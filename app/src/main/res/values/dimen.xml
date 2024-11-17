@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="mainMargin">16dp</dimen>
+    <dimen name="marginLeft">16dp</dimen>
+    <dimen name="marginRight">16dp</dimen>
+    <dimen name="marginBottom">16dp</dimen>
+    <dimen name="marginTop">16dp</dimen>
+    <dimen name="inputTextPadding">16dp</dimen>
+    <dimen name="addNoteRadius">10dp</dimen>
+
+</resources>

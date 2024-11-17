@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#000000</color>
+    <color name="white">#FFFFFF</color>
+    <color name="blue">#1a73e8</color>
+    <color name="red">#EA4335</color>
+    <color name="green">#34A853</color>
+    <color name="grey_background">#f2f2f2</color>
+    <color name="textColor">#494949</color>
+
+    <color name="category_color_1">#73C7E1</color>
+    <color name="category_color_2">#FFB553</color>
+    <color name="category_color_3">#FF85E0</color>
+    <color name="category_color_4">#F26279</color>
+    <color name="category_color_5">#03BD9D</color>
+    <color name="category_color_6">#AF8AF4</color>
+    <color name="category_color_7">#EAD61A</color>
+
+
+</resources>
