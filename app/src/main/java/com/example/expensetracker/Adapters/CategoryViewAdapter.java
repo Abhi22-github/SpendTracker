@@ -20,12 +20,12 @@ import com.example.expensetracker.Utilities.Constants;
 
 import java.util.List;
 
-public class CategoryExpenseViewAdapter extends RecyclerView.Adapter<CategoryExpenseViewAdapter.CategoryViewHolder> {
+public class CategoryViewAdapter extends RecyclerView.Adapter<CategoryViewAdapter.CategoryViewHolder> {
     private List<CategoryClass> categoryClassList;
     private Context context;
     private Actions actions;
 
-    public CategoryExpenseViewAdapter( Context context,List<CategoryClass> categoryClassList) {
+    public CategoryViewAdapter(Context context, List<CategoryClass> categoryClassList) {
         this.categoryClassList = categoryClassList;
         this.context = context;
         this.actions = (Actions) context;
@@ -33,20 +33,20 @@ public class CategoryExpenseViewAdapter extends RecyclerView.Adapter<CategoryExp
 
     @NonNull
     @Override
-    public CategoryExpenseViewAdapter.CategoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+    public CategoryViewAdapter.CategoryViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.single_category_view,parent,false);
         return new CategoryViewHolder(view);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CategoryExpenseViewAdapter.CategoryViewHolder holder, @SuppressLint("RecyclerView") int position) {
-        holder.categoryName.setText(categoryClassList.get(position).getCategoryName());
+    public void onBindViewHolder(@NonNull CategoryViewAdapter.CategoryViewHolder holder, @SuppressLint("RecyclerView") int position) {
+        holder.categoryName.setText(categoryClassList.get(position).categoryName);
 
         holder.editButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AddCategoryBottomSheet addCategoryBottomSheet = new AddCategoryBottomSheet(Constants.expense);
-                addCategoryBottomSheet.show(((AppCompatActivity)context).getSupportFragmentManager(),"expense");
+                AddCategoryBottomSheet addCategoryBottomSheet = new AddCategoryBottomSheet(categoryClassList.get(position));
+                addCategoryBottomSheet.show(((AppCompatActivity)context).getSupportFragmentManager(), categoryClassList.get(position).categoryType);
             }
         });
 

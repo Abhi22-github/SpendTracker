@@ -37,7 +37,7 @@ public class CategoryExpenseViewChipAdapter extends RecyclerView.Adapter<Categor
 
     @Override
     public void onBindViewHolder(@NonNull CategoryExpenseViewChipAdapter.CategoryViewHolder holder, int position) {
-        holder.chip.setText(categoryClassList.get(position).getCategoryName());
+        holder.chip.setText(categoryClassList.get(position).categoryName);
         holder.chip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -6,7 +6,6 @@ import android.os.AsyncTask;
 import androidx.lifecycle.LiveData;
 
 import com.example.expensetracker.Model.CategoryClass;
-import com.example.expensetracker.Model.CategoryClass;
 import com.example.expensetracker.Utilities.Constants;
 
 import java.util.List;
@@ -24,8 +23,8 @@ public class CategoryRepository {
         TransactionDatabase database = TransactionDatabase.getInstance(application);
         categoryDao = database.categoryDao();
         allCategories = categoryDao.getAllCategory();
-        allExpenseCategories = categoryDao.getOnlyExpenseCategories(Constants.expense);
-        allIncomeCategories = categoryDao.getOnlyIncomeCategories(Constants.income);
+        allExpenseCategories = categoryDao.getOnlyExpenseCategories(Constants.EXPENSE);
+        allIncomeCategories = categoryDao.getOnlyIncomeCategories(Constants.INCOME);
     }
 
     // creating a method to insert the data to our database. 

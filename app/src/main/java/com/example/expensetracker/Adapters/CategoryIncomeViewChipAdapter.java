@@ -37,7 +37,7 @@ public class CategoryIncomeViewChipAdapter extends RecyclerView.Adapter<Category
 
     @Override
     public void onBindViewHolder(@NonNull CategoryIncomeViewChipAdapter.CategoryViewHolder holder, int position) {
-        holder.chip.setText(categoryClassList.get(position).getCategoryName());
+        holder.chip.setText(categoryClassList.get(position).categoryName);
         holder.chip.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

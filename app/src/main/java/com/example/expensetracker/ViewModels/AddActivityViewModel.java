@@ -50,7 +50,7 @@ public class AddActivityViewModel extends ViewModel {
         chipsName = new String[]{};
         chipsList = new ArrayList<>();
         date = Calendar.getInstance().getTimeInMillis();
-        transactionType = Constants.expense;
+        transactionType = Constants.EXPENSE;
     }
 
     public void initializeDatabaseRepository(Application application) {
@@ -94,7 +94,7 @@ public class AddActivityViewModel extends ViewModel {
         //to get,separate and validate data from both expense and income
         if (amount.isEmpty()) {
             EventBus.getDefault().post(new EventMessage(4, "Amount can't be zero"));
-        } else if (transactionType.equals(Constants.expense)) {
+        } else if (transactionType.equals(Constants.EXPENSE)) {
             category = currentSelectedExpenseCategory;
             if (currentSelectedExpenseCategory.isEmpty()) {
                 EventBus.getDefault().post(new EventMessage(5, "Please select a category"));
@@ -103,7 +103,7 @@ public class AddActivityViewModel extends ViewModel {
                 Toast.makeText(mContext, "success", Toast.LENGTH_SHORT).show();
                 storeFormDataInDatabase(transactionType, amount, note, category, date);
             }
-        } else if (transactionType.equals(Constants.income)) {
+        } else if (transactionType.equals(Constants.INCOME)) {
             category = currentSelectedIncomeCategory;
             if (currentSelectedIncomeCategory.isEmpty()) {
                 EventBus.getDefault().post(new EventMessage(5, "Please select a category"));
@@ -150,28 +150,29 @@ public class AddActivityViewModel extends ViewModel {
         return transactionRepository.getAllTransactions();
     }
 
-    public void validateCategoryData(String categoryName, String categoryType) {
-        if (categoryName.isEmpty()) {
+    public void validateCategoryData(CategoryClass categoryClass) {
+        if (categoryClass.categoryName.isEmpty()) {
             // textInputLayoutName.setError("Name field can't be empty");
             EventBus.getDefault().post(new EventMessage(1, "Name field can't be empty"));
-        } else if (categoryName.length() < 3) {
+        } else if (categoryClass.categoryName.length() < 3) {
             //textInputLayoutName.setError("Name must have at least 3 letters");
             EventBus.getDefault().post(new EventMessage(12, "Name must have at least 3 letters"));
-        } else if (categoryType.isEmpty()) {
+        } else if (categoryClass.categoryType.isEmpty()) {
             EventBus.getDefault().post(new EventMessage(2, "Please select a category type"));
         } else {
-            storeCategoryInDatabase(categoryType, categoryName, 1, 1);
+            storeCategoryInDatabase(categoryClass);
         }
     }
 
-    private void storeCategoryInDatabase(String categoryType, String categoryName, int colorNumber, int iconNumber) {
-        CategoryClass categoryClass = new CategoryClass();
-        categoryClass.setCategoryType(categoryType);
-        categoryClass.setCategoryName(categoryName);
-        categoryClass.setCategoryColorNumber(colorNumber);
-        categoryClass.setCategoryIconNumber(iconNumber);
+    private void storeCategoryInDatabase(CategoryClass categoryClass) {
+        if(categoryClass.id == 0){
+            //new category insert
+            categoryRepository.insert(categoryClass);
+        }else {
+            //existing category update
+            categoryRepository.update(categoryClass);
+        }
 
-        categoryRepository.insert(categoryClass);
         EventBus.getDefault().post(new EventMessage(3, "closing bottom sheet"));
     }
 

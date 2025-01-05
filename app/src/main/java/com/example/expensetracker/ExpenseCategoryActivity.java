@@ -11,7 +11,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.expensetracker.Adapters.CategoryExpenseViewAdapter;
+import com.example.expensetracker.Adapters.CategoryViewAdapter;
 import com.example.expensetracker.Model.CategoryClass;
 import com.example.expensetracker.Utilities.Constants;
 import com.example.expensetracker.ViewModels.AddActivityViewModel;
@@ -26,7 +26,7 @@ public class ExpenseCategoryActivity extends AppCompatActivity implements Action
     private ImageButton imageButtonBackButton;
     private FloatingActionButton fabAddCategory;
     private RecyclerView recyclerViewCategoryExpense;
-    private CategoryExpenseViewAdapter categoryExpenseViewAdapter;
+    private CategoryViewAdapter categoryViewAdapter;
     private AddActivityViewModel viewmodel;
     private MaterialToolbar toolbarExpenseCategoryToolbar;
 
@@ -69,7 +69,9 @@ public class ExpenseCategoryActivity extends AppCompatActivity implements Action
     }
 
     private void openBottomSheetModel(){
-        AddCategoryBottomSheet addCategoryBottomSheet = new AddCategoryBottomSheet(Constants.expense);
+        CategoryClass categoryClass = new CategoryClass();
+        categoryClass.categoryType = Constants.EXPENSE;
+        AddCategoryBottomSheet addCategoryBottomSheet = new AddCategoryBottomSheet(categoryClass);
         addCategoryBottomSheet.show(getSupportFragmentManager(),"addCategory");
     }
 
@@ -78,8 +80,8 @@ public class ExpenseCategoryActivity extends AppCompatActivity implements Action
         viewmodel.getOnlyExpenseCategoryNames().observe(this, new Observer<List<CategoryClass>>() {
             @Override
             public void onChanged(List<CategoryClass> categoryClassList) {
-                categoryExpenseViewAdapter = new CategoryExpenseViewAdapter(mContext,categoryClassList);
-                recyclerViewCategoryExpense.setAdapter(categoryExpenseViewAdapter);
+                categoryViewAdapter = new CategoryViewAdapter(mContext,categoryClassList);
+                recyclerViewCategoryExpense.setAdapter(categoryViewAdapter);
             }
         });
 

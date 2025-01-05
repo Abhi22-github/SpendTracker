@@ -1,6 +1,9 @@
 package com.example.expensetracker;
 
 
+import static com.example.expensetracker.Utilities.Constants.EXPENSE;
+import static com.example.expensetracker.Utilities.Constants.INCOME;
+
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -12,15 +15,14 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.expensetracker.Events.EventMessage;
+import com.example.expensetracker.Model.CategoryClass;
 import com.example.expensetracker.Utilities.Constants;
 import com.example.expensetracker.ViewModels.AddActivityViewModel;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 import com.google.android.material.button.MaterialButton;
-import com.google.android.material.button.MaterialButtonToggleGroup;
 import com.google.android.material.chip.Chip;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
@@ -38,21 +40,10 @@ public class AddCategoryBottomSheet extends BottomSheetDialogFragment {
 
     private View view;
     private AddActivityViewModel viewModel;
-    private Integer categoryTypeFromActivity = 0;
+    private CategoryClass categoryClassFromActivity;
 
-    /*
-    Expense -> 2
-    Income -> 1
-    both  -> 0
-     */
-    public AddCategoryBottomSheet(String type) {
-        if (type.equals(Constants.expense)) {
-            categoryTypeFromActivity = 2;
-        } else if (type.equals(Constants.income)) {
-            categoryTypeFromActivity = 1;
-        } else {
-            categoryTypeFromActivity = 0;
-        }
+    public AddCategoryBottomSheet(CategoryClass categoryClass) {
+        categoryClassFromActivity = categoryClass;
     }
 
     @Nullable
@@ -66,6 +57,8 @@ public class AddCategoryBottomSheet extends BottomSheetDialogFragment {
 
         //to initialize the view
         initView();
+
+        setUpViews();
 
         //validate the filled data when create button clicked
         materialButtonCreateButton.setOnClickListener(v -> validateData());
@@ -90,14 +83,18 @@ public class AddCategoryBottomSheet extends BottomSheetDialogFragment {
             }
         });
 
-        /*
+        return view;
+    }
+
+    private void setUpViews() {
+        if (categoryClassFromActivity.categoryName != null) {
+            editTextName.setText(categoryClassFromActivity.categoryName);
+        }
+         /*
         we will disable functionality to choose between expense and income based on the activity
         from where the bottom sheet is called
          */
         categoryChipsStateManage();
-
-
-        return view;
     }
 
     private void initView() {
@@ -115,12 +112,17 @@ public class AddCategoryBottomSheet extends BottomSheetDialogFragment {
         String categoryName = editTextName.getText().toString();
         String categoryType = "";
         if (chipExpense.isChecked()) {
-            categoryType = "";
-            categoryType = Constants.expense;
+            categoryType = EXPENSE;
         } else if (chipIncome.isChecked()) {
-            categoryType = Constants.income;
+            categoryType = INCOME;
         }
-        viewModel.validateCategoryData(categoryName, categoryType);
+        categoryClassFromActivity.categoryName = categoryName;
+        categoryClassFromActivity.categoryType = categoryType;
+        categoryClassFromActivity.categoryIconNumber = 1;
+        categoryClassFromActivity.categoryColorNumber = 1;
+        viewModel.validateCategoryData(categoryClassFromActivity);
+
+
     }
 
     @Subscribe
@@ -156,10 +158,10 @@ public class AddCategoryBottomSheet extends BottomSheetDialogFragment {
     }
 
     private void categoryChipsStateManage() {
-        if (categoryTypeFromActivity == 2) {
+        if (EXPENSE.equals(categoryClassFromActivity.categoryType)) {
             chipIncome.setEnabled(false);
             chipExpense.setChecked(true);
-        } else if (categoryTypeFromActivity == 1) {
+        } else if (INCOME.equals(categoryClassFromActivity.categoryType)) {
             chipExpense.setEnabled(false);
             chipIncome.setChecked(true);
         } else {

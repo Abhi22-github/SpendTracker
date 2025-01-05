@@ -122,13 +122,13 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
             public void onButtonChecked(MaterialButtonToggleGroup group, int checkedId, boolean isChecked) {
                 if (checkedId == R.id.toggleButton_expenseButton_addActivity && isChecked) {
                     Log.d("ToggleGroup", "Expense");
-                    viewModel.setTransactionTypeInViewModel(Constants.expense);
+                    viewModel.setTransactionTypeInViewModel(Constants.EXPENSE);
                     recyclerViewLayoutCategoryExpense.setVisibility(View.VISIBLE);
                     recyclerViewLayoutCategoryIncome.setVisibility(View.GONE);
 
                 } else if (checkedId == R.id.toggleButton_incomeButton_addActivity && isChecked) {
                     Log.d("ToggleGroup", "Income");
-                    viewModel.setTransactionTypeInViewModel(Constants.income);
+                    viewModel.setTransactionTypeInViewModel(Constants.INCOME);
                     recyclerViewLayoutCategoryExpense.setVisibility(View.GONE);
                     recyclerViewLayoutCategoryIncome.setVisibility(View.VISIBLE);
                 }
@@ -149,7 +149,7 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
         imageButtonCategoryButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                AddCategoryBottomSheet addCategoryBottomSheet = new AddCategoryBottomSheet("");
+                AddCategoryBottomSheet addCategoryBottomSheet = new AddCategoryBottomSheet(new CategoryClass());
                 addCategoryBottomSheet.show(getSupportFragmentManager(), "BottomSheet");
             }
         });

@@ -175,10 +175,10 @@ public class MainActivity extends AppCompatActivity {
 
             for (String s : expenseArray) {
                 CategoryClass categoryClassObject = new CategoryClass();
-                categoryClassObject.setCategoryName(s);
-                categoryClassObject.setCategoryType(Constants.expense);
-                categoryClassObject.setCategoryIconNumber(1);
-                categoryClassObject.setCategoryColorNumber(1);
+                categoryClassObject.categoryName = s;
+                categoryClassObject.categoryType = Constants.EXPENSE;
+                categoryClassObject.categoryIconNumber = 1;
+                categoryClassObject.categoryColorNumber = 1;
                 categoryClassesList.add(categoryClassObject);
             }
 
@@ -186,10 +186,10 @@ public class MainActivity extends AppCompatActivity {
 
             for (String s : incomeArray) {
                 CategoryClass categoryClassObject = new CategoryClass();
-                categoryClassObject.setCategoryName(s);
-                categoryClassObject.setCategoryType(Constants.income);
-                categoryClassObject.setCategoryIconNumber(1);
-                categoryClassObject.setCategoryColorNumber(1);
+                categoryClassObject.categoryName = s;
+                categoryClassObject.categoryType = Constants.INCOME;
+                categoryClassObject.categoryIconNumber = 1;
+                categoryClassObject.categoryColorNumber = 1;
                 categoryClassesList.add(categoryClassObject);
             }
 

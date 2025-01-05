@@ -3,8 +3,8 @@ package com.example.expensetracker.Utilities;
 import com.example.expensetracker.R;
 
 public class Constants {
-    public final static String expense = "Expense";
-    public final static String income = "Income";
+    public final static String EXPENSE = "Expense";
+    public final static String INCOME = "Income";
     public final static String sharedPreferencesName = "OneTimeOperations";
     public final static String sharedPreferenceOneTimeCheckKey = "isPerformed";
     public final static int categoryIcon1 = R.drawable.category_school_1;
