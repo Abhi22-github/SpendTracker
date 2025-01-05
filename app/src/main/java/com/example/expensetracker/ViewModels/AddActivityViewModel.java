@@ -183,4 +183,9 @@ public class AddActivityViewModel extends ViewModel {
         Log.d("Chips", "completed again");
     }
 
+    //to delete categories from database
+    public void deleteCategoryFromDatabase(CategoryClass categoryClass){
+        categoryRepository.delete(categoryClass);
+    }
+
 }

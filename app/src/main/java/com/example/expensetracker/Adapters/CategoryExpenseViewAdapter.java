@@ -1,5 +1,6 @@
 package com.example.expensetracker.Adapters;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.expensetracker.Actions;
 import com.example.expensetracker.AddCategoryBottomSheet;
 import com.example.expensetracker.Model.CategoryClass;
 import com.example.expensetracker.R;
@@ -21,10 +23,12 @@ import java.util.List;
 public class CategoryExpenseViewAdapter extends RecyclerView.Adapter<CategoryExpenseViewAdapter.CategoryViewHolder> {
     private List<CategoryClass> categoryClassList;
     private Context context;
+    private Actions actions;
 
     public CategoryExpenseViewAdapter( Context context,List<CategoryClass> categoryClassList) {
         this.categoryClassList = categoryClassList;
         this.context = context;
+        this.actions = (Actions) context;
     }
 
     @NonNull
@@ -35,7 +39,7 @@ public class CategoryExpenseViewAdapter extends RecyclerView.Adapter<CategoryExp
     }
 
     @Override
-    public void onBindViewHolder(@NonNull CategoryExpenseViewAdapter.CategoryViewHolder holder, int position) {
+    public void onBindViewHolder(@NonNull CategoryExpenseViewAdapter.CategoryViewHolder holder, @SuppressLint("RecyclerView") int position) {
         holder.categoryName.setText(categoryClassList.get(position).getCategoryName());
 
         holder.editButton.setOnClickListener(new View.OnClickListener() {
@@ -50,6 +54,7 @@ public class CategoryExpenseViewAdapter extends RecyclerView.Adapter<CategoryExp
             @Override
             public void onClick(View v) {
                 //remove the category from the list
+                actions.onDeleteCategory(categoryClassList.get(position));
             }
         });
     }

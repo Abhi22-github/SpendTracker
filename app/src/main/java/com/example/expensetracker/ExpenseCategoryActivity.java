@@ -4,6 +4,7 @@ import android.content.Context;
 import android.os.Bundle;
 import android.widget.ImageButton;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
@@ -19,7 +20,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
 
-public class ExpenseCategoryActivity extends AppCompatActivity {
+public class ExpenseCategoryActivity extends AppCompatActivity implements Actions{
     private Context mContext;
 
     private ImageButton imageButtonBackButton;
@@ -84,4 +85,8 @@ public class ExpenseCategoryActivity extends AppCompatActivity {
 
     }
 
+    @Override
+    public void onDeleteCategory(@NonNull CategoryClass categoryClass) {
+        viewmodel.deleteCategoryFromDatabase(categoryClass);
+    }
 }
