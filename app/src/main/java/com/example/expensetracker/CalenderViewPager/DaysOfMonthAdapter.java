@@ -19,10 +19,15 @@ public abstract class DaysOfMonthAdapter extends RecyclerView.Adapter<RecyclerVi
         this.daysList = daysList;
     }
 
+    public void updateData(ArrayList<DateWithAmountClass> daysList){
+        this.daysList = daysList;
+    }
+
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         onBindViewHolder(holder, daysList.get(holder.getLayoutPosition()));
     }
+
 
 
     //42 cell grid

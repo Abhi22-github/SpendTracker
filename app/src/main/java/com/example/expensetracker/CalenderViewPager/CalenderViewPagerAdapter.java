@@ -10,14 +10,20 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
 
+import com.example.expensetracker.Activity.MainActivity;
+import com.example.expensetracker.Adapters.TransactionViewAdapter;
 import com.example.expensetracker.Model.DateWithAmountClass;
 import com.example.expensetracker.Model.Day;
 import com.example.expensetracker.Model.TotalAmountClass;
+import com.example.expensetracker.Model.TransactionClass;
 import com.example.expensetracker.R;
 import com.example.expensetracker.Utilities.Constants;
 import com.example.expensetracker.ViewModels.AddActivityViewModel;
@@ -71,8 +77,7 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
         //getting the current page month days in array
         daysListWithAmount = daysInMonthArray(position);
 
-        //setting up the recycler view with current month dates
-        recyclerView.setAdapter(new DaysOfMonthAdapter(context, daysListWithAmount) {
+        DaysOfMonthAdapter daysOfMonthAdapter = new DaysOfMonthAdapter(context, daysListWithAmount) {
             @Override
             void onBindViewHolder(RecyclerView.ViewHolder holder, DateWithAmountClass dateWithAmountClass) {
                 CalenderViewPagerAdapter.this.onBindView(holder.itemView, dateWithAmountClass);
@@ -83,6 +88,18 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
             public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
                 return new RecyclerView.ViewHolder(CalenderViewPagerAdapter.this.onCreateView(parent, viewType)) {
                 };
+            }
+        };
+
+        recyclerView.setAdapter(daysOfMonthAdapter);
+
+        //setting up the recycler view with current month dates
+        viewModel.getAllTransactions().observe((LifecycleOwner) context, new Observer<List<TransactionClass>>() {
+            @Override
+            public void onChanged(List<TransactionClass> transactionClasses) {
+                daysListWithAmount = daysInMonthArray(position);
+                daysOfMonthAdapter.updateData(daysListWithAmount);
+                daysOfMonthAdapter.notifyDataSetChanged();
             }
         });
 
@@ -115,7 +132,7 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
         TextView textViewIncomeAmount = view.findViewById(R.id.textView_incomeAmount_singleDateViewHolder);
         RelativeLayout relativeLayoutDateCircle = view.findViewById(R.id.relativeLayout_circleBackground_singleDateViewHolder);
         String[] dateSplit = String.valueOf(dateWithAmountClass.getDate()).split("-");
-       // String str = dateWithAmountClass.getDate().format(dateTimeFormatter);
+        // String str = dateWithAmountClass.getDate().format(dateTimeFormatter);
         //textView.setText(dateSplit[2]+"-"+dateSplit[1]);
         if (todayDate.toString().equals(String.valueOf(dateWithAmountClass.getDate()))) {
             relativeLayoutDateCircle.setBackground(context.getResources().getDrawable(R.drawable.circle_background, context.getTheme()));
@@ -204,9 +221,9 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
     }
 
     private DateWithAmountClass getTotalForDay(Day day) {
-            return new DateWithAmountClass(day.getDate(),
+        return new DateWithAmountClass(day.getDate(),
                 viewModel.getTotalAmountByDateAndCategoryType(Long.parseLong(day.getDate().toString().replace("-", "")), Constants.EXPENSE).getTotalAmount(),
-                viewModel.getTotalAmountByDateAndCategoryType(Long.parseLong(day.getDate().toString().replace("-", "")),Constants.INCOME).getTotalAmount()
+                viewModel.getTotalAmountByDateAndCategoryType(Long.parseLong(day.getDate().toString().replace("-", "")), Constants.INCOME).getTotalAmount()
         );
 
     }
