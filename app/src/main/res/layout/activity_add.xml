@@ -13,18 +13,6 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp">
 
-
-        <ImageButton
-            android:id="@+id/imageButton_category_addActivity"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:background="?selectableItemBackgroundBorderless"
-            android:padding="8dp"
-            android:visibility="gone"
-            android:src="@drawable/icon_round_close" />
-
         <ImageButton
             android:id="@+id/imageButton_back_addActivity"
             android:layout_width="wrap_content"

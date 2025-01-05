@@ -46,7 +46,7 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
 
     // views
     private TextInputEditText editTextAmount, editTextAddNote, editTextDate;
-    private ImageButton imageButtonBackButton, imageButtonCategoryButton;
+    private ImageButton imageButtonBackButton;
     private RecyclerView recyclerViewLayoutCategoryExpense, recyclerViewLayoutCategoryIncome;
     private MaterialButton expenseButton, incomeButton, saveButton;
     private RelativeLayout mainLayout;
@@ -146,15 +146,6 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
 
         editTextAmount.requestFocus();
 
-        imageButtonCategoryButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                AddCategoryBottomSheet addCategoryBottomSheet = new AddCategoryBottomSheet(new CategoryClass());
-                addCategoryBottomSheet.show(getSupportFragmentManager(), "BottomSheet");
-            }
-        });
-
-
         viewModel.getOnlyExpenseCategoryNames().observe(this, new Observer<List<CategoryClass>>() {
             @Override
             public void onChanged(List<CategoryClass> categoryClasses) {
@@ -202,9 +193,6 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
         editTextDate = findViewById(R.id.textInputEditText_date_addActivity);
         //set the text view date
         editTextDate.setText(simpleDateFormat.format(new Date(viewModel.getSelectedDate())));
-
-        imageButtonCategoryButton = findViewById(R.id.imageButton_category_addActivity);
-
 
     }
 
