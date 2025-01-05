@@ -41,8 +41,8 @@ public class TransactionRepository {
         new DeleteCourseAsyncTask(transactionDao).execute(model);
     }
 
-    public TotalAmountClass getTotalAmountByDate(Long date){
-        return transactionDao.getTotalAmountByDate(date);
+    public TotalAmountClass getTotalAmountByDateAndCategoryType(Long date,String categoryType){
+        return transactionDao.getTotalAmountByDateAndCategoryType(date,categoryType);
     }
 
     // below is the method to delete all the courses. 

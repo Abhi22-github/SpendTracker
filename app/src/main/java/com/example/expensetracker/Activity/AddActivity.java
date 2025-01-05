@@ -1,4 +1,4 @@
-package com.example.expensetracker;
+package com.example.expensetracker.Activity;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -18,6 +18,7 @@ import com.example.expensetracker.Adapters.CategoryExpenseViewChipAdapter;
 import com.example.expensetracker.Adapters.CategoryIncomeViewChipAdapter;
 import com.example.expensetracker.Events.EventMessage;
 import com.example.expensetracker.Model.CategoryClass;
+import com.example.expensetracker.R;
 import com.example.expensetracker.Utilities.Constants;
 import com.example.expensetracker.ViewModels.AddActivityViewModel;
 import com.google.android.flexbox.FlexDirection;

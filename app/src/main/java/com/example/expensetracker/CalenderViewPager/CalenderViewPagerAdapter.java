@@ -19,6 +19,7 @@ import com.example.expensetracker.Model.DateWithAmountClass;
 import com.example.expensetracker.Model.Day;
 import com.example.expensetracker.Model.TotalAmountClass;
 import com.example.expensetracker.R;
+import com.example.expensetracker.Utilities.Constants;
 import com.example.expensetracker.ViewModels.AddActivityViewModel;
 
 import java.time.LocalDate;
@@ -110,7 +111,8 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
 
     public void onBindView(View view, DateWithAmountClass dateWithAmountClass) {
         TextView textViewDate = view.findViewById(R.id.textView_date_singleDateViewHolder);
-        TextView textViewAmount = view.findViewById(R.id.textView_amount_singleDateViewHolder);
+        TextView textViewExpenseAmount = view.findViewById(R.id.textView_expenseAmount_singleDateViewHolder);
+        TextView textViewIncomeAmount = view.findViewById(R.id.textView_incomeAmount_singleDateViewHolder);
         RelativeLayout relativeLayoutDateCircle = view.findViewById(R.id.relativeLayout_circleBackground_singleDateViewHolder);
         String[] dateSplit = String.valueOf(dateWithAmountClass.getDate()).split("-");
        // String str = dateWithAmountClass.getDate().format(dateTimeFormatter);
@@ -121,7 +123,8 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
             textViewDate.setTextColor(context.getResources().getColor(R.color.white, context.getTheme()));
         }
         textViewDate.setText(dateSplit[2]);
-        textViewAmount.setText(String.valueOf(dateWithAmountClass.getTotalAmount()));
+        textViewExpenseAmount.setText(String.valueOf(dateWithAmountClass.getTotalExpenseAmount()));
+        textViewIncomeAmount.setText(String.valueOf(dateWithAmountClass.getTotalIncomeAmount()));
     }
 
     //calculate the days in month
@@ -201,8 +204,10 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
     }
 
     private DateWithAmountClass getTotalForDay(Day day) {
-        TotalAmountClass totalAmountClass = viewModel.getTotalAmountByDate(Long.parseLong(day.getDate().toString().replace("-", "")));
-        return new DateWithAmountClass(day.getDate(),totalAmountClass.getTotalAmount());
+            return new DateWithAmountClass(day.getDate(),
+                viewModel.getTotalAmountByDateAndCategoryType(Long.parseLong(day.getDate().toString().replace("-", "")), Constants.EXPENSE).getTotalAmount(),
+                viewModel.getTotalAmountByDateAndCategoryType(Long.parseLong(day.getDate().toString().replace("-", "")),Constants.INCOME).getTotalAmount()
+        );
 
     }
 

@@ -151,8 +151,8 @@ public class AddActivityViewModel extends ViewModel {
         return transactionRepository.getAllTransactions();
     }
 
-    public TotalAmountClass getTotalAmountByDate(Long date) {
-        return transactionRepository.getTotalAmountByDate(date);
+    public TotalAmountClass getTotalAmountByDateAndCategoryType(Long date,String categoryType) {
+        return transactionRepository.getTotalAmountByDateAndCategoryType(date,categoryType);
     }
 
     public void validateCategoryData(CategoryClass categoryClass) {

@@ -9,35 +9,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical">
-    <RelativeLayout
-        android:id="@+id/relativeLayout_circleBackground_singleDateViewHolder"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_centerHorizontal="true"
-        android:layout_gravity="center"
-        android:layout_marginTop="10dp"
 
-        android:paddingStart="6dp"
-        android:paddingTop="2dp"
-        android:paddingEnd="6dp"
-        android:paddingBottom="5dp"
-       >
-
-        <TextView
-            android:id="@+id/textView_date_singleDateViewHolder"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:layout_centerHorizontal="true"
-            android:layout_centerVertical="true"
-            android:fontFamily="@font/manropesemibold"
-            android:text="1"
-            android:textAlignment="center"
-            android:textColor="@color/textColor"
-            android:textSize="12sp" />
-    </RelativeLayout>
         <RelativeLayout
-            android:id="@+id/relativeLayout_circleBackground1_singleDateViewHolder"
+            android:id="@+id/relativeLayout_circleBackground_singleDateViewHolder"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
@@ -47,11 +21,63 @@
             android:paddingStart="6dp"
             android:paddingTop="2dp"
             android:paddingEnd="6dp"
-            android:paddingBottom="5dp"
-            >
+            android:paddingBottom="5dp">
 
             <TextView
-                android:id="@+id/textView_amount_singleDateViewHolder"
+                android:id="@+id/textView_date_singleDateViewHolder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:fontFamily="@font/manropesemibold"
+                android:text="1"
+                android:textAlignment="center"
+                android:textColor="@color/textColor"
+                android:textSize="12sp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/relativeLayout_circleBackgroundExpense_singleDateViewHolder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+
+            android:paddingStart="6dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="6dp"
+            android:paddingBottom="5dp">
+
+            <TextView
+                android:id="@+id/textView_expenseAmount_singleDateViewHolder"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:layout_centerHorizontal="true"
+                android:layout_centerVertical="true"
+                android:fontFamily="@font/manropesemibold"
+                android:text="1"
+                android:textAlignment="center"
+                android:textColor="@color/textColor"
+                android:textSize="12sp" />
+        </RelativeLayout>
+
+        <RelativeLayout
+            android:id="@+id/relativeLayout_circleBackgroundIncome_singleDateViewHolder"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:paddingStart="6dp"
+            android:paddingTop="2dp"
+            android:paddingEnd="6dp"
+            android:paddingBottom="5dp">
+
+            <TextView
+                android:id="@+id/textView_incomeAmount_singleDateViewHolder"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_centerInParent="true"

@@ -1,4 +1,4 @@
-package com.example.expensetracker
+package com.example.expensetracker.Fragments
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -11,10 +11,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.expensetracker.Adapters.TransactionViewAdapter
 import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.ViewModels.AddActivityViewModel
-import com.example.expensetracker.databinding.FragmentTransactionViewBinding
+import com.example.expensetracker.databinding.FragmentListViewBinding
+
 
 class ListViewFragment : Fragment() {
-    private lateinit var binding: FragmentTransactionViewBinding
+    private lateinit var binding: FragmentListViewBinding
     private lateinit var viewModel: AddActivityViewModel
 
     override fun onCreateView(
@@ -22,7 +23,7 @@ class ListViewFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        binding = FragmentTransactionViewBinding.inflate(inflater,container,false)
+        binding = FragmentListViewBinding.inflate(inflater,container,false)
         return binding.root
     }
 
@@ -39,19 +40,10 @@ class ListViewFragment : Fragment() {
 
     private fun setTransactionRecyclerView() {
         binding.recyclerViewTransactionMainActivity.setLayoutManager(LinearLayoutManager(requireActivity()))
-        viewModel.allTransactions.observe(requireActivity(),Observer<List<TransactionClass>>{
+        viewModel.allTransactions.observe(viewLifecycleOwner,Observer<List<TransactionClass>>{
             val transactionViewAdapter = TransactionViewAdapter(requireActivity(),
                 it)
             binding.recyclerViewTransactionMainActivity.adapter = transactionViewAdapter
         })
-//        viewModel.getAllTransactions().observe(this, object : Observer<List<TransactionClass?>?> {
-//            override fun onChanged(transactionClasses: List<TransactionClass?>) {
-//                transactionViewAdapter = TransactionViewAdapter(
-//                    this@MainActivity,
-//                    viewModel.getAllTransactions().getValue()
-//                )
-//                recyclerViewTransactions.setAdapter(transactionViewAdapter)
-//            }
-//        })
     }
 }

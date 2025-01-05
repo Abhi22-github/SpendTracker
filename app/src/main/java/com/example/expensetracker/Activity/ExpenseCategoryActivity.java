@@ -1,4 +1,4 @@
-package com.example.expensetracker;
+package com.example.expensetracker.Activity;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -11,8 +11,11 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.expensetracker.Actions;
 import com.example.expensetracker.Adapters.CategoryViewAdapter;
+import com.example.expensetracker.AddCategoryBottomSheet;
 import com.example.expensetracker.Model.CategoryClass;
+import com.example.expensetracker.R;
 import com.example.expensetracker.Utilities.Constants;
 import com.example.expensetracker.ViewModels.AddActivityViewModel;
 import com.google.android.material.appbar.MaterialToolbar;
@@ -20,7 +23,7 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.util.List;
 
-public class ExpenseCategoryActivity extends AppCompatActivity implements Actions{
+public class ExpenseCategoryActivity extends AppCompatActivity implements Actions {
     private Context mContext;
 
     private ImageButton imageButtonBackButton;
