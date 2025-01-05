@@ -2,9 +2,11 @@ package com.example.expensetracker.Database;
 
 import android.app.Application;
 import android.os.AsyncTask;
+import android.os.TransactionTooLargeException;
 
 import androidx.lifecycle.LiveData;
 
+import com.example.expensetracker.Model.TotalAmountClass;
 import com.example.expensetracker.Model.TransactionClass;
 
 import java.util.List;
@@ -37,6 +39,10 @@ public class TransactionRepository {
     // creating a method to delete the data in our database. 
     public void delete(TransactionClass model) {
         new DeleteCourseAsyncTask(transactionDao).execute(model);
+    }
+
+    public TotalAmountClass getTotalAmountByDate(Long date){
+        return transactionDao.getTotalAmountByDate(date);
     }
 
     // below is the method to delete all the courses. 

@@ -43,6 +43,7 @@ public abstract class TransactionDatabase extends RoomDatabase {
                             // below line is to add callback
                             // to our database.
                             .addCallback(roomCallback)
+                            .allowMainThreadQueries()
                             // below line is to
                             // build our database.
                             .build();

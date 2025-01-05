@@ -5,15 +5,16 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.expensetracker.Model.DateWithAmountClass;
 import com.example.expensetracker.Model.Day;
 
 import java.util.ArrayList;
 
 public abstract class DaysOfMonthAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
     private Context context;
-    private ArrayList<Day> daysList;
+    private ArrayList<DateWithAmountClass> daysList;
 
-    DaysOfMonthAdapter(Context context, ArrayList<Day> daysList) {
+    DaysOfMonthAdapter(Context context, ArrayList<DateWithAmountClass> daysList) {
         this.context = context;
         this.daysList = daysList;
     }
@@ -30,7 +31,7 @@ public abstract class DaysOfMonthAdapter extends RecyclerView.Adapter<RecyclerVi
         return (7 * 6);
     }
 
-    abstract void onBindViewHolder(RecyclerView.ViewHolder holder, Day day);
+    abstract void onBindViewHolder(RecyclerView.ViewHolder holder, DateWithAmountClass totalAmountClass);
 
 
 }

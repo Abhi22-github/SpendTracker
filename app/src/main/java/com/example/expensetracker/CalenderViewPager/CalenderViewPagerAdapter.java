@@ -10,17 +10,22 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.lifecycle.LiveData;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
 
+import com.example.expensetracker.Model.DateWithAmountClass;
 import com.example.expensetracker.Model.Day;
+import com.example.expensetracker.Model.TotalAmountClass;
 import com.example.expensetracker.R;
+import com.example.expensetracker.ViewModels.AddActivityViewModel;
 
 import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.List;
 
 public class CalenderViewPagerAdapter extends PagerAdapter {
 
@@ -31,15 +36,17 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
     private LocalDate todayDate;
 
     private LocalDate selectedDate;
-    private ArrayList<Day> daysList;
+    private ArrayList<DateWithAmountClass> daysListWithAmount;
     DateTimeFormatter dateTimeFormatter;
+    private AddActivityViewModel viewModel;
 
-    public CalenderViewPagerAdapter(Context context) {
+    public CalenderViewPagerAdapter(Context context, AddActivityViewModel viewModel) {
         this.context = context;
         layoutInflater = LayoutInflater.from(context);
         MAX_VALUE = 500;
         dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
         todayDate = LocalDate.now();
+        this.viewModel = viewModel;
     }
 
     @Override
@@ -61,13 +68,13 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
         recyclerView.setLayoutManager(new GridLayoutManager(context, 7));
 
         //getting the current page month days in array
-        daysList = daysInMonthArray(position);
+        daysListWithAmount = daysInMonthArray(position);
 
         //setting up the recycler view with current month dates
-        recyclerView.setAdapter(new DaysOfMonthAdapter(context, daysList) {
+        recyclerView.setAdapter(new DaysOfMonthAdapter(context, daysListWithAmount) {
             @Override
-            void onBindViewHolder(RecyclerView.ViewHolder holder, Day day) {
-                CalenderViewPagerAdapter.this.onBindView(holder.itemView, day);
+            void onBindViewHolder(RecyclerView.ViewHolder holder, DateWithAmountClass dateWithAmountClass) {
+                CalenderViewPagerAdapter.this.onBindView(holder.itemView, dateWithAmountClass);
             }
 
             @NonNull
@@ -101,26 +108,28 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
     }
 
 
-    public void onBindView(View view, Day day) {
+    public void onBindView(View view, DateWithAmountClass dateWithAmountClass) {
         TextView textViewDate = view.findViewById(R.id.textView_date_singleDateViewHolder);
+        TextView textViewAmount = view.findViewById(R.id.textView_amount_singleDateViewHolder);
         RelativeLayout relativeLayoutDateCircle = view.findViewById(R.id.relativeLayout_circleBackground_singleDateViewHolder);
-        String[] dateSplit = String.valueOf(day.getDate()).split("-");
-        String str = day.getDate().format(dateTimeFormatter);
+        String[] dateSplit = String.valueOf(dateWithAmountClass.getDate()).split("-");
+       // String str = dateWithAmountClass.getDate().format(dateTimeFormatter);
         //textView.setText(dateSplit[2]+"-"+dateSplit[1]);
-        if(todayDate.toString().equals(day.getDate().toString())){
+        if (todayDate.toString().equals(String.valueOf(dateWithAmountClass.getDate()))) {
             relativeLayoutDateCircle.setBackground(context.getResources().getDrawable(R.drawable.circle_background, context.getTheme()));
             relativeLayoutDateCircle.getBackground().setTint(context.getResources().getColor(R.color.black, context.getTheme()));
             textViewDate.setTextColor(context.getResources().getColor(R.color.white, context.getTheme()));
         }
         textViewDate.setText(dateSplit[2]);
+        textViewAmount.setText(String.valueOf(dateWithAmountClass.getTotalAmount()));
     }
 
     //calculate the days in month
-    public ArrayList<Day> daysInMonthArray(Integer position) {
+    public ArrayList<DateWithAmountClass> daysInMonthArray(Integer position) {
 
         position = position - 250;
 
-        ArrayList<Day> daysInMonthArray = new ArrayList<>();
+        ArrayList<DateWithAmountClass> daysInMonthArray = new ArrayList<>();
         if (position > 0) {
 
             selectedDate = LocalDate.now().plusMonths(position).withDayOfMonth(15);
@@ -173,21 +182,28 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
             if (i < dayOfWeek) {
                 //prev months condition
                 //day.setDate(prevMonthSameDate.withDayOfMonth((Math.abs((i) - daysInPrevMonth))));
-                day.setDate(prevMonthSameDate.withDayOfMonth((Math.abs(daysInPrevMonth-Math.abs(dayOfWeek-(i+1))))));
-                daysInMonthArray.add(day);
+                day.setDate(prevMonthSameDate.withDayOfMonth((Math.abs(daysInPrevMonth - Math.abs(dayOfWeek - (i + 1))))));
+                daysInMonthArray.add(getTotalForDay(day));
             } else if (i >= daysInMonth + dayOfWeek) {
                 //next month condition
                 day.setDate(nextMonthSameDate.withDayOfMonth(Math.abs((i + 1) - (daysInMonth + dayOfWeek))));
-                daysInMonthArray.add(day);
+                daysInMonthArray.add(getTotalForDay(day));
             } else if (i < daysInMonth + dayOfWeek) {
                 //current month condition
                 day.setDate(selectedDate.withDayOfMonth((i + 1) - dayOfWeek));
-                daysInMonthArray.add(day);
+                daysInMonthArray.add(getTotalForDay(day));
             }
-           // Log.d("position<>", String.valueOf(day.getDate())+ " " + String.valueOf(i));
+            // Log.d("position<>", String.valueOf(day.getDate())+ " " + String.valueOf(i));
+            //Log.d("Hello",String.valueOf(getTotalForDay(day).get(0).getTotalAmount()));
 
         }
         return daysInMonthArray;
+    }
+
+    private DateWithAmountClass getTotalForDay(Day day) {
+        TotalAmountClass totalAmountClass = viewModel.getTotalAmountByDate(Long.parseLong(day.getDate().toString().replace("-", "")));
+        return new DateWithAmountClass(day.getDate(),totalAmountClass.getTotalAmount());
+
     }
 
 

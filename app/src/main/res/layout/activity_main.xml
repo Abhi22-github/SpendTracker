@@ -37,93 +37,13 @@
         </com.google.android.material.appbar.AppBarLayout>
 
 
-        <androidx.recyclerview.widget.RecyclerView
-            android:id="@+id/recyclerView_transaction_mainActivity"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:background="@android:color/white"
-            android:visibility="visible"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
-
-        <androidx.core.widget.NestedScrollView
-            android:id="@+id/nestedScrollView_scrollView_mainActivity"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:visibility="gone"
-            app:layout_behavior="@string/appbar_scrolling_view_behavior">
-
-            <LinearLayout
+            <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
+                android:id="@+id/frameLayout_fragment_mainActivity"
+                app:layout_behavior="@string/appbar_scrolling_view_behavior"
+                android:layout_height="match_parent"/>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="@color/white"
-                    android:orientation="horizontal"
-                    android:paddingBottom="10dp"
-                    android:weightSum="7">
-
-                    <TextView
-                        style="@style/dayNameText"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Sun" />
-
-                    <TextView
-                        style="@style/dayNameText"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Mon" />
-
-                    <TextView
-                        style="@style/dayNameText"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Tue" />
-
-                    <TextView
-                        style="@style/dayNameText"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Wed" />
-
-                    <TextView
-                        style="@style/dayNameText"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Thu" />
-
-                    <TextView
-                        style="@style/dayNameText"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Fri" />
-
-                    <TextView
-                        style="@style/dayNameText"
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_weight="1"
-                        android:text="Sat" />
-                </LinearLayout>
-
-                <androidx.viewpager.widget.ViewPager
-                    android:id="@+id/viewPager_calender_mainActivity"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@color/white"
-                    app:layout_behavior="@string/appbar_scrolling_view_behavior" />
-            </LinearLayout>
-        </androidx.core.widget.NestedScrollView>
 
         <LinearLayout
             android:layout_width="wrap_content"

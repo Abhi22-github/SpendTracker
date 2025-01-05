@@ -3,6 +3,8 @@ package com.example.expensetracker.Model;
 import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
+import com.airbnb.lottie.L;
+
 
 @Entity(tableName = "transaction_table")
 public class TransactionClass {
@@ -10,7 +12,7 @@ public class TransactionClass {
     @PrimaryKey(autoGenerate = true )
     private long id;
     private String type;
-    private String amount;
+    private Long amount;
     private String note;
     private String category;
     private Long dateWithTime;
@@ -20,7 +22,7 @@ public class TransactionClass {
 
     }
 
-    public TransactionClass(String type, String amount, String note, String category,Long dateWithTime, Long date) {
+    public TransactionClass(String type, Long amount, String note, String category, Long dateWithTime, Long date) {
         this.type = type;
         this.amount = amount;
         this.note = note;
@@ -45,11 +47,11 @@ public class TransactionClass {
         this.type = type;
     }
 
-    public String getAmount() {
+    public Long getAmount() {
         return amount;
     }
 
-    public void setAmount(String amount) {
+    public void setAmount(Long amount) {
         this.amount = amount;
     }
 

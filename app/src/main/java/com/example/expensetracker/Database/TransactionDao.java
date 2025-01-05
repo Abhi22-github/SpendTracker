@@ -6,6 +6,7 @@ import androidx.room.Insert;
 import androidx.room.Query;
 import androidx.room.Update;
 
+import com.example.expensetracker.Model.TotalAmountClass;
 import com.example.expensetracker.Model.TransactionClass;
 
 import java.util.List;
@@ -28,4 +29,7 @@ public interface TransactionDao {
 
     @Query("SELECT * FROM transaction_table ORDER BY dateWithTime DESC")
     LiveData<List<TransactionClass>> getAllTransactions();
+
+    @Query("SELECT date,SUM(amount) AS totalAmount FROM transaction_table where date == :date")
+    TotalAmountClass getTotalAmountByDate(Long date);
 }

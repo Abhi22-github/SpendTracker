@@ -12,6 +12,7 @@ import androidx.lifecycle.ViewModel;
 import com.example.expensetracker.Database.CategoryRepository;
 import com.example.expensetracker.Events.EventMessage;
 import com.example.expensetracker.Model.CategoryClass;
+import com.example.expensetracker.Model.TotalAmountClass;
 import com.example.expensetracker.Model.TransactionClass;
 import com.example.expensetracker.Database.TransactionRepository;
 import com.example.expensetracker.Utilities.Constants;
@@ -120,7 +121,7 @@ public class AddActivityViewModel extends ViewModel {
         // on below line we are creating
         // a variable for our modal class.
         TransactionClass modal = new TransactionClass();
-        modal.setAmount(amount.trim());
+        modal.setAmount(Long.parseLong(amount.trim().replace(",","")));
         modal.setType(expense.trim());
         modal.setNote(note.trim());
         modal.setCategory(category.trim());
@@ -148,6 +149,10 @@ public class AddActivityViewModel extends ViewModel {
 
     public LiveData<List<TransactionClass>> getAllTransactions() {
         return transactionRepository.getAllTransactions();
+    }
+
+    public TotalAmountClass getTotalAmountByDate(Long date) {
+        return transactionRepository.getTotalAmountByDate(date);
     }
 
     public void validateCategoryData(CategoryClass categoryClass) {

@@ -231,10 +231,10 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
         if (v.getId() == R.id.button_saveButton_addActivity) {
             String amount = "";
             if (!editTextAmount.getText().toString().isEmpty())
-                amount = editTextAmount.getText().toString();
+                amount = editTextAmount.getText().toString().replace(",","");
 
             String note = editTextAddNote.getText().toString();
-            viewModel.validateFormData(amount, note, mContext);
+            viewModel.validateFormData(amount,note, mContext);
 
         }
     }

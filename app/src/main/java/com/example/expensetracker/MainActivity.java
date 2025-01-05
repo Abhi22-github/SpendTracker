@@ -6,10 +6,8 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import com.example.expensetracker.Adapters.TransactionViewAdapter;
-import com.example.expensetracker.CalenderViewPager.CalenderViewPagerAdapter;
 import com.example.expensetracker.Events.EventMessage;
 import com.example.expensetracker.Model.CategoryClass;
-import com.example.expensetracker.Model.TransactionClass;
 import com.example.expensetracker.Utilities.Constants;
 import com.example.expensetracker.ViewModels.AddActivityViewModel;
 import com.google.android.material.appbar.AppBarLayout;
@@ -19,13 +17,10 @@ import com.google.android.material.navigation.NavigationView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
-import androidx.core.widget.NestedScrollView;
 import androidx.drawerlayout.widget.DrawerLayout;
-import androidx.lifecycle.Observer;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.ui.AppBarConfiguration;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
 import com.example.expensetracker.databinding.ActivityMainBinding;
@@ -33,7 +28,6 @@ import com.example.expensetracker.databinding.ActivityMainBinding;
 import android.os.Handler;
 import android.util.Log;
 import android.view.MenuItem;
-import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
@@ -41,7 +35,6 @@ import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -49,7 +42,7 @@ public class MainActivity extends AppCompatActivity {
     private ActivityMainBinding binding;
 
     private FloatingActionButton fabAddExpense;
-    private RecyclerView recyclerViewTransactions;
+    //private RecyclerView recyclerViewTransactions;
     private Context context;
     private TransactionViewAdapter transactionViewAdapter;
     private AddActivityViewModel viewModel;
@@ -57,11 +50,11 @@ public class MainActivity extends AppCompatActivity {
     private AppBarLayout appBarLayout;
     private MaterialToolbar toolbar;
     private NavigationView navigationView;
-    private NestedScrollView nestedScrollView;
     private LinearLayout linearLayoutEmptyScreenLayout;
 
     private ViewPager viewPagerCalender;
     private SharedPreferences sharedPreferences;
+    private FragmentTransaction fragmentTransaction;
 
 
     @Override
@@ -85,33 +78,23 @@ public class MainActivity extends AppCompatActivity {
 
         navigationView.setNavigationItemSelectedListener(v -> sideMenuItemClickHandler(v));
 
-        //setting up transaction recycler view
-        setTransactionRecyclerView();
-
-        //setting up calender month view pager
-        setCalenderMonthViewPager();
+        setUpTransactionFragment();
 
         oneTimeOperationMethod();
 
 
     }
 
-    private void setTransactionRecyclerView() {
-        recyclerViewTransactions.setLayoutManager(new LinearLayoutManager(this));
-        viewModel.getAllTransactions().observe(this, new Observer<List<TransactionClass>>() {
-            @Override
-            public void onChanged(List<TransactionClass> transactionClasses) {
-                transactionViewAdapter = new TransactionViewAdapter(MainActivity.this, viewModel.getAllTransactions().getValue());
-                recyclerViewTransactions.setAdapter(transactionViewAdapter);
-            }
-        });
+    private void setUpTransactionFragment(){
+        fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.frameLayout_fragment_mainActivity,new ListViewFragment(),"ListView");
+        fragmentTransaction.commit();
     }
 
-
-    private void setCalenderMonthViewPager() {
-        CalenderViewPagerAdapter calenderViewPagerAdapter = new CalenderViewPagerAdapter(this);
-        viewPagerCalender.setAdapter(calenderViewPagerAdapter);
-        viewPagerCalender.setCurrentItem(250, true);
+    private void setUpMonthFragment(){
+        fragmentTransaction = getSupportFragmentManager().beginTransaction();
+        fragmentTransaction.replace(R.id.frameLayout_fragment_mainActivity,new MonthViewFragment(),"MonthView");
+        fragmentTransaction.commit();
     }
 
     private boolean sideMenuItemClickHandler(MenuItem v) {
@@ -119,13 +102,12 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 int menuID = v.getItemId();
-                if (menuID == R.id.item_listView_sideNavigation) {
-                    recyclerViewTransactions.setVisibility(View.VISIBLE);
-                    nestedScrollView.setVisibility(View.GONE);
-                } else if (menuID == R.id.item_monthView_sideNavigation) {
-                    recyclerViewTransactions.setVisibility(View.GONE);
-                    nestedScrollView.setVisibility(View.VISIBLE);
-
+                if(menuID == R.id.item_listView_sideNavigation){
+                    setUpTransactionFragment();
+                    navigationView.setCheckedItem(R.id.item_listView_sideNavigation);
+                }else if (menuID == R.id.item_monthView_sideNavigation) {
+                    setUpMonthFragment();
+                    navigationView.setCheckedItem(R.id.item_monthView_sideNavigation);
                 } else if (menuID == R.id.item_expenseCategory_sideNavigation) {
                     sendUserToExpenseCategoryActivity();
                     navigationView.setCheckedItem(R.id.item_listView_sideNavigation);
@@ -156,14 +138,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void initViews() {
         fabAddExpense = findViewById(R.id.fab_add_activity_main);
-        recyclerViewTransactions = findViewById(R.id.recyclerView_transaction_mainActivity);
         appBarLayout = findViewById(R.id.appBarLayout_appBar_mainActivity);
         drawerLayout = findViewById(R.id.drawerLayout_drawer_mainActivity);
         toolbar = findViewById(R.id.toolbar_mainToolbar_mainActivity);
         navigationView = findViewById(R.id.navigationView_navigationContent_mainActivity);
-        nestedScrollView = findViewById(R.id.nestedScrollView_scrollView_mainActivity);
-        nestedScrollView.setFillViewport(true);
-        viewPagerCalender = findViewById(R.id.viewPager_calender_mainActivity);
+//        viewPagerCalender = findViewById(R.id.viewPager_calender_mainActivity);
         linearLayoutEmptyScreenLayout = findViewById(R.id.linearLayout_emptyScreenDialog_mainActivity);
     }
 
