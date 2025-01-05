@@ -8,6 +8,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:id="@+id/linearLayout_singleItem_singleDateViewHolder"
         android:orientation="vertical">
 
         <RelativeLayout
@@ -38,17 +39,19 @@
         </RelativeLayout>
 
         <RelativeLayout
-            android:id="@+id/relativeLayout_circleBackgroundExpense_singleDateViewHolder"
-            android:layout_width="wrap_content"
+            android:id="@+id/relativeLayout_backgroundExpense_singleDateViewHolder"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_gravity="center"
-            android:layout_marginTop="10dp"
-
-            android:paddingStart="6dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginTop="5dp"
             android:paddingTop="2dp"
-            android:paddingEnd="6dp"
-            android:paddingBottom="5dp">
+            android:paddingBottom="2dp"
+            android:layout_marginEnd="2dp"
+            android:background="@drawable/transaction_single_rectangle_background"
+            android:backgroundTint="@color/grey_background"
+            >
 
             <TextView
                 android:id="@+id/textView_expenseAmount_singleDateViewHolder"
@@ -60,21 +63,24 @@
                 android:fontFamily="@font/manropesemibold"
                 android:text="1"
                 android:textAlignment="center"
-                android:textColor="@color/textColor"
+                android:textColor="@color/red"
                 android:textSize="12sp" />
         </RelativeLayout>
 
         <RelativeLayout
-            android:id="@+id/relativeLayout_circleBackgroundIncome_singleDateViewHolder"
-            android:layout_width="wrap_content"
+            android:id="@+id/relativeLayout_backgroundIncome_singleDateViewHolder"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true"
             android:layout_gravity="center"
-            android:layout_marginTop="10dp"
-            android:paddingStart="6dp"
+            android:layout_marginStart="2dp"
+            android:layout_marginTop="5dp"
+            android:layout_marginEnd="2dp"
+            android:background="@drawable/transaction_single_rectangle_background"
+            android:backgroundTint="@color/grey_background"
             android:paddingTop="2dp"
-            android:paddingEnd="6dp"
-            android:paddingBottom="5dp">
+            android:paddingBottom="2dp"
+            >
 
             <TextView
                 android:id="@+id/textView_incomeAmount_singleDateViewHolder"
@@ -83,10 +89,10 @@
                 android:layout_centerInParent="true"
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
-                android:fontFamily="@font/manropesemibold"
+                android:fontFamily="@font/manropebold"
                 android:text="1"
                 android:textAlignment="center"
-                android:textColor="@color/textColor"
+                android:textColor="@color/green"
                 android:textSize="12sp" />
         </RelativeLayout>
     </LinearLayout>

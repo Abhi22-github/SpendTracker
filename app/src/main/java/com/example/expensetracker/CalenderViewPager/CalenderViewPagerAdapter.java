@@ -6,6 +6,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
@@ -131,6 +132,9 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
         TextView textViewExpenseAmount = view.findViewById(R.id.textView_expenseAmount_singleDateViewHolder);
         TextView textViewIncomeAmount = view.findViewById(R.id.textView_incomeAmount_singleDateViewHolder);
         RelativeLayout relativeLayoutDateCircle = view.findViewById(R.id.relativeLayout_circleBackground_singleDateViewHolder);
+        RelativeLayout relativeLayoutExpenseBox = view.findViewById(R.id.relativeLayout_backgroundExpense_singleDateViewHolder);
+        RelativeLayout relativeLayoutIncomeBox = view.findViewById(R.id.relativeLayout_backgroundIncome_singleDateViewHolder);
+        LinearLayout itemLayout = view.findViewById(R.id.linearLayout_singleItem_singleDateViewHolder);
         String[] dateSplit = String.valueOf(dateWithAmountClass.getDate()).split("-");
         // String str = dateWithAmountClass.getDate().format(dateTimeFormatter);
         //textView.setText(dateSplit[2]+"-"+dateSplit[1]);
@@ -138,10 +142,22 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
             relativeLayoutDateCircle.setBackground(context.getResources().getDrawable(R.drawable.circle_background, context.getTheme()));
             relativeLayoutDateCircle.getBackground().setTint(context.getResources().getColor(R.color.black, context.getTheme()));
             textViewDate.setTextColor(context.getResources().getColor(R.color.white, context.getTheme()));
+
+            itemLayout.setBackground(context.getResources().getDrawable(R.drawable.single_item_rectange_calender_view, context.getTheme()));
+
         }
         textViewDate.setText(dateSplit[2]);
-        textViewExpenseAmount.setText(String.valueOf(dateWithAmountClass.getTotalExpenseAmount()));
-        textViewIncomeAmount.setText(String.valueOf(dateWithAmountClass.getTotalIncomeAmount()));
+        if(dateWithAmountClass.getTotalExpenseAmount() != 0){
+            textViewExpenseAmount.setText("-"+String.valueOf(dateWithAmountClass.getTotalExpenseAmount()));
+        }else{
+            relativeLayoutExpenseBox.setVisibility(View.GONE);
+        }
+        if(dateWithAmountClass.getTotalIncomeAmount() != 0){
+            textViewIncomeAmount.setText("-"+String.valueOf(dateWithAmountClass.getTotalIncomeAmount()));
+        }else{
+            relativeLayoutIncomeBox.setVisibility(View.GONE);
+        }
+
     }
 
     //calculate the days in month
