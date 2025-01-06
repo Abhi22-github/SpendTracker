@@ -44,11 +44,6 @@ public class AddActivityViewModel extends ViewModel {
     private String category;
     private SharedPreferences sharedPreferences;
 
-    public LiveData<TotalAmountClass> totalIncome = new MutableLiveData<>() ;
-    public MutableLiveData<TotalAmountClass> _totalIncome = new MutableLiveData<>();
-
-    public LiveData<TotalAmountClass> totalExpense = new MutableLiveData<>() ;
-    public MutableLiveData<TotalAmountClass> _totalExpense = new MutableLiveData<>();
 
     AddActivityViewModel() {
         chipsName = new String[]{};
@@ -207,6 +202,10 @@ public class AddActivityViewModel extends ViewModel {
 
     public LiveData<TotalAmountClass> getTotalAmountByDateRangeAndCategoryType(Long startDate,Long endDate,String categoryType){
         return transactionRepository.getTotalAmountByDateRangeAndCategoryType(startDate, endDate, categoryType);
+    }
+
+    public void deleteSingleTransaction(TransactionClass transactionClass){
+        transactionRepository.delete(transactionClass);
     }
 
 }

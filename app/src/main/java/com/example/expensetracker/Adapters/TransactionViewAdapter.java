@@ -13,10 +13,13 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.expensetracker.AddCategoryBottomSheet;
 import com.example.expensetracker.Model.TransactionClass;
 import com.example.expensetracker.R;
+import com.example.expensetracker.TransactionDetailBottomSheet;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -87,6 +90,14 @@ public class TransactionViewAdapter extends RecyclerView.Adapter<TransactionView
                     holder.date.setText(dateSplit[0]);
                 }
             }
+            holder.main.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    TransactionDetailBottomSheet transactionDetailBottomSheet = new TransactionDetailBottomSheet(transactionList.get(position));
+                    transactionDetailBottomSheet.show(((AppCompatActivity) mContext).getSupportFragmentManager(),"transactionDetails");
+
+                }
+            });
 
     }
 
@@ -109,7 +120,7 @@ public class TransactionViewAdapter extends RecyclerView.Adapter<TransactionView
 
         private TextView note, amount,day,date;
         private RelativeLayout body,circleBackground;
-        private LinearLayout dayDateView,main;
+        private LinearLayout dayDateView,main,entry;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);

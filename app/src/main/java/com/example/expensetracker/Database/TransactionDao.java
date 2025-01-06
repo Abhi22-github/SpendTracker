@@ -17,7 +17,6 @@ public interface TransactionDao {
     @Insert
     void insert(TransactionClass transactionClass);
 
-
     @Delete
     void delete(TransactionClass transactionClass);
 

@@ -1,8 +1,10 @@
 package com.example.expensetracker.Utilities
 
 import java.text.DecimalFormat
+import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+import java.util.Calendar
 
 
 fun getFirstAndLastDateOfCurrentMonth(): Pair<Long, Long> {
@@ -21,4 +23,14 @@ fun getFirstAndLastDateOfCurrentMonth(): Pair<Long, Long> {
 fun parseAmount(amount:Long):String{
     val formatter = DecimalFormat("##,##,##,###")
     return  formatter.format(amount)
+}
+
+fun getDateFromMillis(milliSeconds: Long): String {
+    // Create a DateFormatter object for displaying date in specified format.
+    val formatter: SimpleDateFormat = SimpleDateFormat("dd-MMM-yyyy")
+
+    // Create a calendar object that will convert the date and time value in milliseconds to date.
+    val calendar: Calendar = Calendar.getInstance()
+    calendar.setTimeInMillis(milliSeconds)
+    return formatter.format(calendar.getTime())
 }
