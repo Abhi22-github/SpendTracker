@@ -45,6 +45,10 @@ public class TransactionRepository {
         return transactionDao.getTotalAmountByDateAndCategoryType(date,categoryType);
     }
 
+    public LiveData<TotalAmountClass> getTotalAmountByDateRangeAndCategoryType(Long startDate,Long endDate,String categoryType){
+        return transactionDao.getTotalAmountByDateRangeAndCategoryType(startDate, endDate, categoryType);
+    }
+
     // below is the method to delete all the courses. 
     public void deleteAllTransaction() {
         new DeleteAllCoursesAsyncTask(transactionDao).execute();

@@ -32,4 +32,7 @@ public interface TransactionDao {
 
     @Query("SELECT date,SUM(amount) AS totalAmount FROM transaction_table where date == :date and type == :category")
     TotalAmountClass getTotalAmountByDateAndCategoryType(Long date,String category);
+
+    @Query("SELECT date,SUM(amount) AS totalAmount FROM transaction_table where date >= :startDate and date <= :endDate and type == :category")
+    LiveData<TotalAmountClass> getTotalAmountByDateRangeAndCategoryType(Long startDate,Long endDate,String category);
 }

@@ -1,6 +1,7 @@
 package com.example.expensetracker.Fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.expensetracker.Adapters.TransactionViewAdapter
 import com.example.expensetracker.Model.TransactionClass
+import com.example.expensetracker.Utilities.getFirstAndLastDateOfCurrentMonth
 import com.example.expensetracker.ViewModels.AddActivityViewModel
 import com.example.expensetracker.databinding.FragmentListViewBinding
 
@@ -17,6 +19,7 @@ import com.example.expensetracker.databinding.FragmentListViewBinding
 class ListViewFragment : Fragment() {
     private lateinit var binding: FragmentListViewBinding
     private lateinit var viewModel: AddActivityViewModel
+
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,6 +39,18 @@ class ListViewFragment : Fragment() {
         viewModel.initializeDatabaseRepository(requireActivity().application)
 
         setTransactionRecyclerView()
+
+        setUpTotalExpenseAndIncomeAmount()
+    }
+
+    fun setUpTotalExpenseAndIncomeAmount() {
+        val (firstDay,lastDay) = getFirstAndLastDateOfCurrentMonth()
+        viewModel.getTotalIncomeForRange(firstDay,lastDay).observe(viewLifecycleOwner,Observer{
+            binding.textViewIncomeListViewFragment.text = it.totalAmount.toString()
+        })
+        viewModel.getTotalExpenseForRange(firstDay,lastDay).observe(viewLifecycleOwner,Observer{
+            binding.textViewExpenseListViewFragment.text = it.totalAmount.toString()
+        })
     }
 
     private fun setTransactionRecyclerView() {

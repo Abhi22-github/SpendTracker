@@ -7,6 +7,7 @@ import android.util.Log;
 import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.expensetracker.Database.CategoryRepository;
@@ -43,9 +44,11 @@ public class AddActivityViewModel extends ViewModel {
     private String category;
     private SharedPreferences sharedPreferences;
 
+    public LiveData<TotalAmountClass> totalIncome = new MutableLiveData<>() ;
+    public MutableLiveData<TotalAmountClass> _totalIncome = new MutableLiveData<>();
 
-//    public  MutableLiveData<String> liveData = new MutableLiveData<>();
-
+    public LiveData<TotalAmountClass> totalExpense = new MutableLiveData<>() ;
+    public MutableLiveData<TotalAmountClass> _totalExpense = new MutableLiveData<>();
 
     AddActivityViewModel() {
         chipsName = new String[]{};
@@ -192,6 +195,18 @@ public class AddActivityViewModel extends ViewModel {
     //to delete categories from database
     public void deleteCategoryFromDatabase(CategoryClass categoryClass){
         categoryRepository.delete(categoryClass);
+    }
+
+    public LiveData<TotalAmountClass> getTotalIncomeForRange(Long startDate,Long endDate){
+        return getTotalAmountByDateRangeAndCategoryType(startDate,endDate,Constants.INCOME);
+    }
+
+    public LiveData<TotalAmountClass> getTotalExpenseForRange(Long startDate,Long endDate){
+        return getTotalAmountByDateRangeAndCategoryType(startDate,endDate,Constants.EXPENSE);
+    }
+
+    public LiveData<TotalAmountClass> getTotalAmountByDateRangeAndCategoryType(Long startDate,Long endDate,String categoryType){
+        return transactionRepository.getTotalAmountByDateRangeAndCategoryType(startDate, endDate, categoryType);
     }
 
 }
