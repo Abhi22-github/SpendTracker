@@ -39,10 +39,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:id="@+id/textView_income_listViewFragment"
                     android:textColor="@color/green"
-                    android:fontFamily="@font/manropesemibold"
+                    android:fontFamily="@font/googlesansmedium"
                     android:text="0 Rs"/>
                 <TextView
                     android:layout_width="wrap_content"
@@ -78,10 +78,10 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="16sp"
+                    android:textSize="18sp"
                     android:id="@+id/textView_expense_listViewFragment"
                     android:textColor="@color/expense_orange"
-                    android:fontFamily="@font/manropesemibold"
+                    android:fontFamily="@font/googlesansmedium"
                     android:text="0 Rs"/>
                 <TextView
                     android:layout_width="wrap_content"
