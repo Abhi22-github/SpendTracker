@@ -1,5 +1,7 @@
 package com.example.expensetracker.Adapters;
 
+import static com.example.expensetracker.Utilities.AppUtilityKt.parseAmount;
+
 import android.content.Context;
 import android.icu.text.DateFormat;
 import android.icu.text.SimpleDateFormat;
@@ -46,13 +48,13 @@ public class TransactionViewAdapter extends RecyclerView.Adapter<TransactionView
 
             // Expense/Income logic
             if(transactionList.get(position).getType().toString().equals("Expense")) {
-                holder.amount.setText("-₹" + transactionList.get(position).getAmount());
+                holder.amount.setText("-₹" + parseAmount(transactionList.get(position).getAmount()));
                 holder.body.setBackground(mContext.getResources().getDrawable(R.drawable.transaction_single_rectangle_background, mContext.getTheme()));
                 holder.amount.setTextColor(mContext.getResources().getColor(R.color.red, mContext.getTheme()));
                 holder.body.getBackground().setTint(mContext.getResources().getColor(R.color.red, mContext.getTheme()));
                 holder.body.getBackground().setAlpha(25);
             }else{
-                holder.amount.setText("+₹" + transactionList.get(position).getAmount());
+                holder.amount.setText("+₹" + parseAmount(transactionList.get(position).getAmount()));
                 holder.body.setBackground(mContext.getResources().getDrawable(R.drawable.transaction_single_rectangle_background, mContext.getTheme()));
                 holder.amount.setTextColor(mContext.getResources().getColor(R.color.green, mContext.getTheme()));
                 holder.body.getBackground().setTint(mContext.getResources().getColor(R.color.green, mContext.getTheme()));

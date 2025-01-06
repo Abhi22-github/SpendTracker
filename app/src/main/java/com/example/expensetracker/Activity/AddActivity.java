@@ -1,5 +1,7 @@
 package com.example.expensetracker.Activity;
 
+import static com.example.expensetracker.Utilities.AppUtilityKt.parseAmount;
+
 import android.content.Context;
 import android.os.Bundle;
 import android.text.Editable;
@@ -98,10 +100,8 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
                     if (givenstring.contains(",")) {
                         givenstring = givenstring.replaceAll(",", "");
                     }
-                    longval = Long.parseLong(givenstring);
-                    DecimalFormat formatter = new DecimalFormat("##,##,##,###");
-                    String formattedString = formatter.format(longval);
-                    editTextAmount.setText(formattedString);
+                    String amount = parseAmount(Long.parseLong(givenstring));
+                    editTextAmount.setText(amount);
                     editTextAmount.setSelection(editTextAmount.getText().length());
                 } catch (NumberFormatException nfe) {
                     nfe.printStackTrace();

@@ -18,3 +18,7 @@ fun getFirstAndLastDateOfCurrentMonth(): Pair<Long, Long> {
     return Pair(firstDate.format(formatter).toLong(), lastDate.format(formatter).toLong())
 }
 
+fun parseAmount(amount:Long):String{
+    val formatter = DecimalFormat("##,##,##,###")
+    return  formatter.format(amount)
+}
