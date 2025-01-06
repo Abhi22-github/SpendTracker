@@ -47,10 +47,10 @@ class ListViewFragment : Fragment() {
     fun setUpTotalExpenseAndIncomeAmount() {
         val (firstDay,lastDay) = getFirstAndLastDateOfCurrentMonth()
         viewModel.getTotalIncomeForRange(firstDay,lastDay).observe(viewLifecycleOwner,Observer{
-            binding.textViewIncomeListViewFragment.text = parseAmount(it.totalAmount)
+            binding.textViewIncomeListViewFragment.text = "₹"+parseAmount(it.totalAmount)
         })
         viewModel.getTotalExpenseForRange(firstDay,lastDay).observe(viewLifecycleOwner,Observer{
-            binding.textViewExpenseListViewFragment.text = parseAmount(it.totalAmount)
+            binding.textViewExpenseListViewFragment.text = "₹"+parseAmount(it.totalAmount)
         })
     }
 

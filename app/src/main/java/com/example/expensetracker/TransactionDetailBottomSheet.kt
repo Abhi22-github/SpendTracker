@@ -46,7 +46,7 @@ class TransactionDetailBottomSheet(val transactionClass: TransactionClass) : Bot
     private fun setUpPage(){
         binding.chipCategoryTransactionDetails.text = transactionClass.category
         binding.textViewDateTransactionDetails.text = getDateFromMillis(transactionClass.dateWithTime)
-        binding.textViewAmountTransactionDetails.text = "Rs "+parseAmount(transactionClass.amount)+".00"
+        binding.textViewAmountTransactionDetails.text = "₹"+parseAmount(transactionClass.amount)+".00"
         binding.textViewNoteTransactionDetails.text = transactionClass.note
         if(transactionClass.type.equals(Constants.INCOME)){
             binding.imageViewTypeTransactionDetails.setImageDrawable(resources.getDrawable(R.drawable.icon_income))

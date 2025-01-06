@@ -41,10 +41,10 @@ class MonthViewFragment : Fragment() {
     fun setUpTotalExpenseAndIncomeAmount() {
         val (firstDay,lastDay) = getFirstAndLastDateOfCurrentMonth()
         viewModel.getTotalIncomeForRange(firstDay,lastDay).observe(viewLifecycleOwner, Observer{
-            binding.textViewIncomeMonthViewFragment.text = parseAmount(it.totalAmount)
+            binding.textViewIncomeMonthViewFragment.text = "₹"+parseAmount(it.totalAmount)
         })
         viewModel.getTotalExpenseForRange(firstDay,lastDay).observe(viewLifecycleOwner,Observer{
-            binding.textViewExpenseMonthViewFragment.text = parseAmount(it.totalAmount)
+            binding.textViewExpenseMonthViewFragment.text = "₹"+parseAmount(it.totalAmount)
         })
     }
 
