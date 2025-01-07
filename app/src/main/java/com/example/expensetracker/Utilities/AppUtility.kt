@@ -6,7 +6,6 @@ import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
-import java.util.HashMap
 
 
 fun getFirstAndLastDateOfCurrentMonth(): Pair<Long, Long> {
@@ -43,4 +42,8 @@ fun convertTotalExpenseIncomeClassToMap(totalExpenseIncomeClassList: List<TotalE
         map[it.date] = Pair(it.totalExpense,it.totalIncome)
     }
     return map
+}
+
+fun convertLocalDateToLong(date:LocalDate):Long{
+    return date.toString().replace("-","").toLong()
 }
