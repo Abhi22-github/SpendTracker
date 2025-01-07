@@ -4,6 +4,7 @@ package com.example.expensetracker.CalenderViewPager;
 import static com.example.expensetracker.Utilities.AppUtilityKt.convertLocalDateToLong;
 import static com.example.expensetracker.Utilities.AppUtilityKt.convertTotalExpenseIncomeClassToMap;
 import static com.example.expensetracker.Utilities.AppUtilityKt.getFirstAndLastDateOfCurrentMonth;
+import static com.example.expensetracker.Utilities.AppUtilityKt.parseAmount;
 import static com.example.expensetracker.Utilities.Constants.INCOME;
 
 import android.content.Context;
@@ -145,11 +146,11 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
         textViewDate.setText(dateSplit[2]);
         if (map.containsKey(convertLocalDateToLong(dateWithAmountClass.getDate()))) {
             if (Objects.requireNonNull(map.get(convertLocalDateToLong(dateWithAmountClass.getDate()))).getFirst() != 0) {
-                textViewExpenseAmount.setText("-" + map.get(convertLocalDateToLong(dateWithAmountClass.getDate())).getFirst());
+                textViewExpenseAmount.setText("-₹" + parseAmount(map.get(convertLocalDateToLong(dateWithAmountClass.getDate())).getFirst()));
                 relativeLayoutExpenseBox.setVisibility(View.VISIBLE);
             }
             if (Objects.requireNonNull(map.get(convertLocalDateToLong(dateWithAmountClass.getDate()))).getSecond() != 0) {
-                textViewIncomeAmount.setText("-" + map.get(convertLocalDateToLong(dateWithAmountClass.getDate())).getSecond());
+                textViewIncomeAmount.setText("+₹" + parseAmount(map.get(convertLocalDateToLong(dateWithAmountClass.getDate())).getSecond()));
                 relativeLayoutIncomeBox.setVisibility(View.VISIBLE);
             }
         }
