@@ -1,7 +1,6 @@
 package com.example.expensetracker.Fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,7 +10,7 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.expensetracker.Adapters.TransactionViewAdapter
 import com.example.expensetracker.Model.TransactionClass
-import com.example.expensetracker.Utilities.getFirstAndLastDateOfCurrentMonth
+import com.example.expensetracker.Utilities.getFirstAndLastDateOfGivenPeriod
 import com.example.expensetracker.Utilities.parseAmount
 import com.example.expensetracker.ViewModels.AddActivityViewModel
 import com.example.expensetracker.databinding.FragmentListViewBinding
@@ -45,7 +44,12 @@ class ListViewFragment : Fragment() {
     }
 
     fun setUpTotalExpenseAndIncomeAmount() {
-        val (firstDay,lastDay) = getFirstAndLastDateOfCurrentMonth()
+
+        val currentDate = java.time.LocalDate.now()
+        val firstDate = currentDate.withDayOfMonth(1)
+        val lastDate = currentDate.withDayOfMonth(currentDate.lengthOfMonth())
+
+        val (firstDay,lastDay) = getFirstAndLastDateOfGivenPeriod(firstDate,lastDate)
         viewModel.getTotalIncomeForRange(firstDay,lastDay).observe(viewLifecycleOwner,Observer{
             binding.textViewIncomeListViewFragment.text = "₹"+parseAmount(it.totalAmount)
         })

@@ -1,9 +1,9 @@
 package com.example.expensetracker.CalenderViewPager;
 
 
+import static com.example.expensetracker.Utilities.AppUtilityKt.LocalDateToLong;
 import static com.example.expensetracker.Utilities.AppUtilityKt.convertLocalDateToLong;
 import static com.example.expensetracker.Utilities.AppUtilityKt.convertTotalExpenseIncomeClassToMap;
-import static com.example.expensetracker.Utilities.AppUtilityKt.getFirstAndLastDateOfCurrentMonth;
 import static com.example.expensetracker.Utilities.AppUtilityKt.parseAmount;
 
 import android.content.Context;
@@ -75,13 +75,12 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
 
-
         //initializing recycler view
         RecyclerView recyclerView = new RecyclerView(context);
         recyclerView.setLayoutManager(new GridLayoutManager(context, 7));
 
-        Pair<Long, Long> month = getFirstAndLastDateOfCurrentMonth();
-        viewModel.getListOfTotalAmountPerDayForRange(month.getFirst(), month.getSecond()).observe((LifecycleOwner) context, new Observer<List<TotalExpenseIncomeClass>>() {
+        daysList = daysInMonthArray(position);
+        viewModel.getListOfTotalAmountPerDayForRange(LocalDateToLong(daysList.get(0)), LocalDateToLong(daysList.get(daysList.size()-1))).observe((LifecycleOwner) context, new Observer<List<TotalExpenseIncomeClass>>() {
             @Override
             public void onChanged(List<TotalExpenseIncomeClass> totalExpenseIncomeClasses) {
                 map = convertTotalExpenseIncomeClassToMap(totalExpenseIncomeClasses);
@@ -89,7 +88,7 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
                 daysList = daysInMonthArray(position);
                 DaysOfMonthAdapter daysOfMonthAdapter = new DaysOfMonthAdapter(context, daysList, map) {
                     @Override
-                    void onBindViewHolder(RecyclerView.ViewHolder holder, LocalDate date , HashMap<Long, Pair<Long, Long>> map) {
+                    void onBindViewHolder(RecyclerView.ViewHolder holder, LocalDate date, HashMap<Long, Pair<Long, Long>> map) {
                         CalenderViewPagerAdapter.this.onBindView(holder.itemView, date, map);
                     }
 
@@ -160,19 +159,12 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
 
         ArrayList<LocalDate> daysInMonthArray = new ArrayList<>();
         if (position > 0) {
-
             selectedDate = LocalDate.now().plusMonths(position).withDayOfMonth(15);
-            // Log.d("position>0",String.valueOf(position)+" "+selectedDate.toString());
         } else if (position < 0) {
-
             selectedDate = LocalDate.now().minusMonths(Math.abs(position)).withDayOfMonth(15);
-            // Log.d("position<0",String.valueOf(position)+" "+selectedDate.toString());
         } else {
-
             selectedDate = LocalDate.now();
-            // Log.d("position=0",String.valueOf(position)+" "+selectedDate.toString());
         }
-
 
         //finding the exact  same date in prev month and next month
         LocalDate prevMonthSameDate = selectedDate.minusMonths(1);

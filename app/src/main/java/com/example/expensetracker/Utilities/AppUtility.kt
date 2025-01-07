@@ -8,17 +8,20 @@ import java.time.format.DateTimeFormatter
 import java.util.Calendar
 
 
-fun getFirstAndLastDateOfCurrentMonth(): Pair<Long, Long> {
-    val currentDate = LocalDate.now()
+fun getFirstAndLastDateOfGivenPeriod(prevMonth:LocalDate,nextMonth:LocalDate): Pair<Long, Long> {
 
     // First date of the current month
-    val firstDate = currentDate.withDayOfMonth(1)
+    val firstDate = prevMonth.withDayOfMonth(1)
 
     // Last date of the current month
-    val lastDate = currentDate.withDayOfMonth(currentDate.lengthOfMonth())
+    val lastDate = nextMonth.withDayOfMonth(nextMonth.lengthOfMonth())
 
     val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
     return Pair(firstDate.format(formatter).toLong(), lastDate.format(formatter).toLong())
+}
+
+fun LocalDateToLong( localDate: LocalDate):Long{
+    return localDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")).toLong()
 }
 
 fun parseAmount(amount:Long):String{

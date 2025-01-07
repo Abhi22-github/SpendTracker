@@ -8,7 +8,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.expensetracker.CalenderViewPager.CalenderViewPagerAdapter
-import com.example.expensetracker.Utilities.getFirstAndLastDateOfCurrentMonth
+import com.example.expensetracker.Utilities.getFirstAndLastDateOfGivenPeriod
 import com.example.expensetracker.Utilities.parseAmount
 import com.example.expensetracker.ViewModels.AddActivityViewModel
 import com.example.expensetracker.databinding.FragmentMonthViewBinding
@@ -39,7 +39,11 @@ class MonthViewFragment : Fragment() {
     }
 
     fun setUpTotalExpenseAndIncomeAmount() {
-        val (firstDay,lastDay) = getFirstAndLastDateOfCurrentMonth()
+        val currentDate = java.time.LocalDate.now()
+        val firstDate = currentDate.withDayOfMonth(1)
+        val lastDate = currentDate.withDayOfMonth(currentDate.lengthOfMonth())
+
+        val (firstDay,lastDay) = getFirstAndLastDateOfGivenPeriod(firstDate,lastDate)
         viewModel.getTotalIncomeForRange(firstDay,lastDay).observe(viewLifecycleOwner, Observer{
             binding.textViewIncomeMonthViewFragment.text = "₹"+parseAmount(it.totalAmount)
         })
