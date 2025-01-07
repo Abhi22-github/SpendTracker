@@ -146,10 +146,6 @@ public class AddActivityViewModel extends ViewModel {
         return transactionRepository.getAllTransactions();
     }
 
-    public TotalAmountClass getTotalAmountByDateAndCategoryType(Long date,String categoryType) {
-        return transactionRepository.getTotalAmountByDateAndCategoryType(date,categoryType);
-    }
-
     public void validateCategoryData(CategoryClass categoryClass) {
         if (categoryClass.categoryName.isEmpty()) {
             // textInputLayoutName.setError("Name field can't be empty");
