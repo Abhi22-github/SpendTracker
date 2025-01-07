@@ -1,6 +1,10 @@
 package com.example.expensetracker.CalenderViewPager;
 
 
+import static com.example.expensetracker.Utilities.AppUtilityKt.convertTotalExpenseIncomeClassToMap;
+import static com.example.expensetracker.Utilities.AppUtilityKt.getFirstAndLastDateOfCurrentMonth;
+import static com.example.expensetracker.Utilities.Constants.INCOME;
+
 import android.content.Context;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -24,6 +28,7 @@ import com.example.expensetracker.Adapters.TransactionViewAdapter;
 import com.example.expensetracker.Model.DateWithAmountClass;
 import com.example.expensetracker.Model.Day;
 import com.example.expensetracker.Model.TotalAmountClass;
+import com.example.expensetracker.Model.TotalExpenseIncomeClass;
 import com.example.expensetracker.Model.TransactionClass;
 import com.example.expensetracker.R;
 import com.example.expensetracker.Utilities.Constants;
@@ -33,7 +38,10 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+
+import kotlin.Pair;
 
 public class CalenderViewPagerAdapter extends PagerAdapter {
 
@@ -45,6 +53,8 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
 
     private LocalDate selectedDate;
     private ArrayList<DateWithAmountClass> daysListWithAmount;
+    private HashMap<Long, Pair<Long, Long>> map;
+
     DateTimeFormatter dateTimeFormatter;
     private AddActivityViewModel viewModel;
 
@@ -55,6 +65,7 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
         dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
         todayDate = LocalDate.now();
         this.viewModel = viewModel;
+        map = new HashMap<>();
     }
 
     @Override
@@ -71,6 +82,7 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
     @Override
     public Object instantiateItem(@NonNull ViewGroup container, int position) {
 
+
         //initializing recycler view
         RecyclerView recyclerView = new RecyclerView(context);
         recyclerView.setLayoutManager(new GridLayoutManager(context, 7));
@@ -78,10 +90,10 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
         //getting the current page month days in array
         daysListWithAmount = daysInMonthArray(position);
 
-        DaysOfMonthAdapter daysOfMonthAdapter = new DaysOfMonthAdapter(context, daysListWithAmount) {
+        DaysOfMonthAdapter daysOfMonthAdapter = new DaysOfMonthAdapter(context, daysListWithAmount,map) {
             @Override
-            void onBindViewHolder(RecyclerView.ViewHolder holder, DateWithAmountClass dateWithAmountClass) {
-                CalenderViewPagerAdapter.this.onBindView(holder.itemView, dateWithAmountClass);
+            void onBindViewHolder(RecyclerView.ViewHolder holder, DateWithAmountClass dateWithAmountClass, HashMap<Long, Pair<Long, Long>> map) {
+                CalenderViewPagerAdapter.this.onBindView(holder.itemView, dateWithAmountClass, map);
             }
 
             @NonNull
@@ -95,11 +107,26 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
         recyclerView.setAdapter(daysOfMonthAdapter);
 
         //setting up the recycler view with current month dates
-        viewModel.getAllTransactions().observe((LifecycleOwner) context, new Observer<List<TransactionClass>>() {
+//        viewModel.getAllTransactions().observe((LifecycleOwner) context, new Observer<List<TransactionClass>>() {
+//            @Override
+//            public void onChanged(List<TransactionClass> transactionClasses) {
+//                new Runnable(){
+//                    public void run(){
+//                        daysListWithAmount = daysInMonthArray(position);
+//                        daysOfMonthAdapter.updateData(daysListWithAmount,map);
+//                        daysOfMonthAdapter.notifyDataSetChanged();
+//                    }
+//                }.run();
+//
+//            }
+//        });
+        Pair<Long, Long> month = getFirstAndLastDateOfCurrentMonth();
+        viewModel.getListOfTotalAmountPerDayForRange(month.getFirst(), month.getSecond()).observe((LifecycleOwner) context, new Observer<List<TotalExpenseIncomeClass>>() {
             @Override
-            public void onChanged(List<TransactionClass> transactionClasses) {
+            public void onChanged(List<TotalExpenseIncomeClass> totalExpenseIncomeClasses) {
+                map = convertTotalExpenseIncomeClassToMap(totalExpenseIncomeClasses);
                 daysListWithAmount = daysInMonthArray(position);
-                daysOfMonthAdapter.updateData(daysListWithAmount);
+                daysOfMonthAdapter.updateData(daysListWithAmount, map);
                 daysOfMonthAdapter.notifyDataSetChanged();
             }
         });
@@ -127,7 +154,7 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
     }
 
 
-    public void onBindView(View view, DateWithAmountClass dateWithAmountClass) {
+    public void onBindView(View view, DateWithAmountClass dateWithAmountClass, HashMap<Long, Pair<Long, Long>> map) {
         TextView textViewDate = view.findViewById(R.id.textView_date_singleDateViewHolder);
         TextView textViewExpenseAmount = view.findViewById(R.id.textView_expenseAmount_singleDateViewHolder);
         TextView textViewIncomeAmount = view.findViewById(R.id.textView_incomeAmount_singleDateViewHolder);
@@ -143,20 +170,28 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
             relativeLayoutDateCircle.getBackground().setTint(context.getResources().getColor(R.color.black, context.getTheme()));
             textViewDate.setTextColor(context.getResources().getColor(R.color.white, context.getTheme()));
 
-            itemLayout.setBackground(context.getResources().getDrawable(R.drawable.single_item_rectange_calender_view, context.getTheme()));
+            //itemLayout.setBackground(context.getResources().getDrawable(R.drawable.single_item_rectange_calender_view, context.getTheme()));
 
         }
         textViewDate.setText(dateSplit[2]);
-        if(dateWithAmountClass.getTotalExpenseAmount() != 0){
-            textViewExpenseAmount.setText("-"+String.valueOf(dateWithAmountClass.getTotalExpenseAmount()));
-        }else{
-            relativeLayoutExpenseBox.setVisibility(View.GONE);
-        }
-        if(dateWithAmountClass.getTotalIncomeAmount() != 0){
-            textViewIncomeAmount.setText("-"+String.valueOf(dateWithAmountClass.getTotalIncomeAmount()));
-        }else{
-            relativeLayoutIncomeBox.setVisibility(View.GONE);
-        }
+
+//        if(dateWithAmountClass.getTotalExpenseAmount() != 0){
+//            textViewExpenseAmount.setText("-"+String.valueOf(dateWithAmountClass.getTotalExpenseAmount()));
+//        }else{
+//            relativeLayoutExpenseBox.setVisibility(View.GONE);
+//        }
+//        if(dateWithAmountClass.getTotalIncomeAmount() != 0){
+//            textViewIncomeAmount.setText("-"+String.valueOf(dateWithAmountClass.getTotalIncomeAmount()));
+//        }else{
+//            relativeLayoutIncomeBox.setVisibility(View.GONE);
+//        }
+//        if (map.containsKey(dateWithAmountClass.getDate())) {
+//            textViewExpenseAmount.setText("-" + String.valueOf(map.get(dateWithAmountClass.getDate()).getFirst()));
+//            textViewExpenseAmount.setText("-" + String.valueOf(map.get(dateWithAmountClass.getDate()).getSecond()));
+//        } else {
+//
+//        }
+        //print(map);
 
     }
 
@@ -239,8 +274,11 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
     private DateWithAmountClass getTotalForDay(Day day) {
         return new DateWithAmountClass(day.getDate(),
                 viewModel.getTotalAmountByDateAndCategoryType(Long.parseLong(day.getDate().toString().replace("-", "")), Constants.EXPENSE).getTotalAmount(),
-                viewModel.getTotalAmountByDateAndCategoryType(Long.parseLong(day.getDate().toString().replace("-", "")), Constants.INCOME).getTotalAmount()
+                viewModel.getTotalAmountByDateAndCategoryType(Long.parseLong(day.getDate().toString().replace("-", "")), INCOME).getTotalAmount()
         );
+    }
+
+    private void getTotalIncomeListPerDay() {
 
     }
 

@@ -1,10 +1,12 @@
 package com.example.expensetracker.Utilities
 
+import com.example.expensetracker.Model.TotalExpenseIncomeClass
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
+import java.util.HashMap
 
 
 fun getFirstAndLastDateOfCurrentMonth(): Pair<Long, Long> {
@@ -33,4 +35,12 @@ fun getDateFromMillis(milliSeconds: Long): String {
     val calendar: Calendar = Calendar.getInstance()
     calendar.setTimeInMillis(milliSeconds)
     return formatter.format(calendar.getTime())
+}
+
+fun convertTotalExpenseIncomeClassToMap(totalExpenseIncomeClassList: List<TotalExpenseIncomeClass>):HashMap<Long,Pair<Long,Long>>{
+    val map = hashMapOf<Long,Pair<Long,Long>>()
+    totalExpenseIncomeClassList.forEach { it ->
+        map[it.date] = Pair(it.totalExpense,it.totalIncome)
+    }
+    return map
 }

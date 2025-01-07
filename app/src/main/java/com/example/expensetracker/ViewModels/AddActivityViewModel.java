@@ -3,17 +3,16 @@ package com.example.expensetracker.ViewModels;
 import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.util.Log;
 import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
-import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.expensetracker.Database.CategoryRepository;
 import com.example.expensetracker.Events.EventMessage;
 import com.example.expensetracker.Model.CategoryClass;
 import com.example.expensetracker.Model.TotalAmountClass;
+import com.example.expensetracker.Model.TotalExpenseIncomeClass;
 import com.example.expensetracker.Model.TransactionClass;
 import com.example.expensetracker.Database.TransactionRepository;
 import com.example.expensetracker.Utilities.Constants;
@@ -72,12 +71,10 @@ public class AddActivityViewModel extends ViewModel {
 
     public void storeCurrentExpenseSelectChip(String s) {
         currentSelectedExpenseCategory = s;
-        Log.d("Chips Expense ", currentSelectedExpenseCategory);
     }
 
     public void storeCurrentIncomeSelectChip(String s) {
         currentSelectedIncomeCategory = s;
-        Log.d("Chips Income ", currentSelectedIncomeCategory);
     }
 
     public void setTransactionTypeInViewModel(String transaction) {
@@ -184,7 +181,6 @@ public class AddActivityViewModel extends ViewModel {
             categoryRepository.insert(categoryClass);
         }
         EventBus.getDefault().post(new EventMessage(9, "success"));
-        Log.d("Chips", "completed again");
     }
 
     //to delete categories from database
@@ -202,6 +198,10 @@ public class AddActivityViewModel extends ViewModel {
 
     public LiveData<TotalAmountClass> getTotalAmountByDateRangeAndCategoryType(Long startDate,Long endDate,String categoryType){
         return transactionRepository.getTotalAmountByDateRangeAndCategoryType(startDate, endDate, categoryType);
+    }
+
+    public LiveData<List<TotalExpenseIncomeClass>> getListOfTotalAmountPerDayForRange(Long startDate, Long endDate){
+        return transactionRepository.getListOfTotalAmountPerDayForRange(startDate, endDate);
     }
 
     public void deleteSingleTransaction(TransactionClass transactionClass){

@@ -29,7 +29,6 @@ import androidx.viewpager.widget.ViewPager;
 import com.example.expensetracker.databinding.ActivityMainBinding;
 
 import android.os.Handler;
-import android.util.Log;
 import android.view.MenuItem;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -58,6 +57,9 @@ public class MainActivity extends AppCompatActivity {
     private ViewPager viewPagerCalender;
     private SharedPreferences sharedPreferences;
     private FragmentTransaction fragmentTransaction;
+
+    private ListViewFragment listViewFragment;
+    private MonthViewFragment monthViewFragment;
 
 
     @Override
@@ -89,19 +91,31 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void setUpTransactionFragment(){
-        fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.frameLayout_fragment_mainActivity,new ListViewFragment(),"ListView");
-        fragmentTransaction.commit();
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.frameLayout_fragment_mainActivity,listViewFragment,"ListView");
+                fragmentTransaction.commit();
+            }
+        });
+
     }
 
     private void setUpMonthFragment(){
-        fragmentTransaction = getSupportFragmentManager().beginTransaction();
-        fragmentTransaction.replace(R.id.frameLayout_fragment_mainActivity,new MonthViewFragment(),"MonthView");
-        fragmentTransaction.commit();
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.frameLayout_fragment_mainActivity,monthViewFragment,"MonthView");
+                fragmentTransaction.commit();
+            }
+        });
+
     }
 
     private boolean sideMenuItemClickHandler(MenuItem v) {
-        new Handler().post(new Runnable() {
+        new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
                 int menuID = v.getItemId();
@@ -126,9 +140,8 @@ public class MainActivity extends AppCompatActivity {
                 } else {
 
                 }
-
             }
-        });
+        },300);
         drawerLayout.close();
         return true;
     }
@@ -136,6 +149,8 @@ public class MainActivity extends AppCompatActivity {
     private void initVars() {
         context = getApplicationContext();
         sharedPreferences = getSharedPreferences(Constants.sharedPreferencesName, MODE_PRIVATE);
+        listViewFragment = new ListViewFragment();
+        monthViewFragment = new MonthViewFragment();
     }
 
 
@@ -175,7 +190,6 @@ public class MainActivity extends AppCompatActivity {
                 categoryClassesList.add(categoryClassObject);
             }
 
-            Log.d("Chips", "performed again");
             viewModel.fillCategoriesInDatabase(categoryClassesList);
 
             SharedPreferences.Editor editor = sharedPreferences.edit();
@@ -202,12 +216,10 @@ public class MainActivity extends AppCompatActivity {
 
     @Subscribe
     public void EventHandler(EventMessage eventMessage) {
-        Log.d("Chips", "completed again2");
         if (eventMessage.getEventCode() == 9) {
             SharedPreferences.Editor editor = sharedPreferences.edit();
             editor.putInt(Constants.sharedPreferenceOneTimeCheckKey, 1);
             editor.apply();
-            Log.d("Chips", "completed again3");
         }
     }
 

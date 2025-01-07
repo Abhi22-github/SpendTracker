@@ -7,6 +7,7 @@ import android.os.TransactionTooLargeException;
 import androidx.lifecycle.LiveData;
 
 import com.example.expensetracker.Model.TotalAmountClass;
+import com.example.expensetracker.Model.TotalExpenseIncomeClass;
 import com.example.expensetracker.Model.TransactionClass;
 
 import java.util.List;
@@ -47,6 +48,10 @@ public class TransactionRepository {
 
     public LiveData<TotalAmountClass> getTotalAmountByDateRangeAndCategoryType(Long startDate,Long endDate,String categoryType){
         return transactionDao.getTotalAmountByDateRangeAndCategoryType(startDate, endDate, categoryType);
+    }
+
+    public LiveData<List<TotalExpenseIncomeClass>> getListOfTotalAmountPerDayForRange(Long startDate, Long endDate){
+        return transactionDao.getListOfTotalAmountPerDayForRange(startDate, endDate);
     }
 
     // below is the method to delete all the courses. 
