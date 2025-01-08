@@ -12,6 +12,10 @@
             android:id="@+id/item_monthView_sideNavigation"
             android:title="Month"
             android:icon="@drawable/home_icon_selector"/>
+        <item
+            android:id="@+id/item_dayView_sideNavigation"
+            android:title="Day"
+            android:icon="@drawable/home_icon_selector"/>
     </group>
     <group
         android:id="@+id/group_more_sideNavigation"

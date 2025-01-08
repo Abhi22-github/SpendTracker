@@ -24,7 +24,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
 
 import com.example.expensetracker.Activity.MainActivity;
-import com.example.expensetracker.Fragments.DayDetailsFragment;
+import com.example.expensetracker.Fragments.DayViewFragment;
 import com.example.expensetracker.Model.Day;
 import com.example.expensetracker.Model.TotalExpenseIncomeClass;
 import com.example.expensetracker.R;
@@ -159,8 +159,9 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
             @Override
             public void onClick(View v) {
                 try {
+                    viewModel.setCurrentSelectedDate(date);
                     FragmentTransaction fragmentTransaction = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
-                    fragmentTransaction.replace(R.id.frameLayout_fragment_mainActivity,new DayDetailsFragment());
+                    fragmentTransaction.replace(R.id.frameLayout_fragment_mainActivity,new DayViewFragment());
                     fragmentTransaction.addToBackStack("DayDetails");
                     fragmentTransaction.commit();
                 } catch (ClassCastException e) {

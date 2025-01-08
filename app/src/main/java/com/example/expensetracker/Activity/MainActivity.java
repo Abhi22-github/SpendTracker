@@ -18,6 +18,7 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.example.expensetracker.Adapters.TransactionViewAdapter;
 import com.example.expensetracker.Events.EventMessage;
+import com.example.expensetracker.Fragments.DayViewFragment;
 import com.example.expensetracker.Fragments.ListViewFragment;
 import com.example.expensetracker.Fragments.MonthViewFragment;
 import com.example.expensetracker.Model.CategoryClass;
@@ -57,6 +58,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ListViewFragment listViewFragment;
     private MonthViewFragment monthViewFragment;
+    private DayViewFragment dayViewFragment;
 
 
     @Override
@@ -109,7 +111,18 @@ public class MainActivity extends AppCompatActivity {
                 fragmentTransaction.commit();
             }
         });
+    }
 
+    private void setUpDayFragment(){
+        new Handler().post(new Runnable() {
+            @Override
+            public void run() {
+                fragmentTransaction = getSupportFragmentManager().beginTransaction();
+                fragmentTransaction.replace(R.id.frameLayout_fragment_mainActivity,dayViewFragment);
+                fragmentTransaction.addToBackStack("DayView");
+                fragmentTransaction.commit();
+            }
+        });
     }
 
     private boolean sideMenuItemClickHandler(MenuItem v) {
@@ -123,7 +136,11 @@ public class MainActivity extends AppCompatActivity {
                 }else if (menuID == R.id.item_monthView_sideNavigation) {
                     setUpMonthFragment();
                     navigationView.setCheckedItem(R.id.item_monthView_sideNavigation);
-                } else if (menuID == R.id.item_expenseCategory_sideNavigation) {
+                }else if(menuID == R.id.item_dayView_sideNavigation){
+                    setUpDayFragment();
+                    navigationView.setCheckedItem(R.id.item_dayView_sideNavigation);
+                }
+                else if (menuID == R.id.item_expenseCategory_sideNavigation) {
                     sendUserToExpenseCategoryActivity();
                     navigationView.setCheckedItem(R.id.item_listView_sideNavigation);
                 } else if (menuID == R.id.item_incomeCategory_sideNavigation) {
@@ -149,6 +166,7 @@ public class MainActivity extends AppCompatActivity {
         sharedPreferences = getSharedPreferences(Constants.sharedPreferencesName, MODE_PRIVATE);
         listViewFragment = new ListViewFragment();
         monthViewFragment = new MonthViewFragment();
+        dayViewFragment = new DayViewFragment();
     }
 
 

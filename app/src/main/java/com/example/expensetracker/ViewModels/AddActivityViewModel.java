@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.widget.Toast;
 
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.expensetracker.Database.CategoryRepository;
@@ -24,6 +25,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -43,12 +45,19 @@ public class AddActivityViewModel extends ViewModel {
     private String category;
     private SharedPreferences sharedPreferences;
 
+    private MutableLiveData<Integer> _currentSelectedDate;
+    public LiveData<Integer> currentSelectedDate;
+    public LocalDate todaysDate;
+
 
     AddActivityViewModel() {
         chipsName = new String[]{};
         chipsList = new ArrayList<>();
         date = Calendar.getInstance().getTimeInMillis();
         transactionType = Constants.EXPENSE;
+        _currentSelectedDate = new MutableLiveData<>(0);
+        currentSelectedDate = _currentSelectedDate;
+        todaysDate = LocalDate.now();
     }
 
     public void initializeDatabaseRepository(Application application) {
@@ -116,7 +125,7 @@ public class AddActivityViewModel extends ViewModel {
         // on below line we are creating
         // a variable for our modal class.
         TransactionClass modal = new TransactionClass();
-        modal.setAmount(Long.parseLong(amount.trim().replace(",","")));
+        modal.setAmount(Long.parseLong(amount.trim().replace(",", "")));
         modal.setType(expense.trim());
         modal.setNote(note.trim());
         modal.setCategory(category.trim());
@@ -161,10 +170,10 @@ public class AddActivityViewModel extends ViewModel {
     }
 
     private void storeCategoryInDatabase(CategoryClass categoryClass) {
-        if(categoryClass.id == 0){
+        if (categoryClass.id == 0) {
             //new category insert
             categoryRepository.insert(categoryClass);
-        }else {
+        } else {
             //existing category update
             categoryRepository.update(categoryClass);
         }
@@ -180,32 +189,48 @@ public class AddActivityViewModel extends ViewModel {
     }
 
     //to delete categories from database
-    public void deleteCategoryFromDatabase(CategoryClass categoryClass){
+    public void deleteCategoryFromDatabase(CategoryClass categoryClass) {
         categoryRepository.delete(categoryClass);
     }
 
-    public LiveData<TotalAmountClass> getTotalIncomeForRange(Long startDate,Long endDate){
-        return getTotalAmountByDateRangeAndCategoryType(startDate,endDate,Constants.INCOME);
+    public LiveData<TotalAmountClass> getTotalIncomeForRange(Long startDate, Long endDate) {
+        return getTotalAmountByDateRangeAndCategoryType(startDate, endDate, Constants.INCOME);
     }
 
-    public LiveData<TotalAmountClass> getTotalExpenseForRange(Long startDate,Long endDate){
-        return getTotalAmountByDateRangeAndCategoryType(startDate,endDate,Constants.EXPENSE);
+    public LiveData<TotalAmountClass> getTotalExpenseForRange(Long startDate, Long endDate) {
+        return getTotalAmountByDateRangeAndCategoryType(startDate, endDate, Constants.EXPENSE);
     }
 
-    public LiveData<TotalAmountClass> getTotalAmountByDateRangeAndCategoryType(Long startDate,Long endDate,String categoryType){
+    public LiveData<TotalAmountClass> getTotalAmountByDateRangeAndCategoryType(Long startDate, Long endDate, String categoryType) {
         return transactionRepository.getTotalAmountByDateRangeAndCategoryType(startDate, endDate, categoryType);
     }
 
-    public LiveData<List<TotalExpenseIncomeClass>> getListOfTotalAmountPerDayForRange(Long startDate, Long endDate){
+    public LiveData<List<TotalExpenseIncomeClass>> getListOfTotalAmountPerDayForRange(Long startDate, Long endDate) {
         return transactionRepository.getListOfTotalAmountPerDayForRange(startDate, endDate);
     }
 
-    public void deleteSingleTransaction(TransactionClass transactionClass){
+    public void deleteSingleTransaction(TransactionClass transactionClass) {
         transactionRepository.delete(transactionClass);
     }
 
-    public LiveData<List<TransactionClass>> getAllTransactionsForDate(Long date){
+    public LiveData<List<TransactionClass>> getAllTransactionsForDate(Long date) {
         return transactionRepository.getAllTransactionsForDate(date);
+    }
+
+    public void setCurrentSelectedDate(LocalDate currentSelectedDate) {
+        this._currentSelectedDate.setValue(diffBetCurrentAndGivenDate(currentSelectedDate));
+        this.currentSelectedDate = _currentSelectedDate;
+    }
+
+    public Integer diffBetCurrentAndGivenDate(LocalDate currentSelectedDate) {
+        if (todaysDate.compareTo(currentSelectedDate) > 0) {
+            return -(int) ChronoUnit.DAYS.between(todaysDate, currentSelectedDate);
+        } else if (todaysDate.compareTo(currentSelectedDate) > 0) {
+            return (int) ChronoUnit.DAYS.between(todaysDate, currentSelectedDate);
+        } else {
+            return 0;
+        }
+
     }
 
 }
