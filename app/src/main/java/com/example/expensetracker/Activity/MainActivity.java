@@ -6,7 +6,6 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MenuItem;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -50,7 +49,6 @@ public class MainActivity extends AppCompatActivity {
     private AppBarLayout appBarLayout;
     private MaterialToolbar toolbar;
     private NavigationView navigationView;
-    private LinearLayout linearLayoutEmptyScreenLayout;
 
     private ViewPager viewPagerCalender;
     private SharedPreferences sharedPreferences;
@@ -176,9 +174,7 @@ public class MainActivity extends AppCompatActivity {
         drawerLayout = findViewById(R.id.drawerLayout_drawer_mainActivity);
         toolbar = findViewById(R.id.toolbar_mainToolbar_mainActivity);
         navigationView = findViewById(R.id.navigationView_navigationContent_mainActivity);
-//        viewPagerCalender = findViewById(R.id.viewPager_calender_mainActivity);
-        linearLayoutEmptyScreenLayout = findViewById(R.id.linearLayout_emptyScreenDialog_mainActivity);
-    }
+ }
 
     private void oneTimeOperationMethod() {
         int check = sharedPreferences.getInt(Constants.sharedPreferenceOneTimeCheckKey, 0);

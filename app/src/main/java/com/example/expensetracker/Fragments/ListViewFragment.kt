@@ -61,9 +61,15 @@ class ListViewFragment : Fragment() {
     private fun setTransactionRecyclerView() {
         binding.recyclerViewTransactionMainActivity.setLayoutManager(LinearLayoutManager(requireActivity()))
         viewModel.allTransactions.observe(viewLifecycleOwner,Observer<List<TransactionClass>>{
-            val transactionViewAdapter = TransactionViewAdapter(requireActivity(),
-                it)
-            binding.recyclerViewTransactionMainActivity.adapter = transactionViewAdapter
+            if(it.size == 0){
+                binding.linearLayoutEmptyScreenDialogListView.visibility = View.VISIBLE
+            }else{
+                binding.linearLayoutEmptyScreenDialogListView.visibility = View.GONE
+                val transactionViewAdapter = TransactionViewAdapter(requireActivity(),
+                    it)
+                binding.recyclerViewTransactionMainActivity.adapter = transactionViewAdapter
+            }
+
         })
     }
 }

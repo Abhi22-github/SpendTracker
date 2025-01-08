@@ -14,8 +14,10 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.PagerAdapter
 import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.R
+import com.example.expensetracker.Utilities.LocalDateToLong
 import com.example.expensetracker.ViewModels.AddActivityViewModel
 import java.time.LocalDate
+
 
 class DayViewPagerAdapter(
     val context: Context,
@@ -34,29 +36,53 @@ class DayViewPagerAdapter(
     }
 
     override fun instantiateItem(container: ViewGroup, position: Int): Any {
+        val view = RelativeLayout(context)
         val recyclerView = RecyclerView(context)
+        val emptyMessageView =
+            LayoutInflater.from(context).inflate(R.layout.empty_layout, view, false)
+
+        setLayoutInCenter(emptyMessageView, RelativeLayout.CENTER_IN_PARENT)
+        view.addView(emptyMessageView)
+        view.addView(recyclerView)
+
         recyclerView.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
-        viewModel.getAllTransactionsForDate(getDateByPagerPosition(position).toString().replace("-","").toLong()).observe(context as LifecycleOwner, Observer {
-            val adapter: OnlyDayAdapter = object : OnlyDayAdapter(context,it) {
-                override fun onBindViewHolder(holder: RecyclerView.ViewHolder,transactionClasses: MutableList<TransactionClass>,position: Int) {
-                    this@DayViewPagerAdapter.onBindView(holder.itemView,transactionClasses,position)
-                }
+        viewModel.getAllTransactionsForDate(LocalDateToLong(getDateByPagerPosition(position)))
+            .observe(context as LifecycleOwner, Observer {
+                if (it.size != 0) {
+                    emptyMessageView.visibility = View.GONE
+                    recyclerView.visibility = View.VISIBLE
+                    val adapter: OnlyDayAdapter = object : OnlyDayAdapter(context, it) {
+                        override fun onBindViewHolder(
+                            holder: RecyclerView.ViewHolder,
+                            transactionClasses: MutableList<TransactionClass>,
+                            position: Int
+                        ) {
+                            this@DayViewPagerAdapter.onBindView(
+                                holder.itemView,
+                                transactionClasses,
+                                position
+                            )
+                        }
 
-                override fun onCreateViewHolder(
-                    parent: ViewGroup,
-                    viewType: Int
-                ): RecyclerView.ViewHolder {
-                    return object :
-                        RecyclerView.ViewHolder(this@DayViewPagerAdapter.onCreateView(parent)) {}
+                        override fun onCreateViewHolder(
+                            parent: ViewGroup,
+                            viewType: Int
+                        ): RecyclerView.ViewHolder {
+                            return object :
+                                RecyclerView.ViewHolder(this@DayViewPagerAdapter.onCreateView(parent)) {}
+                        }
+                    }
+                    recyclerView.adapter = adapter
+                } else {
+                    emptyMessageView.visibility = View.VISIBLE
+                    recyclerView.visibility = View.GONE
                 }
-            }
-            recyclerView.adapter = adapter
-        })
+            })
 
         container.addView(
-            recyclerView,
+            view,
             ViewGroup.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.MATCH_PARENT
@@ -64,7 +90,7 @@ class DayViewPagerAdapter(
         )
         viewContainer = container
 
-        return recyclerView
+        return view
     }
 
     private fun onCreateView(parent: ViewGroup): View {
@@ -73,7 +99,11 @@ class DayViewPagerAdapter(
         return view
     }
 
-    private fun onBindView(itemView: View,transactionClasses: MutableList<TransactionClass>, position: Int) {
+    private fun onBindView(
+        itemView: View,
+        transactionClasses: MutableList<TransactionClass>,
+        position: Int
+    ) {
         val main = itemView.findViewById<LinearLayout>(R.id.main)
         val note = itemView.findViewById<TextView>(R.id.textView_note_transactionViewHolder)
         val amount = itemView.findViewById<TextView>(R.id.textView_amount_transactionViewHolder)
@@ -87,10 +117,10 @@ class DayViewPagerAdapter(
             itemView.findViewById<RelativeLayout>(R.id.relativeLayout_circleBackground_transactionViewHolder)
 
 
-        if(transactionClasses.size != 0){
-            try{
+        if (transactionClasses.size != 0) {
+            try {
                 amount.text = transactionClasses.get(position).amount.toString()
-            }catch (e:Exception){
+            } catch (e: Exception) {
 
             }
 
@@ -101,10 +131,18 @@ class DayViewPagerAdapter(
         container.removeView(`object` as View)
     }
 
-    fun getDateByPagerPosition(position: Int):LocalDate{
+    fun getDateByPagerPosition(position: Int): LocalDate {
         val date = LocalDate.now()
-        return date.plusDays(position.toLong()-250)
+        return date.plusDays(position.toLong() - 250)
     }
 
+    private fun setLayoutInCenter(view: View, centerInParent: Int) {
+        val buttonLayoutParameters = RelativeLayout.LayoutParams(
+            RelativeLayout.LayoutParams.WRAP_CONTENT,
+            RelativeLayout.LayoutParams.WRAP_CONTENT
+        )
+        buttonLayoutParameters.addRule(centerInParent)
+        view.layoutParams = buttonLayoutParameters
+    }
 
 }
