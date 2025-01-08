@@ -4,34 +4,31 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-
-import com.example.expensetracker.Adapters.TransactionViewAdapter;
-import com.example.expensetracker.Events.EventMessage;
-import com.example.expensetracker.Fragments.ListViewFragment;
-import com.example.expensetracker.Model.CategoryClass;
-import com.example.expensetracker.Fragments.MonthViewFragment;
-import com.example.expensetracker.R;
-import com.example.expensetracker.Utilities.Constants;
-import com.example.expensetracker.ViewModels.AddActivityViewModel;
-import com.google.android.material.appbar.AppBarLayout;
-import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
-import com.google.android.material.navigation.NavigationView;
+import android.os.Handler;
+import android.view.MenuItem;
+import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-
 import androidx.drawerlayout.widget.DrawerLayout;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.viewpager.widget.ViewPager;
 
+import com.example.expensetracker.Adapters.TransactionViewAdapter;
+import com.example.expensetracker.Events.EventMessage;
+import com.example.expensetracker.Fragments.ListViewFragment;
+import com.example.expensetracker.Fragments.MonthViewFragment;
+import com.example.expensetracker.Model.CategoryClass;
+import com.example.expensetracker.R;
+import com.example.expensetracker.Utilities.Constants;
+import com.example.expensetracker.ViewModels.AddActivityViewModel;
 import com.example.expensetracker.databinding.ActivityMainBinding;
-
-import android.os.Handler;
-import android.view.MenuItem;
-import android.widget.LinearLayout;
-import android.widget.Toast;
+import com.google.android.material.appbar.AppBarLayout;
+import com.google.android.material.appbar.MaterialToolbar;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.android.material.navigation.NavigationView;
 
 import org.greenrobot.eventbus.EventBus;
 import org.greenrobot.eventbus.Subscribe;
@@ -95,7 +92,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.frameLayout_fragment_mainActivity,listViewFragment,"ListView");
+                fragmentTransaction.replace(R.id.frameLayout_fragment_mainActivity,listViewFragment);
                 fragmentTransaction.commit();
             }
         });
@@ -107,7 +104,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 fragmentTransaction = getSupportFragmentManager().beginTransaction();
-                fragmentTransaction.replace(R.id.frameLayout_fragment_mainActivity,monthViewFragment,"MonthView");
+                fragmentTransaction.replace(R.id.frameLayout_fragment_mainActivity,monthViewFragment);
+                fragmentTransaction.addToBackStack("MonthView");
                 fragmentTransaction.commit();
             }
         });

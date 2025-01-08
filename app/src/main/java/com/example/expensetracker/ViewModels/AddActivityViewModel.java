@@ -9,12 +9,12 @@ import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
 
 import com.example.expensetracker.Database.CategoryRepository;
+import com.example.expensetracker.Database.TransactionRepository;
 import com.example.expensetracker.Events.EventMessage;
 import com.example.expensetracker.Model.CategoryClass;
 import com.example.expensetracker.Model.TotalAmountClass;
 import com.example.expensetracker.Model.TotalExpenseIncomeClass;
 import com.example.expensetracker.Model.TransactionClass;
-import com.example.expensetracker.Database.TransactionRepository;
 import com.example.expensetracker.Utilities.Constants;
 import com.google.android.material.chip.Chip;
 
@@ -202,6 +202,10 @@ public class AddActivityViewModel extends ViewModel {
 
     public void deleteSingleTransaction(TransactionClass transactionClass){
         transactionRepository.delete(transactionClass);
+    }
+
+    public LiveData<List<TransactionClass>> getAllTransactionsForDate(Long date){
+        return transactionRepository.getAllTransactionsForDate(date);
     }
 
 }

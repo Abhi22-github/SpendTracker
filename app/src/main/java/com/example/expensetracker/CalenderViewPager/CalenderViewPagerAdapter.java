@@ -13,14 +13,18 @@ import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.fragment.app.FragmentTransaction;
 import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.Observer;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.PagerAdapter;
 
+import com.example.expensetracker.Activity.MainActivity;
+import com.example.expensetracker.Fragments.DayDetailsFragment;
 import com.example.expensetracker.Model.Day;
 import com.example.expensetracker.Model.TotalExpenseIncomeClass;
 import com.example.expensetracker.R;
@@ -150,6 +154,20 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
                 relativeLayoutIncomeBox.setVisibility(View.VISIBLE);
             }
         }
+
+        itemLayout.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                try {
+                    FragmentTransaction fragmentTransaction = ((MainActivity) context).getSupportFragmentManager().beginTransaction();
+                    fragmentTransaction.replace(R.id.frameLayout_fragment_mainActivity,new DayDetailsFragment());
+                    fragmentTransaction.addToBackStack("DayDetails");
+                    fragmentTransaction.commit();
+                } catch (ClassCastException e) {
+                    Toast.makeText(context,"Can't get fragment Manager"+e.toString(),Toast.LENGTH_SHORT).show();
+                }
+            }
+        });
     }
 
     //calculate the days in month

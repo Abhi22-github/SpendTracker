@@ -49,6 +49,10 @@ public class TransactionRepository {
         return transactionDao.getListOfTotalAmountPerDayForRange(startDate, endDate);
     }
 
+    public LiveData<List<TransactionClass>> getAllTransactionsForDate(Long date){
+        return transactionDao.getAllTransactionsForDate(date);
+    }
+
     // below is the method to delete all the courses. 
     public void deleteAllTransaction() {
         new DeleteAllCoursesAsyncTask(transactionDao).execute();
