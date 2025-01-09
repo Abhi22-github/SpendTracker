@@ -45,6 +45,8 @@ class DayViewFragment : Fragment() {
             binding.viewPagerCalenderDayFragment.setCurrentItem(250-it, true)
         })
 
+        binding.tabLayoutDayDayView.setupWithViewPager(binding.viewPagerCalenderDayFragment)
+
     }
 
 

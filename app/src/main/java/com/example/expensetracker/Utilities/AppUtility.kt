@@ -24,6 +24,10 @@ fun LocalDateToLong( localDate: LocalDate):Long{
     return localDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")).toLong()
 }
 
+fun LocalDateToString( localDate: LocalDate):String{
+    return localDate.format(DateTimeFormatter.ofPattern("dd MMM")).toString()
+}
+
 fun parseAmount(amount:Long):String{
     val formatter = DecimalFormat("##,##,##,###")
     return  formatter.format(amount)

@@ -15,6 +15,7 @@ import androidx.viewpager.widget.PagerAdapter
 import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.R
 import com.example.expensetracker.Utilities.LocalDateToLong
+import com.example.expensetracker.Utilities.LocalDateToString
 import com.example.expensetracker.ViewModels.AddActivityViewModel
 import java.time.LocalDate
 
@@ -92,6 +93,11 @@ class DayViewPagerAdapter(
 
         return view
     }
+
+    override fun getPageTitle(position: Int): CharSequence {
+       return LocalDateToString(getDateByPagerPosition(position))
+    }
+
 
     private fun onCreateView(parent: ViewGroup): View {
         val inflater = LayoutInflater.from(parent.context)
