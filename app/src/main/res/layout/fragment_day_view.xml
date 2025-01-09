@@ -7,12 +7,7 @@
     android:orientation="vertical"
     tools:context=".Fragments.DayViewFragment">
 
-    <androidx.core.widget.NestedScrollView
-        android:id="@+id/nestedScrollView_scrollView_dayFragment"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:fillViewport="true"
-        android:visibility="visible">
+
 
         <androidx.coordinatorlayout.widget.CoordinatorLayout
             android:layout_width="match_parent"
@@ -20,7 +15,7 @@
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
+                android:layout_height="match_parent"
                 android:orientation="vertical">
 
                 <com.google.android.material.tabs.TabLayout
@@ -33,6 +28,7 @@
                     app:tabIndicatorColor="@null"
                     app:tabIndicatorFullWidth="true"
                     app:tabIndicatorGravity="stretch"
+                    app:tabMaxWidth="65dp"
                     app:tabMode="scrollable" />
 
                 <LinearLayout
@@ -134,12 +130,16 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:background="@color/white"
+                    android:visibility="gone" />
+
+                <androidx.viewpager2.widget.ViewPager2
+                    android:id="@+id/viewPager2_calender_DayFragment"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
                     android:visibility="visible" />
             </LinearLayout>
 
 
         </androidx.coordinatorlayout.widget.CoordinatorLayout>
-    </androidx.core.widget.NestedScrollView>
-
 
 </FrameLayout>
