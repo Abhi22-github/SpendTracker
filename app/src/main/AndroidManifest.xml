@@ -13,6 +13,9 @@
         android:theme="@style/Theme.ExpenseTracker"
         tools:targetApi="31">
         <activity
+            android:name=".Activity.SettingsActivity"
+            android:exported="false" />
+        <activity
             android:name=".Activity.ExpenseCategoryActivity"
             android:exported="false" />
         <activity

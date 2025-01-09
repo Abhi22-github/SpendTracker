@@ -145,6 +145,7 @@ public class MainActivity extends AppCompatActivity {
                     sendUserToIncomeCategoryActivity();
                     navigationView.setCheckedItem(R.id.item_listView_sideNavigation);
                 } else if (menuID == R.id.item_settings_sideNavigation) {
+                    sendUserToSettingsActivity();
                     navigationView.setCheckedItem(R.id.item_listView_sideNavigation);
                 } else if (menuID == R.id.item_analyze_sideNavigation) {
                     navigationView.setCheckedItem(R.id.item_listView_sideNavigation);
@@ -218,11 +219,16 @@ public class MainActivity extends AppCompatActivity {
     private void sendUserToExpenseCategoryActivity() {
         Intent intent = new Intent(context, ExpenseCategoryActivity.class);
         startActivity(intent);
-        MainActivity.this.overridePendingTransition(android.R.anim.fade_in, 0);
+        //MainActivity.this.overridePendingTransition(android.R.anim.fade_in, 0);
     }
 
     private void sendUserToIncomeCategoryActivity() {
         Intent intent = new Intent(context, IncomeCategoryActivity.class);
+        startActivity(intent);
+    }
+
+    private void sendUserToSettingsActivity() {
+        Intent intent = new Intent(context, SettingsActivity.class);
         startActivity(intent);
     }
 
