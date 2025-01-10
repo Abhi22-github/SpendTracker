@@ -26,4 +26,7 @@ public class Constants {
     public final static int categoryIcon17 = R.drawable.category_token_17;
     public final static int categoryIcon18 = R.drawable.category_heart_18;
 
+    public final static int MAX_PAGES = 500;
+    public final static int CURRENT_PAGE = 250;
+
 }

@@ -8,7 +8,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.expensetracker.CalenderViewPager.CalenderViewPagerAdapter
+import com.example.expensetracker.Utilities.Constants.CURRENT_PAGE
 import com.example.expensetracker.Utilities.getFirstAndLastDateOfGivenPeriod
+import com.example.expensetracker.Utilities.launchCoroutine
 import com.example.expensetracker.Utilities.parseAmount
 import com.example.expensetracker.ViewModels.AddActivityViewModel
 import com.example.expensetracker.databinding.FragmentMonthViewBinding
@@ -55,7 +57,8 @@ class MonthViewFragment : Fragment() {
     private fun setCalenderMonthViewPager() {
         val calenderViewPagerAdapter = CalenderViewPagerAdapter(context, viewModel)
         binding.viewPagerCalenderMonthFragment.setAdapter(calenderViewPagerAdapter)
-        binding.viewPagerCalenderMonthFragment.setCurrentItem(250, true)
+        launchCoroutine(binding.viewPagerCalenderMonthFragment.setCurrentItem(CURRENT_PAGE, false))
+
     }
 
 

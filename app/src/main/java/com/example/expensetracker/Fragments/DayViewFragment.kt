@@ -10,8 +10,8 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import com.example.expensetracker.CalenderViewPager.DayViewPager2Adapter
-import com.example.expensetracker.CalenderViewPager.DayViewPagerAdapter
 import com.example.expensetracker.R
+import com.example.expensetracker.Utilities.Constants.CURRENT_PAGE
 import com.example.expensetracker.ViewModels.AddActivityViewModel
 import com.example.expensetracker.databinding.FragmentDayViewBinding
 import com.google.android.material.tabs.TabLayout
@@ -43,18 +43,18 @@ class DayViewFragment : Fragment() {
     }
 
     private fun setCalenderDayViewPager() {
-        val onlyDayAdapter = context?.let { DayViewPagerAdapter(it, viewModel) }
-        binding.viewPagerCalenderDayFragment.setAdapter(onlyDayAdapter)
-        viewModel.currentSelectedDate.observe(context as LifecycleOwner, Observer {
-            binding.viewPagerCalenderDayFragment.setCurrentItem(250 - it, true)
-        })
-
-        binding.tabLayoutDayDayView.setupWithViewPager(binding.viewPagerCalenderDayFragment)
+//        val onlyDayAdapter = context?.let { DayViewPagerAdapter(it, viewModel) }
+//        binding.viewPagerCalenderDayFragment.setAdapter(onlyDayAdapter)
+//        viewModel.currentSelectedDate.observe(context as LifecycleOwner, Observer {
+//            binding.viewPagerCalenderDayFragment.setCurrentItem(250 - it, true)
+//        })
+//
+//        binding.tabLayoutDayDayView.setupWithViewPager(binding.viewPagerCalenderDayFragment)
 
         val onlyDayAdapter2 = context?.let { DayViewPager2Adapter(it, viewModel) }
         binding.viewPager2CalenderDayFragment.setAdapter(onlyDayAdapter2)
         viewModel.currentSelectedDate.observe(context as LifecycleOwner, Observer {
-            binding.viewPager2CalenderDayFragment.setCurrentItem(250 - it, false)
+            binding.viewPager2CalenderDayFragment.setCurrentItem(CURRENT_PAGE - it, false)
         })
 
         binding.tabLayoutDayDayView.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener{

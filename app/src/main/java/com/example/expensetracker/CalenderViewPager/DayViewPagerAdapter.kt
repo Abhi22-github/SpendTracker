@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.PagerAdapter
 import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.R
+import com.example.expensetracker.Utilities.Constants.CURRENT_PAGE
 import com.example.expensetracker.Utilities.LocalDateToLong
 import com.example.expensetracker.Utilities.LocalDateToString
 import com.example.expensetracker.ViewModels.AddActivityViewModel
@@ -54,7 +55,7 @@ class DayViewPagerAdapter(
                 if (it.size != 0) {
                     emptyMessageView.visibility = View.GONE
                     recyclerView.visibility = View.VISIBLE
-                    val adapter: OnlyDayAdapter = object : OnlyDayAdapter(context, it) {
+                    val adapter: OnlyDayAdapter = object : OnlyDayAdapter(context) {
                         override fun onBindViewHolder(
                             holder: RecyclerView.ViewHolder,
                             transactionClasses: MutableList<TransactionClass>,
@@ -139,7 +140,7 @@ class DayViewPagerAdapter(
 
     fun getDateByPagerPosition(position: Int): LocalDate {
         val date = LocalDate.now()
-        return date.plusDays(position.toLong() - 250)
+        return date.plusDays(position.toLong() - CURRENT_PAGE)
     }
 
     private fun setLayoutInCenter(view: View, centerInParent: Int) {

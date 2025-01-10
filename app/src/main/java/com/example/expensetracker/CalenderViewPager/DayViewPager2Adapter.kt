@@ -13,6 +13,8 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.R
+import com.example.expensetracker.Utilities.Constants.CURRENT_PAGE
+import com.example.expensetracker.Utilities.Constants.MAX_PAGES
 import com.example.expensetracker.Utilities.LocalDateToLong
 import com.example.expensetracker.ViewModels.AddActivityViewModel
 import java.time.LocalDate
@@ -23,7 +25,7 @@ class DayViewPager2Adapter(
     val viewModel: AddActivityViewModel,
 ) :
     RecyclerView.Adapter<DayViewPager2Adapter.ViewHolder>() {
-    val MAX_VALUE = 500
+    val MAX_VALUE = MAX_PAGES
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val view: View =
@@ -38,41 +40,43 @@ class DayViewPager2Adapter(
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         holder.recyclerView.layoutManager =
             LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
+        val adapter: OnlyDayAdapter = object : OnlyDayAdapter(context) {
+            override fun onBindViewHolder(
+                holder: RecyclerView.ViewHolder,
+                transactionClasses: MutableList<TransactionClass>,
+                position: Int
+            ) {
+                this@DayViewPager2Adapter.onBindView(
+                    holder.itemView,
+                    transactionClasses,
+                    position
+                )
+            }
+
+            override fun onCreateViewHolder(
+                parent: ViewGroup,
+                viewType: Int
+            ): RecyclerView.ViewHolder {
+                return object :
+                    RecyclerView.ViewHolder(
+                        this@DayViewPager2Adapter.onCreateView(
+                            parent
+                        )
+                    ) {}
+            }
+        }
+        holder.recyclerView.adapter = adapter
         viewModel.getAllTransactionsForDate(LocalDateToLong(getLocalDateByPagerPosition(position)))
             .observe(context as LifecycleOwner, Observer {
                 if (it.size != 0) {
                     holder.emptyMessageView.visibility = View.GONE
                     holder.recyclerView.visibility = View.VISIBLE
-                    val adapter: OnlyDayAdapter = object : OnlyDayAdapter(context, it) {
-                        override fun onBindViewHolder(
-                            holder: RecyclerView.ViewHolder,
-                            transactionClasses: MutableList<TransactionClass>,
-                            position: Int
-                        ) {
-                            this@DayViewPager2Adapter.onBindView(
-                                holder.itemView,
-                                transactionClasses,
-                                position
-                            )
-                        }
-
-                        override fun onCreateViewHolder(
-                            parent: ViewGroup,
-                            viewType: Int
-                        ): RecyclerView.ViewHolder {
-                            return object :
-                                RecyclerView.ViewHolder(
-                                    this@DayViewPager2Adapter.onCreateView(
-                                        parent
-                                    )
-                                ) {}
-                        }
-                    }
-                    holder.recyclerView.adapter = adapter
+                    adapter.updateData(it)
                 } else {
                     holder.emptyMessageView.visibility = View.VISIBLE
                     holder.recyclerView.visibility = View.GONE
                 }
+                adapter.notifyDataSetChanged()
             })
 
     }
@@ -113,7 +117,7 @@ class DayViewPager2Adapter(
 
     fun getLocalDateByPagerPosition(position: Int): LocalDate {
         val date = LocalDate.now()
-        return date.plusDays(position.toLong() - 250)
+        return date.plusDays(position.toLong() - CURRENT_PAGE)
     }
 
     fun getDayByPagerPosition(position: Int):String{

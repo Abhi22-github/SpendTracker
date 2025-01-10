@@ -16,14 +16,12 @@ public abstract class DaysOfMonthAdapter extends RecyclerView.Adapter<RecyclerVi
     private ArrayList<LocalDate> daysList;
     private HashMap<Long, Pair<Long,Long>> map;
 
-    DaysOfMonthAdapter(Context context, ArrayList<LocalDate> daysList, HashMap<Long, Pair<Long, Long>> map) {
+    DaysOfMonthAdapter(Context context, ArrayList<LocalDate> daysList) {
         this.context = context;
         this.daysList = daysList;
-        this.map = map;
     }
 
-    public void updateData(ArrayList<LocalDate> daysList,HashMap<Long, Pair<Long, Long>> map){
-        this.daysList = daysList;
+    public void updateData(HashMap<Long, Pair<Long, Long>> map){
         this.map = map;
     }
 

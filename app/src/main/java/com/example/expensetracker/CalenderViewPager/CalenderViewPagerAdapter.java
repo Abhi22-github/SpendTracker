@@ -5,6 +5,9 @@ import static com.example.expensetracker.Utilities.AppUtilityKt.LocalDateToLong;
 import static com.example.expensetracker.Utilities.AppUtilityKt.convertLocalDateToLong;
 import static com.example.expensetracker.Utilities.AppUtilityKt.convertTotalExpenseIncomeClassToMap;
 import static com.example.expensetracker.Utilities.AppUtilityKt.parseAmount;
+import static com.example.expensetracker.Utilities.Constants.CURRENT_PAGE;
+import static com.example.expensetracker.Utilities.Constants.MAX_PAGES;
+import static java.lang.Math.abs;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -45,7 +48,6 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
     private Context context;
     private LayoutInflater layoutInflater;
     private ViewGroup viewContainer = null;
-    private Integer MAX_VALUE;
     private LocalDate todayDate;
 
     private LocalDate selectedDate;
@@ -58,7 +60,6 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
     public CalenderViewPagerAdapter(Context context, AddActivityViewModel viewModel) {
         this.context = context;
         layoutInflater = LayoutInflater.from(context);
-        MAX_VALUE = 500;
         dateTimeFormatter = DateTimeFormatter.ofPattern("dd MMM yyyy");
         todayDate = LocalDate.now();
         this.viewModel = viewModel;
@@ -67,7 +68,7 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
 
     @Override
     public int getCount() {
-        return MAX_VALUE;
+        return MAX_PAGES;
     }
 
     @Override
@@ -83,27 +84,31 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
         RecyclerView recyclerView = new RecyclerView(context);
         recyclerView.setLayoutManager(new GridLayoutManager(context, 7));
 
+
+        //getting the current page month days in array
+        daysList = daysInMonthArray(position);
+        DaysOfMonthAdapter daysOfMonthAdapter = new DaysOfMonthAdapter(context, daysList) {
+            @Override
+            void onBindViewHolder(RecyclerView.ViewHolder holder, LocalDate date, HashMap<Long, Pair<Long, Long>> map) {
+                CalenderViewPagerAdapter.this.onBindView(holder.itemView, date, map);
+            }
+
+            @NonNull
+            @Override
+            public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+                return new RecyclerView.ViewHolder(CalenderViewPagerAdapter.this.onCreateView(parent, viewType)) {
+                };
+            }
+        };
+        recyclerView.setAdapter(daysOfMonthAdapter);
+
         daysList = daysInMonthArray(position);
         viewModel.getListOfTotalAmountPerDayForRange(LocalDateToLong(daysList.get(0)), LocalDateToLong(daysList.get(daysList.size()-1))).observe((LifecycleOwner) context, new Observer<List<TotalExpenseIncomeClass>>() {
             @Override
             public void onChanged(List<TotalExpenseIncomeClass> totalExpenseIncomeClasses) {
                 map = convertTotalExpenseIncomeClassToMap(totalExpenseIncomeClasses);
-                //getting the current page month days in array
-                daysList = daysInMonthArray(position);
-                DaysOfMonthAdapter daysOfMonthAdapter = new DaysOfMonthAdapter(context, daysList, map) {
-                    @Override
-                    void onBindViewHolder(RecyclerView.ViewHolder holder, LocalDate date, HashMap<Long, Pair<Long, Long>> map) {
-                        CalenderViewPagerAdapter.this.onBindView(holder.itemView, date, map);
-                    }
-
-                    @NonNull
-                    @Override
-                    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-                        return new RecyclerView.ViewHolder(CalenderViewPagerAdapter.this.onCreateView(parent, viewType)) {
-                        };
-                    }
-                };
-                recyclerView.setAdapter(daysOfMonthAdapter);
+                daysOfMonthAdapter.updateData(map);
+                daysOfMonthAdapter.notifyDataSetChanged();
             }
         });
 
@@ -144,7 +149,7 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
             textViewDate.setTextColor(context.getResources().getColor(R.color.white, context.getTheme()));
         }
         textViewDate.setText(dateSplit[2]);
-        if (map.containsKey(convertLocalDateToLong(date))) {
+        if (map != null && map.containsKey(convertLocalDateToLong(date))) {
             if (Objects.requireNonNull(map.get(convertLocalDateToLong(date))).getFirst() != 0) {
                 textViewExpenseAmount.setText("-₹" + parseAmount(map.get(convertLocalDateToLong(date)).getFirst()));
                 relativeLayoutExpenseBox.setVisibility(View.VISIBLE);
@@ -174,13 +179,13 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
     //calculate the days in month
     public ArrayList<LocalDate> daysInMonthArray(Integer position) {
 
-        position = position - 250;
+        position = abs(position - CURRENT_PAGE);
 
         ArrayList<LocalDate> daysInMonthArray = new ArrayList<>();
         if (position > 0) {
             selectedDate = LocalDate.now().plusMonths(position).withDayOfMonth(15);
         } else if (position < 0) {
-            selectedDate = LocalDate.now().minusMonths(Math.abs(position)).withDayOfMonth(15);
+            selectedDate = LocalDate.now().minusMonths(position).withDayOfMonth(15);
         } else {
             selectedDate = LocalDate.now();
         }
@@ -222,11 +227,11 @@ public class CalenderViewPagerAdapter extends PagerAdapter {
             if (i < dayOfWeek) {
                 //prev months condition
                 //day.setDate(prevMonthSameDate.withDayOfMonth((Math.abs((i) - daysInPrevMonth))));
-                day.setDate(prevMonthSameDate.withDayOfMonth((Math.abs(daysInPrevMonth - Math.abs(dayOfWeek - (i + 1))))));
+                day.setDate(prevMonthSameDate.withDayOfMonth((abs(daysInPrevMonth - abs(dayOfWeek - (i + 1))))));
                 daysInMonthArray.add(day.getDate());
             } else if (i >= daysInMonth + dayOfWeek) {
                 //next month condition
-                day.setDate(nextMonthSameDate.withDayOfMonth(Math.abs((i + 1) - (daysInMonth + dayOfWeek))));
+                day.setDate(nextMonthSameDate.withDayOfMonth(abs((i + 1) - (daysInMonth + dayOfWeek))));
                 daysInMonthArray.add(day.getDate());
             } else if (i < daysInMonth + dayOfWeek) {
                 //current month condition

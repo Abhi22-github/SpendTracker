@@ -6,9 +6,12 @@ import com.example.expensetracker.Model.TransactionClass
 
 abstract class OnlyDayAdapter(
     val context: Context,
-    val transactionClasses: MutableList<TransactionClass>
 ): RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    var transactionClasses: MutableList<TransactionClass> = mutableListOf()
 
+    fun updateData(transactionClasses: MutableList<TransactionClass>){
+        this.transactionClasses = transactionClasses
+    }
     override fun getItemCount(): Int {
         return transactionClasses.size
     }
