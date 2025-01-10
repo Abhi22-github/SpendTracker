@@ -149,6 +149,7 @@ public class MainActivity extends AppCompatActivity {
                     navigationView.setCheckedItem(R.id.item_listView_sideNavigation);
                 } else if (menuID == R.id.item_analyze_sideNavigation) {
                     navigationView.setCheckedItem(R.id.item_listView_sideNavigation);
+                    sendUserToStatisticsActivity();
                 } else if (menuID == R.id.item_bankAccounts_sideNavigation) {
                     Toast.makeText(context, "manageBankAccounts", Toast.LENGTH_SHORT).show();
                 } else {
@@ -229,6 +230,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void sendUserToSettingsActivity() {
         Intent intent = new Intent(context, SettingsActivity.class);
+        startActivity(intent);
+    }
+    private void sendUserToStatisticsActivity() {
+        Intent intent = new Intent(context, StatisticsActivity.class);
         startActivity(intent);
     }
 

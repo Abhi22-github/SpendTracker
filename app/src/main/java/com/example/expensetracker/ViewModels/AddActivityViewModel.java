@@ -21,6 +21,7 @@ import com.google.android.material.chip.Chip;
 
 import org.greenrobot.eventbus.EventBus;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneId;
@@ -48,6 +49,11 @@ public class AddActivityViewModel extends ViewModel {
     private MutableLiveData<Integer> _currentSelectedDate;
     public LiveData<Integer> currentSelectedDate;
     public LocalDate todaysDate;
+    public MutableLiveData<BigDecimal> spend;
+    public MutableLiveData<Float> oldTotal;
+    public MutableLiveData<Float> newTotal;
+    public MutableLiveData<String> oldTotalString;
+    public MutableLiveData<String> newTotalString;
 
 
     AddActivityViewModel() {
@@ -58,6 +64,11 @@ public class AddActivityViewModel extends ViewModel {
         _currentSelectedDate = new MutableLiveData<>(0);
         currentSelectedDate = _currentSelectedDate;
         todaysDate = LocalDate.now();
+        spend = new MutableLiveData<>(BigDecimal.valueOf(1));
+        oldTotal = new MutableLiveData<>(1f);
+        newTotal = new MutableLiveData<>(1f);
+        oldTotalString = new MutableLiveData<>("");
+        newTotalString = new MutableLiveData<>("");
     }
 
     public void initializeDatabaseRepository(Application application) {

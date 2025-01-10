@@ -7,24 +7,40 @@
     android:layout_height="match_parent"
     tools:context=".Activity.SettingsActivity">
 
-    <com.google.android.material.appbar.AppBarLayout
-        android:id="@+id/appBarLayout_appBar_settingsActivity"
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:background="@android:color/white"
-        app:liftOnScroll="true"
-        app:liftOnScrollColor="@android:color/transparent"
-       >
+        android:layout_height="match_parent"
+        android:orientation="vertical">
 
-        <com.google.android.material.appbar.MaterialToolbar
-            android:id="@+id/toolbar_expenseCategoryToolbar_settingsActivity"
+        <com.google.android.material.appbar.AppBarLayout
+            android:id="@+id/appBarLayout_appBar_settingsActivity"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
-            android:elevation="30dp"
-            app:navigationIcon="@drawable/round_arrow_back"
-            app:titleTextAppearance="@style/toolbarTitleStyle" />
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:background="@android:color/white"
+            app:liftOnScroll="true"
+            app:liftOnScrollColor="@android:color/transparent">
 
-    </com.google.android.material.appbar.AppBarLayout>
+            <com.google.android.material.appbar.MaterialToolbar
+                android:id="@+id/toolbar_expenseCategoryToolbar_settingsActivity"
+                android:layout_width="match_parent"
+                android:layout_height="?attr/actionBarSize"
+                android:elevation="30dp"
+                app:navigationIcon="@drawable/round_arrow_back"
+                app:titleTextAppearance="@style/toolbarTitleStyle" />
+
+        </com.google.android.material.appbar.AppBarLayout>
+
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/compose_view"
+            android:layout_width="match_parent"
+            android:layout_height="120dp"
+            />
+
+<Button
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:id="@+id/button"/>
+    </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

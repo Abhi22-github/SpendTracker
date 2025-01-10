@@ -54,3 +54,5 @@ fun convertTotalExpenseIncomeClassToMap(totalExpenseIncomeClassList: List<TotalE
 fun convertLocalDateToLong(date:LocalDate):Long{
     return date.toString().replace("-","").toLong()
 }
+
+fun Float.clamp(min: Float, max: Float): Float = (1f - ((this.coerceIn(min, max) - min) / (max - min)))
