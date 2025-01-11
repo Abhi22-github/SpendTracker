@@ -16,7 +16,7 @@ enum class ThemeMode { LIGHT, NIGHT, SYSTEM }
 
 fun darkColorScheme(): ColorScheme {
     val palette = CorePalette.contentOf(colorSeed.toArgb())
-    
+
     return darkColorScheme(
         primary = Color(palette.a1.tone(80)),
         onPrimary = Color(palette.a1.tone(20)),
@@ -47,7 +47,7 @@ fun darkColorScheme(): ColorScheme {
         outline = Color(palette.n2.tone(60)),
         outlineVariant = Color(palette.n2.tone(50)), //
         scrim = Color(palette.n1.tone(30)), //
-    )
+        )
 }
 
 fun lightColorScheme(): ColorScheme {
@@ -96,7 +96,7 @@ fun isNightMode(): Boolean = when (ThemeMode.SYSTEM) {
 
 
 @Composable
-fun BuckwheatTheme(
+fun ExpenseTrackerTheme(
     darkTheme: Boolean = isNightMode(),
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit,
@@ -107,6 +107,7 @@ fun BuckwheatTheme(
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
+
         darkTheme -> darkColorScheme()
         else -> lightColorScheme()
     }

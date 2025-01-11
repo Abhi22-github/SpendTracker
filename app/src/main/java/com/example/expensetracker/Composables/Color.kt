@@ -12,6 +12,9 @@ val colorNotGood = Color(0xFFFABC20)
 val colorBad = Color(0xFFC70909)
 val colorMin = Color(0xFF185ED6)
 val colorMax = Color(0xFFDD1414)
+val greyBackground = Color(0xfff2f2f2)
+val greyTextColor = Color(0xFF616161)
+val successColor = Color(0xFF34A853)
 
 
 val colorBackground

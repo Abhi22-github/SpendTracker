@@ -12,8 +12,10 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.ViewModelProvider
+import com.example.expensetracker.Composables.ExpenseTrackerTheme
 import com.example.expensetracker.Composables.components.RestBudgetPill
 import com.example.expensetracker.Composables.components.SpendsBudgetCard
+import com.example.expensetracker.Composables.components.TransactionsListCompose
 import com.example.expensetracker.ViewModels.AddActivityViewModel
 
 class StatisticsActivity : ComponentActivity() {
@@ -25,24 +27,28 @@ class StatisticsActivity : ComponentActivity() {
         )
         viewModel.initializeDatabaseRepository(application)
         setContent {
-            val percent by viewModel.newTotal.observeAsState()
-            Column {
-                SpendsBudgetCard(
-                    modifier = Modifier.height(100.dp),
-                    budget = 1000f,
-                    spend = 50f,
-                    viewModel = viewModel
-                )
-                Button(onClick = { incrementSpend() }) {
+            ExpenseTrackerTheme {
+                val percent by viewModel.newTotal.observeAsState()
+                Column {
+                    SpendsBudgetCard(
+                        modifier = Modifier.height(100.dp),
+                        budget = 1000f,
+                        spend = 50f,
+                        viewModel = viewModel
+                    )
+                    Button(onClick = { incrementSpend() }) {
+                    }
+                    Row {
+                        RestBudgetPill(viewModel = viewModel)
+                    }
+                    TransactionsListCompose(viewModel = viewModel)
                 }
-                Row {
-                    RestBudgetPill(viewModel = viewModel)
-                }
-             
+
             }
         }
     }
-    fun incrementSpend(){
+
+    fun incrementSpend() {
         viewModel.newTotal.postValue((Math.random()).toFloat())
     }
 }

@@ -24,7 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
-import com.example.expensetracker.Composables.BuckwheatTheme
+import com.example.expensetracker.Composables.ExpenseTrackerTheme
 
 @Composable
 fun StatCard(
@@ -97,7 +97,7 @@ fun StatCard(
 @Preview
 @Composable
 private fun Preview() {
-    BuckwheatTheme {
+    ExpenseTrackerTheme {
         StatCard(
             value = "value",
             label = "label"

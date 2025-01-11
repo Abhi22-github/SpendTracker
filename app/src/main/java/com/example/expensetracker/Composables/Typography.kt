@@ -19,11 +19,12 @@ import androidx.compose.ui.text.font.FontVariation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.expensetracker.R
 
 fun typography(context: Context): Typography {
     fun getFont(weight: Int) = FontFamily(
         Font(
-            "font/manrope_variable.ttf", context.assets,
+            "manrope_variable.ttf", context.assets,
             variationSettings = FontVariation.Settings(
                 FontVariation.weight(weight),
             ),
@@ -56,41 +57,46 @@ fun typography(context: Context): Typography {
             fontSize = 24.sp
         ),
         titleLarge = TextStyle(
-            fontFamily = getFont(700),
+            fontFamily = getFont(600),
             fontSize = 22.sp
         ),
         titleMedium = TextStyle(
-            fontFamily = getFont(700),
+            fontFamily = getFont(600),
             fontSize = 16.sp
         ),
         titleSmall = TextStyle(
-            fontFamily = getFont(700),
+            fontFamily = getFont(600),
             fontSize = 14.sp
         ),
         bodyLarge = TextStyle(
-            fontFamily = getFont(700),
-            fontSize = 16.sp
+            fontFamily = getFont(500),
+            fontSize = 16.sp,
+            color = greyTextColor
         ),
         bodyMedium = TextStyle(
-            fontFamily = getFont(700),
-            fontSize = 14.sp
+            fontFamily = getFont(500),
+            fontSize = 14.sp,
+            color = greyTextColor
         ),
         bodySmall = TextStyle(
-            fontFamily = getFont(600),
-            fontSize = 14.sp
+            fontFamily = getFont(500),
+            fontSize = 14.sp,
+            color = greyTextColor
         ),
         labelLarge = TextStyle(
-            fontFamily = getFont(700),
-            fontSize = 14.sp
+            fontFamily = getFont(500),
+            fontSize = 14.sp, color = greyTextColor
         ),
         labelMedium = TextStyle(
-            fontFamily = getFont(700),
-            fontSize = 12.sp
+            fontFamily = getFont(500),
+            fontSize = 12.sp, color = greyTextColor
+
         ),
         labelSmall = TextStyle(
-            fontFamily = getFont(600),
-            fontSize = 11.sp
-        )
+            fontFamily = getFont(500),
+            fontSize = 11.sp,
+            color = greyTextColor
+        ),
     )
 }
 
@@ -108,10 +114,14 @@ fun FontCard(family: String, size: String, style: TextStyle) {
     }
 }
 
+object CustomFonts{
+    val numberFont = FontFamily(Font(R.font.googlesansmedium))
+}
+
 @Preview
 @Composable
 fun PreviewTypography() {
-    BuckwheatTheme {
+    ExpenseTrackerTheme {
         Surface {
             Row {
                 Column {
