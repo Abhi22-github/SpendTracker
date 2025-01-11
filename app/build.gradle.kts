@@ -2,12 +2,14 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
-
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
+    // Apply Hilt plugin
 }
-//apply(plugin = "kotlin-kapt")
+apply(plugin = "kotlin-kapt")
 //apply(plugin = "realm-android")
 
-apply(plugin="kotlin-android")
+apply(plugin = "kotlin-android")
 
 
 android {
@@ -65,13 +67,13 @@ dependencies {
     implementation(libs.ui.tooling.preview)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    implementation( libs.parkdatetimepicker)
+    implementation(libs.parkdatetimepicker)
     implementation(libs.flexbox)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     implementation(libs.kotlinx.coroutines.android)
     //add below dependancy for using room.
-    annotationProcessor(libs.androidx.room.compiler)
+    kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.core)
     implementation(libs.joda.time)
     implementation(libs.eventbus)
@@ -88,7 +90,8 @@ dependencies {
     implementation(libs.androidx.runtime)
     implementation(libs.androidx.runtime.livedata)
     //  implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:")
-
+    implementation("com.google.dagger:hilt-android:2.51.1")
+    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
 
 
 }

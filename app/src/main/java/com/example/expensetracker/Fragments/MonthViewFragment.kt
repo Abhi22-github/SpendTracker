@@ -15,6 +15,7 @@ import com.example.expensetracker.Utilities.parseAmount
 import com.example.expensetracker.ViewModels.AddActivityViewModel
 import com.example.expensetracker.databinding.FragmentMonthViewBinding
 
+
 class MonthViewFragment : Fragment() {
     private lateinit var binding: FragmentMonthViewBinding
     private lateinit var viewModel: AddActivityViewModel
@@ -30,10 +31,9 @@ class MonthViewFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity()).get<AddActivityViewModel>(
-            AddActivityViewModel::class.java
-        )
-        viewModel.initializeDatabaseRepository(requireActivity().application)
+
+        viewModel = ViewModelProvider(requireActivity()).get(AddActivityViewModel::class.java)
+
         binding.nestedScrollViewScrollViewMonthFragment.isFillViewport = true
 
         setCalenderMonthViewPager()
@@ -55,7 +55,7 @@ class MonthViewFragment : Fragment() {
     }
 
     private fun setCalenderMonthViewPager() {
-        val calenderViewPagerAdapter = CalenderViewPagerAdapter(context, viewModel)
+        val calenderViewPagerAdapter = CalenderViewPagerAdapter(requireContext(), viewModel)
         binding.viewPagerCalenderMonthFragment.setAdapter(calenderViewPagerAdapter)
         launchCoroutine(binding.viewPagerCalenderMonthFragment.setCurrentItem(CURRENT_PAGE, false))
 

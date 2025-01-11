@@ -6,9 +6,9 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
-import androidx.lifecycle.ViewModelProvider
 import com.example.expensetracker.CalenderViewPager.DayViewPager2Adapter
 import com.example.expensetracker.R
 import com.example.expensetracker.Utilities.Constants.CURRENT_PAGE
@@ -16,11 +16,12 @@ import com.example.expensetracker.ViewModels.AddActivityViewModel
 import com.example.expensetracker.databinding.FragmentDayViewBinding
 import com.google.android.material.tabs.TabLayout
 import com.google.android.material.tabs.TabLayoutMediator
+import dagger.hilt.android.AndroidEntryPoint
 
-
+@AndroidEntryPoint
 class DayViewFragment : Fragment() {
     private lateinit var binding: FragmentDayViewBinding
-    private lateinit var viewModel: AddActivityViewModel
+    private val viewModel: AddActivityViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -33,11 +34,6 @@ class DayViewFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        viewModel = ViewModelProvider(requireActivity()).get<AddActivityViewModel>(
-            AddActivityViewModel::class.java
-        )
-        viewModel.initializeDatabaseRepository(requireActivity().application)
-
         setCalenderDayViewPager()
 
     }
@@ -51,9 +47,9 @@ class DayViewFragment : Fragment() {
 //
 //        binding.tabLayoutDayDayView.setupWithViewPager(binding.viewPagerCalenderDayFragment)
 
-        val onlyDayAdapter2 = context?.let { DayViewPager2Adapter(it, viewModel) }
+        val onlyDayAdapter2 = DayViewPager2Adapter(requireActivity(), viewModel)
         binding.viewPager2CalenderDayFragment.setAdapter(onlyDayAdapter2)
-        viewModel.currentSelectedDate.observe(context as LifecycleOwner, Observer {
+        viewModel.currentSelectedDate.observe(requireActivity() as LifecycleOwner, Observer {
             binding.viewPager2CalenderDayFragment.setCurrentItem(CURRENT_PAGE - it, false)
         })
 

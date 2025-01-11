@@ -1,132 +1,112 @@
-package com.example.expensetracker;
+package com.example.expensetracker
 
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
+import android.widget.ImageButton
+import android.widget.TextView
+import androidx.fragment.app.viewModels
+import com.example.expensetracker.Events.EventMessage
+import com.example.expensetracker.Model.CategoryClass
+import com.example.expensetracker.Utilities.Constants
+import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.chip.Chip
+import com.google.android.material.textfield.TextInputEditText
+import com.google.android.material.textfield.TextInputLayout
+import dagger.hilt.android.AndroidEntryPoint
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
 
-import static com.example.expensetracker.Utilities.Constants.EXPENSE;
-import static com.example.expensetracker.Utilities.Constants.INCOME;
+@AndroidEntryPoint
+class AddCategoryBottomSheet(private val categoryClassFromActivity: CategoryClass) :
+    BottomSheetDialogFragment() {
+    private lateinit var cancelButton: ImageButton
+    private lateinit var textInputLayoutName: TextInputLayout
+    private lateinit var editTextName: TextInputEditText
+    private lateinit var materialButtonCreateButton: MaterialButton
+    private lateinit var chipExpense: Chip
+    private lateinit var chipIncome: Chip
+    private lateinit var textViewCategoryError: TextView
 
-import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.ImageButton;
-import android.widget.TextView;
+    private lateinit var view: View
+    private val viewModel: AddActivityViewModel by viewModels()
 
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.lifecycle.ViewModelProvider;
-
-import com.example.expensetracker.Events.EventMessage;
-import com.example.expensetracker.Model.CategoryClass;
-import com.example.expensetracker.Utilities.Constants;
-import com.example.expensetracker.ViewModels.AddActivityViewModel;
-import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.textfield.TextInputEditText;
-import com.google.android.material.textfield.TextInputLayout;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-
-public class AddCategoryBottomSheet extends BottomSheetDialogFragment {
-    private ImageButton cancelButton;
-    private TextInputLayout textInputLayoutName;
-    private TextInputEditText editTextName;
-    private MaterialButton materialButtonCreateButton;
-    private Chip chipExpense, chipIncome;
-    private TextView textViewCategoryError;
-
-    private View view;
-    private AddActivityViewModel viewModel;
-    private CategoryClass categoryClassFromActivity;
-
-    public AddCategoryBottomSheet(CategoryClass categoryClass) {
-        categoryClassFromActivity = categoryClass;
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        view = inflater.inflate(R.layout.add_category_bottom_sheet_layout, container, false);
-
-        //initializing the view model
-        viewModel = new ViewModelProvider(this).get(AddActivityViewModel.class);
-        viewModel.initializeDatabaseRepository(getActivity().getApplication());
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View? {
+        view = inflater.inflate(R.layout.add_category_bottom_sheet_layout, container, false)
 
         //to initialize the view
-        initView();
+        initView()
 
-        setUpViews();
+        setUpViews()
 
         //validate the filled data when create button clicked
-        materialButtonCreateButton.setOnClickListener(v -> validateData());
+        materialButtonCreateButton.setOnClickListener { v: View? -> validateData() }
 
-        cancelButton.setOnClickListener(v -> dismiss());
+        cancelButton.setOnClickListener { v: View? -> dismiss() }
 
-        editTextName.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+        editTextName.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
             }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
             }
 
-            @Override
-            public void afterTextChanged(Editable s) {
-                textInputLayoutName.setError("");
-
+            override fun afterTextChanged(s: Editable) {
+                textInputLayoutName.error = ""
             }
-        });
+        })
 
-        return view;
+        return view
     }
 
-    private void setUpViews() {
+    private fun setUpViews() {
         if (categoryClassFromActivity.categoryName != null) {
-            editTextName.setText(categoryClassFromActivity.categoryName);
+            editTextName.setText(categoryClassFromActivity.categoryName)
         }
-         /*
+        /*
         we will disable functionality to choose between expense and income based on the activity
         from where the bottom sheet is called
          */
-        categoryChipsStateManage();
+        categoryChipsStateManage()
     }
 
-    private void initView() {
-        cancelButton = view.findViewById(R.id.imageButton_cancel_bottomSheet);
-        textInputLayoutName = view.findViewById(R.id.editTextLayout_name_bottomSheet);
-        editTextName = view.findViewById(R.id.editText_name_bottomSheet);
-        materialButtonCreateButton = view.findViewById(R.id.button_saveButton_bottomSheet);
+    private fun initView() {
+        cancelButton = view.findViewById(R.id.imageButton_cancel_bottomSheet)
+        textInputLayoutName = view.findViewById(R.id.editTextLayout_name_bottomSheet)
+        editTextName = view.findViewById(R.id.editText_name_bottomSheet)
+        materialButtonCreateButton = view.findViewById(R.id.button_saveButton_bottomSheet)
 
-        chipExpense = view.findViewById(R.id.chip_expense_bottomSheet);
-        chipIncome = view.findViewById(R.id.chip_income_bottomSheet);
-        textViewCategoryError = view.findViewById(R.id.textview_categoryError_bottomSheet);
+        chipExpense = view.findViewById(R.id.chip_expense_bottomSheet)
+        chipIncome = view.findViewById(R.id.chip_income_bottomSheet)
+        textViewCategoryError = view.findViewById(R.id.textview_categoryError_bottomSheet)
     }
 
-    private void validateData() {
-        String categoryName = editTextName.getText().toString();
-        String categoryType = "";
-        if (chipExpense.isChecked()) {
-            categoryType = EXPENSE;
-        } else if (chipIncome.isChecked()) {
-            categoryType = INCOME;
+    private fun validateData() {
+        val categoryName = editTextName.text.toString()
+        var categoryType = ""
+        if (chipExpense.isChecked) {
+            categoryType = Constants.EXPENSE
+        } else if (chipIncome.isChecked) {
+            categoryType = Constants.INCOME
         }
-        categoryClassFromActivity.categoryName = categoryName;
-        categoryClassFromActivity.categoryType = categoryType;
-        categoryClassFromActivity.categoryIconNumber = 1;
-        categoryClassFromActivity.categoryColorNumber = 1;
-        viewModel.validateCategoryData(categoryClassFromActivity);
-
-
+        categoryClassFromActivity.categoryName = categoryName
+        categoryClassFromActivity.categoryType = categoryType
+        categoryClassFromActivity.categoryIconNumber = 1
+        categoryClassFromActivity.categoryColorNumber = 1
+        viewModel.validateCategoryData(categoryClassFromActivity)
     }
 
     @Subscribe
-    public void EventBusHandler(EventMessage eventMessage) {
+    fun EventBusHandler(eventMessage: EventMessage) {
         /*
          codes
            1 -> error (category name provided is empty)
@@ -134,40 +114,38 @@ public class AddCategoryBottomSheet extends BottomSheetDialogFragment {
            3 -> success (dismiss the bottom sheet)
          */
         if (eventMessage.getEventCode() == 1 || eventMessage.getEventCode() == 12) {
-            textInputLayoutName.setError(eventMessage.getMessage());
+            textInputLayoutName.error = eventMessage.getMessage()
         }
         if (eventMessage.getEventCode() == 2) {
-            textViewCategoryError.setText(eventMessage.getMessage());
-            textViewCategoryError.setVisibility(View.VISIBLE);
+            textViewCategoryError.text = eventMessage.getMessage()
+            textViewCategoryError.visibility = View.VISIBLE
         }
         if (eventMessage.getEventCode() == 3) {
-            dismiss();
+            dismiss()
         }
     }
 
-    @Override
-    public void onStart() {
-        super.onStart();
-        EventBus.getDefault().register(this);
+    override fun onStart() {
+        super.onStart()
+        EventBus.getDefault().register(this)
     }
 
-    @Override
-    public void onStop() {
-        EventBus.getDefault().unregister(this);
-        super.onStop();
+    override fun onStop() {
+        EventBus.getDefault().unregister(this)
+        super.onStop()
     }
 
-    private void categoryChipsStateManage() {
-        if (EXPENSE.equals(categoryClassFromActivity.categoryType)) {
-            chipIncome.setEnabled(false);
-            chipExpense.setChecked(true);
-        } else if (INCOME.equals(categoryClassFromActivity.categoryType)) {
-            chipExpense.setEnabled(false);
-            chipIncome.setChecked(true);
+    private fun categoryChipsStateManage() {
+        if (Constants.EXPENSE == categoryClassFromActivity.categoryType) {
+            chipIncome.isEnabled = false
+            chipExpense.isChecked = true
+        } else if (Constants.INCOME == categoryClassFromActivity.categoryType) {
+            chipExpense.isEnabled = false
+            chipIncome.isChecked = true
         } else {
-            chipExpense.setEnabled(true);
-            chipExpense.setChecked(true);
-            chipIncome.setEnabled(true);
+            chipExpense.isEnabled = true
+            chipExpense.isChecked = true
+            chipIncome.isEnabled = true
         }
     }
 }

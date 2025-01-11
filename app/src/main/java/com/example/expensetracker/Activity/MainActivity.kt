@@ -8,10 +8,10 @@ import android.os.Handler
 import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
 import androidx.fragment.app.FragmentTransaction
-import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.viewpager.widget.ViewPager
 import com.example.expensetracker.Adapters.TransactionViewAdapter
@@ -28,9 +28,11 @@ import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
+import dagger.hilt.android.AndroidEntryPoint
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private val appBarConfiguration: AppBarConfiguration? = null
     private var binding: ActivityMainBinding? = null
@@ -39,7 +41,7 @@ class MainActivity : AppCompatActivity() {
 
     private var context: Context? = null
     private val transactionViewAdapter: TransactionViewAdapter? = null
-    private var viewModel: AddActivityViewModel? = null
+    private val viewModel: AddActivityViewModel by viewModels()
     private var drawerLayout: DrawerLayout? = null
     private var appBarLayout: AppBarLayout? = null
     private var toolbar: MaterialToolbar? = null
@@ -59,10 +61,6 @@ class MainActivity : AppCompatActivity() {
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding!!.root)
-        viewModel = ViewModelProvider(this).get(
-            AddActivityViewModel::class.java
-        )
-        viewModel!!.initializeDatabaseRepository(application)
 
         // method to initialize vars
         initVars()
@@ -193,7 +191,7 @@ class MainActivity : AppCompatActivity() {
                 categoryClassesList.add(categoryClassObject)
             }
 
-            viewModel!!.fillCategoriesInDatabase(categoryClassesList)
+            viewModel.fillCategoriesInDatabase(categoryClassesList)
 
             val editor = sharedPreferences!!.edit()
             editor.putInt(Constants.sharedPreferenceOneTimeCheckKey, 1)

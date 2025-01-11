@@ -1,247 +1,224 @@
-package com.example.expensetracker.Activity;
+package com.example.expensetracker.Activity
 
-import static com.example.expensetracker.Utilities.AppUtilityKt.parseAmount;
+import android.content.Context
+import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
+import android.util.Log
+import android.view.View
+import android.widget.ImageButton
+import android.widget.RelativeLayout
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.RecyclerView
+import com.example.expensetracker.Adapters.CategoryExpenseViewChipAdapter
+import com.example.expensetracker.Adapters.CategoryIncomeViewChipAdapter
+import com.example.expensetracker.Events.EventMessage
+import com.example.expensetracker.Model.CategoryClass
+import com.example.expensetracker.R
+import com.example.expensetracker.Utilities.Constants
+import com.example.expensetracker.Utilities.parseAmount
+import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.google.android.flexbox.FlexDirection
+import com.google.android.flexbox.FlexWrap
+import com.google.android.flexbox.FlexboxLayoutManager
+import com.google.android.flexbox.JustifyContent
+import com.google.android.material.button.MaterialButton
+import com.google.android.material.button.MaterialButtonToggleGroup
+import com.google.android.material.chip.Chip
+import com.google.android.material.datepicker.MaterialDatePicker
+import com.google.android.material.snackbar.Snackbar
+import com.google.android.material.textfield.TextInputEditText
+import dagger.hilt.android.AndroidEntryPoint
+import org.greenrobot.eventbus.EventBus
+import org.greenrobot.eventbus.Subscribe
+import java.text.SimpleDateFormat
+import java.util.Date
 
-import android.content.Context;
-import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
-import android.view.View;
-import android.widget.ImageButton;
-import android.widget.RelativeLayout;
-
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.RecyclerView;
-
-import com.example.expensetracker.Adapters.CategoryExpenseViewChipAdapter;
-import com.example.expensetracker.Adapters.CategoryIncomeViewChipAdapter;
-import com.example.expensetracker.Events.EventMessage;
-import com.example.expensetracker.Model.CategoryClass;
-import com.example.expensetracker.R;
-import com.example.expensetracker.Utilities.Constants;
-import com.example.expensetracker.ViewModels.AddActivityViewModel;
-import com.google.android.flexbox.FlexDirection;
-import com.google.android.flexbox.FlexWrap;
-import com.google.android.flexbox.FlexboxLayoutManager;
-import com.google.android.flexbox.JustifyContent;
-import com.google.android.material.button.MaterialButton;
-import com.google.android.material.button.MaterialButtonToggleGroup;
-import com.google.android.material.chip.Chip;
-import com.google.android.material.datepicker.MaterialDatePicker;
-import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
-import com.google.android.material.snackbar.Snackbar;
-import com.google.android.material.textfield.TextInputEditText;
-
-import org.greenrobot.eventbus.EventBus;
-import org.greenrobot.eventbus.Subscribe;
-
-import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-
-public class AddActivity extends AppCompatActivity implements View.OnClickListener {
-
+@AndroidEntryPoint
+class AddActivity : AppCompatActivity(), View.OnClickListener {
     // views
-    private TextInputEditText editTextAmount, editTextAddNote, editTextDate;
-    private ImageButton imageButtonBackButton;
-    private RecyclerView recyclerViewLayoutCategoryExpense, recyclerViewLayoutCategoryIncome;
-    private MaterialButton expenseButton, incomeButton, saveButton;
-    private RelativeLayout mainLayout;
-    private CategoryExpenseViewChipAdapter categoryExpenseViewChipAdapter;
-    private CategoryIncomeViewChipAdapter categoryIncomeViewChipAdapter;
-    private MaterialButtonToggleGroup toggleGroupCategory;
+    private lateinit var editTextAmount: TextInputEditText
+    private lateinit var editTextAddNote: TextInputEditText
+    private lateinit var editTextDate: TextInputEditText
+    private lateinit var imageButtonBackButton: ImageButton
+    private lateinit var recyclerViewLayoutCategoryExpense: RecyclerView
+    private lateinit var recyclerViewLayoutCategoryIncome: RecyclerView
+    private lateinit var expenseButton: MaterialButton
+    private lateinit var incomeButton: MaterialButton
+    private lateinit var saveButton: MaterialButton
+    private lateinit var mainLayout: RelativeLayout
+    private lateinit var categoryExpenseViewChipAdapter: CategoryExpenseViewChipAdapter
+    private lateinit var categoryIncomeViewChipAdapter: CategoryIncomeViewChipAdapter
+    private lateinit var toggleGroupCategory: MaterialButtonToggleGroup
 
 
     //vars
-    private String[] chipsName;
-    private List<Chip> chipsList;
-    private AddActivityViewModel viewModel;
-    private Context mContext;
-    SimpleDateFormat simpleDateFormat;
-    private List<CategoryClass> categoryClassList;
+    private lateinit var chipsList: List<Chip>
+    private val viewModel: AddActivityViewModel by viewModels()
+    private lateinit var mContext: Context
+    lateinit var simpleDateFormat: SimpleDateFormat
+    private lateinit var categoryClassList: List<CategoryClass>
 
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add);
-        viewModel = new ViewModelProvider(this).get(AddActivityViewModel.class);
-        viewModel.initializeDatabaseRepository(getApplication());
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_add)
 
-        initVars();
+        initVars()
 
-        initView();
+        initView()
 
 
-        editTextAmount.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
+        editTextAmount.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence, start: Int, count: Int, after: Int) {
             }
 
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-
+            override fun onTextChanged(s: CharSequence, start: Int, before: Int, count: Int) {
             }
 
-            @Override
-            public void afterTextChanged(Editable s) {
-                editTextAmount.removeTextChangedListener(this);
+            override fun afterTextChanged(s: Editable) {
+                editTextAmount.removeTextChangedListener(this)
 
                 try {
-                    String givenstring = s.toString();
-                    Long longval;
+                    var givenstring = s.toString()
+                    var longval: Long
                     if (givenstring.contains(",")) {
-                        givenstring = givenstring.replaceAll(",", "");
+                        givenstring = givenstring.replace(",".toRegex(), "")
                     }
-                    String amount = parseAmount(Long.parseLong(givenstring));
-                    editTextAmount.setText(amount);
-                    editTextAmount.setSelection(editTextAmount.getText().length());
-                } catch (NumberFormatException nfe) {
-                    nfe.printStackTrace();
-                } catch (Exception e) {
-                    e.printStackTrace();
+                    val amount = parseAmount(givenstring.toLong())
+                    editTextAmount.setText(amount)
+                    editTextAmount.text?.let { editTextAmount.setSelection(it.length) }
+                } catch (nfe: NumberFormatException) {
+                    nfe.printStackTrace()
+                } catch (e: Exception) {
+                    e.printStackTrace()
                 }
 
-                editTextAmount.addTextChangedListener(this);
+                editTextAmount.addTextChangedListener(this)
             }
-        });
+        })
 
-        expenseButton.setChecked(true);
+        expenseButton.isChecked = true
 
-        recyclerViewLayoutCategoryExpense.setVisibility(View.VISIBLE);
-        recyclerViewLayoutCategoryIncome.setVisibility(View.GONE);
+        recyclerViewLayoutCategoryExpense.visibility = View.VISIBLE
+        recyclerViewLayoutCategoryIncome.visibility = View.GONE
 
-        toggleGroupCategory.addOnButtonCheckedListener(new MaterialButtonToggleGroup.OnButtonCheckedListener() {
-            @Override
-            public void onButtonChecked(MaterialButtonToggleGroup group, int checkedId, boolean isChecked) {
-                if (checkedId == R.id.toggleButton_expenseButton_addActivity && isChecked) {
-                    Log.d("ToggleGroup", "Expense");
-                    viewModel.setTransactionTypeInViewModel(Constants.EXPENSE);
-                    recyclerViewLayoutCategoryExpense.setVisibility(View.VISIBLE);
-                    recyclerViewLayoutCategoryIncome.setVisibility(View.GONE);
+        toggleGroupCategory.addOnButtonCheckedListener { group, checkedId, isChecked ->
+            if (checkedId == R.id.toggleButton_expenseButton_addActivity && isChecked) {
+                Log.d("ToggleGroup", "Expense")
+                viewModel.setTransactionTypeInViewModel(Constants.EXPENSE)
+                recyclerViewLayoutCategoryExpense.visibility = View.VISIBLE
+                recyclerViewLayoutCategoryIncome.visibility = View.GONE
+            } else if (checkedId == R.id.toggleButton_incomeButton_addActivity && isChecked) {
+                Log.d("ToggleGroup", "Income")
+                viewModel.setTransactionTypeInViewModel(Constants.INCOME)
+                recyclerViewLayoutCategoryExpense.visibility = View.GONE
+                recyclerViewLayoutCategoryIncome.visibility = View.VISIBLE
+            }
+        }
 
-                } else if (checkedId == R.id.toggleButton_incomeButton_addActivity && isChecked) {
-                    Log.d("ToggleGroup", "Income");
-                    viewModel.setTransactionTypeInViewModel(Constants.INCOME);
-                    recyclerViewLayoutCategoryExpense.setVisibility(View.GONE);
-                    recyclerViewLayoutCategoryIncome.setVisibility(View.VISIBLE);
+        setUpCategoryRecyclerView()
+
+
+        imageButtonBackButton.setOnClickListener { v: View? -> onBackPressedDispatcher.onBackPressed() }
+
+        editTextDate.setOnClickListener { v: View? -> openCalender() }
+
+        saveButton.setOnClickListener(this)
+
+        editTextAmount.requestFocus()
+
+        viewModel.onlyExpenseCategoryNames.observe(
+            this,
+            object : Observer<List<CategoryClass>> {
+                override fun onChanged(value: List<CategoryClass>) {
+                    categoryExpenseViewChipAdapter =
+                        CategoryExpenseViewChipAdapter(this@AddActivity, value)
+                    recyclerViewLayoutCategoryExpense.adapter = categoryExpenseViewChipAdapter
                 }
+            })
+
+        viewModel.onlyIncomeCategoryNames.observe(this, object : Observer<List<CategoryClass>> {
+            override fun onChanged(value: List<CategoryClass>) {
+                categoryIncomeViewChipAdapter =
+                    CategoryIncomeViewChipAdapter(this@AddActivity, value)
+                recyclerViewLayoutCategoryIncome.adapter = categoryIncomeViewChipAdapter
             }
-        });
-
-        setUpCategoryRecyclerView();
-
-
-        imageButtonBackButton.setOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
-
-        editTextDate.setOnClickListener(v -> openCalender());
-
-        saveButton.setOnClickListener(this);
-
-        editTextAmount.requestFocus();
-
-        viewModel.getOnlyExpenseCategoryNames().observe(this, new Observer<List<CategoryClass>>() {
-            @Override
-            public void onChanged(List<CategoryClass> categoryClasses) {
-                categoryExpenseViewChipAdapter = new CategoryExpenseViewChipAdapter(AddActivity.this, categoryClasses);
-                recyclerViewLayoutCategoryExpense.setAdapter(categoryExpenseViewChipAdapter);
-            }
-        });
-
-        viewModel.getOnlyIncomeCategoryNames().observe(this, new Observer<List<CategoryClass>>() {
-            @Override
-            public void onChanged(List<CategoryClass> categoryClasses) {
-                categoryIncomeViewChipAdapter = new CategoryIncomeViewChipAdapter(AddActivity.this, categoryClasses);
-                recyclerViewLayoutCategoryIncome.setAdapter(categoryIncomeViewChipAdapter);
-            }
-        });
-
-
+        })
     }
 
-    private void initVars() {
-        simpleDateFormat = new SimpleDateFormat("dd/MM/yyyy ");
-        chipsList = new ArrayList<>();
-        categoryClassList = new ArrayList<>();
+    private fun initVars() {
+        simpleDateFormat = SimpleDateFormat("dd/MM/yyyy")
+        chipsList = ArrayList()
+        categoryClassList = ArrayList()
     }
 
-    private void initView() {
-        editTextAmount = findViewById(R.id.inputEditText_amount_addActivity);
-        editTextAmount.requestFocus();
+    private fun initView() {
+        editTextAmount = findViewById(R.id.inputEditText_amount_addActivity)
+        editTextAmount.requestFocus()
 
-        toggleGroupCategory = findViewById(R.id.toggleGroup_category_addActivity);
+        toggleGroupCategory = findViewById(R.id.toggleGroup_category_addActivity)
 
-        editTextAddNote = findViewById(R.id.inputEditText_addNote_addActivity);
-        imageButtonBackButton = findViewById(R.id.imageButton_back_addActivity);
+        editTextAddNote = findViewById(R.id.inputEditText_addNote_addActivity)
+        imageButtonBackButton = findViewById(R.id.imageButton_back_addActivity)
 
-        recyclerViewLayoutCategoryExpense = findViewById(R.id.recyclerView_categoryExpense_addActivity);
-        recyclerViewLayoutCategoryIncome = findViewById(R.id.recyclerView_categoryIncome_addActivity);
+        recyclerViewLayoutCategoryExpense =
+            findViewById(R.id.recyclerView_categoryExpense_addActivity)
+        recyclerViewLayoutCategoryIncome =
+            findViewById(R.id.recyclerView_categoryIncome_addActivity)
 
-        expenseButton = findViewById(R.id.toggleButton_expenseButton_addActivity);
-        incomeButton = findViewById(R.id.toggleButton_incomeButton_addActivity);
-        saveButton = findViewById(R.id.button_saveButton_addActivity);
-        mainLayout = findViewById(R.id.main);
+        expenseButton = findViewById(R.id.toggleButton_expenseButton_addActivity)
+        incomeButton = findViewById(R.id.toggleButton_incomeButton_addActivity)
+        saveButton = findViewById(R.id.button_saveButton_addActivity)
+        mainLayout = findViewById(R.id.main)
 
-        mContext = getApplicationContext();
+        mContext = applicationContext
 
-        editTextDate = findViewById(R.id.textInputEditText_date_addActivity);
+        editTextDate = findViewById(R.id.textInputEditText_date_addActivity)
         //set the text view date
-        editTextDate.setText(simpleDateFormat.format(new Date(viewModel.getSelectedDate())));
-
+        editTextDate.setText(simpleDateFormat.format(Date(viewModel.selectedDate)))
     }
 
-    private void setUpCategoryRecyclerView() {
-        FlexboxLayoutManager flexboxLayoutManagerExpense = new FlexboxLayoutManager(this, FlexDirection.ROW, FlexWrap.WRAP);
-        flexboxLayoutManagerExpense.setJustifyContent(JustifyContent.CENTER);
-        FlexboxLayoutManager flexboxLayoutManagerIncome = new FlexboxLayoutManager(this, FlexDirection.ROW, FlexWrap.WRAP);
-        flexboxLayoutManagerIncome.setJustifyContent(JustifyContent.CENTER);
-        recyclerViewLayoutCategoryExpense.setLayoutManager(flexboxLayoutManagerExpense);
-        recyclerViewLayoutCategoryIncome.setLayoutManager(flexboxLayoutManagerIncome);
+    private fun setUpCategoryRecyclerView() {
+        val flexboxLayoutManagerExpense =
+            FlexboxLayoutManager(this, FlexDirection.ROW, FlexWrap.WRAP)
+        flexboxLayoutManagerExpense.justifyContent = JustifyContent.CENTER
+        val flexboxLayoutManagerIncome =
+            FlexboxLayoutManager(this, FlexDirection.ROW, FlexWrap.WRAP)
+        flexboxLayoutManagerIncome.justifyContent = JustifyContent.CENTER
+        recyclerViewLayoutCategoryExpense.layoutManager = flexboxLayoutManagerExpense
+        recyclerViewLayoutCategoryIncome.layoutManager = flexboxLayoutManagerIncome
     }
 
 
-    private void openCalender() {
+    private fun openCalender() {
+        val datePicker = MaterialDatePicker.Builder.datePicker().setTitleText("")
+            .setSelection(viewModel.selectedDate)
+            .build()
 
-        MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker().setTitleText("")
-                .setSelection(viewModel.getSelectedDate())
-                .build();
+        datePicker.show(supportFragmentManager, "tag")
 
-        datePicker.show(getSupportFragmentManager(), "tag");
-
-        datePicker.addOnPositiveButtonClickListener(new MaterialPickerOnPositiveButtonClickListener<Long>() {
-            @Override
-            public void onPositiveButtonClick(Long selection) {
-
-                editTextDate.setText(simpleDateFormat.format(new Date(selection)));
-                viewModel.saveSelectedDate(selection);
-            }
-        });
-
-
+        datePicker.addOnPositiveButtonClickListener { selection ->
+            editTextDate.setText(simpleDateFormat.format(Date(selection)))
+            viewModel.saveSelectedDate(selection)
+        }
     }
 
-    @Override
-    public void onClick(View v) {
-        if (v.getId() == R.id.button_saveButton_addActivity) {
-            String amount = "";
-            if (!editTextAmount.getText().toString().isEmpty())
-                amount = editTextAmount.getText().toString().replace(",","");
+    override fun onClick(v: View) {
+        if (v.id == R.id.button_saveButton_addActivity) {
+            var amount = ""
+            if (!editTextAmount.text.toString().isEmpty()) amount =
+                editTextAmount.text.toString().replace(",", "")
 
-            String note = editTextAddNote.getText().toString();
-            viewModel.validateFormData(amount,note, mContext);
-
+            val note = editTextAddNote.text.toString()
+            viewModel.validateFormData(amount, note, mContext)
         }
     }
 
     @Subscribe
-    public void EventHandler(EventMessage eventMessage) {
+    fun EventHandler(eventMessage: EventMessage) {
         /*
          Codes
          4 -> Error (Amount can't be zero)
@@ -251,34 +228,32 @@ public class AddActivity extends AppCompatActivity implements View.OnClickListen
          8 -> get selected Income category text from category recycler view and update it on view model
          */
         if (eventMessage.getEventCode() == 4 || eventMessage.getEventCode() == 5) {
-            showSnackBar(eventMessage.getMessage());
+            showSnackBar(eventMessage.getMessage())
         }
         if (eventMessage.getEventCode() == 6) {
-            getOnBackPressedDispatcher().onBackPressed();
+            onBackPressedDispatcher.onBackPressed()
         }
         if (eventMessage.getEventCode() == 7) {
-            viewModel.storeCurrentExpenseSelectChip(eventMessage.getMessage());
+            viewModel.storeCurrentExpenseSelectChip(eventMessage.getMessage())
         }
         if (eventMessage.getEventCode() == 8) {
-            Log.d("Chips","EventBUs"+eventMessage.getMessage());
-            viewModel.storeCurrentIncomeSelectChip(eventMessage.getMessage());
+            Log.d("Chips", "EventBUs" + eventMessage.getMessage())
+            viewModel.storeCurrentIncomeSelectChip(eventMessage.getMessage())
         }
     }
 
-    private void showSnackBar(String message) {
-        Snackbar snackbar = Snackbar.make(mainLayout, message, Snackbar.LENGTH_SHORT);
-        snackbar.show();
+    private fun showSnackBar(message: String) {
+        val snackbar = Snackbar.make(mainLayout, message, Snackbar.LENGTH_SHORT)
+        snackbar.show()
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        EventBus.getDefault().register(this);
+    override fun onStart() {
+        super.onStart()
+        EventBus.getDefault().register(this)
     }
 
-    @Override
-    protected void onStop() {
-        EventBus.getDefault().unregister(this);
-        super.onStop();
+    override fun onStop() {
+        EventBus.getDefault().unregister(this)
+        super.onStop()
     }
 }

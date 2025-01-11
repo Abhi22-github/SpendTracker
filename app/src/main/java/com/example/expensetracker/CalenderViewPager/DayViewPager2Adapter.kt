@@ -43,7 +43,7 @@ class DayViewPager2Adapter(
         val adapter: OnlyDayAdapter = object : OnlyDayAdapter(context) {
             override fun onBindViewHolder(
                 holder: RecyclerView.ViewHolder,
-                transactionClasses: MutableList<TransactionClass>,
+                transactionClasses: List<TransactionClass>,
                 position: Int
             ) {
                 this@DayViewPager2Adapter.onBindView(
@@ -89,7 +89,7 @@ class DayViewPager2Adapter(
 
     private fun onBindView(
         itemView: View,
-        transactionClasses: MutableList<TransactionClass>,
+        transactionClasses: List<TransactionClass>,
         position: Int
     ) {
         val main = itemView.findViewById<LinearLayout>(R.id.main)

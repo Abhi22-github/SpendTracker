@@ -1,47 +1,38 @@
-package com.example.expensetracker.CalenderViewPager;
+package com.example.expensetracker.CalenderViewPager
 
-import android.content.Context;
+import android.content.Context
+import androidx.recyclerview.widget.RecyclerView
+import java.time.LocalDate
 
-import androidx.annotation.NonNull;
-import androidx.recyclerview.widget.RecyclerView;
+abstract class DaysOfMonthAdapter internal constructor(
+    private val context: Context,
+    private val daysList: ArrayList<LocalDate>
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+    private lateinit var map: HashMap<Long, Pair<Long, Long>>
 
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import kotlin.Pair;
-
-public abstract class DaysOfMonthAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
-    private Context context;
-    private ArrayList<LocalDate> daysList;
-    private HashMap<Long, Pair<Long,Long>> map;
-
-    DaysOfMonthAdapter(Context context, ArrayList<LocalDate> daysList) {
-        this.context = context;
-        this.daysList = daysList;
+    init {
+        map = hashMapOf()
     }
 
-    public void updateData(HashMap<Long, Pair<Long, Long>> map){
-        this.map = map;
+    fun updateData(map: HashMap<Long, Pair<Long, Long>>) {
+        this.map = map
     }
 
-    @Override
-    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
-        onBindViewHolder(holder, daysList.get(holder.getLayoutPosition()),map);
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        onBindViewHolder(holder, daysList[holder.layoutPosition], map)
     }
-
-
 
 
     //42 cell grid
-    @Override
-    public int getItemCount() {
-        return (7 * 6);
+    override fun getItemCount(): Int {
+        return (7 * 6)
     }
 
-    abstract void onBindViewHolder(RecyclerView.ViewHolder holder, LocalDate date, HashMap<Long, Pair<Long, Long>> map);
-
-
+    abstract fun onBindViewHolder(
+        holder: RecyclerView.ViewHolder,
+        date: LocalDate,
+        map: HashMap<Long, Pair<Long, Long>>
+    )
 }
 
 

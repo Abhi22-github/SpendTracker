@@ -1,98 +1,93 @@
-package com.example.expensetracker.Activity;
+package com.example.expensetracker.Activity
 
-import android.content.Context;
-import android.os.Bundle;
-import android.widget.ImageButton;
+import android.content.Context
+import android.os.Bundle
+import android.view.View
+import android.widget.ImageButton
+import androidx.activity.viewModels
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.Observer
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import com.example.expensetracker.Actions
+import com.example.expensetracker.Adapters.CategoryViewAdapter
+import com.example.expensetracker.AddCategoryBottomSheet
+import com.example.expensetracker.Model.CategoryClass
+import com.example.expensetracker.R
+import com.example.expensetracker.Utilities.Constants
+import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.floatingactionbutton.FloatingActionButton
+import dagger.hilt.android.AndroidEntryPoint
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
+@AndroidEntryPoint
+class IncomeCategoryActivity : AppCompatActivity(), Actions {
+    private var mContext: Context? = null
 
-import com.example.expensetracker.Actions;
-import com.example.expensetracker.Adapters.CategoryViewAdapter;
-import com.example.expensetracker.AddCategoryBottomSheet;
-import com.example.expensetracker.Model.CategoryClass;
-import com.example.expensetracker.R;
-import com.example.expensetracker.Utilities.Constants;
-import com.example.expensetracker.ViewModels.AddActivityViewModel;
-import com.google.android.material.appbar.MaterialToolbar;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
+    private val imageButtonBackButton: ImageButton? = null
+    private var fabAddCategory: FloatingActionButton? = null
+    private var recyclerViewCategoryExpense: RecyclerView? = null
+    private var categoryViewAdapter: CategoryViewAdapter? = null
 
-import java.util.List;
-
-public class IncomeCategoryActivity extends AppCompatActivity implements Actions {
-    private Context mContext;
-
-    private ImageButton imageButtonBackButton;
-    private FloatingActionButton fabAddCategory;
-    private RecyclerView recyclerViewCategoryExpense;
-    private CategoryViewAdapter categoryViewAdapter;
-    private AddActivityViewModel viewmodel;
-    private MaterialToolbar toolbarExpenseCategoryToolbar;
+    private val viewmodel: AddActivityViewModel by viewModels()
+    private lateinit var toolbarExpenseCategoryToolbar: MaterialToolbar
 
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_category);
-        //initializing the viewmodel and passing the application
-        viewmodel = new ViewModelProvider(this).get(AddActivityViewModel.class);
-        viewmodel.initializeDatabaseRepository(getApplication());
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_category)
+
+
 
         //initializing the vars
-        initVars();
+        initVars()
 
         //initializing the views
-        initView();
+        initView()
 
         //send user back to the previous activity on back icon pressed
-        toolbarExpenseCategoryToolbar.setNavigationOnClickListener(v ->getOnBackPressedDispatcher().onBackPressed() );
+        toolbarExpenseCategoryToolbar.setNavigationOnClickListener { v: View? -> onBackPressedDispatcher.onBackPressed() }
 
         //open the bottom sheet when user clicks on fab add button
-        fabAddCategory.setOnClickListener(v -> openBottomSheetModel());
+        fabAddCategory!!.setOnClickListener { v: View? -> openBottomSheetModel() }
 
         //set up the expense recycler view on observer live data
-        setUpCategoryExpenseRecyclerView();
-
+        setUpCategoryExpenseRecyclerView()
     }
 
-    private void initVars(){
-        mContext = this;
+    private fun initVars() {
+        mContext = this
     }
 
-    private void initView() {
-      //  imageButtonBackButton = findViewById(R.id.imageButton_back_categoryActivity);
-        fabAddCategory = findViewById(R.id.fab_addCategory_categoryActivity);
-        recyclerViewCategoryExpense = findViewById(R.id.recyclerView_categoryExpense_categoryActivity);
-        toolbarExpenseCategoryToolbar = findViewById(R.id.toolbar_expenseCategoryToolbar_expenseCategoryActivity);
-        toolbarExpenseCategoryToolbar.setTitle("Income Category");
+    private fun initView() {
+        //  imageButtonBackButton = findViewById(R.id.imageButton_back_categoryActivity);
+        fabAddCategory = findViewById(R.id.fab_addCategory_categoryActivity)
+        recyclerViewCategoryExpense =
+            findViewById(R.id.recyclerView_categoryExpense_categoryActivity)
+        toolbarExpenseCategoryToolbar =
+            findViewById(R.id.toolbar_expenseCategoryToolbar_expenseCategoryActivity)
+        toolbarExpenseCategoryToolbar.setTitle("Income Category")
     }
 
-    private void openBottomSheetModel(){
-        CategoryClass categoryClass = new CategoryClass();
-        categoryClass.categoryType = Constants.INCOME;
-        AddCategoryBottomSheet addCategoryBottomSheet = new AddCategoryBottomSheet(categoryClass);
-        addCategoryBottomSheet.show(getSupportFragmentManager(),"addCategory");
+    private fun openBottomSheetModel() {
+        val categoryClass = CategoryClass()
+        categoryClass.categoryType = Constants.INCOME
+        val addCategoryBottomSheet = AddCategoryBottomSheet(categoryClass)
+        addCategoryBottomSheet.show(supportFragmentManager, "addCategory")
     }
 
-    private void setUpCategoryExpenseRecyclerView(){
-        recyclerViewCategoryExpense.setLayoutManager(new LinearLayoutManager(this,LinearLayoutManager.VERTICAL,false));
-        viewmodel.getOnlyIncomeCategoryNames().observe(this, new Observer<List<CategoryClass>>() {
-            @Override
-            public void onChanged(List<CategoryClass> categoryClassList) {
-                categoryViewAdapter = new CategoryViewAdapter(mContext,categoryClassList);
-                recyclerViewCategoryExpense.setAdapter(categoryViewAdapter);
+    private fun setUpCategoryExpenseRecyclerView() {
+        recyclerViewCategoryExpense!!.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
+        viewmodel.onlyIncomeCategoryNames.observe(this, object : Observer<List<CategoryClass?>?> {
+            override fun onChanged(value: List<CategoryClass?>?) {
+                categoryViewAdapter = CategoryViewAdapter(mContext, value)
+                recyclerViewCategoryExpense!!.adapter = categoryViewAdapter
             }
-        });
-
+        })
     }
 
-    @Override
-    public void onDeleteCategory(@NonNull CategoryClass categoryClass) {
-        viewmodel.deleteCategoryFromDatabase(categoryClass);
+    override fun onDeleteCategory(categoryClass: CategoryClass) {
+        viewmodel.deleteCategoryFromDatabase(categoryClass)
     }
-
 }

@@ -3,6 +3,8 @@ agp = "8.5.2"
 commonsLang3 = "3.6"
 eventbus = "3.1.1"
 flexbox = "3.0.0"
+hiltAndroid = "2.49"
+hiltCompiler = "2.46.1"
 jodaTime = "2.10.10"
 junit = "4.13.2"
 junitVersion = "1.2.1"
@@ -36,6 +38,8 @@ androidx-runtime-livedata = { module = "androidx.compose.runtime:runtime-livedat
 commons-lang3 = { module = "org.apache.commons:commons-lang3", version.ref = "commonsLang3" }
 eventbus = { module = "org.greenrobot:eventbus", version.ref = "eventbus" }
 flexbox = { module = "com.google.android.flexbox:flexbox", version.ref = "flexbox" }
+hilt-android = { module = "com.google.dagger:hilt-android", version.ref = "hiltAndroid" }
+hilt-compiler = { module = "com.google.dagger:hilt-compiler", version.ref = "hiltCompiler" }
 joda-time = { module = "joda-time:joda-time", version.ref = "jodaTime" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 ext-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
@@ -65,4 +69,5 @@ ui-tooling-preview = { module = "androidx.compose.ui:ui-tooling-preview", versio
 android-application = { id = "com.android.application", version.ref = "agp" }
 jetbrains-kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+hilt-android = {id = "com.google.dagger.hilt.android", version.ref = "hiltAndroid" }
 
