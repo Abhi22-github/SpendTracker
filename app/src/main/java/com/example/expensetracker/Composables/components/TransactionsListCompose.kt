@@ -14,7 +14,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -28,10 +27,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.expensetracker.Composables.CustomFonts
+import com.example.expensetracker.Composables.failureColor
 import com.example.expensetracker.Composables.successColor
 import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.R
 import com.example.expensetracker.Utilities.Constants.EXPENSE
+import com.example.expensetracker.Utilities.getDateFromMillis
 import com.example.expensetracker.ViewModels.AddActivityViewModel
 
 @Composable
@@ -64,7 +65,7 @@ fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionCla
             if (item.type.equals(EXPENSE)) {
                 iconImage =R.drawable.icon_expense
                 amount = "-₹"+amount
-                amountColor = MaterialTheme.colorScheme.error
+                amountColor = failureColor
             } else {
                 iconImage =R.drawable.icon_income
                 amount = "+₹"+amount
@@ -91,8 +92,8 @@ fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionCla
                     style = typography.titleMedium
                 )
                 Text(
-                    text = item.category,
-                    style = typography.bodySmall
+                    text = getDateFromMillis(item.dateWithTime),
+                    style = typography.labelMedium
                 )
             }
 

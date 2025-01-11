@@ -1,12 +1,13 @@
 package com.example.expensetracker.Fragments
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import com.example.expensetracker.CalenderViewPager.DayViewPager2Adapter
@@ -21,7 +22,7 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class DayViewFragment : Fragment() {
     private lateinit var binding: FragmentDayViewBinding
-    private val viewModel: AddActivityViewModel by viewModels()
+    private val viewModel: AddActivityViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -50,6 +51,7 @@ class DayViewFragment : Fragment() {
         val onlyDayAdapter2 = DayViewPager2Adapter(requireActivity(), viewModel)
         binding.viewPager2CalenderDayFragment.setAdapter(onlyDayAdapter2)
         viewModel.currentSelectedDate.observe(requireActivity() as LifecycleOwner, Observer {
+            Log.d("val - ",it.toString())
             binding.viewPager2CalenderDayFragment.setCurrentItem(CURRENT_PAGE - it, false)
         })
 

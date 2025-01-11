@@ -7,15 +7,19 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
+import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.R
+import com.example.expensetracker.TransactionDetailBottomSheet
 import com.example.expensetracker.Utilities.Constants.CURRENT_PAGE
 import com.example.expensetracker.Utilities.Constants.MAX_PAGES
 import com.example.expensetracker.Utilities.LocalDateToLong
+import com.example.expensetracker.Utilities.getDateFromMillis
+import com.example.expensetracker.Utilities.parseAmount
 import com.example.expensetracker.ViewModels.AddActivityViewModel
 import java.time.LocalDate
 
@@ -83,7 +87,7 @@ class DayViewPager2Adapter(
 
     private fun onCreateView(parent: ViewGroup): View {
         val inflater = LayoutInflater.from(parent.context)
-        val view: View = inflater.inflate(R.layout.single_transaction_view_holder, parent, false)
+        val view: View = inflater.inflate(R.layout.single_transaction_view_holder_test, parent, false)
         return view
     }
 
@@ -97,13 +101,7 @@ class DayViewPager2Adapter(
         val amount = itemView.findViewById<TextView>(R.id.textView_amount_transactionViewHolder)
         val body =
             itemView.findViewById<RelativeLayout>(R.id.relativeLayout_singleEntry_transactionViewHolder)
-        val day = itemView.findViewById<TextView>(R.id.textView_day_transactionViewHolder)
         val date = itemView.findViewById<TextView>(R.id.textView_date_transactionViewHolder)
-        val dayDateView =
-            itemView.findViewById<LinearLayout>(R.id.linearLayout_dateDay_transactionViewHolder)
-        val circleBackground =
-            itemView.findViewById<RelativeLayout>(R.id.relativeLayout_circleBackground_transactionViewHolder)
-
 
         if (transactionClasses.size != 0) {
             try {
@@ -111,8 +109,51 @@ class DayViewPager2Adapter(
             } catch (e: Exception) {
 
             }
-
         }
+
+        // Expense/Income logic
+        if (transactionClasses.get(position).type.toString() == "Expense") {
+            amount.setText("-₹" + parseAmount(transactionClasses.get(position).getAmount()))
+            body.setBackground(
+                context.getResources().getDrawable(
+                    R.drawable.transaction_single_rectangle_background,
+                    context.getTheme()
+                )
+            )
+            amount.setTextColor(
+                context.getResources().getColor(R.color.red, context.getTheme())
+            )
+            body.getBackground()
+                .setTint(context.getResources().getColor(R.color.red, context.getTheme()))
+            body.getBackground().setAlpha(25)
+        } else {
+            amount.setText("+₹" + parseAmount(transactionClasses.get(position).getAmount()))
+            body.setBackground(
+                context.getResources().getDrawable(
+                    R.drawable.transaction_single_rectangle_background,
+                    context.getTheme()
+                )
+            )
+            amount.setTextColor(
+                context.getResources().getColor(R.color.green, context.getTheme())
+            )
+            body.getBackground()
+                .setTint(context.getResources().getColor(R.color.green, context.getTheme()))
+            body.getBackground().setAlpha(25)
+        }
+
+        date.text = getDateFromMillis(transactionClasses.get(position).dateWithTime)
+        note.text = transactionClasses.get(position).note
+
+
+        main.setOnClickListener(View.OnClickListener {
+            val transactionDetailBottomSheet =
+                TransactionDetailBottomSheet(transactionClasses.get(position))
+            transactionDetailBottomSheet.show(
+                (context as AppCompatActivity).supportFragmentManager,
+                "transactionDetails"
+            )
+        })
     }
 
     fun getLocalDateByPagerPosition(position: Int): LocalDate {

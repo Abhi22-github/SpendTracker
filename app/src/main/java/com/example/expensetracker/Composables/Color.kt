@@ -15,6 +15,7 @@ val colorMax = Color(0xFFDD1414)
 val greyBackground = Color(0xfff2f2f2)
 val greyTextColor = Color(0xFF616161)
 val successColor = Color(0xFF34A853)
+val failureColor = Color(0xFFEA4335)
 
 
 val colorBackground
