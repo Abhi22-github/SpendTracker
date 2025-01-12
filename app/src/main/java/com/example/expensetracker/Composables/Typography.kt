@@ -57,7 +57,7 @@ fun typography(context: Context): Typography {
             fontSize = 24.sp
         ),
         titleLarge = TextStyle(
-            fontFamily = getFont(600),
+            fontFamily = getFont(700),
             fontSize = 22.sp
         ),
         titleMedium = TextStyle(
@@ -69,33 +69,28 @@ fun typography(context: Context): Typography {
             fontSize = 14.sp
         ),
         bodyLarge = TextStyle(
-            fontFamily = getFont(500),
+            fontFamily = getFont(600),
             fontSize = 16.sp,
-            color = greyTextColor
         ),
         bodyMedium = TextStyle(
             fontFamily = getFont(500),
             fontSize = 14.sp,
-            color = greyTextColor
         ),
         bodySmall = TextStyle(
             fontFamily = getFont(500),
             fontSize = 14.sp,
-            color = greyTextColor
         ),
         labelLarge = TextStyle(
             fontFamily = getFont(500),
-            fontSize = 14.sp, color = greyTextColor
+            fontSize = 14.sp,
         ),
         labelMedium = TextStyle(
             fontFamily = getFont(500),
-            fontSize = 12.sp, color = greyTextColor
-
+            fontSize = 12.sp,
         ),
         labelSmall = TextStyle(
             fontFamily = getFont(500),
             fontSize = 11.sp,
-            color = greyTextColor
         ),
     )
 }

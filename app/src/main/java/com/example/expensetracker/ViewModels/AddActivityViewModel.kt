@@ -6,6 +6,7 @@ import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.asFlow
 import com.example.expensetracker.Database.CategoryRepository
 import com.example.expensetracker.Database.TransactionRepository
 import com.example.expensetracker.Events.EventMessage
@@ -161,6 +162,8 @@ class AddActivityViewModel @Inject constructor(
 
     val allTransactions: LiveData<List<TransactionClass>>
         get() = transactionRepository.allTransactions
+
+    val allTransactionFlow = allTransactions.asFlow()
 
     fun validateCategoryData(categoryClass: CategoryClass) {
         if (categoryClass.categoryName!!.isEmpty()) {

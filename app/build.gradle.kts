@@ -63,6 +63,7 @@ dependencies {
     implementation(libs.activity)
     implementation(libs.places)
     implementation(libs.core.ktx)
+    implementation(libs.androidx.palette.ktx)
     testImplementation(libs.junit)
     implementation(libs.ui.tooling.preview)
     androidTestImplementation(libs.ext.junit)
@@ -92,6 +93,8 @@ dependencies {
     //  implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:")
     implementation("com.google.dagger:hilt-android:2.51.1")
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
+
+
 
 
 }

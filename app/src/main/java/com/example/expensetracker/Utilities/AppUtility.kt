@@ -35,7 +35,7 @@ fun parseAmount(amount:Long):String{
 
 fun getDateFromMillis(milliSeconds: Long): String {
     // Create a DateFormatter object for displaying date in specified format.
-    val formatter: SimpleDateFormat = SimpleDateFormat("dd MMM")
+    val formatter: SimpleDateFormat = SimpleDateFormat("MMM dd,yyyy")
 
     // Create a calendar object that will convert the date and time value in milliseconds to date.
     val calendar: Calendar = Calendar.getInstance()

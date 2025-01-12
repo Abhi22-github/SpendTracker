@@ -16,7 +16,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.expensetracker.AddCategoryBottomSheet;
 import com.example.expensetracker.Model.TransactionClass;
 import com.example.expensetracker.R;
 import com.example.expensetracker.TransactionDetailBottomSheet;
@@ -52,15 +51,15 @@ public class TransactionViewAdapter extends RecyclerView.Adapter<TransactionView
             // Expense/Income logic
             if(transactionList.get(position).getType().toString().equals("Expense")) {
                 holder.amount.setText("-₹" + parseAmount(transactionList.get(position).getAmount()));
-                holder.body.setBackground(mContext.getResources().getDrawable(R.drawable.transaction_single_rectangle_background, mContext.getTheme()));
+               holder.body.setBackground(mContext.getResources().getDrawable(R.drawable.transaction_single_rectangle_background, mContext.getTheme()));
                 holder.amount.setTextColor(mContext.getResources().getColor(R.color.red, mContext.getTheme()));
-                holder.body.getBackground().setTint(mContext.getResources().getColor(R.color.red, mContext.getTheme()));
+               // holder.body.getBackground().setTint(mContext.getResources().getColor(R.color.red, mContext.getTheme()));
                 holder.body.getBackground().setAlpha(25);
             }else{
                 holder.amount.setText("+₹" + parseAmount(transactionList.get(position).getAmount()));
                 holder.body.setBackground(mContext.getResources().getDrawable(R.drawable.transaction_single_rectangle_background, mContext.getTheme()));
                 holder.amount.setTextColor(mContext.getResources().getColor(R.color.green, mContext.getTheme()));
-                holder.body.getBackground().setTint(mContext.getResources().getColor(R.color.green, mContext.getTheme()));
+               // holder.body.getBackground().setTint(mContext.getResources().getColor(R.color.green, mContext.getTheme()));
                 holder.body.getBackground().setAlpha(25);
             }
 
