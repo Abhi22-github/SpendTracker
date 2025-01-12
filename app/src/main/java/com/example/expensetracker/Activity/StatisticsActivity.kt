@@ -32,7 +32,6 @@ class StatisticsActivity : ComponentActivity() {
                         modifier = Modifier.height(100.dp),
                         budget = 1000f,
                         spend = 50f,
-                        viewModel = viewModel
                     )
                     Button(onClick = { incrementSpend() }) {
                     }

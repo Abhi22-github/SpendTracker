@@ -26,7 +26,6 @@ class SettingsActivity : AppCompatActivity() {
             SpendsBudgetCard(
                 budget = 1000f,
                 spend = 50f,
-                viewModel = viewModel
             )
         }
         binding.button.setOnClickListener {

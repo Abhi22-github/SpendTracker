@@ -128,6 +128,7 @@ class AddActivityViewModel @Inject constructor(
         }
     }
 
+
     private fun storeFormDataInDatabase(
         expense: String,
         amount: String,

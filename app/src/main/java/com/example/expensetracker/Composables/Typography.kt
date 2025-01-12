@@ -33,7 +33,7 @@ fun typography(context: Context): Typography {
 
     return Typography(
         displayLarge = TextStyle(
-            fontFamily = getFont(750),
+            fontFamily = getFont(900),
             fontSize = 57.sp
         ),
         displayMedium = TextStyle(
@@ -58,7 +58,7 @@ fun typography(context: Context): Typography {
         ),
         titleLarge = TextStyle(
             fontFamily = getFont(700),
-            fontSize = 22.sp
+            fontSize = 20.sp
         ),
         titleMedium = TextStyle(
             fontFamily = getFont(600),
@@ -73,23 +73,23 @@ fun typography(context: Context): Typography {
             fontSize = 16.sp,
         ),
         bodyMedium = TextStyle(
-            fontFamily = getFont(500),
+            fontFamily = getFont(600),
             fontSize = 14.sp,
         ),
         bodySmall = TextStyle(
-            fontFamily = getFont(500),
+            fontFamily = getFont(600),
             fontSize = 14.sp,
         ),
         labelLarge = TextStyle(
-            fontFamily = getFont(500),
+            fontFamily = getFont(600),
             fontSize = 14.sp,
         ),
         labelMedium = TextStyle(
-            fontFamily = getFont(500),
+            fontFamily = getFont(600),
             fontSize = 12.sp,
         ),
         labelSmall = TextStyle(
-            fontFamily = getFont(500),
+            fontFamily = getFont(600),
             fontSize = 11.sp,
         ),
     )

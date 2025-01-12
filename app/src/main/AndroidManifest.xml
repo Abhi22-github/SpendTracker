@@ -12,6 +12,7 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ExpenseTracker"
+        android:enableOnBackInvokedCallback="true"
         tools:targetApi="31">
         <activity
             android:name=".Activity.StatisticsActivity"
@@ -30,6 +31,9 @@
             android:exported="false" />
         <activity
             android:name=".Activity.AddActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activity.SettingComposeActivity"
             android:exported="false" />
         <activity
             android:name=".Activity.MainActivity"

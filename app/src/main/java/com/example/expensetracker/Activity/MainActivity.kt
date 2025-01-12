@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.os.Handler
 import android.view.MenuItem
 import android.view.View
-import android.widget.Toast
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.drawerlayout.widget.DrawerLayout
@@ -140,7 +139,7 @@ class MainActivity : AppCompatActivity() {
                 navigationView!!.setCheckedItem(R.id.item_listView_sideNavigation)
                 sendUserToStatisticsActivity()
             } else if (menuID == R.id.item_bankAccounts_sideNavigation) {
-                Toast.makeText(context, "manageBankAccounts", Toast.LENGTH_SHORT).show()
+                sendUserToManageAccountsActivity()
             } else {
             }
         }, 300)
@@ -222,6 +221,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun sendUserToStatisticsActivity() {
         val intent = Intent(context, StatisticsActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun sendUserToManageAccountsActivity() {
+        val intent = Intent(context, SettingComposeActivity::class.java)
         startActivity(intent)
     }
 

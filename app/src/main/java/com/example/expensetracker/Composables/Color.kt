@@ -18,7 +18,14 @@ val successColor = Color(0xFF34A853)
 val failureColor = Color(0xFFEA4335)
 val blueColor = Color(0xFF1A73E8)
 
-
+val cardBackgroundColor
+    @Composable
+    @ReadOnlyComposable
+    get() = combineColors(
+    MaterialTheme.colorScheme.surface,
+    MaterialTheme.colorScheme.surfaceVariant,
+    angle = 0.3f,
+)
 val colorBackground
     @Composable
     @ReadOnlyComposable

@@ -1,5 +1,6 @@
 package com.example.expensetracker.Composables.components
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -15,6 +16,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -36,6 +38,7 @@ import com.example.expensetracker.Composables.CustomFonts
 import com.example.expensetracker.Composables.failureColor
 import com.example.expensetracker.Composables.successColor
 import com.example.expensetracker.Composables.utils.combineColors
+import com.example.expensetracker.Converters.TransactionConverter
 import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.R
 import com.example.expensetracker.Utilities.Constants.EXPENSE
@@ -43,18 +46,27 @@ import com.example.expensetracker.Utilities.getDateFromMillis
 import com.example.expensetracker.ViewModels.AddActivityViewModel
 import kotlin.random.Random
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TransactionsListCompose(viewModel: AddActivityViewModel) {
 
     val transactionList by viewModel.allTransactionFlow.collectAsState(emptyList<TransactionClass>())
-    val transactionsMap = transactionList.groupBy { it.date }.toSortedMap()
-    LazyColumn(modifier = Modifier.fillMaxWidth()) {
-        transactionsMap.forEach { (date, transactionList) ->
-            items(transactionList) { item ->
-                SingleTransactionNew(item, onSingleItemClick = { onClick(item) })
+    val transactionsMap =
+        transactionList.sortedByDescending { it.dateWithTime }.groupBy { it.date }.toSortedMap()
+
+    val transactionConverterList = transactionsMap.map {
+        TransactionConverter(it.key.toString(), it.value)
+    }.reversed()
+    val lazyList = rememberLazyListState()
+    Surface(color = MaterialTheme.colorScheme.surface) {
+        LazyColumn(modifier = Modifier.fillMaxWidth(), state = lazyList) {
+            transactionConverterList.forEach { (date, transactionList) ->
+                item { Header(transactionList.get(0).dateWithTime) }
+                items(transactionList, key = {it.id}) { item ->
+                    SingleTransaction(item, onSingleItemClick = { onClick(item) })
+                }
             }
         }
-
     }
 }
 
@@ -74,85 +86,91 @@ val iconList = listOf(
 @Composable
 fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionClass) -> Unit) {
     Card(
-        shape = RoundedCornerShape(0.dp),
-        modifier = Modifier
+        shape = RoundedCornerShape(12.dp), modifier = Modifier
+            .padding(16.dp, 4.dp)
             .clickable {
                 onSingleItemClick(item)
-            }
+            }, colors = CardDefaults.cardColors(
+            containerColor = combineColors(
+                MaterialTheme.colorScheme.surface,
+                MaterialTheme.colorScheme.surfaceVariant,
+                angle = 0.3f,
+            )
+        )
     ) {
-        Surface(color = MaterialTheme.colorScheme.surface) {
-            Row(
+
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(16.dp, 12.dp)
+        ) {
+            var amount = item.amount.toString()
+            var amountColor = successColor
+            if (item.type.equals(EXPENSE)) {
+                amount = "-₹" + amount
+                amountColor = failureColor
+            } else {
+                amount = "+₹" + amount
+                amountColor = successColor
+            }
+            val randomNumber = Random.nextInt(0, 9)
+
+
+            Surface(
+                shape = CircleShape,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .wrapContentHeight()
-                    .padding(16.dp, 12.dp)
+                    .size(36.dp)
+                    .fillMaxSize(),
+                color = MaterialTheme.colorScheme.surfaceVariant
             ) {
-                var amount = item.amount.toString()
-                var amountColor = successColor
-                if (item.type.equals(EXPENSE)) {
-                    amount = "-₹" + amount
-                    amountColor = failureColor
-                } else {
-                    amount = "+₹" + amount
-                    amountColor = successColor
-                }
-                val randomNumber = Random.nextInt(0, 9)
                 Box(
-                    modifier = Modifier
-                        .size(48.dp),
-                    contentAlignment = Alignment.Center
-                )
-                {
-                    Surface(
-                        shape = CircleShape, modifier = Modifier
-                            .fillMaxSize(), color = MaterialTheme.colorScheme.surfaceVariant
-                    ) {
-                        Box(
-                            modifier = Modifier.fillMaxSize(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Image(
-                                painter = painterResource(id = iconList[randomNumber]),
-                                contentDescription = "Test Image",
-                                modifier = Modifier.size(24.dp),
-                            )
-                        }
-                    }
-                }
-
-                Spacer(modifier = Modifier.width(16.dp))
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .fillMaxWidth(0.70f)
-
+                    modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                 ) {
-                    Text(
-                        text = item.note.replaceFirstChar { it.uppercase() },
-                        style = typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_category_1),
+                        contentDescription = "Test Image",
+                        modifier = Modifier.size(24.dp),
                     )
+                }
+            }
+
+
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
+                    .fillMaxWidth(0.70f)
+
+            ) {
+                Text(
+                    text = item.note.replaceFirstChar { it.uppercase() },
+                    style = typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                if (false) {
                     Text(
                         text = item.type,
                         style = typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Text(
-                    text = amount,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .align(Alignment.CenterVertically),
-                    style = typography.titleMedium,
-                    fontFamily = CustomFonts.numberFont,
-                    color = amountColor,
-                    textAlign = TextAlign.End
-                )
-
             }
+            Spacer(modifier = Modifier.width(16.dp))
+
+            Text(
+                text = amount,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterVertically),
+                style = typography.titleMedium,
+                fontFamily = CustomFonts.numberFont,
+                color = amountColor,
+                textAlign = TextAlign.End
+            )
+
         }
+
     }
 }
 
@@ -163,15 +181,13 @@ fun onClick(item: TransactionClass) {
 fun SingleTransactionNew(item: TransactionClass, onSingleItemClick: (TransactionClass) -> Unit) {
 
     Card(
-        shape = RoundedCornerShape(22.dp),
-        colors = CardDefaults.cardColors(
+        shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(
             containerColor = combineColors(
                 MaterialTheme.colorScheme.surface,
                 MaterialTheme.colorScheme.surfaceVariant,
                 angle = 0.3f,
             ),
-        ),
-        modifier = Modifier.padding(16.dp)
+        ), modifier = Modifier.padding(16.dp)
     ) {
         Column(
             Modifier
@@ -201,6 +217,18 @@ fun SingleTransactionNew(item: TransactionClass, onSingleItemClick: (Transaction
 
 }
 
+@Composable
+fun Header(date: Long) {
+    Text(
+        text = getDateFromMillis(date),
+        style = typography.labelLarge,
+        color = MaterialTheme.colorScheme.onSurface.copy(0.6f),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(16.dp, 14.dp, 8.dp, 4.dp)
+    )
+}
+
 
 @Preview
 @Composable
@@ -212,4 +240,10 @@ fun SingleTransactionPreview() {
 @Composable
 fun SingleTransactionNewPreview() {
     SingleTransactionNew(item = TransactionClass("Expesne", 20L, "Hello", "", 0L, 0L)) {}
+}
+
+@Preview
+@Composable
+fun HeaderPreview() {
+    Header(11L)
 }

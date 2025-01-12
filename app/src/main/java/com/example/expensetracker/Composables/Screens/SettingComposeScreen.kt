@@ -1,0 +1,179 @@
+package com.example.expensetracker.Composables.Screens
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButtonColors
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.expensetracker.Composables.components.BudgetBottomSheet
+import com.example.expensetracker.Composables.components.SingleItemRadioButton
+import com.example.expensetracker.Composables.components.SpendsBudgetCard
+import com.example.expensetracker.Composables.components.TopBar
+import com.example.expensetracker.ViewModels.AddActivityViewModel
+
+val radioButtonColors
+    @Composable
+    @ReadOnlyComposable
+    get() = RadioButtonColors(
+        MaterialTheme.colorScheme.primary,
+        MaterialTheme.colorScheme.surfaceVariant,
+        MaterialTheme.colorScheme.surface,
+        MaterialTheme.colorScheme.surface
+    )
+
+@Composable
+fun SettingsScreen(
+    sendUserBack: () -> Unit,
+    isManage: Boolean,
+    viewModel: AddActivityViewModel = hiltViewModel()
+) {
+    val budget by viewModel.newTotal.observeAsState()
+    SettingsScreenContent(sendUserBack, isManage, budget)
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingsScreenContent(sendUserBack: () -> Unit, isManage: Boolean, budget: Float?) {
+    var themeSelected by remember {
+        mutableStateOf("Light")
+    }
+    var sheetState = rememberModalBottomSheetState()
+    var bottomSheet by remember { mutableStateOf(false) }
+    val list = listOf("Light", "Dark", "System Default")
+
+    Column {
+        TopBar(title = "Settings") {
+            sendUserBack()
+        }
+        Column() {
+            Spacer(Modifier.height(10.dp))
+            Text(
+                text = "Theme", style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.padding(16.dp, 0.dp)
+            )
+            Text(
+                text = "Please select theme according to your preferences or you can set it according to your device theme",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.6f),
+                modifier = Modifier.padding(16.dp, 0.dp)
+            )
+            Column(modifier = Modifier.padding(16.dp, 0.dp)) {
+                list.map {
+                    SingleItemRadioButton(it, selectedItem = { themeSelected = it }, themeSelected)
+                }
+            }
+            Spacer(Modifier.height(24.dp))
+            Surface(onClick = {}) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp, 4.dp)
+                        .fillMaxWidth()
+                ) {
+                    Text(
+                        text = "Budget", style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        text = "Please set up a budget accordingly with custom time frame so that we can better analyze it accordingly",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.6f)
+                    )
+                    Box(
+                        modifier = Modifier
+                            .height(128.dp)
+                            .padding(top = 10.dp)
+                    ) {
+                        budget?.let {
+                            SpendsBudgetCard(
+                                budget = it,
+                                spend = 500f,
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.End
+                    ) {
+                        if (!isManage) {
+                            FilledTonalButton(
+                                onClick = { bottomSheet = true },
+                                colors = ButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    MaterialTheme.colorScheme.onSecondaryContainer,
+                                    MaterialTheme.colorScheme.onSecondaryContainer,
+                                )
+                            ) {
+                                Text(
+                                    text = "Create Budget",
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            }
+                        } else {
+                            FilledTonalButton(
+                                onClick = {},
+                                colors = ButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                    MaterialTheme.colorScheme.onSecondaryContainer,
+                                    MaterialTheme.colorScheme.onSecondaryContainer,
+                                )
+                            ) {
+                                Text(
+                                    text = "Manage Budget",
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        if (bottomSheet) {
+            BudgetBottomSheet(sheetState, bottomSheetDismissed = { bottomSheet = false })
+        }
+    }
+
+}
+
+@Composable
+@Preview
+fun SettingsScreenManagePreview() {
+    Surface {
+        // SettingsScreenContent({}, false, budget,)
+    }
+}
+
+@Composable
+@Preview
+fun SettingsScreenCreatePreview() {
+    Surface {
+        // SettingsScreenContent({}, true, budget)
+    }
+}
+
+

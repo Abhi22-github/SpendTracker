@@ -1,5 +1,6 @@
 package com.example.expensetracker.Adapters;
 
+import static com.example.expensetracker.Utilities.AppUtilityKt.getDateFromMillis;
 import static com.example.expensetracker.Utilities.AppUtilityKt.parseAmount;
 
 import android.content.Context;
@@ -74,19 +75,22 @@ public class TransactionViewAdapter extends RecyclerView.Adapter<TransactionView
             //eliminate date for multiple entries in same day
             if(position == 0){
                 String[] dateSplit = convertDateToString(transactionList.get(position).getDateWithTime()).split("/");
-                holder.day.setText(dateSplit[1]);
-                holder.date.setText(dateSplit[0]);
+                //holder.day.setText(dateSplit[1]);
+              //  holder.date.setText(dateSplit[0]);
+                holder.date.setText(getDateFromMillis(transactionList.get(position).getDateWithTime()));
+
             }else{
                 String current = convertDateToString(transactionList.get(position).getDateWithTime());
                 String prev = convertDateToString(transactionList.get(position-1).getDateWithTime());
                 //entries are on similar date to previous
                 if(current.equals(prev)){
-                    holder.dayDateView.setVisibility(View.INVISIBLE);
+                    holder.dayDateView.setVisibility(View.GONE);
                 }else{
                     //entries are on diff date so show the date
-                    String[] dateSplit = current.split("/");
-                    holder.day.setText(dateSplit[1]);
-                    holder.date.setText(dateSplit[0]);
+                  //  String[] dateSplit = current.split("/");
+                   // holder.day.setText(current);
+
+                    holder.date.setText(getDateFromMillis(transactionList.get(position).getDateWithTime()));
                 }
             }
             holder.main.setOnClickListener(new View.OnClickListener() {
