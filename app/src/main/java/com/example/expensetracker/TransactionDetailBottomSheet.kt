@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.lifecycle.ViewModelProvider
+import androidx.fragment.app.viewModels
 import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.Utilities.Constants
 import com.example.expensetracker.Utilities.getDateFromMillis
@@ -12,11 +12,13 @@ import com.example.expensetracker.Utilities.parseAmount
 import com.example.expensetracker.ViewModels.AddActivityViewModel
 import com.example.expensetracker.databinding.FragmentTransactionDetailBottomSheetBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class TransactionDetailBottomSheet(val transactionClass: TransactionClass) : BottomSheetDialogFragment() {
 
     private lateinit var binding: FragmentTransactionDetailBottomSheetBinding
-    private lateinit var viewModel:AddActivityViewModel
+    private val viewModel: AddActivityViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -29,11 +31,6 @@ class TransactionDetailBottomSheet(val transactionClass: TransactionClass) : Bot
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
-        //initializing the view model
-        viewModel =
-            ViewModelProvider(this).get<AddActivityViewModel>(AddActivityViewModel::class.java)
-        viewModel.initializeDatabaseRepository(requireActivity().application)
 
         setUpPage()
         binding.materialButtonEditTransactionDetails.setOnClickListener {

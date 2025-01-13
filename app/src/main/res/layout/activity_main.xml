@@ -36,11 +36,11 @@
 
         </com.google.android.material.appbar.AppBarLayout>
 
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:id="@+id/frameLayout_fragment_mainActivity"
-                app:layout_behavior="@string/appbar_scrolling_view_behavior"
-                android:layout_height="match_parent"/>
+        <FrameLayout
+            android:id="@+id/frameLayout_fragment_mainActivity"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fab_add_activity_main"
@@ -49,7 +49,7 @@
             android:layout_alignParentEnd="true"
             android:layout_alignParentBottom="true"
             android:layout_gravity="bottom|end"
-            android:layout_margin="@dimen/mainMargin"
+            android:layout_margin="@dimen/margin_16"
             app:srcCompat="@drawable/icon_round_add" />
 
 

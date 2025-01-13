@@ -1,6 +1,6 @@
 package com.example.expensetracker.Database;
 
-import android.app.Application;
+import android.content.Context;
 import android.os.AsyncTask;
 
 import androidx.lifecycle.LiveData;
@@ -9,6 +9,8 @@ import com.example.expensetracker.Model.CategoryClass;
 import com.example.expensetracker.Utilities.Constants;
 
 import java.util.List;
+
+import dagger.hilt.android.qualifiers.ApplicationContext;
 
 public class CategoryRepository {
     // below line is the create a variable  
@@ -19,8 +21,8 @@ public class CategoryRepository {
     // creating a constructor for our variables 
     // and passing the variables to it.
 
-    public CategoryRepository(Application application) {
-        TransactionDatabase database = TransactionDatabase.getInstance(application);
+    public CategoryRepository(@ApplicationContext Context applicationContext) {
+        TransactionDatabase database = TransactionDatabase.getInstance(applicationContext);
         categoryDao = database.categoryDao();
         allCategories = categoryDao.getAllCategory();
         allExpenseCategories = categoryDao.getOnlyExpenseCategories(Constants.EXPENSE);

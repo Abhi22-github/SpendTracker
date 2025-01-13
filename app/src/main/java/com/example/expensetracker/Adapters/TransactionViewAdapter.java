@@ -1,5 +1,6 @@
 package com.example.expensetracker.Adapters;
 
+import static com.example.expensetracker.Utilities.AppUtilityKt.getDateFromMillis;
 import static com.example.expensetracker.Utilities.AppUtilityKt.parseAmount;
 
 import android.content.Context;
@@ -16,7 +17,6 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.expensetracker.AddCategoryBottomSheet;
 import com.example.expensetracker.Model.TransactionClass;
 import com.example.expensetracker.R;
 import com.example.expensetracker.TransactionDetailBottomSheet;
@@ -52,15 +52,15 @@ public class TransactionViewAdapter extends RecyclerView.Adapter<TransactionView
             // Expense/Income logic
             if(transactionList.get(position).getType().toString().equals("Expense")) {
                 holder.amount.setText("-₹" + parseAmount(transactionList.get(position).getAmount()));
-                holder.body.setBackground(mContext.getResources().getDrawable(R.drawable.transaction_single_rectangle_background, mContext.getTheme()));
+               holder.body.setBackground(mContext.getResources().getDrawable(R.drawable.transaction_single_rectangle_background, mContext.getTheme()));
                 holder.amount.setTextColor(mContext.getResources().getColor(R.color.red, mContext.getTheme()));
-                holder.body.getBackground().setTint(mContext.getResources().getColor(R.color.red, mContext.getTheme()));
+               // holder.body.getBackground().setTint(mContext.getResources().getColor(R.color.red, mContext.getTheme()));
                 holder.body.getBackground().setAlpha(25);
             }else{
                 holder.amount.setText("+₹" + parseAmount(transactionList.get(position).getAmount()));
                 holder.body.setBackground(mContext.getResources().getDrawable(R.drawable.transaction_single_rectangle_background, mContext.getTheme()));
                 holder.amount.setTextColor(mContext.getResources().getColor(R.color.green, mContext.getTheme()));
-                holder.body.getBackground().setTint(mContext.getResources().getColor(R.color.green, mContext.getTheme()));
+               // holder.body.getBackground().setTint(mContext.getResources().getColor(R.color.green, mContext.getTheme()));
                 holder.body.getBackground().setAlpha(25);
             }
 
@@ -75,19 +75,22 @@ public class TransactionViewAdapter extends RecyclerView.Adapter<TransactionView
             //eliminate date for multiple entries in same day
             if(position == 0){
                 String[] dateSplit = convertDateToString(transactionList.get(position).getDateWithTime()).split("/");
-                holder.day.setText(dateSplit[1]);
-                holder.date.setText(dateSplit[0]);
+                //holder.day.setText(dateSplit[1]);
+              //  holder.date.setText(dateSplit[0]);
+                holder.date.setText(getDateFromMillis(transactionList.get(position).getDateWithTime()));
+
             }else{
                 String current = convertDateToString(transactionList.get(position).getDateWithTime());
                 String prev = convertDateToString(transactionList.get(position-1).getDateWithTime());
                 //entries are on similar date to previous
                 if(current.equals(prev)){
-                    holder.dayDateView.setVisibility(View.INVISIBLE);
+                    holder.dayDateView.setVisibility(View.GONE);
                 }else{
                     //entries are on diff date so show the date
-                    String[] dateSplit = current.split("/");
-                    holder.day.setText(dateSplit[1]);
-                    holder.date.setText(dateSplit[0]);
+                  //  String[] dateSplit = current.split("/");
+                   // holder.day.setText(current);
+
+                    holder.date.setText(getDateFromMillis(transactionList.get(position).getDateWithTime()));
                 }
             }
             holder.main.setOnClickListener(new View.OnClickListener() {
