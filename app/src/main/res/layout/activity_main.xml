@@ -5,7 +5,6 @@
     android:id="@+id/drawerLayout_drawer_mainActivity"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/white"
     tools:context=".Activity.MainActivity"
     tools:openDrawer="start">
 
@@ -19,7 +18,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:background="@android:color/white"
             app:liftOnScroll="true"
             app:liftOnScrollColor="@android:color/transparent"
             app:liftOnScrollTargetViewId="@id/recyclerView_transaction_mainActivity">
@@ -60,12 +58,9 @@
         android:layout_width="320dp"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@color/white"
         app:dividerInsetEnd="0dp"
         app:dividerInsetStart="0dp"
-        app:itemIconTint="#49454F"
         app:itemTextAppearance="@style/menuItemStyle"
         app:itemTextAppearanceActiveBoldEnabled="false"
-        app:itemTextColor="#49454F"
         app:menu="@menu/side_navigation_menu" />
 </androidx.drawerlayout.widget.DrawerLayout>

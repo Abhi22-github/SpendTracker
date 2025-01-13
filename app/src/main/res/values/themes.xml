@@ -1,11 +1,8 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <!-- Base application theme. -->
     <style name="Base.Theme.ExpenseTracker" parent="Theme.Material3.DayNight.NoActionBar">
         <!-- Customize your light theme here. -->
         <item name="colorPrimary">#1a73e8</item>
-        <item name="android:navigationBarColor">@android:color/white</item>
-        <item name="android:windowLightStatusBar">?attr/isLightTheme</item>
-        <item name="android:statusBarColor">@android:color/white</item>
     </style>
 
     <style name="dayNameText">
@@ -15,12 +12,9 @@
     </style>
 
 
-    <style name="customBottomSheetDialog">
-
-    </style>
     <style name="menuItemStyle">
         <item name="fontFamily">@font/manropesemibold</item>
-        <item name="android:textSize">16sp</item>
+        <item name="android:textSize">14.sp</item>
     </style>
 
     <style name="toolbarTitleStyle">
