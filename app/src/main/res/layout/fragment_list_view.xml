@@ -16,6 +16,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:visibility="gone"
             android:weightSum="2">
 
             <RelativeLayout
@@ -106,13 +107,19 @@
 
         </LinearLayout>
 
+        <androidx.compose.ui.platform.ComposeView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:id="@+id/composeView_transactions_listFragment"
+            app:layout_behavior="@string/appbar_scrolling_view_behavior" />
+
 
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/recyclerView_transaction_mainActivity"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:background="@android:color/white"
-            android:visibility="visible"
+            android:visibility="gone"
             app:layout_behavior="@string/appbar_scrolling_view_behavior" />
     </LinearLayout>
 

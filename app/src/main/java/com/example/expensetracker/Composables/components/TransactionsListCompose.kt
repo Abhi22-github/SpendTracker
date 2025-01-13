@@ -34,6 +34,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.expensetracker.Composables.CustomFonts
 import com.example.expensetracker.Composables.failureColor
 import com.example.expensetracker.Composables.successColor
@@ -48,7 +49,7 @@ import kotlin.random.Random
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TransactionsListCompose(viewModel: AddActivityViewModel) {
+fun TransactionsListCompose(viewModel: AddActivityViewModel = hiltViewModel()) {
 
     val transactionList by viewModel.allTransactionFlow.collectAsState(emptyList<TransactionClass>())
     val transactionsMap =
@@ -221,7 +222,7 @@ fun SingleTransactionNew(item: TransactionClass, onSingleItemClick: (Transaction
 fun Header(date: Long) {
     Text(
         text = getDateFromMillis(date),
-        style = typography.labelLarge,
+        style = typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurface.copy(0.6f),
         modifier = Modifier
             .fillMaxWidth()

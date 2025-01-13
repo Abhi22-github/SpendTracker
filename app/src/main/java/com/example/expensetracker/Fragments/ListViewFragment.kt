@@ -4,11 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.compose.material3.Surface
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.expensetracker.Adapters.TransactionViewAdapter
+import com.example.expensetracker.Composables.ExpenseTrackerTheme
+import com.example.expensetracker.Composables.components.TransactionsListCompose
 import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.Utilities.getFirstAndLastDateOfGivenPeriod
 import com.example.expensetracker.Utilities.parseAmount
@@ -28,7 +31,7 @@ class ListViewFragment : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         // Inflate the layout for this fragment
-        binding = FragmentListViewBinding.inflate(inflater,container,false)
+        binding = FragmentListViewBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -39,6 +42,15 @@ class ListViewFragment : Fragment() {
         setTransactionRecyclerView()
 
         setUpTotalExpenseAndIncomeAmount()
+
+        binding.composeViewTransactionsListFragment.setContent {
+            ExpenseTrackerTheme {
+                Surface {
+                    TransactionsListCompose()
+                }
+            }
+
+        }
     }
 
     fun setUpTotalExpenseAndIncomeAmount() {
@@ -47,24 +59,30 @@ class ListViewFragment : Fragment() {
         val firstDate = currentDate.withDayOfMonth(1)
         val lastDate = currentDate.withDayOfMonth(currentDate.lengthOfMonth())
 
-        val (firstDay,lastDay) = getFirstAndLastDateOfGivenPeriod(firstDate,lastDate)
-        viewModel.getTotalIncomeForRange(firstDay,lastDay).observe(viewLifecycleOwner,Observer{
-            binding.textViewIncomeListViewFragment.text = "₹"+parseAmount(it.totalAmount)
+        val (firstDay, lastDay) = getFirstAndLastDateOfGivenPeriod(firstDate, lastDate)
+        viewModel.getTotalIncomeForRange(firstDay, lastDay).observe(viewLifecycleOwner, Observer {
+            binding.textViewIncomeListViewFragment.text = "₹" + parseAmount(it.totalAmount)
         })
-        viewModel.getTotalExpenseForRange(firstDay,lastDay).observe(viewLifecycleOwner,Observer{
-            binding.textViewExpenseListViewFragment.text = "₹"+parseAmount(it.totalAmount)
+        viewModel.getTotalExpenseForRange(firstDay, lastDay).observe(viewLifecycleOwner, Observer {
+            binding.textViewExpenseListViewFragment.text = "₹" + parseAmount(it.totalAmount)
         })
     }
 
     private fun setTransactionRecyclerView() {
-        binding.recyclerViewTransactionMainActivity.setLayoutManager(LinearLayoutManager(requireActivity()))
-        viewModel.allTransactions.observe(viewLifecycleOwner,Observer<List<TransactionClass>>{
-            if(it.size == 0){
+        binding.recyclerViewTransactionMainActivity.setLayoutManager(
+            LinearLayoutManager(
+                requireActivity()
+            )
+        )
+        viewModel.allTransactions.observe(viewLifecycleOwner, Observer<List<TransactionClass>> {
+            if (it.size == 0) {
                 binding.linearLayoutEmptyScreenDialogListView.visibility = View.VISIBLE
-            }else{
+            } else {
                 binding.linearLayoutEmptyScreenDialogListView.visibility = View.GONE
-                val transactionViewAdapter = TransactionViewAdapter(requireActivity(),
-                    it)
+                val transactionViewAdapter = TransactionViewAdapter(
+                    requireActivity(),
+                    it
+                )
                 binding.recyclerViewTransactionMainActivity.adapter = transactionViewAdapter
             }
 
