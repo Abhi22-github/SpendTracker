@@ -7,6 +7,7 @@
     <color name="green">#34A853</color>
     <color name="grey_background">#f2f2f2</color>
     <color name="textColor">#494949</color>
+    <color name="textColor60">#99494949</color>
     <color name="expense_orange">#DF7D1A</color>
 
     <color name="md_theme_primary">#435E91</color>
