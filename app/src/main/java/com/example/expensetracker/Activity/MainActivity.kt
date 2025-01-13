@@ -215,7 +215,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun sendUserToSettingsActivity() {
-        val intent = Intent(context, SettingsActivity::class.java)
+        val intent = Intent(context, SettingComposeActivity::class.java)
         startActivity(intent)
     }
 
@@ -225,7 +225,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun sendUserToManageAccountsActivity() {
-        val intent = Intent(context, SettingComposeActivity::class.java)
+        val intent = Intent(context, ManageBankAccountActivity::class.java)
         startActivity(intent)
     }
 
