@@ -18,12 +18,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -31,7 +33,7 @@ import com.example.expensetracker.Composables.components.BudgetBottomSheet
 import com.example.expensetracker.Composables.components.SingleItemRadioButton
 import com.example.expensetracker.Composables.components.SpendsBudgetCard
 import com.example.expensetracker.Composables.components.TopBar
-import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.example.expensetracker.ViewModels.PreferencesViewModel
 
 val radioButtonColors
     @Composable
@@ -46,20 +48,20 @@ val radioButtonColors
 @Composable
 fun SettingsScreen(
     sendUserBack: () -> Unit,
-    isManage: Boolean,
-    viewModel: AddActivityViewModel = hiltViewModel()
+    preferenceViewModel : PreferencesViewModel = hiltViewModel()
 ) {
-    val budget by viewModel.newTotal.observeAsState()
-    SettingsScreenContent(sendUserBack, isManage, budget)
+    val isBudgetSet by preferenceViewModel.isBudgetSet.collectAsState(false)
+    val budget by preferenceViewModel.getBudgetValue.collectAsState(0f)
+    SettingsScreenContent(sendUserBack, isBudgetSet, budget)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreenContent(sendUserBack: () -> Unit, isManage: Boolean, budget: Float?) {
+fun SettingsScreenContent(sendUserBack: () -> Unit, isBudgetSet: Boolean, budget: Float?) {
     var themeSelected by remember {
         mutableStateOf("Light")
     }
-    var sheetState = rememberModalBottomSheetState()
+    val sheetState = rememberModalBottomSheetState()
     var bottomSheet by remember { mutableStateOf(false) }
     val list = listOf("Light", "Dark", "System Default")
 
@@ -86,85 +88,92 @@ fun SettingsScreenContent(sendUserBack: () -> Unit, isManage: Boolean, budget: F
                 }
             }
             Spacer(Modifier.height(24.dp))
-            Surface(onClick = {}) {
-                Column(
+            Column(
+                modifier = Modifier
+                    .padding(16.dp, 4.dp)
+                    .fillMaxWidth()
+            ) {
+                Text(
+                    text = "Budget", style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = "Please set up a budget accordingly with custom time frame so that we can better analyze it accordingly",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.6f)
+                )
+                Box(
                     modifier = Modifier
-                        .padding(16.dp, 4.dp)
-                        .fillMaxWidth()
+                        .height(128.dp)
+                        .padding(top = 10.dp)
                 ) {
-                    Text(
-                        text = "Budget", style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = "Please set up a budget accordingly with custom time frame so that we can better analyze it accordingly",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.6f)
-                    )
-                    Box(
-                        modifier = Modifier
-                            .height(128.dp)
-                            .padding(top = 10.dp)
-                    ) {
+                    key(budget) {
                         budget?.let {
                             SpendsBudgetCard(
-                                budget = it,
-                                spend = 500f,
+                                spend = it,
+                                budget = 1000f,
                             )
                         }
                     }
-                    Spacer(Modifier.height(8.dp))
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.End
-                    ) {
-                        if (!isManage) {
-                            FilledTonalButton(
-                                onClick = { bottomSheet = true },
-                                colors = ButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                    MaterialTheme.colorScheme.onSecondaryContainer,
-                                    MaterialTheme.colorScheme.onSecondaryContainer,
-                                )
-                            ) {
-                                Text(
-                                    text = "Create Budget",
-                                    style = MaterialTheme.typography.labelLarge
-                                )
-                            }
-                        } else {
-                            FilledTonalButton(
-                                onClick = {},
-                                colors = ButtonColors(
-                                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-                                    MaterialTheme.colorScheme.onSecondaryContainer,
-                                    MaterialTheme.colorScheme.onSecondaryContainer,
-                                )
-                            ) {
-                                Text(
-                                    text = "Manage Budget",
-                                    style = MaterialTheme.typography.labelLarge
-                                )
-                            }
+
+                }
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    if (!isBudgetSet) {
+                        FilledTonalButton(
+                            onClick = { bottomSheet = true },
+                            colors = ButtonColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                MaterialTheme.colorScheme.onSecondaryContainer,
+                                MaterialTheme.colorScheme.onSecondaryContainer,
+                            )
+                        ) {
+                            Text(
+                                text = "Create Budget",
+                                style = MaterialTheme.typography.labelLarge
+                            )
+                        }
+                    } else {
+                        FilledTonalButton(
+                            onClick = {bottomSheet = true},
+                            colors = ButtonColors(
+                                containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                                contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+                                MaterialTheme.colorScheme.onSecondaryContainer,
+                                MaterialTheme.colorScheme.onSecondaryContainer,
+                            )
+                        ) {
+                            Text(
+                                text = "Manage Budget",
+                                style = MaterialTheme.typography.labelLarge
+                            )
                         }
                     }
                 }
             }
         }
-        if (bottomSheet) {
-            BudgetBottomSheet(sheetState, bottomSheetDismissed = { bottomSheet = false })
-        }
     }
+    if (bottomSheet) {
+        if(isBudgetSet){
+            var amountText by remember { mutableStateOf(TextFieldValue(budget.toString())) }
+            BudgetBottomSheet(sheetState, bottomSheetDismissed = { bottomSheet = false },amountText,isBudgetSet)
+        }else{
+            var amountText by remember { mutableStateOf(TextFieldValue("")) }
+            BudgetBottomSheet(sheetState, bottomSheetDismissed = { bottomSheet = false },amountText,isBudgetSet)
+        }
 
+    }
 }
 
 @Composable
 @Preview
 fun SettingsScreenManagePreview() {
     Surface {
-        // SettingsScreenContent({}, false, budget,)
+        SettingsScreenContent({}, false, 0.5f)
     }
 }
 
@@ -172,7 +181,7 @@ fun SettingsScreenManagePreview() {
 @Preview
 fun SettingsScreenCreatePreview() {
     Surface {
-        // SettingsScreenContent({}, true, budget)
+        SettingsScreenContent({}, true, 0.2f)
     }
 }
 

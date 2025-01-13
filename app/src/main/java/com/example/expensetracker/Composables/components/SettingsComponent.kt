@@ -1,6 +1,5 @@
 package com.example.expensetracker.Composables.components
 
-import android.util.Log
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -18,6 +18,7 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -29,27 +30,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.text.input.TransformedText
-import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.text.isDigitsOnly
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.expensetracker.Composables.ExpenseTrackerTheme
 import com.example.expensetracker.Composables.Screens.radioButtonColors
 import com.example.expensetracker.R
-import com.example.expensetracker.ViewModels.AddActivityViewModel
-import java.text.NumberFormat
-import java.util.Locale
+import com.example.expensetracker.ViewModels.PreferencesViewModel
 
 
 @Composable
@@ -77,21 +73,56 @@ fun SingleItemRadioButton(
 fun BudgetBottomSheet(
     sheetState: SheetState,
     bottomSheetDismissed: () -> Unit,
-    viewModel: AddActivityViewModel = hiltViewModel()
+    amount: TextFieldValue,
+    isBudgetSet: Boolean,
+    preferenceViewModel: PreferencesViewModel = hiltViewModel(),
 ) {
     val modifier = Modifier.padding(16.dp, 0.dp)
-    var amountText by remember { mutableStateOf(TextFieldValue("")) }
+    var amountText by remember { mutableStateOf(amount) }
+    var shouldShowConfirmation by remember { mutableStateOf(false) }
+
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
-
     ModalBottomSheet(onDismissRequest = { bottomSheetDismissed() }, sheetState = sheetState) {
         BottomSheetContent(
             modifier,
             amountText,
-            amountTextValueChange = { amountText = it },
-            { saveDateToDevice(viewModel, amountText.text, bottomSheetDismissed,keyboardController, focusManager) })
+            amountTextValueChange = {
+                amountText = it
+            },
+            {
+                if (isBudgetSet) {
+                    shouldShowConfirmation = true
+                } else {
+                    saveDateToDevice(
+                        preferenceViewModel,
+                        amountText.text,
+                        bottomSheetDismissed,
+                        keyboardController,
+                        focusManager
+                    )
+                }
+            })
+    }
+    if (shouldShowConfirmation) {
+        ConfirmationAlertDialog(
+            { shouldShowConfirmation = false },
+            {
+                saveDateToDevice(
+                    preferenceViewModel,
+                    amountText.text,
+                    bottomSheetDismissed,
+                    keyboardController,
+                    focusManager
+                )
+            },
+            "Change Budget",
+            "Are you sure, you want to change the current budget?",
+            ImageVector.vectorResource(R.drawable.icon_expense)
+        )
     }
 }
+
 
 @Composable
 fun BottomSheetContent(
@@ -121,10 +152,8 @@ fun BottomSheetContent(
         TextField(
             value = dailySpendLimit,
             onValueChange = { newText ->
-                //text = newText
-                if (newText.text.length <= Long.MAX_VALUE.toString().length && newText.text.isDigitsOnly()) {
-                    amountTextValueChange(newText)
-                }
+                val modifiedString = newText.text.filter{it in '0'..'9' || it == '.'}
+                amountTextValueChange(TextFieldValue(modifiedString, newText.selection))
             },
             singleLine = true,
             modifier = Modifier
@@ -140,7 +169,7 @@ fun BottomSheetContent(
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
             ),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            visualTransformation = NumberCommaTransformation()
+            // visualTransformation = NumberCommaTransformation()
         )
 
         Spacer(Modifier.height(24.dp))
@@ -156,38 +185,98 @@ fun BottomSheetContent(
 }
 
 
-class NumberCommaTransformation : VisualTransformation {
-    override fun filter(text: AnnotatedString): TransformedText {
-        return TransformedText(
-            text = AnnotatedString(text.text.toLongOrNull().formatWithComma()),
-            offsetMapping = object : OffsetMapping {
-                override fun originalToTransformed(offset: Int): Int {
-                    return text.text.toLongOrNull().formatWithComma().length
+@Composable
+fun ConfirmationAlertDialog(
+    onDismissRequest: () -> Unit,
+    onConfirmation: () -> Unit,
+    dialogTitle: String,
+    dialogText: String,
+    icon: ImageVector,
+) {
+    AlertDialog(
+        icon = {
+            Icon(icon, contentDescription = "Example Icon")
+        },
+        title = {
+            Text(text = dialogTitle)
+        },
+        text = {
+            Text(text = dialogText)
+        },
+        onDismissRequest = {
+            onDismissRequest()
+        },
+        confirmButton = {
+            TextButton(
+                onClick = {
+                    onConfirmation()
                 }
-
-                override fun transformedToOriginal(offset: Int): Int {
-                    return text.length
-                }
+            ) {
+                Text("Confirm")
             }
-        )
-    }
+        },
+        dismissButton = {
+            TextButton(
+                onClick = {
+                    onDismissRequest()
+                }
+            ) {
+                Text("Cancel")
+            }
+        }
+    )
 }
 
-fun Long?.formatWithComma(): String =
-    NumberFormat.getNumberInstance(Locale.getDefault()).format(this ?: 0)
+
+//class NumberCommaTransformation : VisualTransformation {
+//    override fun filter(text: AnnotatedString): TransformedText {
+//        return TransformedText(
+//            text = AnnotatedString(text.text.toLongOrNull().formatWithComma()),
+//            offsetMapping = object : OffsetMapping {
+//                override fun originalToTransformed(offset: Int): Int {
+//                    return text.text.toLongOrNull().formatWithComma().length
+//                }
+//
+//                override fun transformedToOriginal(offset: Int): Int {
+//                    return text.length
+//                }
+//            }
+//        )
+//    }
+//}
+//
+//fun Long?.formatWithComma(): String =
+//    NumberFormat.getNumberInstance(Locale.getDefault()).format(this ?: 0)
 
 fun saveDateToDevice(
-    viewModel: AddActivityViewModel,
+    preferenceViewModel: PreferencesViewModel,
     text: String,
     bottomSheetDismissed: () -> Unit,
     keyboardController: SoftwareKeyboardController?,
-    focusManager: FocusManager
+    focusManager: FocusManager,
 ) {
-    viewModel.newTotal.value = text.toFloat()
-    Log.d("Hello", "reached")
+    preferenceViewModel.saveBudget(text.toFloat())
+    preferenceViewModel.setBudgetState(true)
     focusManager.clearFocus()
     keyboardController?.hide()
     bottomSheetDismissed()
+
+}
+
+@Preview
+@Composable
+fun AlertDialogPreview() {
+    ExpenseTrackerTheme {
+        Surface {
+            ConfirmationAlertDialog(
+                {},
+                {},
+                "Change Budget",
+                "Are you sure, you want to change the current budget?",
+                ImageVector.vectorResource(R.drawable.icon_expense)
+            )
+        }
+    }
 }
 
 @Preview

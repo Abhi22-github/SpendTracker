@@ -18,7 +18,7 @@ class SettingComposeActivity : ComponentActivity() {
         setContent {
             ExpenseTrackerTheme {
                 Surface {
-                    SettingsScreen({ sendUserBack() },false)
+                    SettingsScreen({ sendUserBack() })
                 }
             }
         }

@@ -10,7 +10,7 @@ import com.example.expensetracker.databinding.ActivitySettingsBinding
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
-class SettingsActivity : AppCompatActivity() {
+class ManageBankAccountActivity : AppCompatActivity() {
     private lateinit var binding: ActivitySettingsBinding
     private val viewModel: AddActivityViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
