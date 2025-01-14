@@ -1,7 +1,6 @@
 package com.example.expensetracker.CalenderViewPager
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,7 +9,7 @@ import androidx.fragment.app.viewModels
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.expensetracker.Adapters.TransactionViewAdapter
 import com.example.expensetracker.Composables.ExpenseTrackerTheme
-import com.example.expensetracker.Composables.components.TransactionsListCompose
+import com.example.expensetracker.Composables.Screens.FragmentDayScreen
 import com.example.expensetracker.Utilities.toLocalDate
 import com.example.expensetracker.Utilities.toNormalString
 import com.example.expensetracker.ViewModels.TransactionsViewModel
@@ -48,13 +47,12 @@ class testFragment() : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         // setTransactionRecyclerView()
         setUpComposeRecyclerView()
-        Log.d("frag", "FragmentPosition $position  and date $date")
     }
 
     fun setUpComposeRecyclerView() {
         binding.composeViewDayListSingleDayFragment.setContent {
             ExpenseTrackerTheme {
-                TransactionsListCompose(true, date)
+                FragmentDayScreen(true,date)
             }
         }
     }

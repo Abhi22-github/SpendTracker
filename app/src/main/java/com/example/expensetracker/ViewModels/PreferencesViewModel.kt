@@ -27,6 +27,6 @@ class PreferencesViewModel @Inject constructor(private val preferenceManager: Pr
         }
     }
 
-    val isBudgetSet= preferenceManager.getBooleanValue(IS_BUDGET_SET)
+    val isBudgetSet = preferenceManager.getBooleanValue(IS_BUDGET_SET)
 
 }

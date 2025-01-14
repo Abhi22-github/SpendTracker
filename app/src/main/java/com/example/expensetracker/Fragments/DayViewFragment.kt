@@ -10,7 +10,6 @@ import androidx.fragment.app.activityViewModels
 import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_IDLE
 import com.example.expensetracker.CalenderViewPager.testViewPager2Adapter
-import com.example.expensetracker.Utilities.getPreviousAndNext10Days
 import com.example.expensetracker.Utilities.getPreviousAndNextDays
 import com.example.expensetracker.Utilities.toLocalDate
 import com.example.expensetracker.ViewModels.TransactionsViewModel
@@ -43,7 +42,7 @@ class DayViewFragment : Fragment() {
     private fun setCalenderDayViewPager() {
         val start = System.currentTimeMillis()
         val date = LocalDate.now()
-        var dateList = getPreviousAndNext10Days(date).toMutableList()
+        var dateList = getPreviousAndNextDays(date).toMutableList()
 //        val onlyDayAdapter = context?.let { DayViewPagerAdapter(it, viewModel, dateList) }
 //        binding.viewPagerCalenderDayFragment.setAdapter(onlyDayAdapter)
 ////        viewModel.currentSelectedDate.observe(context as LifecycleOwner, Observer {
@@ -137,13 +136,14 @@ class DayViewFragment : Fragment() {
 
         val onlyDayAdapter2Frag =
             testViewPager2Adapter(this, dateList, binding.viewPager2CalenderDayFragment)
+
         onlyDayAdapter2Frag.setData(dateList)
 //        binding.viewPager2CalenderDayFragment.isSaveFromParentEnabled = false
-
         binding.viewPager2CalenderDayFragment.setAdapter(onlyDayAdapter2Frag)
 //        viewModel.currentSelectedDate.observe(requireActivity() as LifecycleOwner, Observer {
 //            binding.viewPager2CalenderDayFragment.setCurrentItem(CURRENT_PAGE - it, false)
 //        })
+
 
 
         val tabMediator = TabLayoutMediator(
@@ -155,17 +155,17 @@ class DayViewFragment : Fragment() {
 
         tabMediator.attach()
 
-        GlobalScope.launch {
-            Log.d("Hello", "Reached")
-            dateList = getPreviousAndNextDays(LocalDate.now())
-            onlyDayAdapter2Frag.setData(dateList)
-            binding.viewPager2CalenderDayFragment.post(kotlinx.coroutines.Runnable {
-                dateList = getPreviousAndNextDays(LocalDate.now())
-                binding.viewPager2CalenderDayFragment.setCurrentItem(dateList.size / 2, false)
-                onlyDayAdapter2Frag.notifyDataSetChanged()
-            })
-
-        }
+//        GlobalScope.launch {
+//            Log.d("Hello", "Reached")
+//            dateList = getPreviousAndNextDays(LocalDate.now())
+//            onlyDayAdapter2Frag.setData(dateList)
+//            binding.viewPager2CalenderDayFragment.post(kotlinx.coroutines.Runnable {
+//                dateList = getPreviousAndNextDays(LocalDate.now())
+//                binding.viewPager2CalenderDayFragment.setCurrentItem(dateList.size / 2, false)
+//                onlyDayAdapter2Frag.notifyDataSetChanged()
+//            })
+//
+//        }
 
 
         binding.viewPager2CalenderDayFragment.registerOnPageChangeCallback(object :
@@ -178,7 +178,6 @@ class DayViewFragment : Fragment() {
                 super.onPageSelected(position)
                 if (position < 5 || position >= dateList.size - 5 && binding.viewPager2CalenderDayFragment.scrollState == SCROLL_STATE_IDLE)
                     GlobalScope.launch {
-                        Log.d("Hello", "Reached1${dateList[position]} $position")
                         val date = dateList[position]
                         dateList = getPreviousAndNextDays(date.toLocalDate())
                         onlyDayAdapter2Frag.setData(dateList)

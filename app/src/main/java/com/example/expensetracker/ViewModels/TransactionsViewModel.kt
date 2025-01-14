@@ -2,6 +2,7 @@ package com.example.expensetracker.ViewModels
 
 import android.content.Context
 import android.content.SharedPreferences
+import android.util.Log
 import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -15,6 +16,7 @@ import com.example.expensetracker.Model.TotalAmountClass
 import com.example.expensetracker.Model.TotalExpenseIncomeClass
 import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.Utilities.Constants
+import com.example.expensetracker.Utilities.Constants.EXPENSE
 import com.example.expensetracker.Utilities.UiState
 import com.google.android.material.chip.Chip
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -46,7 +48,8 @@ class TransactionsViewModel @Inject constructor(
     //flow to get total Expense amount for range
     private val _getTotalExpenseAmountForRangeFlow =
         MutableStateFlow<TotalAmountClass>(TotalAmountClass(0, 0))
-    val getTotalAmountForRangeFlow: StateFlow<TotalAmountClass> = _getTotalExpenseAmountForRangeFlow
+    val getTotalExpenseAmountForRangeFlow: StateFlow<TotalAmountClass> =
+        _getTotalExpenseAmountForRangeFlow
 
     //flow to get total Income amount for range
     private val _getTotalIncomeAmountForRangeFlow =
@@ -59,11 +62,17 @@ class TransactionsViewModel @Inject constructor(
     val getAllTransactionsForDateFlow: StateFlow<List<TransactionClass>> =
         _getAllTransactionsForDateFlow
 
-    //flow to get all transactions for give date
+    //flow to get list of TotalAmount
     private val _getListOfTotalAmountPerDayForRangeFlow =
         MutableStateFlow<List<TotalExpenseIncomeClass>>(listOf())
     val getListOfTotalAmountPerDayForRangeFlow: StateFlow<List<TotalExpenseIncomeClass>> =
         _getListOfTotalAmountPerDayForRangeFlow
+
+    //flow to get total amount for given date
+    private val _getTotalExpenseAmountForDateFlow =
+        MutableStateFlow<Long>(0L)
+    val getTotalExpenseAmountForDateFlow: StateFlow<Long> =
+        _getTotalExpenseAmountForDateFlow
 
 
     private val chipsName = arrayOf<String>()
@@ -295,6 +304,24 @@ class TransactionsViewModel @Inject constructor(
         }
     }
 
+    fun getTotalExpenseAmountForDate(date: Long) {
+        viewModelScope.launch {
+            loading()
+            val flow = transactionRepository.getTotalAmountForDate(date, EXPENSE)
+
+            flow?.let {
+                it.catch {
+                    error(it)
+                }?.collect { amount ->
+                    if (amount != null)
+                        _getTotalExpenseAmountForDateFlow.value = amount
+                    completed()
+                }
+            }
+
+        }
+    }
+
     fun setCurrentSelectedDate(currentSelectedDate: LocalDate?) {
         _currentSelectedDate.value = diffBetCurrentAndGivenDate(currentSelectedDate)
         this.currentSelectedDate = _currentSelectedDate
@@ -320,5 +347,6 @@ class TransactionsViewModel @Inject constructor(
 
     fun error(error: Throwable) {
         _uiState.value = UiState.Error(error.toString())
+        Log.d("Hello Error reason", error.toString())
     }
 }
