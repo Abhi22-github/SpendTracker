@@ -7,13 +7,11 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
-import androidx.lifecycle.Observer
 import com.example.expensetracker.CalenderViewPager.CalenderViewPagerAdapter
 import com.example.expensetracker.Utilities.Constants.CURRENT_PAGE
 import com.example.expensetracker.Utilities.getFirstAndLastDateOfGivenPeriod
 import com.example.expensetracker.Utilities.launchCoroutine
-import com.example.expensetracker.Utilities.parseAmount
-import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.example.expensetracker.ViewModels.TransactionsViewModel
 import com.example.expensetracker.databinding.FragmentMonthViewBinding
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.internal.managers.FragmentComponentManager
@@ -21,7 +19,7 @@ import dagger.hilt.android.internal.managers.FragmentComponentManager
 @AndroidEntryPoint
 class MonthViewFragment : Fragment() {
     private lateinit var binding: FragmentMonthViewBinding
-    private val viewModel: AddActivityViewModel by activityViewModels()
+    private val viewModel: TransactionsViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,12 +47,12 @@ class MonthViewFragment : Fragment() {
         val lastDate = currentDate.withDayOfMonth(currentDate.lengthOfMonth())
 
         val (firstDay,lastDay) = getFirstAndLastDateOfGivenPeriod(firstDate,lastDate)
-        viewModel.getTotalIncomeForRange(firstDay,lastDay).observe(viewLifecycleOwner, Observer{
-            binding.textViewIncomeMonthViewFragment.text = "₹"+parseAmount(it.totalAmount)
-        })
-        viewModel.getTotalExpenseForRange(firstDay,lastDay).observe(viewLifecycleOwner,Observer{
-            binding.textViewExpenseMonthViewFragment.text = "₹"+parseAmount(it.totalAmount)
-        })
+//        viewModel.getTotalIncomeForRange(firstDay,lastDay).observe(viewLifecycleOwner, Observer{
+//            binding.textViewIncomeMonthViewFragment.text = "₹"+parseAmount(it.totalAmount)
+//        })
+//        viewModel.getTotalExpenseForRange(firstDay,lastDay).observe(viewLifecycleOwner,Observer{
+//            binding.textViewExpenseMonthViewFragment.text = "₹"+parseAmount(it.totalAmount)
+//        })
     }
 
     private fun setCalenderMonthViewPager() {

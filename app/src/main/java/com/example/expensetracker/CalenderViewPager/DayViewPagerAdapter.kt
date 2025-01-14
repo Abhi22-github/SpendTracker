@@ -7,8 +7,6 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.PagerAdapter
@@ -17,16 +15,16 @@ import com.example.expensetracker.R
 import com.example.expensetracker.Utilities.Constants.CURRENT_PAGE
 import com.example.expensetracker.Utilities.LocalDateToLong
 import com.example.expensetracker.Utilities.LocalDateToString
-import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.example.expensetracker.ViewModels.TransactionsViewModel
+import kotlinx.coroutines.flow.onEach
 import java.time.LocalDate
 
 
 class DayViewPagerAdapter(
     val context: Context,
-    val viewModel: AddActivityViewModel,
+    val viewModel: TransactionsViewModel,
     val dateList: MutableList<String>,
-) :
-    PagerAdapter() {
+) : PagerAdapter() {
     val MAX_VALUE = 500
     lateinit var viewContainer: ViewGroup
 
@@ -52,43 +50,39 @@ class DayViewPagerAdapter(
             LinearLayoutManager(context, LinearLayoutManager.VERTICAL, false)
 
         viewModel.getAllTransactionsForDate(LocalDateToLong(getDateByPagerPosition(position)))
-            .observe(context as LifecycleOwner, Observer {
-                if (it.size != 0) {
-                    emptyMessageView.visibility = View.GONE
-                    recyclerView.visibility = View.VISIBLE
-                    val adapter: OnlyDayAdapter = object : OnlyDayAdapter(context) {
-                        override fun onBindViewHolder(
-                            holder: RecyclerView.ViewHolder,
-                            transactionClasses: List<TransactionClass>,
-                            position: Int
-                        ) {
-                            this@DayViewPagerAdapter.onBindView(
-                                holder.itemView,
-                                transactionClasses,
-                                position
-                            )
-                        }
+        viewModel.getAllTransactionsForDateFlow.onEach {
 
-                        override fun onCreateViewHolder(
-                            parent: ViewGroup,
-                            viewType: Int
-                        ): RecyclerView.ViewHolder {
-                            return object :
-                                RecyclerView.ViewHolder(this@DayViewPagerAdapter.onCreateView(parent)) {}
-                        }
+            if (it.size != 0) {
+                emptyMessageView.visibility = View.GONE
+                recyclerView.visibility = View.VISIBLE
+                val adapter: OnlyDayAdapter = object : OnlyDayAdapter(context) {
+                    override fun onBindViewHolder(
+                        holder: RecyclerView.ViewHolder,
+                        transactionClasses: List<TransactionClass>,
+                        position: Int
+                    ) {
+                        this@DayViewPagerAdapter.onBindView(
+                            holder.itemView, transactionClasses, position
+                        )
                     }
-                    recyclerView.adapter = adapter
-                } else {
-                    emptyMessageView.visibility = View.VISIBLE
-                    recyclerView.visibility = View.GONE
+
+                    override fun onCreateViewHolder(
+                        parent: ViewGroup, viewType: Int
+                    ): RecyclerView.ViewHolder {
+                        return object :
+                            RecyclerView.ViewHolder(this@DayViewPagerAdapter.onCreateView(parent)) {}
+                    }
                 }
-            })
+                recyclerView.adapter = adapter
+            } else {
+                emptyMessageView.visibility = View.VISIBLE
+                recyclerView.visibility = View.GONE
+            }
+        }
 
         container.addView(
-            view,
-            ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
+            view, ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT
             )
         )
         viewContainer = container
@@ -97,7 +91,7 @@ class DayViewPagerAdapter(
     }
 
     override fun getPageTitle(position: Int): CharSequence {
-       return LocalDateToString(getDateByPagerPosition(position))
+        return LocalDateToString(getDateByPagerPosition(position))
     }
 
 
@@ -108,9 +102,7 @@ class DayViewPagerAdapter(
     }
 
     private fun onBindView(
-        itemView: View,
-        transactionClasses: List<TransactionClass>,
-        position: Int
+        itemView: View, transactionClasses: List<TransactionClass>, position: Int
     ) {
         val main = itemView.findViewById<LinearLayout>(R.id.main)
         val note = itemView.findViewById<TextView>(R.id.textView_note_transactionViewHolder)
@@ -146,8 +138,7 @@ class DayViewPagerAdapter(
 
     private fun setLayoutInCenter(view: View, centerInParent: Int) {
         val buttonLayoutParameters = RelativeLayout.LayoutParams(
-            RelativeLayout.LayoutParams.WRAP_CONTENT,
-            RelativeLayout.LayoutParams.WRAP_CONTENT
+            RelativeLayout.LayoutParams.WRAP_CONTENT, RelativeLayout.LayoutParams.WRAP_CONTENT
         )
         buttonLayoutParameters.addRule(centerInParent)
         view.layoutParams = buttonLayoutParameters

@@ -7,12 +7,12 @@ import androidx.activity.viewModels
 import androidx.compose.material3.Surface
 import com.example.expensetracker.Composables.ExpenseTrackerTheme
 import com.example.expensetracker.Composables.Screens.SettingsScreen
-import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.example.expensetracker.ViewModels.TransactionsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class SettingComposeActivity : ComponentActivity() {
-    val viewmodel:AddActivityViewModel by viewModels()
+    val viewmodel:TransactionsViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {

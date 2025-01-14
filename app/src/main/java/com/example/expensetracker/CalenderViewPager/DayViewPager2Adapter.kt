@@ -8,8 +8,6 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.expensetracker.Model.TransactionClass
@@ -20,13 +18,14 @@ import com.example.expensetracker.Utilities.Constants.MAX_PAGES
 import com.example.expensetracker.Utilities.LocalDateToLong
 import com.example.expensetracker.Utilities.getDateFromMillis
 import com.example.expensetracker.Utilities.parseAmount
-import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.example.expensetracker.ViewModels.TransactionsViewModel
+import kotlinx.coroutines.flow.onEach
 import java.time.LocalDate
 
 
 class DayViewPager2Adapter(
     val context: Context,
-    val viewModel: AddActivityViewModel,
+    val viewModel: TransactionsViewModel,
     val dateList: MutableList<String>,
 ) :
     RecyclerView.Adapter<DayViewPager2Adapter.ViewHolder>() {
@@ -72,23 +71,26 @@ class DayViewPager2Adapter(
         }
         holder.recyclerView.adapter = adapter
         viewModel.getAllTransactionsForDate(LocalDateToLong(getLocalDateByPagerPosition(position)))
-            .observe(context as LifecycleOwner, Observer {
-                if (it.size != 0) {
-                    holder.emptyMessageView.visibility = View.GONE
-                    holder.recyclerView.visibility = View.VISIBLE
-                    adapter.updateData(it)
-                } else {
-                    holder.emptyMessageView.visibility = View.VISIBLE
-                    holder.recyclerView.visibility = View.GONE
-                }
-                adapter.notifyDataSetChanged()
-            })
+
+        viewModel.getAllTransactionsForDateFlow.onEach {
+            if (it.size != 0) {
+                holder.emptyMessageView.visibility = View.GONE
+                holder.recyclerView.visibility = View.VISIBLE
+                adapter.updateData(it)
+            } else {
+                holder.emptyMessageView.visibility = View.VISIBLE
+                holder.recyclerView.visibility = View.GONE
+            }
+            adapter.notifyDataSetChanged()
+        }
+
 
     }
 
     private fun onCreateView(parent: ViewGroup): View {
         val inflater = LayoutInflater.from(parent.context)
-        val view: View = inflater.inflate(R.layout.single_transaction_view_holder_test, parent, false)
+        val view: View =
+            inflater.inflate(R.layout.single_transaction_view_holder_test, parent, false)
         return view
     }
 
@@ -162,12 +164,12 @@ class DayViewPager2Adapter(
         return date.plusDays(position.toLong() - CURRENT_PAGE)
     }
 
-    fun getDayByPagerPosition(position: Int):String{
+    fun getDayByPagerPosition(position: Int): String {
         val date = getLocalDateByPagerPosition(position)
         return date.dayOfWeek.toString().take(3).lowercase().replaceFirstChar { it.uppercase() }
     }
 
-    fun getOnlyDateByPagerPosition(position: Int):String{
+    fun getOnlyDateByPagerPosition(position: Int): String {
         val date = getLocalDateByPagerPosition(position)
         return date.toString().takeLast(2)
     }
@@ -175,7 +177,8 @@ class DayViewPager2Adapter(
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val recyclerView =
             itemView.findViewById<RecyclerView>(R.id.recyclerView_dayTransaction_dayRecyclerView)
-        val emptyMessageView = itemView.findViewById<View>(R.id.include_emptyScreenDialog_singleDayLayout)
+        val emptyMessageView =
+            itemView.findViewById<View>(R.id.include_emptyScreenDialog_singleDayLayout)
     }
 
 }

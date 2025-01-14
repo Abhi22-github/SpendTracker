@@ -28,7 +28,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -46,7 +45,7 @@ import com.example.expensetracker.R
 import com.example.expensetracker.Utilities.Constants.EXPENSE
 import com.example.expensetracker.Utilities.convertLocalDateToLong
 import com.example.expensetracker.Utilities.getDateFromMillis
-import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.example.expensetracker.ViewModels.TransactionsViewModel
 import java.time.LocalDate
 import kotlin.random.Random
 
@@ -55,11 +54,11 @@ import kotlin.random.Random
 fun TransactionsListCompose(
     showSingleDateTransactions: Boolean,
     date: LocalDate,
-    viewModel: AddActivityViewModel = hiltViewModel()
+    viewModel: TransactionsViewModel = hiltViewModel()
 ) {
 
     if (!showSingleDateTransactions) {
-        val transactionList by viewModel.allTransactionFlow.collectAsState(emptyList<TransactionClass>())
+        val transactionList by viewModel.allTransactions.collectAsState(emptyList<TransactionClass>())
         val transactionsMap =
             transactionList.sortedByDescending { it.dateWithTime }.groupBy { it.date }.toSortedMap()
 
@@ -82,10 +81,8 @@ fun TransactionsListCompose(
                 EmptyScreen()
         }
     } else {
-        val transactionList by viewModel.getAllTransactionsForDate(convertLocalDateToLong(date))
-            .observeAsState(
-                emptyList<TransactionClass>()
-            )
+        viewModel.getAllTransactionsForDate(convertLocalDateToLong(date))
+        val transactionList by viewModel.getAllTransactionsForDateFlow.collectAsState()
         val lazyList = rememberLazyListState()
         Surface(color = MaterialTheme.colorScheme.surface) {
             if (!transactionList.isEmpty())
