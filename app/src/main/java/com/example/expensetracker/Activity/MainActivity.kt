@@ -87,7 +87,7 @@ class MainActivity : AppCompatActivity() {
             fragmentTransaction = supportFragmentManager.beginTransaction()
             fragmentTransaction!!.replace(
                 R.id.frameLayout_fragment_mainActivity,
-                listViewFragment!!
+                ListViewFragment()
             )
             fragmentTransaction!!.commit()
         }
@@ -98,7 +98,7 @@ class MainActivity : AppCompatActivity() {
             fragmentTransaction = supportFragmentManager.beginTransaction()
             fragmentTransaction!!.replace(
                 R.id.frameLayout_fragment_mainActivity,
-                monthViewFragment!!
+                MonthViewFragment()!!
             )
             fragmentTransaction!!.addToBackStack("MonthView")
             fragmentTransaction!!.commit()
@@ -108,7 +108,7 @@ class MainActivity : AppCompatActivity() {
     private fun setUpDayFragment() {
         Handler().post {
             fragmentTransaction = supportFragmentManager.beginTransaction()
-            fragmentTransaction!!.replace(R.id.frameLayout_fragment_mainActivity, dayViewFragment!!)
+            fragmentTransaction!!.replace(R.id.frameLayout_fragment_mainActivity, DayViewFragment()!!)
             fragmentTransaction!!.addToBackStack("DayView")
             fragmentTransaction!!.commit()
         }

@@ -27,6 +27,7 @@ import java.time.LocalDate
 class DayViewPager2Adapter(
     val context: Context,
     val viewModel: AddActivityViewModel,
+    val dateList: MutableList<String>,
 ) :
     RecyclerView.Adapter<DayViewPager2Adapter.ViewHolder>() {
     val MAX_VALUE = MAX_PAGES
