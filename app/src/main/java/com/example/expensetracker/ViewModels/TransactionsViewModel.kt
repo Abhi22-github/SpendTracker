@@ -15,11 +15,13 @@ import com.example.expensetracker.Model.TotalAmountClass
 import com.example.expensetracker.Model.TotalExpenseIncomeClass
 import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.Utilities.Constants
+import com.example.expensetracker.Utilities.UiState
 import com.google.android.material.chip.Chip
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import java.math.BigDecimal
@@ -36,6 +38,10 @@ class TransactionsViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val categoryRepository: CategoryRepository
 ) : ViewModel() {
+
+    //flow for Ui states
+    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
+    val uiState: StateFlow<UiState> = _uiState
 
     //flow to get total Expense amount for range
     private val _getTotalExpenseAmountForRangeFlow =
@@ -223,21 +229,27 @@ class TransactionsViewModel @Inject constructor(
 
     fun getTotalIncomeForRange(startDate: Long, endDate: Long) {
         viewModelScope.launch {
+            loading()
             getTotalAmountByDateRangeAndCategoryType(
-                startDate,
-                endDate,
-                Constants.INCOME
-            ).collect { totalAmount -> _getTotalIncomeAmountForRangeFlow.value = totalAmount }
+                startDate, endDate, Constants.INCOME
+            ).catch { e ->
+                error(e)
+            }.collect { totalAmount ->
+                _getTotalIncomeAmountForRangeFlow.value = totalAmount
+                completed()
+            }
         }
     }
 
     fun getTotalExpenseForRange(startDate: Long, endDate: Long) {
         viewModelScope.launch {
+            loading()
             getTotalAmountByDateRangeAndCategoryType(
-                startDate,
-                endDate,
-                Constants.EXPENSE
-            ).collect { totalAmount -> _getTotalExpenseAmountForRangeFlow.value = totalAmount }
+                startDate, endDate, Constants.EXPENSE
+            ).catch { error(it) }.collect { totalAmount ->
+                _getTotalExpenseAmountForRangeFlow.value = totalAmount
+                completed()
+            }
         }
     }
 
@@ -252,28 +264,34 @@ class TransactionsViewModel @Inject constructor(
 
 
     fun getListOfTotalAmountPerDayForRange(
-        startDate: Long,
-        endDate: Long
+        startDate: Long, endDate: Long
     ) {
         viewModelScope.launch {
+            loading()
             transactionRepository.getListOfTotalAmountPerDayForRange(startDate, endDate)
-                .collect { totalAmountList ->
+                .catch { error(it) }.collect { totalAmountList ->
                     _getListOfTotalAmountPerDayForRangeFlow.value = totalAmountList
+                    completed()
                 }
         }
     }
 
     fun deleteSingleTransaction(transactionClass: TransactionClass) {
         viewModelScope.launch {
+            loading()
             transactionRepository.delete(transactionClass)
+            completed()
         }
     }
 
     fun getAllTransactionsForDate(date: Long) {
         viewModelScope.launch {
-            transactionRepository.getAllTransactionsForDate(date).collect { transactionsList ->
-                _getAllTransactionsForDateFlow.value = transactionsList
-            }
+            loading()
+            transactionRepository.getAllTransactionsForDate(date).catch { error(it) }
+                .collect { transactionsList ->
+                    _getAllTransactionsForDateFlow.value = transactionsList
+                    completed()
+                }
         }
     }
 
@@ -290,5 +308,17 @@ class TransactionsViewModel @Inject constructor(
         } else {
             0
         }
+    }
+
+    fun loading() {
+        _uiState.value = UiState.Loading
+    }
+
+    fun completed() {
+        _uiState.value = UiState.Success
+    }
+
+    fun error(error: Throwable) {
+        _uiState.value = UiState.Error(error.toString())
     }
 }
