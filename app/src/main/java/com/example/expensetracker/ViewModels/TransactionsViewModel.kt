@@ -6,7 +6,7 @@ import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.asFlow
+import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.Database.CategoryRepository
 import com.example.expensetracker.Database.TransactionRepository
 import com.example.expensetracker.Events.EventMessage
@@ -17,6 +17,10 @@ import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.Utilities.Constants
 import com.google.android.material.chip.Chip
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import java.math.BigDecimal
 import java.time.Instant
@@ -28,10 +32,34 @@ import java.util.Calendar
 import javax.inject.Inject
 
 @HiltViewModel
-class AddActivityViewModel @Inject constructor(
+class TransactionsViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
     private val categoryRepository: CategoryRepository
 ) : ViewModel() {
+
+    //flow to get total Expense amount for range
+    private val _getTotalExpenseAmountForRangeFlow =
+        MutableStateFlow<TotalAmountClass>(TotalAmountClass(0, 0))
+    val getTotalAmountForRangeFlow: StateFlow<TotalAmountClass> = _getTotalExpenseAmountForRangeFlow
+
+    //flow to get total Income amount for range
+    private val _getTotalIncomeAmountForRangeFlow =
+        MutableStateFlow<TotalAmountClass>(TotalAmountClass(0, 0))
+    val getTotalIncomeAmountForRangeFlow: StateFlow<TotalAmountClass> =
+        _getTotalIncomeAmountForRangeFlow
+
+    //flow to get all transactions for give date
+    private val _getAllTransactionsForDateFlow = MutableStateFlow<List<TransactionClass>>(listOf())
+    val getAllTransactionsForDateFlow: StateFlow<List<TransactionClass>> =
+        _getAllTransactionsForDateFlow
+
+    //flow to get all transactions for give date
+    private val _getListOfTotalAmountPerDayForRangeFlow =
+        MutableStateFlow<List<TotalExpenseIncomeClass>>(listOf())
+    val getListOfTotalAmountPerDayForRangeFlow: StateFlow<List<TotalExpenseIncomeClass>> =
+        _getListOfTotalAmountPerDayForRangeFlow
+
+
     private val chipsName = arrayOf<String>()
     private val chipsList: List<Chip> = ArrayList()
     private var currentSelectedExpenseCategory = ""
@@ -105,11 +133,7 @@ class AddActivityViewModel @Inject constructor(
                 //store the data
                 Toast.makeText(mContext, "success", Toast.LENGTH_SHORT).show()
                 storeFormDataInDatabase(
-                    transactionTypeFromViewModel,
-                    amount,
-                    note,
-                    category,
-                    selectedDate
+                    transactionTypeFromViewModel, amount, note, category, selectedDate
                 )
             }
         } else if (transactionTypeFromViewModel == Constants.INCOME) {
@@ -120,11 +144,7 @@ class AddActivityViewModel @Inject constructor(
                 //store the data
                 Toast.makeText(mContext, "success", Toast.LENGTH_SHORT).show()
                 storeFormDataInDatabase(
-                    transactionTypeFromViewModel,
-                    amount,
-                    note,
-                    category,
-                    selectedDate
+                    transactionTypeFromViewModel, amount, note, category, selectedDate
                 )
             }
         }
@@ -132,11 +152,7 @@ class AddActivityViewModel @Inject constructor(
 
 
     private fun storeFormDataInDatabase(
-        expense: String,
-        amount: String,
-        note: String,
-        category: String?,
-        dateWithTime: Long
+        expense: String, amount: String, note: String, category: String?, dateWithTime: Long
     ) {
         // on below line we are creating
         // a variable for our modal class.
@@ -146,14 +162,14 @@ class AddActivityViewModel @Inject constructor(
         modal.note = note.trim { it <= ' ' }
         modal.category = category!!.trim { it <= ' ' }
         modal.dateWithTime = dateWithTime
-        val date = Instant.ofEpochMilli(dateWithTime)
-            .atZone(ZoneId.systemDefault()) // default zone
+        val date = Instant.ofEpochMilli(dateWithTime).atZone(ZoneId.systemDefault()) // default zone
             .toLocalDate()
         modal.date = date.toString().replace("-", "").toLong()
 
 
         //   Log.d("date in local date" ,d.toString());
-        transactionRepository!!.insert(modal)
+        viewModelScope.launch { transactionRepository.insert(modal) }
+
         EventBus.getDefault().post(EventMessage(6, "success"))
 
         //  liveData.postValue("something");
@@ -163,10 +179,9 @@ class AddActivityViewModel @Inject constructor(
         this.selectedDate = date
     }
 
-    val allTransactions: LiveData<List<TransactionClass>>
+    val allTransactions: Flow<List<TransactionClass>>
         get() = transactionRepository.allTransactions
 
-    val allTransactionFlow = allTransactions.asFlow()
 
     fun validateCategoryData(categoryClass: CategoryClass) {
         if (categoryClass.categoryName!!.isEmpty()) {
@@ -206,39 +221,60 @@ class AddActivityViewModel @Inject constructor(
         categoryRepository.delete(categoryClass)
     }
 
-    fun getTotalIncomeForRange(startDate: Long?, endDate: Long?): LiveData<TotalAmountClass> {
-        return getTotalAmountByDateRangeAndCategoryType(startDate, endDate, Constants.INCOME)
+    fun getTotalIncomeForRange(startDate: Long, endDate: Long) {
+        viewModelScope.launch {
+            getTotalAmountByDateRangeAndCategoryType(
+                startDate,
+                endDate,
+                Constants.INCOME
+            ).collect { totalAmount -> _getTotalIncomeAmountForRangeFlow.value = totalAmount }
+        }
     }
 
-    fun getTotalExpenseForRange(startDate: Long?, endDate: Long?): LiveData<TotalAmountClass> {
-        return getTotalAmountByDateRangeAndCategoryType(startDate, endDate, Constants.EXPENSE)
+    fun getTotalExpenseForRange(startDate: Long, endDate: Long) {
+        viewModelScope.launch {
+            getTotalAmountByDateRangeAndCategoryType(
+                startDate,
+                endDate,
+                Constants.EXPENSE
+            ).collect { totalAmount -> _getTotalExpenseAmountForRangeFlow.value = totalAmount }
+        }
     }
 
-    fun getTotalAmountByDateRangeAndCategoryType(
-        startDate: Long?,
-        endDate: Long?,
-        categoryType: String?
-    ): LiveData<TotalAmountClass> {
+
+    suspend fun getTotalAmountByDateRangeAndCategoryType(
+        startDate: Long, endDate: Long, categoryType: String
+    ): Flow<TotalAmountClass> {
         return transactionRepository.getTotalAmountByDateRangeAndCategoryType(
-            startDate,
-            endDate,
-            categoryType
+            startDate, endDate, categoryType
         )
     }
 
+
     fun getListOfTotalAmountPerDayForRange(
-        startDate: Long?,
-        endDate: Long?
-    ): LiveData<List<TotalExpenseIncomeClass>> {
-        return transactionRepository.getListOfTotalAmountPerDayForRange(startDate, endDate)
+        startDate: Long,
+        endDate: Long
+    ) {
+        viewModelScope.launch {
+            transactionRepository.getListOfTotalAmountPerDayForRange(startDate, endDate)
+                .collect { totalAmountList ->
+                    _getListOfTotalAmountPerDayForRangeFlow.value = totalAmountList
+                }
+        }
     }
 
-    fun deleteSingleTransaction(transactionClass: TransactionClass?) {
-        transactionRepository.delete(transactionClass)
+    fun deleteSingleTransaction(transactionClass: TransactionClass) {
+        viewModelScope.launch {
+            transactionRepository.delete(transactionClass)
+        }
     }
 
-    fun getAllTransactionsForDate(date: Long?): LiveData<List<TransactionClass>> {
-        return transactionRepository.getAllTransactionsForDate(date)
+    fun getAllTransactionsForDate(date: Long) {
+        viewModelScope.launch {
+            transactionRepository.getAllTransactionsForDate(date).collect { transactionsList ->
+                _getAllTransactionsForDateFlow.value = transactionsList
+            }
+        }
     }
 
     fun setCurrentSelectedDate(currentSelectedDate: LocalDate?) {

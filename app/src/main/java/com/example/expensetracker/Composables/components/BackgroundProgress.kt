@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.times
 import com.example.expensetracker.Composables.WavyShape
 import com.example.expensetracker.Composables.utils.HarmonizedColorPalette
 import com.example.expensetracker.Utilities.clamp
-import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.example.expensetracker.ViewModels.TransactionsViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
 
@@ -37,7 +37,7 @@ import kotlin.math.ceil
 @Composable
 fun BackgroundProgress(
     harmonizedColor: HarmonizedColorPalette,
-    viewModel: AddActivityViewModel
+    viewModel: TransactionsViewModel
 ) {
     val percentWithNewSpent by viewModel.newTotal.observeAsState(1f)
     val percentWithoutNewSpent by  viewModel.oldTotal.observeAsState(1f)

@@ -19,7 +19,7 @@ import com.example.expensetracker.Model.CategoryClass
 import com.example.expensetracker.R
 import com.example.expensetracker.Utilities.Constants
 import com.example.expensetracker.Utilities.parseAmount
-import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.example.expensetracker.ViewModels.TransactionsViewModel
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
@@ -56,7 +56,7 @@ class AddActivity : AppCompatActivity(), View.OnClickListener {
 
     //vars
     private lateinit var chipsList: List<Chip>
-    private val viewModel: AddActivityViewModel by viewModels()
+    private val viewModel: TransactionsViewModel by viewModels()
     private lateinit var mContext: Context
     lateinit var simpleDateFormat: SimpleDateFormat
     private lateinit var categoryClassList: List<CategoryClass>

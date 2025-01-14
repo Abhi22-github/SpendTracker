@@ -13,7 +13,7 @@ import com.example.expensetracker.CalenderViewPager.testViewPager2Adapter
 import com.example.expensetracker.Utilities.getPreviousAndNext10Days
 import com.example.expensetracker.Utilities.getPreviousAndNextDays
 import com.example.expensetracker.Utilities.toLocalDate
-import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.example.expensetracker.ViewModels.TransactionsViewModel
 import com.example.expensetracker.databinding.FragmentDayViewBinding
 import com.google.android.material.tabs.TabLayoutMediator
 import dagger.hilt.android.AndroidEntryPoint
@@ -24,7 +24,7 @@ import java.time.LocalDate
 @AndroidEntryPoint
 class DayViewFragment : Fragment() {
     private lateinit var binding: FragmentDayViewBinding
-    private val viewModel: AddActivityViewModel by activityViewModels()
+    private val viewModel: TransactionsViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?

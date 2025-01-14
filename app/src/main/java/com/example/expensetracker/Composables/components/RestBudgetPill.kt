@@ -37,11 +37,11 @@ import com.example.expensetracker.Composables.colorNotGood
 import com.example.expensetracker.Composables.utils.combineColors
 import com.example.expensetracker.Composables.utils.harmonize
 import com.example.expensetracker.Composables.utils.toPalette
-import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.example.expensetracker.ViewModels.TransactionsViewModel
 
 @Composable
 fun RowScope.RestBudgetPill(
-     viewModel: AddActivityViewModel
+     viewModel: TransactionsViewModel
 ){
     val percent by viewModel.newTotal.observeAsState()
     val newDailyBudget by viewModel.newTotal.observeAsState("")

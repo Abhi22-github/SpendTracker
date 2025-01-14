@@ -21,7 +21,7 @@ import com.example.expensetracker.Fragments.MonthViewFragment
 import com.example.expensetracker.Model.CategoryClass
 import com.example.expensetracker.R
 import com.example.expensetracker.Utilities.Constants
-import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.example.expensetracker.ViewModels.TransactionsViewModel
 import com.example.expensetracker.databinding.ActivityMainBinding
 import com.google.android.material.appbar.AppBarLayout
 import com.google.android.material.appbar.MaterialToolbar
@@ -40,7 +40,7 @@ class MainActivity : AppCompatActivity() {
 
     private var context: Context? = null
     private val transactionViewAdapter: TransactionViewAdapter? = null
-    private val viewModel: AddActivityViewModel by viewModels()
+    private val viewModel: TransactionsViewModel by viewModels()
     private var drawerLayout: DrawerLayout? = null
     private var appBarLayout: AppBarLayout? = null
     private var toolbar: MaterialToolbar? = null

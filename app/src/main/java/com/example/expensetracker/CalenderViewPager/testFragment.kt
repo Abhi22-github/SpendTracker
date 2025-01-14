@@ -7,24 +7,23 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.expensetracker.Adapters.TransactionViewAdapter
 import com.example.expensetracker.Composables.ExpenseTrackerTheme
 import com.example.expensetracker.Composables.components.TransactionsListCompose
-import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.Utilities.toLocalDate
 import com.example.expensetracker.Utilities.toNormalString
-import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.example.expensetracker.ViewModels.TransactionsViewModel
 import com.example.expensetracker.databinding.FragmentTestBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.onEach
 import java.time.LocalDate
 
 @AndroidEntryPoint
 class testFragment() : Fragment() {
 
     lateinit var binding: FragmentTestBinding
-    val viewModel: AddActivityViewModel by viewModels()
+    val viewModel: TransactionsViewModel by viewModels()
     var position: Int = 0
     lateinit var date: LocalDate
 
@@ -67,13 +66,13 @@ class testFragment() : Fragment() {
                 requireActivity()
             )
         )
-        viewModel.allTransactions.observe(viewLifecycleOwner, Observer<List<TransactionClass>> {
+        viewModel.allTransactions.onEach {
             val transactionViewAdapter = TransactionViewAdapter(
                 requireActivity(),
                 it
             )
             binding.testRecyclerView.adapter = transactionViewAdapter
-        })
+        }
     }
 
 }

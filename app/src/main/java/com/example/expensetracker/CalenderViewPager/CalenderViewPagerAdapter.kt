@@ -9,22 +9,20 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.PagerAdapter
 import com.example.expensetracker.Activity.MainActivity
 import com.example.expensetracker.Fragments.DayViewFragment
 import com.example.expensetracker.Model.Day
-import com.example.expensetracker.Model.TotalExpenseIncomeClass
 import com.example.expensetracker.R
 import com.example.expensetracker.Utilities.Constants
 import com.example.expensetracker.Utilities.LocalDateToLong
 import com.example.expensetracker.Utilities.convertLocalDateToLong
 import com.example.expensetracker.Utilities.convertTotalExpenseIncomeClassToMap
 import com.example.expensetracker.Utilities.parseAmount
-import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.example.expensetracker.ViewModels.TransactionsViewModel
+import kotlinx.coroutines.flow.onEach
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -34,7 +32,7 @@ import kotlin.math.abs
 
 class CalenderViewPagerAdapter(
     private val context: Context,
-    private val viewModel: AddActivityViewModel
+    private val viewModel: TransactionsViewModel
 ) : PagerAdapter() {
     private val layoutInflater: LayoutInflater
     private lateinit var viewContainer: ViewGroup
@@ -97,17 +95,15 @@ class CalenderViewPagerAdapter(
 
         daysList = daysInMonthArray(position)
         viewModel.getListOfTotalAmountPerDayForRange(
-            LocalDateToLong(daysList!![0]), LocalDateToLong(
-                daysList!![daysList!!.size - 1]
+            LocalDateToLong(daysList[0]), LocalDateToLong(
+                daysList[daysList.size - 1]
             )
-        ).observe(
-            (context as LifecycleOwner), object : Observer<List<TotalExpenseIncomeClass>> {
-                override fun onChanged(value: List<TotalExpenseIncomeClass>) {
-                    map = convertTotalExpenseIncomeClassToMap(value)
-                    daysOfMonthAdapter.updateData(map)
-                    daysOfMonthAdapter.notifyDataSetChanged()
-                }
-            })
+        )
+        viewModel.getListOfTotalAmountPerDayForRangeFlow.onEach { listValue ->
+            map = convertTotalExpenseIncomeClassToMap(listValue)
+            daysOfMonthAdapter.updateData(map)
+            daysOfMonthAdapter.notifyDataSetChanged()
+        }
 
         container.addView(
             recyclerView,
@@ -180,7 +176,7 @@ class CalenderViewPagerAdapter(
         itemLayout.setOnClickListener(View.OnClickListener {
             try {
                 viewModel.setCurrentSelectedDate(date)
-                Log.d("val + ",date.toString())
+                Log.d("val + ", date.toString())
                 val fragmentTransaction =
                     (context as MainActivity).supportFragmentManager.beginTransaction()
                 fragmentTransaction.replace(
