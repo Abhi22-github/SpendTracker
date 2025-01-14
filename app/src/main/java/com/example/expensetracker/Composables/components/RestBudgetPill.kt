@@ -1,5 +1,6 @@
 package com.example.expensetracker.Composables.components
 
+import android.util.Log
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -17,8 +18,9 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -30,6 +32,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.expensetracker.Composables.colorBad
 import com.example.expensetracker.Composables.colorEditor
 import com.example.expensetracker.Composables.colorGood
@@ -37,17 +40,37 @@ import com.example.expensetracker.Composables.colorNotGood
 import com.example.expensetracker.Composables.utils.combineColors
 import com.example.expensetracker.Composables.utils.harmonize
 import com.example.expensetracker.Composables.utils.toPalette
+import com.example.expensetracker.Utilities.convertLocalDateToLong
+import com.example.expensetracker.ViewModels.AnimationViewModel
+import com.example.expensetracker.ViewModels.PreferencesViewModel
 import com.example.expensetracker.ViewModels.TransactionsViewModel
+import java.time.LocalDate
 
 @Composable
 fun RowScope.RestBudgetPill(
-     viewModel: TransactionsViewModel
-){
-    val percent by viewModel.newTotal.observeAsState()
-    val newDailyBudget by viewModel.newTotal.observeAsState("")
+    date: LocalDate,
+    transactionsViewModel: TransactionsViewModel = hiltViewModel(),
+    preferenceViewModel: PreferencesViewModel = hiltViewModel(),
+    animationViewModel: AnimationViewModel = hiltViewModel()
+) {
+    LaunchedEffect(Unit) {
+        transactionsViewModel.getTotalExpenseAmountForDate(convertLocalDateToLong(date))
+    }
+
+    val budget by preferenceViewModel.getBudgetValue.collectAsState(1f)
+
+    val percent by animationViewModel.newSpentPercentage.collectAsState()
+    val newDailyBudget by transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
+
+
+    Log.d("Recompose",percent.toString())
+
+
+    Log.d("Hello percent", percent.toString())
+
     val percentWithNewSpentAnimated = animateFloatAsState(
         label = "percentWithNewSpentAnimated",
-        targetValue = percent!!,
+        targetValue = percent,
         animationSpec = TweenSpec(300),
     ).value
 
@@ -79,7 +102,7 @@ fun RowScope.RestBudgetPill(
                 .fillMaxHeight(),
             contentAlignment = Alignment.CenterEnd,
         ) {
-            BackgroundProgress(harmonizedColor = harmonizedColor, viewModel = viewModel)
+            BackgroundProgress(harmonizedColor = harmonizedColor, viewModel = transactionsViewModel)
             Row(
                 modifier = Modifier
                     .fillMaxSize()
@@ -106,12 +129,12 @@ fun RowScope.RestBudgetPill(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start,
             ) {
-                //StatusLabel(harmonizedColor)
+                StatusLabel(harmonizedColor)
                 Spacer(modifier = Modifier.weight(1f))
                 AnimatedNumber(
-                    value = newDailyBudget.toString(),
-                    style = MaterialTheme.typography.headlineLarge.copy(
-                        fontSize = MaterialTheme.typography.headlineMedium.fontSize
+                    value = "₹"+newDailyBudget.toString(),
+                    style = MaterialTheme.typography.titleLarge.copy(
+                        fontSize = MaterialTheme.typography.titleLarge.fontSize
                     ),
                 )
                 Spacer(modifier = Modifier.padding(end = 10.dp))
@@ -119,6 +142,7 @@ fun RowScope.RestBudgetPill(
         }
     }
 }
+
 fun ContentDrawScope.drawWithLayer(block: ContentDrawScope.() -> Unit) {
     with(drawContext.canvas.nativeCanvas) {
         val checkPoint = saveLayer(null, null)

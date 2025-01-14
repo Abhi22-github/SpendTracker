@@ -56,6 +56,14 @@ fun TransactionsListCompose(
     date: LocalDate,
     viewModel: TransactionsViewModel = hiltViewModel()
 ) {
+    val uiState by viewModel.uiState.collectAsState()
+//    LaunchedEffect(uiState) {
+//        when(uiState){
+//            is UiState.Loading -> viewModel.getAllTransactionsForDate(LocalDateToLong(date))
+//            is UiState.Error -> {}
+//            UiState.Success -> {}
+//        }
+//    }
 
     if (!showSingleDateTransactions) {
         val transactionList by viewModel.allTransactions.collectAsState(emptyList<TransactionClass>())

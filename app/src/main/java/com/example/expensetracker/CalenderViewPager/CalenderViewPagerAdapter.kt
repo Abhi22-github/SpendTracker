@@ -1,7 +1,6 @@
 package com.example.expensetracker.CalenderViewPager
 
 import android.content.Context
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -176,7 +175,6 @@ class CalenderViewPagerAdapter(
         itemLayout.setOnClickListener(View.OnClickListener {
             try {
                 viewModel.setCurrentSelectedDate(date)
-                Log.d("val + ", date.toString())
                 val fragmentTransaction =
                     (context as MainActivity).supportFragmentManager.beginTransaction()
                 fragmentTransaction.replace(

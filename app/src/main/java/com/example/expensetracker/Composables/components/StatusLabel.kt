@@ -1,0 +1,116 @@
+package com.example.expensetracker.Composables.components
+
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.TweenSpec
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.expensetracker.Composables.utils.HarmonizedColorPalette
+import com.example.expensetracker.ViewModels.AnimationViewModel
+import com.example.expensetracker.ViewModels.DaileBudgetState
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun StatusLabel(
+    harmonizedColor: HarmonizedColorPalette,
+    animationViewModel: AnimationViewModel = hiltViewModel()
+) {
+    val budgetState by animationViewModel.state.collectAsState(DaileBudgetState.NORMAL)
+
+    val textColor = LocalContentColor.current
+
+    Box(contentAlignment = Alignment.CenterStart) {
+        Row(
+            modifier = Modifier.height(44.dp),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            val textStartOffset by animateDpAsState(
+                label = "textStartOffset",
+                targetValue = if (budgetState === DaileBudgetState.END) 44.dp else 18.dp,
+                animationSpec = TweenSpec(250),
+            )
+
+            Spacer(modifier = Modifier.width(textStartOffset))
+            Text(
+                text = when (budgetState) {
+                    DaileBudgetState.NORMAL -> "For Today"
+                    DaileBudgetState.MIDDLE -> "For Today"
+                    DaileBudgetState.END -> "New Daily"
+                    DaileBudgetState.OVERSPEND -> "Daily Budget Exhausted"
+                },
+                style = MaterialTheme.typography.headlineMedium.copy(
+                    fontSize = MaterialTheme.typography.titleMedium.fontSize
+                ),
+                color = textColor.copy(alpha = 0.6f),
+                overflow = TextOverflow.Ellipsis,
+                softWrap = false,
+            )
+            Spacer(modifier = Modifier.width(14.dp))
+        }
+        AnimatedVisibility(
+            visible = budgetState === DaileBudgetState.END,
+            enter = fadeIn(tween(durationMillis = 250)),
+            exit = fadeOut(tween(durationMillis = 250)),
+        ) {
+            Card(
+                modifier = Modifier.size(50.dp),
+                shape = CircleShape,
+                colors = CardDefaults.cardColors(
+                    containerColor = harmonizedColor.container.copy(alpha = 0f),
+                    contentColor = harmonizedColor.onContainer,
+                ),
+                onClick = {
+                    if (budgetState === DaileBudgetState.END) {
+//                        appViewModel.openSheet(
+//                            PathState(
+//                                BUDGET_IS_OVER_DESCRIPTION_SHEET
+//                            )
+//                        )
+//                    } else {
+//                        appViewModel.openSheet(
+//                            PathState(
+//                                NEW_DAY_BUDGET_DESCRIPTION_SHEET
+//                            )
+//                        )
+//                    }
+                    }
+                }
+            ) {
+//                Row(
+//                    Modifier.fillMaxHeight(),
+//                    verticalAlignment = Alignment.CenterVertically,
+//                ) {
+//                    Spacer(modifier = Modifier.width(14.dp))
+//                    Icon(
+//                        painter = painterResource(R.drawable.ic_info),
+//                        contentDescription = null,
+//                        modifier = Modifier.size(22.dp)
+//                    )
+//                    Spacer(modifier = Modifier.width(14.dp))
+//                }
+            }
+        }
+    }
+}

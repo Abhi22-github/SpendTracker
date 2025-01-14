@@ -37,7 +37,7 @@ class StatisticsActivity : ComponentActivity() {
                     Button(onClick = { incrementSpend() }) {
                     }
                     Row {
-                        RestBudgetPill(viewModel = viewModel)
+                        RestBudgetPill(date = LocalDate.now(), transactionsViewModel = viewModel)
                     }
                     TransactionsListCompose(false, LocalDate.now(),viewModel = viewModel)
                 }
