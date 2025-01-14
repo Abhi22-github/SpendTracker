@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -43,30 +44,58 @@ import com.example.expensetracker.Converters.TransactionConverter
 import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.R
 import com.example.expensetracker.Utilities.Constants.EXPENSE
+import com.example.expensetracker.Utilities.convertLocalDateToLong
 import com.example.expensetracker.Utilities.getDateFromMillis
 import com.example.expensetracker.ViewModels.AddActivityViewModel
+import java.time.LocalDate
 import kotlin.random.Random
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun TransactionsListCompose(viewModel: AddActivityViewModel = hiltViewModel()) {
+fun TransactionsListCompose(
+    showSingleDateTransactions: Boolean,
+    date: LocalDate,
+    viewModel: AddActivityViewModel = hiltViewModel()
+) {
 
-    val transactionList by viewModel.allTransactionFlow.collectAsState(emptyList<TransactionClass>())
-    val transactionsMap =
-        transactionList.sortedByDescending { it.dateWithTime }.groupBy { it.date }.toSortedMap()
+    if (!showSingleDateTransactions) {
+        val transactionList by viewModel.allTransactionFlow.collectAsState(emptyList<TransactionClass>())
+        val transactionsMap =
+            transactionList.sortedByDescending { it.dateWithTime }.groupBy { it.date }.toSortedMap()
 
-    val transactionConverterList = transactionsMap.map {
-        TransactionConverter(it.key.toString(), it.value)
-    }.reversed()
-    val lazyList = rememberLazyListState()
-    Surface(color = MaterialTheme.colorScheme.surface) {
-        LazyColumn(modifier = Modifier.fillMaxWidth(), state = lazyList) {
-            transactionConverterList.forEach { (date, transactionList) ->
-                item { Header(transactionList.get(0).dateWithTime) }
-                items(transactionList, key = {it.id}) { item ->
-                    SingleTransaction(item, onSingleItemClick = { onClick(item) })
+        val transactionConverterList = transactionsMap.map {
+            TransactionConverter(it.key.toString(), it.value)
+        }.reversed()
+        val lazyList = rememberLazyListState()
+
+        Surface(color = MaterialTheme.colorScheme.surface) {
+            if (!transactionConverterList.isEmpty())
+                LazyColumn(modifier = Modifier.fillMaxWidth(), state = lazyList) {
+                    transactionConverterList.forEach { (date, transactionList) ->
+                        item { Header(transactionList.get(0).dateWithTime) }
+                        items(transactionList, key = { it.id }) { item ->
+                            SingleTransaction(item, onSingleItemClick = { onClick(item) })
+                        }
+                    }
                 }
-            }
+            else
+                EmptyScreen()
+        }
+    } else {
+        val transactionList by viewModel.getAllTransactionsForDate(convertLocalDateToLong(date))
+            .observeAsState(
+                emptyList<TransactionClass>()
+            )
+        val lazyList = rememberLazyListState()
+        Surface(color = MaterialTheme.colorScheme.surface) {
+            if (!transactionList.isEmpty())
+                LazyColumn(modifier = Modifier.fillMaxWidth(), state = lazyList) {
+                    items(transactionList, key = { it.id }) { item ->
+                        SingleTransaction(item, onSingleItemClick = { onClick(item) })
+                    }
+                }
+            else
+                EmptyScreen()
         }
     }
 }

@@ -24,13 +24,14 @@ import java.time.LocalDate
 class DayViewPagerAdapter(
     val context: Context,
     val viewModel: AddActivityViewModel,
+    val dateList: MutableList<String>,
 ) :
     PagerAdapter() {
     val MAX_VALUE = 500
     lateinit var viewContainer: ViewGroup
 
     override fun getCount(): Int {
-        return MAX_VALUE
+        return dateList.size
     }
 
     override fun isViewFromObject(view: View, `object`: Any): Boolean {

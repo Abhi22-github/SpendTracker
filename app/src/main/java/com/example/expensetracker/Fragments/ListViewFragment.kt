@@ -18,6 +18,7 @@ import com.example.expensetracker.Utilities.parseAmount
 import com.example.expensetracker.ViewModels.AddActivityViewModel
 import com.example.expensetracker.databinding.FragmentListViewBinding
 import dagger.hilt.android.AndroidEntryPoint
+import java.time.LocalDate
 
 
 @AndroidEntryPoint
@@ -46,7 +47,7 @@ class ListViewFragment : Fragment() {
         binding.composeViewTransactionsListFragment.setContent {
             ExpenseTrackerTheme {
                 Surface {
-                    TransactionsListCompose()
+                    TransactionsListCompose(false, LocalDate.now())
                 }
             }
 

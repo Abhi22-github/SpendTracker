@@ -54,6 +54,7 @@ class AddActivityViewModel @Inject constructor(
     var newTotal: MutableLiveData<Float>
     var oldTotalString: MutableLiveData<String>
     var newTotalString: MutableLiveData<String>
+    var dateList: MutableLiveData<MutableList<String>>
 
 
     init {
@@ -67,6 +68,7 @@ class AddActivityViewModel @Inject constructor(
         newTotal = MutableLiveData(1f)
         oldTotalString = MutableLiveData("")
         newTotalString = MutableLiveData("")
+        dateList = MutableLiveData(mutableListOf<String>())
     }
 
     val categoryNames: LiveData<List<CategoryClass>>

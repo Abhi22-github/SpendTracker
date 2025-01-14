@@ -18,6 +18,7 @@ import com.example.expensetracker.Composables.components.SpendsBudgetCard
 import com.example.expensetracker.Composables.components.TransactionsListCompose
 import com.example.expensetracker.ViewModels.AddActivityViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import java.time.LocalDate
 
 @AndroidEntryPoint
 class StatisticsActivity : ComponentActivity() {
@@ -38,7 +39,7 @@ class StatisticsActivity : ComponentActivity() {
                     Row {
                         RestBudgetPill(viewModel = viewModel)
                     }
-                    TransactionsListCompose(viewModel = viewModel)
+                    TransactionsListCompose(false, LocalDate.now(),viewModel = viewModel)
                 }
 
             }
