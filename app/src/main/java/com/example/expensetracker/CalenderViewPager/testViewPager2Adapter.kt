@@ -2,13 +2,15 @@ package com.example.expensetracker.CalenderViewPager
 
 import android.os.Bundle
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentManager
+import androidx.lifecycle.Lifecycle
 import androidx.viewpager2.adapter.FragmentStateAdapter
 import androidx.viewpager2.widget.ViewPager2
 
 
 class testViewPager2Adapter(
-    fragment: Fragment, val dateList: MutableList<String>, val viewPager: ViewPager2
-) : FragmentStateAdapter(fragment) {
+    fragment: FragmentManager, lifecycle : Lifecycle, val dateList: MutableList<String>, val viewPager: ViewPager2
+) : FragmentStateAdapter(fragment,lifecycle) {
     var list = mutableListOf<String>()
     fun setData(list1:MutableList<String>){
         list = list1

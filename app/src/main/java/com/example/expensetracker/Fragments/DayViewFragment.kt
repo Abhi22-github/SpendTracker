@@ -135,7 +135,7 @@ class DayViewFragment : Fragment() {
 
 
         val onlyDayAdapter2Frag =
-            testViewPager2Adapter(this, dateList, binding.viewPager2CalenderDayFragment)
+            testViewPager2Adapter(childFragmentManager,lifecycle, dateList, binding.viewPager2CalenderDayFragment)
 
         onlyDayAdapter2Frag.setData(dateList)
 //        binding.viewPager2CalenderDayFragment.isSaveFromParentEnabled = false
@@ -203,7 +203,7 @@ class DayViewFragment : Fragment() {
         binding.viewPager2CalenderDayFragment.setCurrentItem(dateList.size / 2, false)
 
         val end = System.currentTimeMillis()
-        Log.d("frag", "total time ${end - start}")
+        Log.d("frag", "total time for frag ${end - start}")
 
 
     }

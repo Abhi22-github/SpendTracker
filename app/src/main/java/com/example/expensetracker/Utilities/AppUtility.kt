@@ -103,7 +103,7 @@ fun getPreviousAndNext10Days(date: LocalDate): List<String> {
 fun getPreviousAndNextDays(date: LocalDate): MutableList<String> {
     val allDates = mutableListOf<String>()
 
-    for (i in 25 downTo 1) {
+    for (i in 50 downTo 1) {
         val previousDate = date.minusDays(i.toLong())  // Subtract days for previous dates
         val formattedPrevDate = previousDate.toNormalString()
         allDates.add(formattedPrevDate)
@@ -111,7 +111,7 @@ fun getPreviousAndNextDays(date: LocalDate): MutableList<String> {
 
     allDates.add(date.toNormalString())
 
-    for (i in 1..25) {
+    for (i in 1..50) {
         val nextDate = date.plusDays(i.toLong())  // Add days for next dates
         val formattedNextDate = nextDate.toNormalString()
         allDates.add(formattedNextDate)
