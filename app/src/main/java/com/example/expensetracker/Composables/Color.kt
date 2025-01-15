@@ -17,6 +17,8 @@ val greyTextColor = Color(0xFF616161)
 val successColor = Color(0xFF34A853)
 val failureColor = Color(0xFFEA4335)
 val blueColor = Color(0xFF1A73E8)
+val greenColor = Color(0xFF8BC34A)
+
 
 val cardBackgroundColor
     @Composable
