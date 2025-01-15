@@ -19,15 +19,24 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -36,6 +45,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.expensetracker.Composables.CustomFonts
+import com.example.expensetracker.Composables.ExpenseTrackerTheme
 import com.example.expensetracker.Composables.failureColor
 import com.example.expensetracker.Composables.successColor
 import com.example.expensetracker.Composables.utils.combineColors
@@ -49,14 +59,16 @@ import com.example.expensetracker.ViewModels.TransactionsViewModel
 import java.time.LocalDate
 import kotlin.random.Random
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionsListCompose(
     showSingleDateTransactions: Boolean,
     date: LocalDate,
     viewModel: TransactionsViewModel = hiltViewModel()
 ) {
-    val uiState by viewModel.uiState.collectAsState()
+    val bottomSheetState = rememberModalBottomSheetState()
+    var bottomSheet by remember { mutableStateOf(false) }
+    //  val uiState by viewModel.uiState.collectAsState()
 //    LaunchedEffect(uiState) {
 //        when(uiState){
 //            is UiState.Loading -> viewModel.getAllTransactionsForDate(LocalDateToLong(date))
@@ -81,7 +93,10 @@ fun TransactionsListCompose(
                     transactionConverterList.forEach { (date, transactionList) ->
                         item { Header(transactionList.get(0).dateWithTime) }
                         items(transactionList, key = { it.id }) { item ->
-                            SingleTransaction(item, onSingleItemClick = { onClick(item) })
+                            SingleTransaction(item, onSingleItemClick = {
+                                onSingleItemClick(item)
+                                bottomSheet = true
+                            })
                         }
                     }
                 }
@@ -96,12 +111,16 @@ fun TransactionsListCompose(
             if (!transactionList.isEmpty())
                 LazyColumn(modifier = Modifier.fillMaxWidth(), state = lazyList) {
                     items(transactionList, key = { it.id }) { item ->
-                        SingleTransaction(item, onSingleItemClick = { onClick(item) })
+                        SingleTransaction(item, onSingleItemClick = { onSingleItemClick(item) })
                     }
                 }
             else
                 EmptyScreen()
         }
+    }
+
+    if (bottomSheet) {
+        BottomSheetContentItemDetails(bottomSheetState) { bottomSheet = false }
     }
 }
 
@@ -162,6 +181,7 @@ fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionCla
                 Box(
                     modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                 ) {
+
                     Image(
                         painter = painterResource(id = R.drawable.ic_category_1),
                         contentDescription = "Test Image",
@@ -209,7 +229,8 @@ fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionCla
     }
 }
 
-fun onClick(item: TransactionClass) {
+fun onSingleItemClick(item: TransactionClass) {
+
 }
 
 @Composable
@@ -264,6 +285,73 @@ fun Header(date: Long) {
     )
 }
 
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun BottomSheetContentItemDetails(sheetState: SheetState, closeBottomSheet: () -> Unit) {
+    ModalBottomSheet(onDismissRequest = { closeBottomSheet() }, sheetState = sheetState) {
+        BottomSheetContentItemDetailsContent(modifier = Modifier)
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BottomSheetContentItemDetailsContent(
+    modifier: Modifier,
+) {
+    Column(modifier.fillMaxWidth()) {
+        Text(
+            text = "Set up a budget",
+            modifier = modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleLarge
+        )
+        Spacer(Modifier.height(32.dp))
+        Text(
+            text = "Daily Budget", style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = "Enter your daily budget amount",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.6f)
+        )
+
+        Spacer(Modifier.height(24.dp))
+
+        Row {
+            Button(
+                modifier = Modifier.weight(1f),
+                onClick = { },
+            ) {
+                Icon(painter = painterResource(R.drawable.round_edit), contentDescription = null)
+                Text(text = "Edit")
+            }
+
+            Button(
+                modifier = Modifier.weight(1f),
+                onClick = { },
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.round_delete_outline_24),
+                    contentDescription = null
+                )
+                Text(text = "Delete")
+            }
+        }
+    }
+}
+
+@Preview
+@Composable
+fun BottomSheetPreview() {
+    ExpenseTrackerTheme {
+        Surface {
+            BottomSheetContentItemDetailsContent(Modifier)
+        }
+    }
+}
 
 @Preview
 @Composable
