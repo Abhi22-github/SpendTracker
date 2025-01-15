@@ -44,6 +44,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberAsyncImagePainter
 import com.example.expensetracker.Composables.CustomFonts
 import com.example.expensetracker.Composables.ExpenseTrackerTheme
 import com.example.expensetracker.Composables.failureColor
@@ -111,7 +112,10 @@ fun TransactionsListCompose(
             if (!transactionList.isEmpty())
                 LazyColumn(modifier = Modifier.fillMaxWidth(), state = lazyList) {
                     items(transactionList, key = { it.id }) { item ->
-                        SingleTransaction(item, onSingleItemClick = { onSingleItemClick(item) })
+                        SingleTransaction(item, onSingleItemClick = {
+                            onSingleItemClick(item)
+                            bottomSheet = true
+                        })
                     }
                 }
             else
@@ -181,9 +185,9 @@ fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionCla
                 Box(
                     modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                 ) {
-
+                val image = rememberAsyncImagePainter(R.drawable.ic_category_1)
                     Image(
-                        painter = painterResource(id = R.drawable.ic_category_1),
+                        painter = image,
                         contentDescription = "Test Image",
                         modifier = Modifier.size(24.dp),
                     )
