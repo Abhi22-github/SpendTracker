@@ -54,6 +54,8 @@ class MainActivity : AppCompatActivity() {
     private var monthViewFragment: MonthViewFragment? = null
     private var dayViewFragment: DayViewFragment? = null
 
+    private var selectedItem: Int = R.id.item_listView_sideNavigation
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -108,41 +110,49 @@ class MainActivity : AppCompatActivity() {
     private fun setUpDayFragment() {
         Handler().post {
             fragmentTransaction = supportFragmentManager.beginTransaction()
-            fragmentTransaction!!.replace(R.id.frameLayout_fragment_mainActivity, DayViewFragment()!!)
+            fragmentTransaction!!.replace(
+                R.id.frameLayout_fragment_mainActivity,
+                DayViewFragment()!!
+            )
             fragmentTransaction!!.addToBackStack("DayView")
             fragmentTransaction!!.commit()
         }
     }
+
 
     private fun sideMenuItemClickHandler(v: MenuItem): Boolean {
         Handler().postDelayed({
             val menuID = v.itemId
             if (menuID == R.id.item_listView_sideNavigation) {
                 setUpTransactionFragment()
-                navigationView!!.setCheckedItem(R.id.item_listView_sideNavigation)
+                selectedItem = R.id.item_listView_sideNavigation
             } else if (menuID == R.id.item_monthView_sideNavigation) {
                 setUpMonthFragment()
-                navigationView!!.setCheckedItem(R.id.item_monthView_sideNavigation)
+                selectedItem = R.id.item_monthView_sideNavigation
+            } else if (menuID == R.id.test) {
+                val intent = Intent(context, DayViewActivityTest::class.java)
+                startActivity(intent)
             } else if (menuID == R.id.item_dayView_sideNavigation) {
                 setUpDayFragment()
-                navigationView!!.setCheckedItem(R.id.item_dayView_sideNavigation)
+                selectedItem = R.id.item_dayView_sideNavigation
             } else if (menuID == R.id.item_expenseCategory_sideNavigation) {
                 sendUserToExpenseCategoryActivity()
-                navigationView!!.setCheckedItem(R.id.item_listView_sideNavigation)
+                selectedItem = R.id.item_listView_sideNavigation
             } else if (menuID == R.id.item_incomeCategory_sideNavigation) {
                 sendUserToIncomeCategoryActivity()
-                navigationView!!.setCheckedItem(R.id.item_listView_sideNavigation)
+                selectedItem = R.id.item_listView_sideNavigation
             } else if (menuID == R.id.item_settings_sideNavigation) {
                 sendUserToSettingsActivity()
-                navigationView!!.setCheckedItem(R.id.item_listView_sideNavigation)
+                selectedItem = R.id.item_listView_sideNavigation
             } else if (menuID == R.id.item_analyze_sideNavigation) {
-                navigationView!!.setCheckedItem(R.id.item_listView_sideNavigation)
+                selectedItem = R.id.item_listView_sideNavigation
                 sendUserToStatisticsActivity()
             } else if (menuID == R.id.item_bankAccounts_sideNavigation) {
                 sendUserToManageAccountsActivity()
             } else {
             }
         }, 300)
+        navigationView?.setCheckedItem(selectedItem)
         drawerLayout!!.close()
         return true
     }
@@ -246,6 +256,26 @@ class MainActivity : AppCompatActivity() {
     override fun onStop() {
         EventBus.getDefault().unregister(this)
         super.onStop()
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putInt("selectedItem", selectedItem)
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+        val i = savedInstanceState.getInt("selectedItem")
+        if (i == R.id.item_listView_sideNavigation) {
+            setUpTransactionFragment()
+            selectedItem = R.id.item_listView_sideNavigation
+        } else if (i == R.id.item_monthView_sideNavigation) {
+            setUpMonthFragment()
+            selectedItem = R.id.item_monthView_sideNavigation
+        } else if (i == R.id.item_dayView_sideNavigation) {
+            setUpDayFragment()
+            selectedItem = R.id.item_dayView_sideNavigation
+        }
     }
 }
 
