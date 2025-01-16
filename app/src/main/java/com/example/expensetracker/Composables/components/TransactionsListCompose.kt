@@ -15,11 +15,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
@@ -36,8 +38,11 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -45,6 +50,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -316,33 +326,28 @@ fun BottomSheetContentItemDetailsContent(
 ) {
     var cashMenuExpanded by remember { mutableStateOf(false) }
     var categoryMenuExpanded by remember { mutableStateOf(false) }
+    var expenseValue by remember { mutableStateOf(TextFieldValue("")) }
+    val focusRequester = remember { FocusRequester() }
+
+    // Request focus once when the composable is first composed
+    LaunchedEffect(Unit) {
+        // Request focus for the TextField
+        focusRequester.requestFocus()
+    }
     Column(
         modifier
             .fillMaxWidth()
             .padding(16.dp)
     ) {
-        Text(
-            text = "Set up a budget",
-            modifier = modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-            style = typography.titleLarge
-        )
-        Spacer(Modifier.height(32.dp))
-        Text(
-            text = "Daily Budget",
-            style = typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Text(
-            text = "Enter your daily budget amount",
-            style = typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.6f)
-        )
 
         Spacer(Modifier.height(24.dp))
 
         Row {
-            Box(modifier = modifier.fillMaxWidth().weight(1f)) {
+            Box(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
                 val colorPalletBlue = toPalette(blueColor)
                 Button(
                     modifier = Modifier.padding(end = 5.dp),
@@ -376,9 +381,16 @@ fun BottomSheetContentItemDetailsContent(
                         Icons.Filled.KeyboardArrowDown, "backIcon", modifier = Modifier.weight(0.2f)
                     )
                 }
-                DropDownMenu(modifier,cashMenuExpanded, colorPalletBlue,onDismiss = { cashMenuExpanded = false })
+                DropDownMenu(modifier,
+                    cashMenuExpanded,
+                    colorPalletBlue,
+                    onDismiss = { cashMenuExpanded = false })
             }
-            Box(modifier = modifier.fillMaxWidth().weight(1f)) {
+            Box(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
                 val colorPalletGreen = toPalette(greenColor)
                 Button(
                     modifier = Modifier.padding(end = 5.dp),
@@ -412,8 +424,99 @@ fun BottomSheetContentItemDetailsContent(
                         Icons.Filled.KeyboardArrowDown, "backIcon", modifier = Modifier.weight(0.2f)
                     )
                 }
-                DropDownMenu(modifier,categoryMenuExpanded,colorPalletGreen, onDismiss = { categoryMenuExpanded = false })
+                DropDownMenu(modifier,
+                    categoryMenuExpanded,
+                    colorPalletGreen,
+                    onDismiss = { categoryMenuExpanded = false })
             }
+        }
+        Spacer(Modifier.height(16.dp))
+        Row {
+            Box(
+                modifier = modifier.fillMaxWidth()
+            ) {
+                val colorPalletGreen = toPalette(greenColor)
+                Button(
+                    modifier = Modifier.padding(end = 5.dp),
+                    onClick = { categoryMenuExpanded = !categoryMenuExpanded },
+                    colors = ButtonColors(
+                        containerColor = colorPalletGreen.container,
+                        contentColor = colorPalletGreen.onContainer,
+                        disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
+                        disabledContentColor = MaterialTheme.colorScheme.onPrimary
+                    ),
+                    contentPadding = PaddingValues(
+                        start = 20.dp, end = 10.dp, top = 16.dp, bottom = 16.dp
+                    )
+                ) {
+                    val image = rememberAsyncImagePainter(R.drawable.ic_category_1)
+                    Image(
+                        painter = image,
+                        contentDescription = "Test Image",
+                        modifier = Modifier
+                            .size(24.dp)
+                            .weight(0.05f),
+                    )
+
+                    Text(
+                        text = "Entertainment",
+                        modifier = Modifier
+                            .weight(0.9f)
+                            .padding(start = 6.dp),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Icon(
+                        Icons.Filled.KeyboardArrowDown, "backIcon", modifier = Modifier.weight(0.1f)
+                    )
+                }
+                DropDownMenu(modifier,
+                    categoryMenuExpanded,
+                    colorPalletGreen,
+                    onDismiss = { categoryMenuExpanded = false })
+            }
+        }
+
+        Spacer(Modifier.padding(16.dp))
+        Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth()) {
+            TextField(
+                value = expenseValue,
+                onValueChange = { newValue ->
+                    expenseValue = newValue
+                },
+                modifier = Modifier
+                    .wrapContentWidth()
+                    .align(Alignment.Center)
+                    .focusRequester(focusRequester),
+                singleLine = true,
+
+//                placeholder = {
+//                    Text(
+//                        "0",
+//                        style = MaterialTheme.typography.displayMedium,
+//                        modifier = Modifier.wrapContentWidth()
+//                            .align(Alignment.Center),
+//                        textAlign = TextAlign.Center
+//                    )
+//                },
+//                leadingIcon = {
+//                    Text(
+//                        "₹",
+//                        style = MaterialTheme.typography.displayMedium,
+//                        modifier = Modifier.wrapContentWidth()
+//                            .align(Alignment.Center)
+//                    )
+//                },
+                shape = RoundedCornerShape(24.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent
+                ),
+                textStyle = MaterialTheme.typography.displayMedium.copy(textAlign = TextAlign.Center),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            )
         }
     }
 }
@@ -427,9 +530,12 @@ fun DropDownMenu(
     onDismiss: () -> Unit
 ) {
     DropdownMenu(
-        expanded = menuExpanded, onDismissRequest = { onDismiss() }, containerColor = colorPallet.surfaceVariant, shape = RoundedCornerShape(24.dp),
+        expanded = menuExpanded,
+        onDismissRequest = { onDismiss() },
+        containerColor = colorPallet.surfaceVariant,
+        shape = RoundedCornerShape(24.dp),
 
-    ) {
+        ) {
         val category1 = rememberAsyncImagePainter(R.drawable.ic_category_1)
         val category2 = rememberAsyncImagePainter(R.drawable.ic_category_2)
         val category3 = rememberAsyncImagePainter(R.drawable.ic_category_3)
