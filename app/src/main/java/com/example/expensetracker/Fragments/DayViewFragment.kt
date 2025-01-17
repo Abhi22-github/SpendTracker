@@ -9,7 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_IDLE
-import com.example.expensetracker.CalenderViewPager.testViewPager2Adapter
+import com.example.expensetracker.CalenderViewPager.DayViewPagerAdapter
 import com.example.expensetracker.Utilities.getPreviousAndNextDays
 import com.example.expensetracker.Utilities.toLocalDate
 import com.example.expensetracker.ViewModels.TransactionsViewModel
@@ -135,7 +135,7 @@ class DayViewFragment : Fragment() {
 
 
         val onlyDayAdapter2Frag =
-            testViewPager2Adapter(childFragmentManager,lifecycle, dateList, binding.viewPager2CalenderDayFragment)
+            DayViewPagerAdapter(childFragmentManager,lifecycle, dateList, binding.viewPager2CalenderDayFragment)
 
         onlyDayAdapter2Frag.setData(dateList)
 //        binding.viewPager2CalenderDayFragment.isSaveFromParentEnabled = false
