@@ -5,6 +5,6 @@
         android:id="@+id/calender"
         android:icon="@drawable/icon_round_calender"
         android:title="Calender"
-        android:iconTint="?attr/colorAccent"
+        android:iconTint="@color/white"
         app:showAsAction="always" />
 </menu>

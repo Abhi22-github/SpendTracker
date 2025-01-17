@@ -1,132 +1,107 @@
-package com.example.expensetracker.Database;
+package com.example.expensetracker.Database
 
-import android.content.Context;
-import android.os.AsyncTask;
+import android.content.Context
+import com.example.expensetracker.Model.TotalAmountClass
+import com.example.expensetracker.Model.TotalExpenseIncomeClass
+import com.example.expensetracker.Model.TransactionClass
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
 
-import androidx.lifecycle.LiveData;
+class TransactionRepository(@ApplicationContext applicationContext: Context) {
 
-import com.example.expensetracker.Model.TotalAmountClass;
-import com.example.expensetracker.Model.TotalExpenseIncomeClass;
-import com.example.expensetracker.Model.TransactionClass;
+    private val transactionDao: TransactionDao
+    val allTransactions: Flow<List<TransactionClass>>
 
-import java.util.List;
-
-import dagger.hilt.android.qualifiers.ApplicationContext;
-
-public class TransactionRepository {
-
-    // below line is the create a variable
-    // for dao and list for all courses.
-    private TransactionDao transactionDao;
-    private LiveData<List<TransactionClass>> allTransactions;
-
-    // creating a constructor for our variables
-    // and passing the variables to it.
-    public TransactionRepository(@ApplicationContext Context applicationContext) {
-        TransactionDatabase database = TransactionDatabase.getInstance(applicationContext);
-        transactionDao = database.transactionDao();
-        allTransactions = transactionDao.getAllTransactions();
+    init {
+        val database = TransactionDatabase.getInstance(applicationContext)
+        transactionDao = database.transactionDao()
+        allTransactions = transactionDao.allTransactions
     }
 
-    // creating a method to insert the data to our database.
-    public void insert(TransactionClass model) {
-        new InsertCourseAsyncTask(transactionDao).execute(model);
+    suspend fun insert(transactionClass: TransactionClass) {
+        transactionDao.insert(transactionClass)
     }
 
-    // creating a method to update data in database.
-    public void update(TransactionClass model) {
-        new UpdateCourseAsyncTask(transactionDao).execute(model);
+    suspend fun update(transactionClass: TransactionClass) {
+        transactionDao.update(transactionClass)
     }
 
-    // creating a method to delete the data in our database.
-    public void delete(TransactionClass model) {
-        new DeleteCourseAsyncTask(transactionDao).execute(model);
+    suspend fun delete(transactionClass: TransactionClass) {
+        transactionDao.delete(transactionClass)
     }
 
-    public LiveData<TotalAmountClass> getTotalAmountByDateRangeAndCategoryType(Long startDate,Long endDate,String categoryType){
-        return transactionDao.getTotalAmountByDateRangeAndCategoryType(startDate, endDate, categoryType);
+    suspend fun getTotalAmountByDateRangeAndCategoryType(
+        startDate: Long,
+        endDate: Long,
+        categoryType: String
+    ): Flow<TotalAmountClass> {
+        return transactionDao.getTotalAmountByDateRangeAndCategoryType(
+            startDate,
+            endDate,
+            categoryType
+        )
     }
 
-    public LiveData<List<TotalExpenseIncomeClass>> getListOfTotalAmountPerDayForRange(Long startDate, Long endDate){
-        return transactionDao.getListOfTotalAmountPerDayForRange(startDate, endDate);
+    fun getTotalAmountForDate(date: Long, type: String): Flow<Long?> {
+        return transactionDao.getTotalAmountForDate(date, type)
     }
 
-    public LiveData<List<TransactionClass>> getAllTransactionsForDate(Long date){
-        return transactionDao.getAllTransactionsForDate(date);
+    fun getListOfTotalAmountPerDayForRange(
+        startDate: Long,
+        endDate: Long
+    ): Flow<List<TotalExpenseIncomeClass>> {
+        return transactionDao.getListOfTotalAmountPerDayForRange(startDate, endDate)
+    }
+
+    fun getAllTransactionsForDate(date: Long): Flow<List<TransactionClass>> {
+        return transactionDao.getAllTransactionsForDate(date)
     }
 
     // below is the method to delete all the courses.
-    public void deleteAllTransaction() {
-        new DeleteAllCoursesAsyncTask(transactionDao).execute();
+    suspend fun deleteAllTransaction() {
+        transactionDao.deleteAllTransaction()
     }
 
-    // below method is to read all the courses.
-    public LiveData<List<TransactionClass>> getAllTransactions() {
-        return allTransactions;
-    }
-
-    // we are creating a async task method to insert new course.
-    private static class InsertCourseAsyncTask extends AsyncTask<TransactionClass, Void, Void> {
-        private TransactionDao transactionDao;
-
-        private InsertCourseAsyncTask(TransactionDao transactionDao) {
-            this.transactionDao = transactionDao;
-        }
-
-        @Override
-        protected Void doInBackground(TransactionClass... model) {
-            // below line is use to insert our modal in dao.
-            transactionDao.insert(model[0]);
-            return null;
-        }
-    }
-
-    // we are creating a async task method to update our course.
-    private static class UpdateCourseAsyncTask extends AsyncTask<TransactionClass, Void, Void> {
-        private TransactionDao transactionDao;
-
-        private UpdateCourseAsyncTask(TransactionDao transactionDao) {
-            this.transactionDao = transactionDao;
-        }
-
-        @Override
-        protected Void doInBackground(TransactionClass... models) {
-            // below line is use to update
-            // our modal in dao.
-            transactionDao.update(models[0]);
-            return null;
-        }
-    }
-
-    // we are creating a async task method to delete course.
-    private static class DeleteCourseAsyncTask extends AsyncTask<TransactionClass, Void, Void> {
-        private TransactionDao transactionDao;
-
-        private DeleteCourseAsyncTask(TransactionDao transactionDao) {
-            this.transactionDao = transactionDao;
-        }
-
-        @Override
-        protected Void doInBackground(TransactionClass... models) {
-            // below line is use to delete
-            // our course modal in dao.
-            transactionDao.delete(models[0]);
-            return null;
-        }
-    }
-
-    // we are creating a async task method to delete all courses.
-    private static class DeleteAllCoursesAsyncTask extends AsyncTask<Void, Void, Void> {
-        private TransactionDao transactionDao;
-        private DeleteAllCoursesAsyncTask(TransactionDao transactionDao) {
-            this.transactionDao = transactionDao;
-        }
-        @Override
-        protected Void doInBackground(Void... voids) {
-            // on below line calling method
-            // to delete all courses.
-            transactionDao.deleteAllTransaction();
-            return null;
-        }
-    }
+//    // we are creating a async task method to insert new course.
+//    private class InsertCourseAsyncTask(private val transactionDao: TransactionDao) :
+//        AsyncTask<TransactionClass?, Void?, Void?>() {
+//        override fun doInBackground(vararg model: TransactionClass): Void? {
+//            // below line is use to insert our modal in dao.
+//            transactionDao.insert(model[0])
+//            return null
+//        }
+//    }
+//
+//    // we are creating a async task method to update our course.
+//    private class UpdateCourseAsyncTask(private val transactionDao: TransactionDao) :
+//        AsyncTask<TransactionClass?, Void?, Void?>() {
+//        override fun doInBackground(vararg models: TransactionClass): Void? {
+//            // below line is use to update
+//            // our modal in dao.
+//            transactionDao.update(models[0])
+//            return null
+//        }
+//    }
+//
+//    // we are creating a async task method to delete course.
+//    private class DeleteCourseAsyncTask(private val transactionDao: TransactionDao) :
+//        AsyncTask<TransactionClass?, Void?, Void?>() {
+//        override fun doInBackground(vararg models: TransactionClass): Void? {
+//            // below line is use to delete
+//            // our course modal in dao.
+//            transactionDao.delete(models[0])
+//            return null
+//        }
+//    }
+//
+//    // we are creating a async task method to delete all courses.
+//    private class DeleteAllCoursesAsyncTask(private val transactionDao: TransactionDao) :
+//        AsyncTask<Void?, Void?, Void?>() {
+//        override fun doInBackground(vararg voids: Void): Void? {
+//            // on below line calling method
+//            // to delete all courses.
+//            transactionDao.deleteAllTransaction()
+//            return null
+//        }
+//    }
 }

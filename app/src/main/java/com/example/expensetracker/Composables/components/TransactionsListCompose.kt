@@ -3,63 +3,108 @@ package com.example.expensetracker.Composables.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.ModalBottomSheet
+import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberAsyncImagePainter
 import com.example.expensetracker.Composables.CustomFonts
+import com.example.expensetracker.Composables.ExpenseTrackerTheme
+import com.example.expensetracker.Composables.blueColor
 import com.example.expensetracker.Composables.failureColor
+import com.example.expensetracker.Composables.greenColor
 import com.example.expensetracker.Composables.successColor
+import com.example.expensetracker.Composables.utils.HarmonizedColorPalette
 import com.example.expensetracker.Composables.utils.combineColors
+import com.example.expensetracker.Composables.utils.toPalette
 import com.example.expensetracker.Converters.TransactionConverter
 import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.R
 import com.example.expensetracker.Utilities.Constants.EXPENSE
 import com.example.expensetracker.Utilities.convertLocalDateToLong
 import com.example.expensetracker.Utilities.getDateFromMillis
-import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.example.expensetracker.ViewModels.TransactionsViewModel
 import java.time.LocalDate
 import kotlin.random.Random
 
-@OptIn(ExperimentalFoundationApi::class)
+@OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionsListCompose(
     showSingleDateTransactions: Boolean,
     date: LocalDate,
-    viewModel: AddActivityViewModel = hiltViewModel()
+    viewModel: TransactionsViewModel = hiltViewModel()
 ) {
+    val bottomSheetState = rememberModalBottomSheetState()
+    var bottomSheet by remember { mutableStateOf(false) }
+    //  val uiState by viewModel.uiState.collectAsState()
+//    LaunchedEffect(uiState) {
+//        when(uiState){
+//            is UiState.Loading -> viewModel.getAllTransactionsForDate(LocalDateToLong(date))
+//            is UiState.Error -> {}
+//            UiState.Success -> {}
+//        }
+//    }
 
     if (!showSingleDateTransactions) {
-        val transactionList by viewModel.allTransactionFlow.collectAsState(emptyList<TransactionClass>())
+        val transactionList by viewModel.allTransactions.collectAsState(emptyList<TransactionClass>())
         val transactionsMap =
             transactionList.sortedByDescending { it.dateWithTime }.groupBy { it.date }.toSortedMap()
 
@@ -69,34 +114,42 @@ fun TransactionsListCompose(
         val lazyList = rememberLazyListState()
 
         Surface(color = MaterialTheme.colorScheme.surface) {
-            if (!transactionConverterList.isEmpty())
-                LazyColumn(modifier = Modifier.fillMaxWidth(), state = lazyList) {
-                    transactionConverterList.forEach { (date, transactionList) ->
-                        item { Header(transactionList.get(0).dateWithTime) }
-                        items(transactionList, key = { it.id }) { item ->
-                            SingleTransaction(item, onSingleItemClick = { onClick(item) })
-                        }
+            if (!transactionConverterList.isEmpty()) LazyColumn(
+                modifier = Modifier.fillMaxWidth(), state = lazyList
+            ) {
+                transactionConverterList.forEach { (date, transactionList) ->
+                    item { Header(transactionList.get(0).dateWithTime) }
+                    items(transactionList, key = { it.id }) { item ->
+                        SingleTransaction(item, onSingleItemClick = {
+                            onSingleItemClick(item)
+                            bottomSheet = true
+                        })
                     }
                 }
-            else
-                EmptyScreen()
+            }
+            else EmptyScreen()
         }
     } else {
-        val transactionList by viewModel.getAllTransactionsForDate(convertLocalDateToLong(date))
-            .observeAsState(
-                emptyList<TransactionClass>()
-            )
+        viewModel.getAllTransactionsForDate(convertLocalDateToLong(date))
+        val transactionList by viewModel.getAllTransactionsForDateFlow.collectAsState()
         val lazyList = rememberLazyListState()
         Surface(color = MaterialTheme.colorScheme.surface) {
-            if (!transactionList.isEmpty())
-                LazyColumn(modifier = Modifier.fillMaxWidth(), state = lazyList) {
-                    items(transactionList, key = { it.id }) { item ->
-                        SingleTransaction(item, onSingleItemClick = { onClick(item) })
-                    }
+            if (!transactionList.isEmpty()) LazyColumn(
+                modifier = Modifier.fillMaxWidth(), state = lazyList
+            ) {
+                items(transactionList, key = { it.id }) { item ->
+                    SingleTransaction(item, onSingleItemClick = {
+                        onSingleItemClick(item)
+                        bottomSheet = true
+                    })
                 }
-            else
-                EmptyScreen()
+            }
+            else EmptyScreen()
         }
+    }
+
+    if (bottomSheet) {
+        BottomSheetContentItemDetails(bottomSheetState) { bottomSheet = false }
     }
 }
 
@@ -157,8 +210,9 @@ fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionCla
                 Box(
                     modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                 ) {
+                    val image = rememberAsyncImagePainter(R.drawable.ic_category_1)
                     Image(
-                        painter = painterResource(id = R.drawable.ic_category_1),
+                        painter = image,
                         contentDescription = "Test Image",
                         modifier = Modifier.size(24.dp),
                     )
@@ -178,11 +232,11 @@ fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionCla
                     style = typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
-                if (false) {
+                if (true) {
                     Text(
-                        text = item.type,
-                        style = typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        text = item.category,
+                        style = typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                     )
                 }
             }
@@ -204,7 +258,8 @@ fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionCla
     }
 }
 
-fun onClick(item: TransactionClass) {
+fun onSingleItemClick(item: TransactionClass) {
+
 }
 
 @Composable
@@ -260,11 +315,358 @@ fun Header(date: Long) {
 }
 
 
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun BottomSheetContentItemDetails(sheetState: SheetState, closeBottomSheet: () -> Unit) {
+    ModalBottomSheet(
+        onDismissRequest = { closeBottomSheet() },
+        sheetState = sheetState,
+        modifier = Modifier
+            .imePadding()
+            .fillMaxWidth(),
+    ) {
+        BottomSheetContentItemDetailsContent(modifier = Modifier)
+    }
+}
+
+val bottomSheetStartEndPadding = 16.dp
+val bottomSheetTopBottomPadding = 0.dp
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BottomSheetContentItemDetailsContent(
+    modifier: Modifier,
+) {
+    var cashMenuExpanded by remember { mutableStateOf(false) }
+    var categoryMenuExpanded by remember { mutableStateOf(false) }
+    var expenseValue by remember { mutableStateOf(TextFieldValue("")) }
+    //val focusRequester = remember { FocusRequester() }
+
+    // Request focus once when the composable is first composed
+    LaunchedEffect(Unit) {
+        // Request focus for the TextField
+        //focusRequester.requestFocus()
+    }
+
+    Column(
+        modifier
+            .fillMaxWidth()
+    ) {
+        Column(
+
+        ) {
+            Spacer(Modifier.height(0.dp))
+
+            Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
+                Box(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) {
+                    val colorPalletBlue = toPalette(blueColor)
+                    Button(
+                        modifier = Modifier.padding(end = 5.dp),
+                        onClick = { cashMenuExpanded = !cashMenuExpanded },
+                        colors = ButtonColors(
+                            containerColor = colorPalletBlue.container,
+                            contentColor = colorPalletBlue.onContainer,
+                            disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContentColor = MaterialTheme.colorScheme.onPrimary
+                        ),
+                        contentPadding = PaddingValues(
+                            start = 20.dp, end = 10.dp, top = 16.dp, bottom = 16.dp
+                        )
+                    ) {
+                        val image = rememberAsyncImagePainter(R.drawable.ic_category_1)
+                        Image(
+                            painter = image,
+                            contentDescription = "Test Image",
+                            modifier = Modifier.size(24.dp),
+                        )
+
+                        Text(
+                            text = "Cash",
+                            modifier = Modifier
+                                .weight(0.6f)
+                                .padding(start = 5.dp),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Icon(
+                            Icons.Filled.KeyboardArrowDown,
+                            "backIcon",
+                            modifier = Modifier.weight(0.2f)
+                        )
+                    }
+                    DropDownMenu(modifier,
+                        cashMenuExpanded,
+                        colorPalletBlue,
+                        onDismiss = { cashMenuExpanded = false })
+                }
+                Box(
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                ) {
+                    val colorPalletGreen = toPalette(greenColor)
+                    Button(
+                        modifier = Modifier.padding(end = 5.dp),
+                        onClick = { categoryMenuExpanded = !categoryMenuExpanded },
+                        colors = ButtonColors(
+                            containerColor = colorPalletGreen.container,
+                            contentColor = colorPalletGreen.onContainer,
+                            disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContentColor = MaterialTheme.colorScheme.onPrimary
+                        ),
+                        contentPadding = PaddingValues(
+                            start = 20.dp, end = 10.dp, top = 16.dp, bottom = 16.dp
+                        )
+                    ) {
+                        val image = rememberAsyncImagePainter(R.drawable.ic_category_1)
+                        Image(
+                            painter = image,
+                            contentDescription = "Test Image",
+                            modifier = Modifier.size(24.dp),
+                        )
+
+                        Text(
+                            text = "Entertainment",
+                            modifier = Modifier
+                                .weight(0.6f)
+                                .padding(start = 5.dp),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Icon(
+                            Icons.Filled.KeyboardArrowDown,
+                            "backIcon",
+                            modifier = Modifier.weight(0.2f)
+                        )
+                    }
+                    DropDownMenu(modifier,
+                        categoryMenuExpanded,
+                        colorPalletGreen,
+                        onDismiss = { categoryMenuExpanded = false })
+                }
+            }
+            Spacer(Modifier.height(16.dp))
+            if (false) {
+                Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
+                    Box(
+                        modifier = modifier.fillMaxWidth()
+                    ) {
+                        val colorPalletGreen = toPalette(greenColor)
+                        Button(
+                            modifier = Modifier.padding(end = 5.dp),
+                            onClick = { categoryMenuExpanded = !categoryMenuExpanded },
+                            colors = ButtonColors(
+                                containerColor = colorPalletGreen.container,
+                                contentColor = colorPalletGreen.onContainer,
+                                disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
+                                disabledContentColor = MaterialTheme.colorScheme.onPrimary
+                            ),
+                            contentPadding = PaddingValues(
+                                start = 20.dp, end = 10.dp, top = 16.dp, bottom = 16.dp
+                            )
+                        ) {
+                            val image = rememberAsyncImagePainter(R.drawable.ic_category_1)
+                            Image(
+                                painter = image,
+                                contentDescription = "Test Image",
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .weight(0.05f),
+                            )
+
+                            Text(
+                                text = "Entertainment",
+                                modifier = Modifier
+                                    .weight(0.9f)
+                                    .padding(start = 6.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                            Icon(
+                                Icons.Filled.KeyboardArrowDown,
+                                "backIcon",
+                                modifier = Modifier.weight(0.1f)
+                            )
+                        }
+                        DropDownMenu(modifier,
+                            categoryMenuExpanded,
+                            colorPalletGreen,
+                            onDismiss = { categoryMenuExpanded = false })
+                    }
+                }
+            }
+            Spacer(Modifier.padding(16.dp))
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
+            ) {
+                TextField(
+                    value = expenseValue,
+                    onValueChange = { newValue ->
+                        expenseValue = newValue
+                    },
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .align(Alignment.Center)
+                        .focusable(false),
+                    //  .focusRequester(focusRequester),
+                    singleLine = true,
+
+//                placeholder = {
+//                    Text(
+//                        "0",
+//                        style = MaterialTheme.typography.displayMedium,
+//                        modifier = Modifier.wrapContentWidth()
+//                            .align(Alignment.Center),
+//                        textAlign = TextAlign.Center
+//                    )
+//                },
+//                leadingIcon = {
+//                    Text(
+//                        "₹",
+//                        style = MaterialTheme.typography.displayMedium,
+//                        modifier = Modifier.wrapContentWidth()
+//                            .align(Alignment.Center)
+//                    )
+//                },
+                    shape = RoundedCornerShape(24.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent
+                    ),
+                    textStyle = typography.displayMedium.copy(textAlign = TextAlign.Center),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                )
+            }
+            Spacer(Modifier.padding(16.dp))
+        }
+        Row {
+            BottomRow(modifier)
+        }
+        Spacer(Modifier.height(16.dp))
+    }
+}
+
+@Composable
+fun BottomRow(modifier: Modifier) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
+    ) {
+        Row(modifier = modifier.weight(1f)) {
+            IconButton(
+                onClick = {},
+                // colors = IconButtonDefaults.filledTonalIconButtonColors(),
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = null)
+            }
+            Spacer(Modifier.width(0.dp))
+            IconButton(
+                onClick = {},
+                //   colors = IconButtonDefaults.filledTonalIconButtonColors(),
+            ) {
+                Icon(
+                    Icons.Filled.DateRange,
+                    contentDescription = null
+                )
+            }
+        }
+        Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.End) {
+            TextButton(
+                onClick = { },
+            ) {
+                Text("Save")
+            }
+        }
+    }
+}
+
+
+@Composable
+fun DropDownMenu(
+    modifier: Modifier,
+    menuExpanded: Boolean,
+    colorPallet: HarmonizedColorPalette,
+    onDismiss: () -> Unit
+) {
+    DropdownMenu(
+        expanded = menuExpanded,
+        onDismissRequest = { onDismiss() },
+        containerColor = colorPallet.surfaceVariant,
+        shape = RoundedCornerShape(24.dp),
+
+        ) {
+        val category1 = rememberAsyncImagePainter(R.drawable.ic_category_1)
+        val category2 = rememberAsyncImagePainter(R.drawable.ic_category_2)
+        val category3 = rememberAsyncImagePainter(R.drawable.ic_category_3)
+        val category4 = rememberAsyncImagePainter(R.drawable.ic_category_4)
+        val category5 = rememberAsyncImagePainter(R.drawable.ic_category_6)
+
+
+        DropdownMenuItem(text = { Text("Food") }, leadingIcon = {
+            Image(
+                painter = category1,
+                contentDescription = "Test Image",
+                modifier = Modifier.size(24.dp),
+            )
+        }, onClick = { /* Do something... */ })
+        DropdownMenuItem(text = { Text("HealthCare") }, leadingIcon = {
+            Image(
+                painter = category2,
+                contentDescription = "Test Image",
+                modifier = Modifier.size(24.dp),
+            )
+        }, onClick = { /* Do something... */ })
+        DropdownMenuItem(text = { Text("Grocery") }, leadingIcon = {
+            Image(
+                painter = category3,
+                contentDescription = "Test Image",
+                modifier = Modifier.size(24.dp),
+            )
+        }, onClick = { /* Do something... */ })
+        DropdownMenuItem(text = { Text("Insurance") }, leadingIcon = {
+            Image(
+                painter = category4,
+                contentDescription = "Test Image",
+                modifier = Modifier.size(24.dp),
+            )
+        }, onClick = { /* Do something... */ })
+        DropdownMenuItem(text = { Text("Transportation") }, leadingIcon = {
+            Image(
+                painter = category5,
+                contentDescription = "Test Image",
+                modifier = Modifier.size(24.dp),
+            )
+        }, onClick = { /* Do something... */ })
+    }
+}
+
+@Preview
+@Composable
+fun BottomSheetPreview() {
+    ExpenseTrackerTheme {
+        Surface {
+            BottomSheetContentItemDetailsContent(Modifier)
+        }
+    }
+}
+
 @Preview
 @Composable
 fun SingleTransactionPreview() {
     SingleTransaction(item = TransactionClass("Expesne", 20L, "Hello", "", 0L, 0L), {})
 }
+
 
 @Preview
 @Composable

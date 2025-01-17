@@ -12,7 +12,7 @@ import javax.inject.Inject
 
 val Context.dataStore by preferencesDataStore(name = PREFERENCES_NAME)
 
-class PreferenceManager @Inject constructor( @ApplicationContext val context: Context) {
+class PreferenceManager @Inject constructor(@ApplicationContext val context: Context) {
     private val dataStore = context.dataStore
 
     // Save float value
@@ -26,7 +26,7 @@ class PreferenceManager @Inject constructor( @ApplicationContext val context: Co
     fun getFloatValue(key: Preferences.Key<Float>): Flow<Float> {
         return context.dataStore.data
             .map { preferences ->
-                preferences[key] ?: 0f
+                preferences[key] ?: 1f
             }
     }
 

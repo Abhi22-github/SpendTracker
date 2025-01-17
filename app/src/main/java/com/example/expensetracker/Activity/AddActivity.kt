@@ -4,7 +4,6 @@ import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.View
 import android.widget.ImageButton
 import android.widget.RelativeLayout
@@ -19,7 +18,7 @@ import com.example.expensetracker.Model.CategoryClass
 import com.example.expensetracker.R
 import com.example.expensetracker.Utilities.Constants
 import com.example.expensetracker.Utilities.parseAmount
-import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.example.expensetracker.ViewModels.TransactionsViewModel
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
 import com.google.android.flexbox.FlexboxLayoutManager
@@ -56,7 +55,7 @@ class AddActivity : AppCompatActivity(), View.OnClickListener {
 
     //vars
     private lateinit var chipsList: List<Chip>
-    private val viewModel: AddActivityViewModel by viewModels()
+    private val viewModel: TransactionsViewModel by viewModels()
     private lateinit var mContext: Context
     lateinit var simpleDateFormat: SimpleDateFormat
     private lateinit var categoryClassList: List<CategoryClass>
@@ -107,12 +106,10 @@ class AddActivity : AppCompatActivity(), View.OnClickListener {
 
         toggleGroupCategory.addOnButtonCheckedListener { group, checkedId, isChecked ->
             if (checkedId == R.id.toggleButton_expenseButton_addActivity && isChecked) {
-                Log.d("ToggleGroup", "Expense")
                 viewModel.setTransactionTypeInViewModel(Constants.EXPENSE)
                 recyclerViewLayoutCategoryExpense.visibility = View.VISIBLE
                 recyclerViewLayoutCategoryIncome.visibility = View.GONE
             } else if (checkedId == R.id.toggleButton_incomeButton_addActivity && isChecked) {
-                Log.d("ToggleGroup", "Income")
                 viewModel.setTransactionTypeInViewModel(Constants.INCOME)
                 recyclerViewLayoutCategoryExpense.visibility = View.GONE
                 recyclerViewLayoutCategoryIncome.visibility = View.VISIBLE
@@ -237,7 +234,6 @@ class AddActivity : AppCompatActivity(), View.OnClickListener {
             viewModel.storeCurrentExpenseSelectChip(eventMessage.getMessage())
         }
         if (eventMessage.getEventCode() == 8) {
-            Log.d("Chips", "EventBUs" + eventMessage.getMessage())
             viewModel.storeCurrentIncomeSelectChip(eventMessage.getMessage())
         }
     }

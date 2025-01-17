@@ -1,30 +1,28 @@
 package com.example.expensetracker.CalenderViewPager
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.expensetracker.Adapters.TransactionViewAdapter
 import com.example.expensetracker.Composables.ExpenseTrackerTheme
-import com.example.expensetracker.Composables.components.TransactionsListCompose
-import com.example.expensetracker.Model.TransactionClass
+import com.example.expensetracker.Composables.Screens.FragmentDayScreen
 import com.example.expensetracker.Utilities.toLocalDate
 import com.example.expensetracker.Utilities.toNormalString
-import com.example.expensetracker.ViewModels.AddActivityViewModel
-import com.example.expensetracker.databinding.FragmentTestBinding
+import com.example.expensetracker.ViewModels.TransactionsViewModel
+import com.example.expensetracker.databinding.FragmentDayBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.onEach
 import java.time.LocalDate
 
 @AndroidEntryPoint
-class testFragment() : Fragment() {
+class DayFragment() : Fragment() {
 
-    lateinit var binding: FragmentTestBinding
-    val viewModel: AddActivityViewModel by viewModels()
+    lateinit var binding: FragmentDayBinding
+    val viewModel: TransactionsViewModel by viewModels()
     var position: Int = 0
     lateinit var date: LocalDate
 
@@ -41,7 +39,7 @@ class testFragment() : Fragment() {
         position = (args?.getString("position") ?: "0").toInt()
         date = (args?.getString("date") ?: LocalDate.now().toNormalString()).toLocalDate()
 
-        binding = FragmentTestBinding.inflate(inflater, container, false)
+        binding = FragmentDayBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -49,13 +47,12 @@ class testFragment() : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         // setTransactionRecyclerView()
         setUpComposeRecyclerView()
-        Log.d("frag", "FragmentPosition $position  and date $date")
     }
 
     fun setUpComposeRecyclerView() {
         binding.composeViewDayListSingleDayFragment.setContent {
             ExpenseTrackerTheme {
-                TransactionsListCompose(true, date)
+                FragmentDayScreen(true, date)
             }
         }
     }
@@ -67,13 +64,13 @@ class testFragment() : Fragment() {
                 requireActivity()
             )
         )
-        viewModel.allTransactions.observe(viewLifecycleOwner, Observer<List<TransactionClass>> {
+        viewModel.allTransactions.onEach {
             val transactionViewAdapter = TransactionViewAdapter(
                 requireActivity(),
                 it
             )
             binding.testRecyclerView.adapter = transactionViewAdapter
-        })
+        }
     }
 
 }

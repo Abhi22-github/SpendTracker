@@ -1,41 +1,49 @@
-package com.example.expensetracker.Database;
+package com.example.expensetracker.Database
 
-import androidx.lifecycle.LiveData;
-import androidx.room.Delete;
-import androidx.room.Insert;
-import androidx.room.Query;
-import androidx.room.Update;
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.Query
+import androidx.room.Update
+import com.example.expensetracker.Model.TotalAmountClass
+import com.example.expensetracker.Model.TotalExpenseIncomeClass
+import com.example.expensetracker.Model.TransactionClass
+import kotlinx.coroutines.flow.Flow
 
-import com.example.expensetracker.Model.TotalAmountClass;
-import com.example.expensetracker.Model.TotalExpenseIncomeClass;
-import com.example.expensetracker.Model.TransactionClass;
-
-import java.util.List;
-
-@androidx.room.Dao
-public interface TransactionDao {
-
+@Dao
+interface TransactionDao {
     @Insert
-    void insert(TransactionClass transactionClass);
+    suspend fun insert(transactionClass: TransactionClass)
 
     @Delete
-    void delete(TransactionClass transactionClass);
+    suspend fun delete(transactionClass: TransactionClass)
 
     @Update
-    void update(TransactionClass transactionClass);
+    suspend fun update(transactionClass: TransactionClass)
 
     @Query("DELETE FROM transaction_table")
-    void deleteAllTransaction();
+    suspend fun deleteAllTransaction()
 
-    @Query("SELECT * FROM transaction_table ORDER BY dateWithTime DESC")
-    LiveData<List<TransactionClass>> getAllTransactions();
+    @get:Query("SELECT * FROM transaction_table ORDER BY dateWithTime DESC")
+    val allTransactions: Flow<List<TransactionClass>>
 
     @Query("SELECT * FROM transaction_table where date == :date ORDER BY dateWithTime DESC")
-    LiveData<List<TransactionClass>> getAllTransactionsForDate(Long date);
+    fun getAllTransactionsForDate(date: Long): Flow<List<TransactionClass>>
+
+    @Query("SELECT SUM(amount) FROM transaction_table where date == :date and type == :type")
+    fun getTotalAmountForDate(date: Long, type: String): Flow<Long?>
 
     @Query("SELECT date,SUM(amount) AS totalAmount FROM transaction_table where date >= :startDate and date <= :endDate and type == :type")
-    LiveData<TotalAmountClass> getTotalAmountByDateRangeAndCategoryType(Long startDate,Long endDate,String type);
+    fun getTotalAmountByDateRangeAndCategoryType(
+        startDate: Long,
+        endDate: Long,
+        type: String
+    ): Flow<TotalAmountClass>
 
     @Query("SELECT date,SUM(CASE WHEN type == \"Expense\" then amount else 0 END) AS totalExpense,SUM(CASE WHEN type == \"Income\" then amount else 0 END) AS totalIncome from transaction_table where date >= :startDate and date <= :endDate group by date")
-    LiveData<List<TotalExpenseIncomeClass>> getListOfTotalAmountPerDayForRange(Long startDate, Long endDate);
+    fun getListOfTotalAmountPerDayForRange(
+        startDate: Long,
+        endDate: Long
+    ): Flow<List<TotalExpenseIncomeClass>>
+
 }

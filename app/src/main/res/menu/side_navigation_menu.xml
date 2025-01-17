@@ -1,47 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android"
-    >
-    <group android:id="@+id/group_view_sideNavigation"
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group
+        android:id="@+id/group_view_sideNavigation"
         android:checkableBehavior="single">
         <item
             android:id="@+id/item_listView_sideNavigation"
-            android:title="List"
             android:checked="true"
-            android:icon="@drawable/home_icon_selector"/>
+            android:icon="@drawable/home_icon_selector"
+            android:title="List" />
         <item
             android:id="@+id/item_monthView_sideNavigation"
-            android:title="Month"
-            android:icon="@drawable/home_icon_selector"/>
+            android:icon="@drawable/home_icon_selector"
+            android:title="Month" />
         <item
             android:id="@+id/item_dayView_sideNavigation"
-            android:title="Day"
-            android:icon="@drawable/home_icon_selector"/>
+            android:icon="@drawable/home_icon_selector"
+            android:title="Day" />
     </group>
     <group
         android:id="@+id/group_more_sideNavigation"
         android:checkableBehavior="single">
         <item
             android:id="@+id/item_expenseCategory_sideNavigation"
-            android:title="Expense Category"
-            android:icon="@drawable/add_category_icon_selector"/>
+            android:icon="@drawable/add_category_icon_selector"
+            android:title="Expense Category" />
         <item
             android:id="@+id/item_incomeCategory_sideNavigation"
-            android:title="Income Category"
-            android:icon="@drawable/add_category_icon_selector"/>
+            android:icon="@drawable/add_category_icon_selector"
+            android:title="Income Category" />
 
         <item
             android:id="@+id/item_settings_sideNavigation"
-            android:title="Settings"
-            android:icon="@drawable/settings_icon_selector"/>
+            android:icon="@drawable/settings_icon_selector"
+            android:title="Settings" />
 
         <item
             android:id="@+id/item_analyze_sideNavigation"
-            android:title="Statistics"
-            android:icon="@drawable/analyze_icon_selector"/>
+            android:icon="@drawable/analyze_icon_selector"
+            android:title="Statistics" />
 
         <item
             android:id="@+id/item_bankAccounts_sideNavigation"
-            android:title="Bank Accounts"
-            android:icon="@drawable/bank_accounts_icon_selector"/>
+            android:icon="@drawable/bank_accounts_icon_selector"
+            android:title="Bank Accounts" />
     </group>
 </menu>

@@ -48,8 +48,9 @@ val radioButtonColors
 @Composable
 fun SettingsScreen(
     sendUserBack: () -> Unit,
-    preferenceViewModel : PreferencesViewModel = hiltViewModel()
+    preferenceViewModel: PreferencesViewModel = hiltViewModel()
 ) {
+
     val isBudgetSet by preferenceViewModel.isBudgetSet.collectAsState(false)
     val budget by preferenceViewModel.getBudgetValue.collectAsState(0f)
     SettingsScreenContent(sendUserBack, isBudgetSet, budget)
@@ -139,7 +140,7 @@ fun SettingsScreenContent(sendUserBack: () -> Unit, isBudgetSet: Boolean, budget
                         }
                     } else {
                         FilledTonalButton(
-                            onClick = {bottomSheet = true},
+                            onClick = { bottomSheet = true },
                             colors = ButtonColors(
                                 containerColor = MaterialTheme.colorScheme.secondaryContainer,
                                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
@@ -158,12 +159,22 @@ fun SettingsScreenContent(sendUserBack: () -> Unit, isBudgetSet: Boolean, budget
         }
     }
     if (bottomSheet) {
-        if(isBudgetSet){
+        if (isBudgetSet) {
             var amountText by remember { mutableStateOf(TextFieldValue(budget.toString())) }
-            BudgetBottomSheet(sheetState, bottomSheetDismissed = { bottomSheet = false },amountText,isBudgetSet)
-        }else{
+            BudgetBottomSheet(
+                sheetState,
+                bottomSheetDismissed = { bottomSheet = false },
+                amountText,
+                isBudgetSet
+            )
+        } else {
             var amountText by remember { mutableStateOf(TextFieldValue("")) }
-            BudgetBottomSheet(sheetState, bottomSheetDismissed = { bottomSheet = false },amountText,isBudgetSet)
+            BudgetBottomSheet(
+                sheetState,
+                bottomSheetDismissed = { bottomSheet = false },
+                amountText,
+                isBudgetSet
+            )
         }
 
     }

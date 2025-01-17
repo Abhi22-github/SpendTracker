@@ -16,13 +16,13 @@ import com.example.expensetracker.Composables.ExpenseTrackerTheme
 import com.example.expensetracker.Composables.components.RestBudgetPill
 import com.example.expensetracker.Composables.components.SpendsBudgetCard
 import com.example.expensetracker.Composables.components.TransactionsListCompose
-import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.example.expensetracker.ViewModels.TransactionsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.time.LocalDate
 
 @AndroidEntryPoint
 class StatisticsActivity : ComponentActivity() {
-    private val viewModel: AddActivityViewModel by viewModels()
+    private val viewModel: TransactionsViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -37,7 +37,7 @@ class StatisticsActivity : ComponentActivity() {
                     Button(onClick = { incrementSpend() }) {
                     }
                     Row {
-                        RestBudgetPill(viewModel = viewModel)
+                        RestBudgetPill(date = LocalDate.now(), transactionsViewModel = viewModel)
                     }
                     TransactionsListCompose(false, LocalDate.now(),viewModel = viewModel)
                 }

@@ -9,7 +9,7 @@ import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.Utilities.Constants
 import com.example.expensetracker.Utilities.getDateFromMillis
 import com.example.expensetracker.Utilities.parseAmount
-import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.example.expensetracker.ViewModels.TransactionsViewModel
 import com.example.expensetracker.databinding.FragmentTransactionDetailBottomSheetBinding
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -18,7 +18,7 @@ import dagger.hilt.android.AndroidEntryPoint
 class TransactionDetailBottomSheet(val transactionClass: TransactionClass) : BottomSheetDialogFragment() {
 
     private lateinit var binding: FragmentTransactionDetailBottomSheetBinding
-    private val viewModel: AddActivityViewModel by viewModels()
+    private val viewModel: TransactionsViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,

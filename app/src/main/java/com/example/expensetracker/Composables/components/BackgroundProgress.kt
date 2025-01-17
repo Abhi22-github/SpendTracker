@@ -15,8 +15,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -26,10 +26,12 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.expensetracker.Composables.WavyShape
 import com.example.expensetracker.Composables.utils.HarmonizedColorPalette
 import com.example.expensetracker.Utilities.clamp
-import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.example.expensetracker.ViewModels.AnimationViewModel
+import com.example.expensetracker.ViewModels.TransactionsViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
 
@@ -37,10 +39,11 @@ import kotlin.math.ceil
 @Composable
 fun BackgroundProgress(
     harmonizedColor: HarmonizedColorPalette,
-    viewModel: AddActivityViewModel
+    viewModel: TransactionsViewModel,
+    animationViewModel: AnimationViewModel = hiltViewModel()
 ) {
-    val percentWithNewSpent by viewModel.newTotal.observeAsState(1f)
-    val percentWithoutNewSpent by  viewModel.oldTotal.observeAsState(1f)
+    val percentWithNewSpent by animationViewModel.newSpentPercentage.collectAsState()
+    val percentWithoutNewSpent by  animationViewModel.oldPercentage.collectAsState()
 
     val percentWithoutNewSpentAnimated by animateFloatAsState(
         label = "percentRealAnim",
@@ -98,7 +101,7 @@ fun BackgroundProgress(
                                     )
                                 }
                             },
-                            color = harmonizedColor.main.copy(alpha = 0.3f),
+                            color = harmonizedColor.main.copy(alpha = 0.5f),
                             style = Stroke(
                                 width = 2.dp.toPx(),
                                 pathEffect = PathEffect.dashPathEffect(
@@ -119,9 +122,9 @@ fun BackgroundProgress(
         Box(
             modifier = Modifier
                 .background(
-                    harmonizedColor.main.copy(alpha = 0.15f),
+                    harmonizedColor.main.copy(alpha = 0.50f),
                     shape = WavyShape(
-                        period = 30.dp,
+                        period = 40.dp,
                         amplitude = percentWithNewSpentAnimated.clamp(0.96f, 1f) * 2.dp,
                         shift = shift.value,
                     ),

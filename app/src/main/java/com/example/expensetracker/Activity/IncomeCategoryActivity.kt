@@ -15,7 +15,7 @@ import com.example.expensetracker.AddCategoryBottomSheet
 import com.example.expensetracker.Model.CategoryClass
 import com.example.expensetracker.R
 import com.example.expensetracker.Utilities.Constants
-import com.example.expensetracker.ViewModels.AddActivityViewModel
+import com.example.expensetracker.ViewModels.TransactionsViewModel
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,7 +29,7 @@ class IncomeCategoryActivity : AppCompatActivity(), Actions {
     private var recyclerViewCategoryExpense: RecyclerView? = null
     private var categoryViewAdapter: CategoryViewAdapter? = null
 
-    private val viewmodel: AddActivityViewModel by viewModels()
+    private val viewmodel: TransactionsViewModel by viewModels()
     private lateinit var toolbarExpenseCategoryToolbar: MaterialToolbar
 
 
