@@ -129,9 +129,6 @@ class MainActivity : AppCompatActivity() {
             } else if (menuID == R.id.item_monthView_sideNavigation) {
                 setUpMonthFragment()
                 selectedItem = R.id.item_monthView_sideNavigation
-            } else if (menuID == R.id.test) {
-                val intent = Intent(context, DayViewActivityTest::class.java)
-                startActivity(intent)
             } else if (menuID == R.id.item_dayView_sideNavigation) {
                 setUpDayFragment()
                 selectedItem = R.id.item_dayView_sideNavigation
