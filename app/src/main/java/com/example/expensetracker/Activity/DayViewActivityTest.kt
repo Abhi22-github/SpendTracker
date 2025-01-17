@@ -5,7 +5,7 @@ import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.SCROLL_STATE_IDLE
-import com.example.expensetracker.CalenderViewPager.testViewPager2Adapter
+import com.example.expensetracker.CalenderViewPager.DayViewPagerAdapter
 import com.example.expensetracker.Utilities.getPreviousAndNextDays
 import com.example.expensetracker.Utilities.toLocalDate
 import com.example.expensetracker.databinding.ActivityDayViewTestBinding
@@ -121,7 +121,7 @@ class DayViewActivityTest : AppCompatActivity() {
 
 
         val onlyDayAdapter2Frag =
-            testViewPager2Adapter(
+            DayViewPagerAdapter(
                 supportFragmentManager,
                 lifecycle,
                 dateList,

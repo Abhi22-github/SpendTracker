@@ -13,15 +13,15 @@ import com.example.expensetracker.Composables.Screens.FragmentDayScreen
 import com.example.expensetracker.Utilities.toLocalDate
 import com.example.expensetracker.Utilities.toNormalString
 import com.example.expensetracker.ViewModels.TransactionsViewModel
-import com.example.expensetracker.databinding.FragmentTestBinding
+import com.example.expensetracker.databinding.FragmentDayBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.onEach
 import java.time.LocalDate
 
 @AndroidEntryPoint
-class testFragment() : Fragment() {
+class DayFragment() : Fragment() {
 
-    lateinit var binding: FragmentTestBinding
+    lateinit var binding: FragmentDayBinding
     val viewModel: TransactionsViewModel by viewModels()
     var position: Int = 0
     lateinit var date: LocalDate
@@ -39,7 +39,7 @@ class testFragment() : Fragment() {
         position = (args?.getString("position") ?: "0").toInt()
         date = (args?.getString("date") ?: LocalDate.now().toNormalString()).toLocalDate()
 
-        binding = FragmentTestBinding.inflate(inflater, container, false)
+        binding = FragmentDayBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -52,7 +52,7 @@ class testFragment() : Fragment() {
     fun setUpComposeRecyclerView() {
         binding.composeViewDayListSingleDayFragment.setContent {
             ExpenseTrackerTheme {
-                FragmentDayScreen(true,date)
+                FragmentDayScreen(true, date)
             }
         }
     }
