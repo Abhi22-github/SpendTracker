@@ -3,22 +3,23 @@ package com.example.expensetracker.Composables.components
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -26,9 +27,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
@@ -36,15 +37,16 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -57,6 +59,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -92,7 +96,7 @@ fun TransactionsListCompose(
     date: LocalDate,
     viewModel: TransactionsViewModel = hiltViewModel()
 ) {
-    val bottomSheetState = rememberModalBottomSheetState()
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var bottomSheet by remember { mutableStateOf(false) }
     //  val uiState by viewModel.uiState.collectAsState()
 //    LaunchedEffect(uiState) {
@@ -324,6 +328,7 @@ fun BottomSheetContentItemDetails(sheetState: SheetState, closeBottomSheet: () -
         modifier = Modifier
             .imePadding()
             .fillMaxWidth(),
+        contentWindowInsets = { WindowInsets.ime }
     ) {
         BottomSheetContentItemDetailsContent(modifier = Modifier)
     }
@@ -332,7 +337,7 @@ fun BottomSheetContentItemDetails(sheetState: SheetState, closeBottomSheet: () -
 val bottomSheetStartEndPadding = 16.dp
 val bottomSheetTopBottomPadding = 0.dp
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun BottomSheetContentItemDetailsContent(
     modifier: Modifier,
@@ -340,22 +345,41 @@ fun BottomSheetContentItemDetailsContent(
     var cashMenuExpanded by remember { mutableStateOf(false) }
     var categoryMenuExpanded by remember { mutableStateOf(false) }
     var expenseValue by remember { mutableStateOf(TextFieldValue("")) }
-    //val focusRequester = remember { FocusRequester() }
+    var comment by remember { mutableStateOf(TextFieldValue("")) }
+    val focusRequester = remember { FocusRequester() }
 
     // Request focus once when the composable is first composed
     LaunchedEffect(Unit) {
         // Request focus for the TextField
-        //focusRequester.requestFocus()
+        focusRequester.requestFocus()
     }
 
     Column(
         modifier
             .fillMaxWidth()
+            .imePadding()
     ) {
         Column(
 
         ) {
-            Spacer(Modifier.height(0.dp))
+
+            Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
+                FilledTonalIconButton(
+                    onClick = {},
+                    colors = IconButtonDefaults.filledTonalIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    )
+                ) {
+                    Icon(
+                        Icons.Filled.ArrowForward,
+                        contentDescription = "ArrowUp",
+                    )
+                }
+                RestBudgetPill(LocalDate.now())
+            }
+
+            Spacer(Modifier.height(16.dp))
 
             Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
                 Box(
@@ -368,8 +392,8 @@ fun BottomSheetContentItemDetailsContent(
                         modifier = Modifier.padding(end = 5.dp),
                         onClick = { cashMenuExpanded = !cashMenuExpanded },
                         colors = ButtonColors(
-                            containerColor = colorPalletBlue.container,
-                            contentColor = colorPalletBlue.onContainer,
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
                             disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
                             disabledContentColor = MaterialTheme.colorScheme.onPrimary
                         ),
@@ -413,8 +437,8 @@ fun BottomSheetContentItemDetailsContent(
                         modifier = Modifier.padding(end = 5.dp),
                         onClick = { categoryMenuExpanded = !categoryMenuExpanded },
                         colors = ButtonColors(
-                            containerColor = colorPalletGreen.container,
-                            contentColor = colorPalletGreen.onContainer,
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
                             disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
                             disabledContentColor = MaterialTheme.colorScheme.onPrimary
                         ),
@@ -449,57 +473,8 @@ fun BottomSheetContentItemDetailsContent(
                         onDismiss = { categoryMenuExpanded = false })
                 }
             }
-            Spacer(Modifier.height(16.dp))
-            if (false) {
-                Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
-                    Box(
-                        modifier = modifier.fillMaxWidth()
-                    ) {
-                        val colorPalletGreen = toPalette(greenColor)
-                        Button(
-                            modifier = Modifier.padding(end = 5.dp),
-                            onClick = { categoryMenuExpanded = !categoryMenuExpanded },
-                            colors = ButtonColors(
-                                containerColor = colorPalletGreen.container,
-                                contentColor = colorPalletGreen.onContainer,
-                                disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
-                                disabledContentColor = MaterialTheme.colorScheme.onPrimary
-                            ),
-                            contentPadding = PaddingValues(
-                                start = 20.dp, end = 10.dp, top = 16.dp, bottom = 16.dp
-                            )
-                        ) {
-                            val image = rememberAsyncImagePainter(R.drawable.ic_category_1)
-                            Image(
-                                painter = image,
-                                contentDescription = "Test Image",
-                                modifier = Modifier
-                                    .size(24.dp)
-                                    .weight(0.05f),
-                            )
 
-                            Text(
-                                text = "Entertainment",
-                                modifier = Modifier
-                                    .weight(0.9f)
-                                    .padding(start = 6.dp),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            Icon(
-                                Icons.Filled.KeyboardArrowDown,
-                                "backIcon",
-                                modifier = Modifier.weight(0.1f)
-                            )
-                        }
-                        DropDownMenu(modifier,
-                            categoryMenuExpanded,
-                            colorPalletGreen,
-                            onDismiss = { categoryMenuExpanded = false })
-                    }
-                }
-            }
-            Spacer(Modifier.padding(16.dp))
+            Spacer(Modifier.height(16.dp))
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -512,29 +487,23 @@ fun BottomSheetContentItemDetailsContent(
                         expenseValue = newValue
                     },
                     modifier = Modifier
-                        .wrapContentWidth()
+                        .fillMaxWidth()
                         .align(Alignment.Center)
-                        .focusable(false),
-                    //  .focusRequester(focusRequester),
+                        .focusRequester(focusRequester),
                     singleLine = true,
 
-//                placeholder = {
-//                    Text(
-//                        "0",
-//                        style = MaterialTheme.typography.displayMedium,
-//                        modifier = Modifier.wrapContentWidth()
-//                            .align(Alignment.Center),
-//                        textAlign = TextAlign.Center
-//                    )
-//                },
-//                leadingIcon = {
-//                    Text(
-//                        "₹",
-//                        style = MaterialTheme.typography.displayMedium,
-//                        modifier = Modifier.wrapContentWidth()
-//                            .align(Alignment.Center)
-//                    )
-//                },
+                    placeholder = {
+                        Text(
+                            "₹0",
+                            style = typography.displayMedium,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.Center),
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
+                    },
+
                     shape = RoundedCornerShape(24.dp),
                     colors = TextFieldDefaults.colors(
                         focusedIndicatorColor = Color.Transparent,
@@ -546,17 +515,90 @@ fun BottomSheetContentItemDetailsContent(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 )
             }
-            Spacer(Modifier.padding(16.dp))
+            Spacer(Modifier.height(8.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
+            ) {
+                TextField(
+                    value = comment,
+                    onValueChange = { newValue ->
+                        comment = newValue
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    singleLine = true,
+                    placeholder = {
+                        Text(
+                            "Add a comment",
+                            style = typography.bodyLarge,
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        )
+                    },
+                    shape = RoundedCornerShape(24.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent
+                    ),
+                    textStyle = typography.bodyLarge.copy(textAlign = TextAlign.Center),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                )
+            }
+
+
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
+//                ) {
+//                    TextField(
+//                        value = expenseValue,
+//                        onValueChange = { newValue ->
+//                            expenseValue = newValue
+//                        },
+//                        modifier = Modifier
+//                            .wrapContentWidth(),
+//
+//                        singleLine = true,
+//                        placeholder = {
+//                            Text(
+//                                "Description",
+//                                style = typography.bodyMedium,
+//                                modifier = Modifier
+//                                    .wrapContentWidth(),
+//                                textAlign = TextAlign.Center,
+//                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+//                            )
+//                        },
+//                        shape = RoundedCornerShape(24.dp),
+//                        colors = TextFieldDefaults.colors(
+//                            focusedIndicatorColor = Color.Transparent,
+//                            unfocusedIndicatorColor = Color.Transparent,
+//                            unfocusedContainerColor = Color.Transparent,
+//                            focusedContainerColor = Color.Transparent
+//                        ),
+//                        textStyle = typography.bodyMedium,
+//                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+//                    )
+//                }
+
         }
         Row {
             BottomRow(modifier)
         }
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(8.dp))
     }
 }
 
 @Composable
 fun BottomRow(modifier: Modifier) {
+    var showDatePicker by remember { mutableStateOf(false) }
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -564,30 +606,35 @@ fun BottomRow(modifier: Modifier) {
             .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
     ) {
         Row(modifier = modifier.weight(1f)) {
-            IconButton(
-                onClick = {},
-                // colors = IconButtonDefaults.filledTonalIconButtonColors(),
+//            IconButton(
+//                onClick = {},
+//                colors = IconButtonDefaults.iconButtonColors(),
+//            ) {
+//                Icon(Icons.Filled.Add, contentDescription = null)
+//            }
+            FilledTonalIconButton(
+                onClick = {
+                    showDatePicker = !showDatePicker
+                },
+                colors = IconButtonDefaults.filledTonalIconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
             ) {
-                Icon(Icons.Filled.Add, contentDescription = null)
-            }
-            Spacer(Modifier.width(0.dp))
-            IconButton(
-                onClick = {},
-                //   colors = IconButtonDefaults.filledTonalIconButtonColors(),
-            ) {
-                Icon(
-                    Icons.Filled.DateRange,
-                    contentDescription = null
-                )
+                Icon(Icons.Rounded.DateRange, contentDescription = null)
             }
         }
         Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.End) {
-            TextButton(
+            FilledTonalButton(
                 onClick = { },
             ) {
                 Text("Save")
             }
         }
+    }
+    if (showDatePicker) {
+        DatePickerModal(
+            onDateSelected = { date ->
+            },
+            onDismiss = { showDatePicker = !showDatePicker }
+        )
     }
 }
 
