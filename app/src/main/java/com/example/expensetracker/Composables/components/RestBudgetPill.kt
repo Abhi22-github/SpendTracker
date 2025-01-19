@@ -1,6 +1,5 @@
 package com.example.expensetracker.Composables.components
 
-import android.util.Log
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.layout.Arrangement
@@ -62,11 +61,6 @@ fun RowScope.RestBudgetPill(
     val percent by animationViewModel.newSpentPercentage.collectAsState()
     val newDailyBudget by transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
 
-
-    Log.d("Recompose",percent.toString())
-
-
-    Log.d("Hello percent", percent.toString())
 
     val percentWithNewSpentAnimated = animateFloatAsState(
         label = "percentWithNewSpentAnimated",
