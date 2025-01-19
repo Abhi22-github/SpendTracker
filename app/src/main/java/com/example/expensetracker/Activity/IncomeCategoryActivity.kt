@@ -15,7 +15,7 @@ import com.example.expensetracker.AddCategoryBottomSheet
 import com.example.expensetracker.Model.CategoryClass
 import com.example.expensetracker.R
 import com.example.expensetracker.Utilities.Constants
-import com.example.expensetracker.ViewModels.TransactionsViewModel
+import com.example.expensetracker.ViewModels.CategoryViewModel
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
@@ -29,7 +29,7 @@ class IncomeCategoryActivity : AppCompatActivity(), Actions {
     private var recyclerViewCategoryExpense: RecyclerView? = null
     private var categoryViewAdapter: CategoryViewAdapter? = null
 
-    private val viewmodel: TransactionsViewModel by viewModels()
+    private val categoryViewModel: CategoryViewModel by viewModels()
     private lateinit var toolbarExpenseCategoryToolbar: MaterialToolbar
 
 
@@ -79,7 +79,7 @@ class IncomeCategoryActivity : AppCompatActivity(), Actions {
     private fun setUpCategoryExpenseRecyclerView() {
         recyclerViewCategoryExpense!!.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        viewmodel.onlyIncomeCategoryNames.observe(this, object : Observer<List<CategoryClass?>?> {
+        categoryViewModel.onlyIncomeCategoryNames.observe(this, object : Observer<List<CategoryClass?>?> {
             override fun onChanged(value: List<CategoryClass?>?) {
                 categoryViewAdapter = CategoryViewAdapter(mContext, value)
                 recyclerViewCategoryExpense!!.adapter = categoryViewAdapter
@@ -88,6 +88,6 @@ class IncomeCategoryActivity : AppCompatActivity(), Actions {
     }
 
     override fun onDeleteCategory(categoryClass: CategoryClass) {
-        viewmodel.deleteCategoryFromDatabase(categoryClass)
+        categoryViewModel.deleteCategoryFromDatabase(categoryClass)
     }
 }
