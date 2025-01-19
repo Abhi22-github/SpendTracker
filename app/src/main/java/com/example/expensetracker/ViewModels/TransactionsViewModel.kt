@@ -10,11 +10,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.Database.TransactionRepository
 import com.example.expensetracker.Events.EventMessage
+import com.example.expensetracker.Model.CategoryClass
 import com.example.expensetracker.Model.TotalAmountClass
 import com.example.expensetracker.Model.TotalExpenseIncomeClass
 import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.Utilities.Constants
 import com.example.expensetracker.Utilities.Constants.EXPENSE
+import com.example.expensetracker.Utilities.LocalDateToLong
 import com.example.expensetracker.Utilities.UiState
 import com.google.android.material.chip.Chip
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -99,7 +101,7 @@ class TransactionsViewModel @Inject constructor(
 
     init {
         selectedDate = Calendar.getInstance().timeInMillis
-        transactionTypeFromViewModel = Constants.EXPENSE
+        transactionTypeFromViewModel = EXPENSE
         _currentSelectedDate = MutableLiveData(0)
         currentSelectedDate = _currentSelectedDate
         todaysDate = LocalDate.now()
@@ -123,12 +125,28 @@ class TransactionsViewModel @Inject constructor(
         transactionTypeFromViewModel = transaction
     }
 
+    fun validateTransactionData(
+        selectedType: String,
+        selectedCategory: CategoryClass,
+        expenseValue: String,
+        comment: String,
+        selectedDate: Long?
+    ) {
+        storeFormDataInDatabase(
+            expense = selectedType,
+            amount = expenseValue,
+            note = comment,
+            category = selectedCategory.categoryName,
+            categoryIcon = selectedCategory.categoryIconNumber,
+            dateWithTime = selectedDate ?: LocalDateToLong(LocalDate.now())
+        )
+    }
 
     fun validateFormData(amount: String, note: String, mContext: Context?) {
         //to get,separate and validate data from both expense and income
         if (amount.isEmpty()) {
             EventBus.getDefault().post(EventMessage(4, "Amount can't be zero"))
-        } else if (transactionTypeFromViewModel == Constants.EXPENSE) {
+        } else if (transactionTypeFromViewModel == EXPENSE) {
             category = currentSelectedExpenseCategory
             if (currentSelectedExpenseCategory.isEmpty()) {
                 EventBus.getDefault().post(EventMessage(5, "Please select a category"))
@@ -136,7 +154,7 @@ class TransactionsViewModel @Inject constructor(
                 //store the data
                 Toast.makeText(mContext, "success", Toast.LENGTH_SHORT).show()
                 storeFormDataInDatabase(
-                    transactionTypeFromViewModel, amount, note, category, selectedDate
+                    transactionTypeFromViewModel, amount, note, category,1, selectedDate
                 )
             }
         } else if (transactionTypeFromViewModel == Constants.INCOME) {
@@ -147,7 +165,7 @@ class TransactionsViewModel @Inject constructor(
                 //store the data
                 Toast.makeText(mContext, "success", Toast.LENGTH_SHORT).show()
                 storeFormDataInDatabase(
-                    transactionTypeFromViewModel, amount, note, category, selectedDate
+                    transactionTypeFromViewModel, amount, note, category, 1,selectedDate
                 )
             }
         }
@@ -155,7 +173,12 @@ class TransactionsViewModel @Inject constructor(
 
 
     private fun storeFormDataInDatabase(
-        expense: String, amount: String, note: String, category: String?, dateWithTime: Long
+        expense: String,
+        amount: String,
+        note: String,
+        category: String?,
+        categoryIcon: Int,
+        dateWithTime: Long
     ) {
         // on below line we are creating
         // a variable for our modal class.
@@ -164,6 +187,7 @@ class TransactionsViewModel @Inject constructor(
         modal.type = expense.trim { it <= ' ' }
         modal.note = note.trim { it <= ' ' }
         modal.category = category!!.trim { it <= ' ' }
+        modal.categoryIcon =  categoryIcon
         modal.dateWithTime = dateWithTime
         val date = Instant.ofEpochMilli(dateWithTime).atZone(ZoneId.systemDefault()) // default zone
             .toLocalDate()
@@ -186,8 +210,6 @@ class TransactionsViewModel @Inject constructor(
         get() = transactionRepository.allTransactions
 
 
-
-
     fun getTotalIncomeForRange(startDate: Long, endDate: Long) {
         viewModelScope.launch {
             loading()
@@ -206,7 +228,7 @@ class TransactionsViewModel @Inject constructor(
         viewModelScope.launch {
             loading()
             getTotalAmountByDateRangeAndCategoryType(
-                startDate, endDate, Constants.EXPENSE
+                startDate, endDate, EXPENSE
             ).catch { error(it) }.collect { totalAmount ->
                 _getTotalExpenseAmountForRangeFlow.value = totalAmount
                 completed()
