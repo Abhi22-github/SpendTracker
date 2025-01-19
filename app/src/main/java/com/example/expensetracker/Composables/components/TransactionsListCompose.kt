@@ -80,6 +80,7 @@ import com.example.expensetracker.Composables.utils.HarmonizedColorPalette
 import com.example.expensetracker.Composables.utils.combineColors
 import com.example.expensetracker.Composables.utils.toPalette
 import com.example.expensetracker.Converters.TransactionConverter
+import com.example.expensetracker.Model.CategoryClass
 import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.R
 import com.example.expensetracker.Utilities.Constants.EXPENSE
@@ -348,6 +349,7 @@ fun BottomSheetContentItemDetailsContent(
     var expenseValue by remember { mutableStateOf(TextFieldValue("")) }
     var comment by remember { mutableStateOf(TextFieldValue("")) }
     val focusRequester = remember { FocusRequester() }
+    val expenseCategoryList by categoryViewModel.onlyExpenseCategoryNames.collectAsState()
 
     // Request focus once when the composable is first composed
     LaunchedEffect(Unit) {
@@ -467,11 +469,14 @@ fun BottomSheetContentItemDetailsContent(
                             modifier = Modifier.weight(0.2f)
                         )
                     }
-//                    DropDownMenu(modifier,
-//                        categoryMenuExpanded,
-//                        colorPalletGreen,
-//                        onDismiss = { categoryMenuExpanded = false },
-//                        )
+
+                    DropDownMenu(
+                        modifier,
+                        categoryMenuExpanded,
+                        colorPalletGreen,
+                        onDismiss = { categoryMenuExpanded = false },
+                        expenseCategoryList
+                    )
                 }
             }
 
@@ -657,7 +662,7 @@ fun DropDownMenu(
     menuExpanded: Boolean,
     colorPallet: HarmonizedColorPalette,
     onDismiss: () -> Unit,
-    itemList: Map<Int, String>
+    itemList: List<CategoryClass>
 ) {
     DropdownMenu(
         expanded = menuExpanded,
@@ -672,12 +677,12 @@ fun DropDownMenu(
 //        val category4 = rememberAsyncImagePainter(R.drawable.ic_category_4)
 //        val category5 = rememberAsyncImagePainter(R.drawable.ic_category_6)
 
-        itemList.forEach { (icon, name) ->
-            val selectedIcon = rememberAsyncImagePainter(icon)
-            DropdownMenuItem(text = { Text(text = name) }, leadingIcon = {
+        itemList.forEach { categoryClass ->
+            val selectedIcon = rememberAsyncImagePainter(R.drawable.ic_category_2)
+            DropdownMenuItem(text = { Text(text = categoryClass.categoryName) }, leadingIcon = {
                 Image(
                     painter = selectedIcon,
-                    contentDescription = name,
+                    contentDescription = categoryClass.categoryName,
                     modifier = Modifier.size(24.dp),
                 )
             }, onClick = { /* Do something... */ })

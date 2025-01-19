@@ -180,22 +180,27 @@ class MainActivity : AppCompatActivity() {
             val expenseArray = resources.getStringArray(R.array.expense_categories)
 
             for (s in expenseArray) {
-                val categoryClassObject = CategoryClass()
-                categoryClassObject.categoryName = s
-                categoryClassObject.categoryType = Constants.EXPENSE
-                categoryClassObject.categoryIconNumber = 1
-                categoryClassObject.categoryColorNumber = 1
+                val categoryClassObject = CategoryClass(
+                    categoryName = s,
+                    categoryColorNumber = 1,
+                    categoryIconNumber = 1,
+                    categoryType = Constants.EXPENSE,
+                    id = 0,
+                )
                 categoryClassesList.add(categoryClassObject)
             }
 
             val incomeArray = resources.getStringArray(R.array.income_categories)
 
             for (s in incomeArray) {
-                val categoryClassObject = CategoryClass()
-                categoryClassObject.categoryName = s
-                categoryClassObject.categoryType = Constants.INCOME
-                categoryClassObject.categoryIconNumber = 1
-                categoryClassObject.categoryColorNumber = 1
+                val categoryClassObject = CategoryClass(
+                    id = 0,
+                    categoryName = s,
+                    categoryColorNumber = 1,
+                    categoryIconNumber = 1,
+                    categoryType = Constants.INCOME,
+                )
+
                 categoryClassesList.add(categoryClassObject)
             }
 
