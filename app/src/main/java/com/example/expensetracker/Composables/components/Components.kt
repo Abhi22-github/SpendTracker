@@ -23,7 +23,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.expensetracker.Composables.utils.HarmonizedColorPalette
 import com.example.expensetracker.Composables.utils.IconState
 import com.example.expensetracker.Model.CategoryClass
-import com.example.expensetracker.Model.TransactionTypeClass
 
 
 @Composable
@@ -45,7 +44,7 @@ fun DateInputChip(
             Icon(
                 Icons.Default.Close,
                 contentDescription = "Localized description",
-                )
+            )
         },
         colors = InputChipDefaults.inputChipColors(containerColor = MaterialTheme.colorScheme.errorContainer)
     )
@@ -62,16 +61,10 @@ fun DateInputChip(
 //type 2 -> expense/Income
 @Composable
 fun DropDownMenu(
-    modifier: Modifier,
     menuExpanded: Boolean,
     colorPallet: HarmonizedColorPalette,
     onDismiss: () -> Unit,
-    type: Int,
-    itemList: List<CategoryClass>?,
-    typeList: List<TransactionTypeClass>?,
-    selectedType: TransactionTypeClass,
-    selectedTypeSetter: (TransactionTypeClass) -> Unit,
-    selectedCategory: CategoryClass,
+    itemList: List<CategoryClass>,
     selectedCategorySetter: (CategoryClass) -> Unit
 ) {
     DropdownMenu(
@@ -80,22 +73,22 @@ fun DropDownMenu(
         containerColor = colorPallet.surfaceVariant,
         shape = RoundedCornerShape(24.dp),
     ) {
-        if (type == 1) {
-            itemList?.forEach { categoryClass ->
-                val selectedIcon =
-                    rememberAsyncImagePainter(IconState.fromNumber(categoryClass.categoryIconNumber))
-                DropdownMenuItem(text = { Text(text = categoryClass.categoryName) }, leadingIcon = {
-                    Image(
-                        painter = selectedIcon,
-                        contentDescription = categoryClass.categoryName,
-                        modifier = Modifier.size(24.dp),
-                    )
-                }, onClick = {
-                    selectedCategorySetter(categoryClass)
-                    onDismiss()
-                })
-            }
+//        if (type == 1) {
+        itemList.forEach { categoryClass ->
+            val selectedIcon =
+                rememberAsyncImagePainter(IconState.fromNumber(categoryClass.categoryIconNumber))
+            DropdownMenuItem(text = { Text(text = categoryClass.categoryName) }, leadingIcon = {
+                Image(
+                    painter = selectedIcon,
+                    contentDescription = categoryClass.categoryName,
+                    modifier = Modifier.size(24.dp),
+                )
+            }, onClick = {
+                selectedCategorySetter(categoryClass)
+                onDismiss()
+            })
         }
+        //     }
 //        if (type == 2) {
 //            typeList?.forEach { transactionTypeClass ->
 //                val selectedIcon =

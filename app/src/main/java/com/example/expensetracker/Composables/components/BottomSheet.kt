@@ -1,7 +1,9 @@
 package com.example.expensetracker.Composables.components
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -67,6 +69,8 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.expensetracker.Composables.ExpenseTrackerTheme
 import com.example.expensetracker.Composables.blueColor
 import com.example.expensetracker.Composables.greenColor
+import com.example.expensetracker.Composables.orange
+import com.example.expensetracker.Composables.successColor
 import com.example.expensetracker.Composables.utils.IconState
 import com.example.expensetracker.Composables.utils.IconStateForType
 import com.example.expensetracker.Composables.utils.toPalette
@@ -81,6 +85,7 @@ import com.example.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -93,7 +98,7 @@ fun BottomSheetContentItemDetails(sheetState: SheetState, closeBottomSheet: () -
             .imePadding()
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
-        BottomSheetContentItemDetailsContent(modifier = Modifier, closeBottomSheet)
+        BottomSheetContentItemDetailsContent(modifier = Modifier)
     }
 }
 
@@ -105,7 +110,7 @@ val bottomSheetTopBottomPadding = 0.dp
 @Composable
 fun BottomSheetContentItemDetailsContent(
     modifier: Modifier,
-    closeBottomSheet: () -> Unit,
+
     categoryViewModel: CategoryViewModel = hiltViewModel(),
     transactionsViewModel: TransactionsViewModel = hiltViewModel(),
     uiViewModel: UiViewModel = hiltViewModel()
@@ -119,32 +124,43 @@ fun BottomSheetContentItemDetailsContent(
     val focusRequester = remember { FocusRequester() }
     val categoryList by categoryViewModel.categoryList.collectAsState()
     var selectedCategory by remember { mutableStateOf(CategoryClass(-1, "Select", 1, 99, EXPENSE)) }
-    val list = listOf(
-        TransactionTypeClass(1, EXPENSE),
-        TransactionTypeClass(2, INCOME)
-    )
-    var selectedType by remember { mutableStateOf(TransactionTypeClass(1, EXPENSE)) }
+
+    val expenseType = TransactionTypeClass(1, EXPENSE)
+    val incomeType = TransactionTypeClass(2, INCOME)
+
+
     val errorStatus by uiViewModel.errorStatusInAddBottomSheet.collectAsState(false)
 
 
     //animations
     var expanded by remember { mutableStateOf(false) }
-    var visible by remember { mutableStateOf(true) }
-    val boxSize by animateDpAsState(targetValue = if (expanded) 200.dp else 56.dp)
+    var typeToggle by remember { mutableStateOf(true) }
+    val boxSize by animateDpAsState(targetValue = if (expanded) 160.dp else 56.dp, animationSpec = tween(500))
+    val colorAnimate by animateColorAsState(
+        targetValue = if (typeToggle) orange.copy(alpha = .20f) else successColor.copy(
+            alpha = 0.20f
+        ), animationSpec = tween(500)
+    )
 
+    var selectedType by remember { mutableStateOf(expenseType.type) }
+    if (typeToggle) {
+        selectedType = expenseType.type
+    } else {
+        selectedType = incomeType.type
+    }
 
     // Request focus once when the composable is first composed
     LaunchedEffect(Unit) {
         // Request focus for the TextField
         focusRequester.requestFocus()
-        categoryViewModel.getCorrespondingList(selectedType.type)
+        categoryViewModel.getCorrespondingList(selectedType)
         categoryViewModel.getOnlyExpenseCategoryNames()
         categoryViewModel.getOnlyIncomeCategoryNames()
     }
 
-    LaunchedEffect(expanded) {
+    LaunchedEffect(expanded, typeToggle) {
         if (expanded) {
-            delay(1000)
+            delay(5000)
             expanded = false
         }
     }
@@ -154,80 +170,57 @@ fun BottomSheetContentItemDetailsContent(
             .fillMaxWidth()
             .imePadding()
     ) {
-        Column(
-
-        ) {
-//            Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
-//                RestBudgetPill(LocalDate.now())
-//            }
+        Column() {
+            Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
+                RestBudgetPill(LocalDate.now())
+            }
 
             Spacer(Modifier.height(16.dp))
-
             Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
 
-                Box(contentAlignment = Alignment.Center, modifier = Modifier
-                    .width(boxSize)
-                    .background(
-                        color = MaterialTheme.colorScheme.surfaceContainer,
-                        shape = RoundedCornerShape(30.dp)
-                    )
-                    .clickable { expanded = !expanded }
-                    .height(56.dp)) {
-                    val colorPalletBlue = toPalette(blueColor)
-
-                    val image =
-                        rememberAsyncImagePainter(IconStateForType.fromNumber(selectedType.iconNumber))
-                    Image(
-                        painter = image,
-                        contentDescription = "Test Image",
-                        modifier = Modifier.size(36.dp),
-                    )
-
-                    if (expanded) {
-                        Text(
-                            text = selectedType.type,
-//                                modifier = Modifier
-//                                    .padding(start = 8.dp),
-//                                maxLines = 1,
-//                                overflow = TextOverflow.Ellipsis
+                Box(contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .width(boxSize)
+                        .background(
+                            color = colorAnimate, shape = RoundedCornerShape(30.dp)
                         )
+                        .clickable {
+                            if (!expanded) {
+                                expanded = !expanded
+                            } else {
+                                typeToggle = !typeToggle
+                                categoryViewModel.getCorrespondingList(if(typeToggle) expenseType.type else incomeType.type)
+                            }
+                        }
+                        .height(56.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        val colorPalletBlue = toPalette(blueColor)
+                        val image =
+                            rememberAsyncImagePainter(
+                                if (typeToggle)
+                                    IconStateForType.fromNumber(expenseType.iconNumber)
+                                else
+                                    IconStateForType.fromNumber(incomeType.iconNumber)
+                            )
+                        Image(
+                            painter = image,
+                            contentDescription = "Test Image",
+                            modifier = Modifier.size(36.dp),
+                        )
+
+                        AnimatedVisibility(expanded) {
+                            Text(
+                                text = if (typeToggle) expenseType.type else incomeType.type,
+                                modifier = Modifier.padding(start = 8.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
-
-//                        Icon(
-//                            Icons.Filled.KeyboardArrowDown,
-//                            "backIcon",
-//                            modifier = Modifier.weight(0.2f)
-//                        )
-
-
-
-                        DropDownMenu(
-                            modifier,
-                            cashMenuExpanded,
-                            colorPalletBlue,
-                            onDismiss = { cashMenuExpanded = false },
-                            2,
-                            null,
-                            list,
-                            selectedType,
-                            selectedTypeSetter = {
-                                selectedType = it
-                                categoryViewModel.getCorrespondingList(it.type)
-                            },
-                            selectedCategory = selectedCategory,
-                            selectedCategorySetter = {
-                                selectedCategory = it
-                                scope.launch {
-                                    uiViewModel.errorStatusInAddBottomSheet.emit(false)
-                                }
-                            },
-                        )
-
                 }
                 Spacer(Modifier.width(12.dp))
                 Box(
-                    modifier = modifier
-                        .fillMaxWidth()
+                    modifier = modifier.fillMaxWidth()
                 ) {
                     val colorPalletGreen = toPalette(greenColor)
                     Button(
@@ -265,21 +258,11 @@ fun BottomSheetContentItemDetailsContent(
                             modifier = Modifier.weight(0.2f)
                         )
                     }
-
                     DropDownMenu(
-                        modifier,
                         categoryMenuExpanded,
                         colorPalletGreen,
                         onDismiss = { categoryMenuExpanded = false },
-                        1,
                         categoryList,
-                        null,
-                        selectedType,
-                        selectedTypeSetter = {
-                            selectedType = it
-                            categoryViewModel.getCorrespondingList(it.type)
-                        },
-                        selectedCategory = selectedCategory,
                         selectedCategorySetter = {
                             selectedCategory = it
                             scope.launch {
@@ -287,10 +270,11 @@ fun BottomSheetContentItemDetailsContent(
                             }
                         },
                     )
+
                 }
             }
 
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(50.dp))
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -333,7 +317,7 @@ fun BottomSheetContentItemDetailsContent(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                 )
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(0.dp))
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -415,8 +399,7 @@ fun BottomSheetContentItemDetailsContent(
         AnimatedVisibility(errorStatus) {
             Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Card(
-                    modifier = Modifier.padding(16.dp, 12.dp),
-                    colors = CardDefaults.cardColors(
+                    modifier = Modifier.padding(16.dp, 0.dp), colors = CardDefaults.cardColors(
                         contentColor = MaterialTheme.colorScheme.error,
                         containerColor = MaterialTheme.colorScheme.errorContainer
                     )
@@ -428,23 +411,20 @@ fun BottomSheetContentItemDetailsContent(
             }
 
         }
+        Spacer(Modifier.height(16.dp))
         Row {
-            BottomRow(
-                modifier,
-                selectedDate,
-                { selectedDate = it }, buttonClicked = {
-                    validateTransactionData(
-                        selectedType.type,
-                        selectedCategory,
-                        expenseValue.text,
-                        comment.text,
-                        selectedDate,
-                        scope,
-                        uiViewModel,
-                        transactionsViewModel,
-                    )
-                }
-            )
+            BottomRow(modifier, selectedDate, { selectedDate = it }, buttonClicked = {
+                validateTransactionData(
+                    selectedType,
+                    selectedCategory,
+                    expenseValue.text,
+                    comment.text,
+                    selectedDate,
+                    scope,
+                    uiViewModel,
+                    transactionsViewModel,
+                )
+            })
         }
         Spacer(Modifier.height(8.dp))
     }
@@ -589,7 +569,7 @@ fun AddBottomSheet(
 fun BottomSheetPreview() {
     ExpenseTrackerTheme {
         Surface {
-            BottomSheetContentItemDetailsContent(Modifier, {})
+            BottomSheetContentItemDetailsContent(Modifier)
         }
     }
 }

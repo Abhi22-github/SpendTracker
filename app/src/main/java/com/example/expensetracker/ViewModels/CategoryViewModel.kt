@@ -47,9 +47,6 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
                 .collect { categoryClassesList ->
                     _onlyExpenseCategoryNames.value = categoryClassesList
                     completed()
-                    onlyExpenseCategoryNames.value.forEach { it ->
-                        Log.d("hello1", it.categoryName)
-                    }
                 }
         }
     }
