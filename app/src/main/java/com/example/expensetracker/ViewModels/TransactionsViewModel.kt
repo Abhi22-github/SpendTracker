@@ -40,6 +40,9 @@ class TransactionsViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
 ) : ViewModel() {
 
+    //for opening bottom sheet in main activity
+    var bottomSheetStatus = MutableStateFlow<Boolean>(false)
+
     //flow for Ui states
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState: StateFlow<UiState> = _uiState
@@ -125,7 +128,7 @@ class TransactionsViewModel @Inject constructor(
         transactionTypeFromViewModel = transaction
     }
 
-    fun validateTransactionData(
+    fun validateAndPrepareTransactionData(
         selectedType: String,
         selectedCategory: CategoryClass,
         expenseValue: String,
