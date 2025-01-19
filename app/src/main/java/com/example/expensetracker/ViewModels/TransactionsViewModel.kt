@@ -8,10 +8,8 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.expensetracker.Database.CategoryRepository
 import com.example.expensetracker.Database.TransactionRepository
 import com.example.expensetracker.Events.EventMessage
-import com.example.expensetracker.Model.CategoryClass
 import com.example.expensetracker.Model.TotalAmountClass
 import com.example.expensetracker.Model.TotalExpenseIncomeClass
 import com.example.expensetracker.Model.TransactionClass
@@ -38,7 +36,6 @@ import javax.inject.Inject
 @HiltViewModel
 class TransactionsViewModel @Inject constructor(
     private val transactionRepository: TransactionRepository,
-    private val categoryRepository: CategoryRepository
 ) : ViewModel() {
 
     //flow for Ui states
@@ -113,15 +110,6 @@ class TransactionsViewModel @Inject constructor(
         newTotalString = MutableLiveData("")
         dateList = MutableLiveData(mutableListOf<String>())
     }
-
-    val categoryNames: LiveData<List<CategoryClass>>
-        get() = categoryRepository.allCategories
-
-    val onlyIncomeCategoryNames: LiveData<List<CategoryClass>>
-        get() = categoryRepository.onlyIncomeCategories
-
-    val onlyExpenseCategoryNames: LiveData<List<CategoryClass>>
-        get() = categoryRepository.onlyExpenseCategories
 
     fun storeCurrentExpenseSelectChip(s: String) {
         currentSelectedExpenseCategory = s
@@ -198,43 +186,7 @@ class TransactionsViewModel @Inject constructor(
         get() = transactionRepository.allTransactions
 
 
-    fun validateCategoryData(categoryClass: CategoryClass) {
-        if (categoryClass.categoryName!!.isEmpty()) {
-            // textInputLayoutName.setError("Name field can't be empty");
-            EventBus.getDefault().post(EventMessage(1, "Name field can't be empty"))
-        } else if (categoryClass.categoryName!!.length < 3) {
-            //textInputLayoutName.setError("Name must have at least 3 letters");
-            EventBus.getDefault().post(EventMessage(12, "Name must have at least 3 letters"))
-        } else if (categoryClass.categoryType!!.isEmpty()) {
-            EventBus.getDefault().post(EventMessage(2, "Please select a category type"))
-        } else {
-            storeCategoryInDatabase(categoryClass)
-        }
-    }
 
-    private fun storeCategoryInDatabase(categoryClass: CategoryClass) {
-        if (categoryClass.id == 0L) {
-            //new category insert
-            categoryRepository.insert(categoryClass)
-        } else {
-            //existing category update
-            categoryRepository.update(categoryClass)
-        }
-
-        EventBus.getDefault().post(EventMessage(3, "closing bottom sheet"))
-    }
-
-    fun fillCategoriesInDatabase(categoryClassesList: ArrayList<CategoryClass>) {
-        for (categoryClass in categoryClassesList) {
-            categoryRepository.insert(categoryClass)
-        }
-        EventBus.getDefault().post(EventMessage(9, "success"))
-    }
-
-    //to delete categories from database
-    fun deleteCategoryFromDatabase(categoryClass: CategoryClass?) {
-        categoryRepository.delete(categoryClass)
-    }
 
     fun getTotalIncomeForRange(startDate: Long, endDate: Long) {
         viewModelScope.launch {

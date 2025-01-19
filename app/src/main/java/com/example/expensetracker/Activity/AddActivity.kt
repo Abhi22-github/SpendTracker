@@ -18,6 +18,7 @@ import com.example.expensetracker.Model.CategoryClass
 import com.example.expensetracker.R
 import com.example.expensetracker.Utilities.Constants
 import com.example.expensetracker.Utilities.parseAmount
+import com.example.expensetracker.ViewModels.CategoryViewModel
 import com.example.expensetracker.ViewModels.TransactionsViewModel
 import com.google.android.flexbox.FlexDirection
 import com.google.android.flexbox.FlexWrap
@@ -55,7 +56,8 @@ class AddActivity : AppCompatActivity(), View.OnClickListener {
 
     //vars
     private lateinit var chipsList: List<Chip>
-    private val viewModel: TransactionsViewModel by viewModels()
+    private val transactionViewModel: TransactionsViewModel by viewModels()
+    private val categoryViewModel: CategoryViewModel by viewModels()
     private lateinit var mContext: Context
     lateinit var simpleDateFormat: SimpleDateFormat
     private lateinit var categoryClassList: List<CategoryClass>
@@ -106,11 +108,11 @@ class AddActivity : AppCompatActivity(), View.OnClickListener {
 
         toggleGroupCategory.addOnButtonCheckedListener { group, checkedId, isChecked ->
             if (checkedId == R.id.toggleButton_expenseButton_addActivity && isChecked) {
-                viewModel.setTransactionTypeInViewModel(Constants.EXPENSE)
+                transactionViewModel.setTransactionTypeInViewModel(Constants.EXPENSE)
                 recyclerViewLayoutCategoryExpense.visibility = View.VISIBLE
                 recyclerViewLayoutCategoryIncome.visibility = View.GONE
             } else if (checkedId == R.id.toggleButton_incomeButton_addActivity && isChecked) {
-                viewModel.setTransactionTypeInViewModel(Constants.INCOME)
+                transactionViewModel.setTransactionTypeInViewModel(Constants.INCOME)
                 recyclerViewLayoutCategoryExpense.visibility = View.GONE
                 recyclerViewLayoutCategoryIncome.visibility = View.VISIBLE
             }
@@ -127,7 +129,7 @@ class AddActivity : AppCompatActivity(), View.OnClickListener {
 
         editTextAmount.requestFocus()
 
-        viewModel.onlyExpenseCategoryNames.observe(
+        categoryViewModel.onlyExpenseCategoryNames.observe(
             this,
             object : Observer<List<CategoryClass>> {
                 override fun onChanged(value: List<CategoryClass>) {
@@ -137,7 +139,7 @@ class AddActivity : AppCompatActivity(), View.OnClickListener {
                 }
             })
 
-        viewModel.onlyIncomeCategoryNames.observe(this, object : Observer<List<CategoryClass>> {
+        categoryViewModel.onlyIncomeCategoryNames.observe(this, object : Observer<List<CategoryClass>> {
             override fun onChanged(value: List<CategoryClass>) {
                 categoryIncomeViewChipAdapter =
                     CategoryIncomeViewChipAdapter(this@AddActivity, value)
@@ -175,7 +177,7 @@ class AddActivity : AppCompatActivity(), View.OnClickListener {
 
         editTextDate = findViewById(R.id.textInputEditText_date_addActivity)
         //set the text view date
-        editTextDate.setText(simpleDateFormat.format(Date(viewModel.selectedDate)))
+        editTextDate.setText(simpleDateFormat.format(Date(transactionViewModel.selectedDate)))
     }
 
     private fun setUpCategoryRecyclerView() {
@@ -192,14 +194,14 @@ class AddActivity : AppCompatActivity(), View.OnClickListener {
 
     private fun openCalender() {
         val datePicker = MaterialDatePicker.Builder.datePicker().setTitleText("")
-            .setSelection(viewModel.selectedDate)
+            .setSelection(transactionViewModel.selectedDate)
             .build()
 
         datePicker.show(supportFragmentManager, "tag")
 
         datePicker.addOnPositiveButtonClickListener { selection ->
             editTextDate.setText(simpleDateFormat.format(Date(selection)))
-            viewModel.saveSelectedDate(selection)
+            transactionViewModel.saveSelectedDate(selection)
         }
     }
 
@@ -210,7 +212,7 @@ class AddActivity : AppCompatActivity(), View.OnClickListener {
                 editTextAmount.text.toString().replace(",", "")
 
             val note = editTextAddNote.text.toString()
-            viewModel.validateFormData(amount, note, mContext)
+            transactionViewModel.validateFormData(amount, note, mContext)
         }
     }
 
@@ -231,10 +233,10 @@ class AddActivity : AppCompatActivity(), View.OnClickListener {
             onBackPressedDispatcher.onBackPressed()
         }
         if (eventMessage.getEventCode() == 7) {
-            viewModel.storeCurrentExpenseSelectChip(eventMessage.getMessage())
+            transactionViewModel.storeCurrentExpenseSelectChip(eventMessage.getMessage())
         }
         if (eventMessage.getEventCode() == 8) {
-            viewModel.storeCurrentIncomeSelectChip(eventMessage.getMessage())
+            transactionViewModel.storeCurrentIncomeSelectChip(eventMessage.getMessage())
         }
     }
 

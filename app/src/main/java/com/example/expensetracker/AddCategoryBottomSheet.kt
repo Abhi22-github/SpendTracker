@@ -12,7 +12,7 @@ import androidx.fragment.app.viewModels
 import com.example.expensetracker.Events.EventMessage
 import com.example.expensetracker.Model.CategoryClass
 import com.example.expensetracker.Utilities.Constants
-import com.example.expensetracker.ViewModels.TransactionsViewModel
+import com.example.expensetracker.ViewModels.CategoryViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.chip.Chip
@@ -34,7 +34,7 @@ class AddCategoryBottomSheet(private val categoryClassFromActivity: CategoryClas
     private lateinit var textViewCategoryError: TextView
 
     private lateinit var view: View
-    private val viewModel: TransactionsViewModel by viewModels()
+    private val categoryViewModel: CategoryViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -102,7 +102,7 @@ class AddCategoryBottomSheet(private val categoryClassFromActivity: CategoryClas
         categoryClassFromActivity.categoryType = categoryType
         categoryClassFromActivity.categoryIconNumber = 1
         categoryClassFromActivity.categoryColorNumber = 1
-        viewModel.validateCategoryData(categoryClassFromActivity)
+        categoryViewModel.validateCategoryData(categoryClassFromActivity)
     }
 
     @Subscribe
