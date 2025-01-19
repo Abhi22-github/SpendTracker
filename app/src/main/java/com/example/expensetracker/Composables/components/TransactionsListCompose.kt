@@ -27,20 +27,18 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.ModalBottomSheet
@@ -49,6 +47,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -84,6 +83,7 @@ import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.R
 import com.example.expensetracker.Utilities.Constants.EXPENSE
 import com.example.expensetracker.Utilities.convertLocalDateToLong
+import com.example.expensetracker.Utilities.convertMillisToDateString
 import com.example.expensetracker.Utilities.getDateFromMillis
 import com.example.expensetracker.ViewModels.TransactionsViewModel
 import java.time.LocalDate
@@ -322,14 +322,12 @@ fun Header(date: Long) {
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun BottomSheetContentItemDetails(sheetState: SheetState, closeBottomSheet: () -> Unit) {
-    ModalBottomSheet(
-        onDismissRequest = { closeBottomSheet() },
+    ModalBottomSheet(onDismissRequest = { closeBottomSheet() },
         sheetState = sheetState,
         modifier = Modifier
             .imePadding()
             .fillMaxWidth(),
-        contentWindowInsets = { WindowInsets.ime }
-    ) {
+        contentWindowInsets = { WindowInsets.ime }) {
         BottomSheetContentItemDetailsContent(modifier = Modifier)
     }
 }
@@ -362,22 +360,21 @@ fun BottomSheetContentItemDetailsContent(
         Column(
 
         ) {
-
-            Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
-                FilledTonalIconButton(
-                    onClick = {},
-                    colors = IconButtonDefaults.filledTonalIconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                        contentColor = MaterialTheme.colorScheme.onSurface
-                    )
-                ) {
-                    Icon(
-                        Icons.Filled.ArrowForward,
-                        contentDescription = "ArrowUp",
-                    )
-                }
-                RestBudgetPill(LocalDate.now())
-            }
+//            Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
+//                FilledTonalIconButton(
+//                    onClick = {},
+//                    colors = IconButtonDefaults.filledTonalIconButtonColors(
+//                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+//                        contentColor = MaterialTheme.colorScheme.onSurface
+//                    )
+//                ) {
+//                    Icon(
+//                        Icons.Filled.ArrowForward,
+//                        contentDescription = "ArrowUp",
+//                    )
+//                }
+//                RestBudgetPill(LocalDate.now())
+//            }
 
             Spacer(Modifier.height(16.dp))
 
@@ -526,15 +523,13 @@ fun BottomSheetContentItemDetailsContent(
                     onValueChange = { newValue ->
                         comment = newValue
                     },
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     placeholder = {
                         Text(
                             "Add a comment",
                             style = typography.bodyLarge,
-                            modifier = Modifier
-                                .fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         )
@@ -596,9 +591,13 @@ fun BottomSheetContentItemDetailsContent(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomRow(modifier: Modifier) {
+    var selectedDate by remember { mutableStateOf<Long?>(System.currentTimeMillis()) }
     var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState =
+        rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -606,20 +605,31 @@ fun BottomRow(modifier: Modifier) {
             .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
     ) {
         Row(modifier = modifier.weight(1f)) {
-//            IconButton(
-//                onClick = {},
-//                colors = IconButtonDefaults.iconButtonColors(),
-//            ) {
-//                Icon(Icons.Filled.Add, contentDescription = null)
-//            }
-            FilledTonalIconButton(
+
+            FilledTonalButton(
                 onClick = {
                     showDatePicker = !showDatePicker
-                },
-                colors = IconButtonDefaults.filledTonalIconButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+                }, colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = 0.6f
+                    )
+                ), contentPadding = PaddingValues(start = 12.dp, end = 12.dp)
             ) {
                 Icon(Icons.Rounded.DateRange, contentDescription = null)
+                Spacer(Modifier.width(3.dp))
+                Text(text = if (selectedDate?.let { convertMillisToDateString(it) } == convertMillisToDateString(
+                        System.currentTimeMillis()
+                    )) {
+                    "Today"
+                } else {
+                    selectedDate?.let {
+                        convertMillisToDateString(it)
+                    } ?: "Date Error"
+                })
+
             }
+
+
         }
         Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.End) {
             FilledTonalButton(
@@ -630,11 +640,9 @@ fun BottomRow(modifier: Modifier) {
         }
     }
     if (showDatePicker) {
-        DatePickerModal(
-            onDateSelected = { date ->
-            },
-            onDismiss = { showDatePicker = !showDatePicker }
-        )
+        DatePickerModal(datePickerState, onDateSelected = { date ->
+            selectedDate = date
+        }, onDismiss = { showDatePicker = !showDatePicker })
     }
 }
 
@@ -644,7 +652,7 @@ fun DropDownMenu(
     modifier: Modifier,
     menuExpanded: Boolean,
     colorPallet: HarmonizedColorPalette,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
 ) {
     DropdownMenu(
         expanded = menuExpanded,
@@ -667,34 +675,7 @@ fun DropDownMenu(
                 modifier = Modifier.size(24.dp),
             )
         }, onClick = { /* Do something... */ })
-        DropdownMenuItem(text = { Text("HealthCare") }, leadingIcon = {
-            Image(
-                painter = category2,
-                contentDescription = "Test Image",
-                modifier = Modifier.size(24.dp),
-            )
-        }, onClick = { /* Do something... */ })
-        DropdownMenuItem(text = { Text("Grocery") }, leadingIcon = {
-            Image(
-                painter = category3,
-                contentDescription = "Test Image",
-                modifier = Modifier.size(24.dp),
-            )
-        }, onClick = { /* Do something... */ })
-        DropdownMenuItem(text = { Text("Insurance") }, leadingIcon = {
-            Image(
-                painter = category4,
-                contentDescription = "Test Image",
-                modifier = Modifier.size(24.dp),
-            )
-        }, onClick = { /* Do something... */ })
-        DropdownMenuItem(text = { Text("Transportation") }, leadingIcon = {
-            Image(
-                painter = category5,
-                contentDescription = "Test Image",
-                modifier = Modifier.size(24.dp),
-            )
-        }, onClick = { /* Do something... */ })
+
     }
 }
 

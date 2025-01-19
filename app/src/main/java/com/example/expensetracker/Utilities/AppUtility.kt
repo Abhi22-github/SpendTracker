@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
+import java.util.Date
+import java.util.Locale
 
 
 fun getFirstAndLastDateOfGivenPeriod(prevMonth: LocalDate, nextMonth: LocalDate): Pair<Long, Long> {
@@ -122,3 +124,9 @@ fun getPreviousAndNextDays(date: LocalDate): MutableList<String> {
 fun String.toLocalDate() = run { LocalDate.parse(this) }
 
 fun LocalDate.toNormalString() = run { this.format(DateTimeFormatter.ISO_LOCAL_DATE) }
+
+fun convertMillisToDateString(millis: Long): String {
+    val format = SimpleDateFormat("dd MMM YYYY", Locale.getDefault())
+    val date = Date(millis)
+    return format.format(date)
+}
