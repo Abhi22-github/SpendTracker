@@ -261,10 +261,10 @@ class TransactionsViewModel @Inject constructor(
             loading()
             val flow = transactionRepository.getTotalAmountForDate(date, EXPENSE)
 
-            flow?.let {
+            flow.let {
                 it.catch {
                     error(it)
-                }?.collect { amount ->
+                }.collect { amount ->
                     if (amount != null)
                         _getTotalExpenseAmountForDateFlow.value = amount
                     completed()

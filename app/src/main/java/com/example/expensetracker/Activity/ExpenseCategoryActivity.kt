@@ -6,7 +6,6 @@ import android.view.View
 import android.widget.ImageButton
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.expensetracker.Actions
@@ -19,6 +18,7 @@ import com.example.expensetracker.ViewModels.CategoryViewModel
 import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.onEach
 
 @AndroidEntryPoint
 class ExpenseCategoryActivity : AppCompatActivity(), Actions {
@@ -76,14 +76,11 @@ class ExpenseCategoryActivity : AppCompatActivity(), Actions {
     private fun setUpCategoryExpenseRecyclerView() {
         recyclerViewCategoryExpense!!.layoutManager =
             LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false)
-        categoryViewModel.onlyExpenseCategoryNames.observe(
-            this,
-            object : Observer<List<CategoryClass?>> {
-                override fun onChanged(value: List<CategoryClass?>) {
-                    categoryViewAdapter = CategoryViewAdapter(mContext, value)
-                    recyclerViewCategoryExpense!!.adapter = categoryViewAdapter
-                }
-            })
+        categoryViewModel.onlyExpenseCategoryNames.onEach {
+            categoryViewAdapter = CategoryViewAdapter(mContext, it)
+            recyclerViewCategoryExpense!!.adapter = categoryViewAdapter
+        }
+
     }
 
     override fun onDeleteCategory(categoryClass: CategoryClass) {
