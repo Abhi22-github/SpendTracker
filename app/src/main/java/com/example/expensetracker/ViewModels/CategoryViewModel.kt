@@ -6,9 +6,10 @@ import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.Database.CategoryRepository
 import com.example.expensetracker.Events.EventMessage
 import com.example.expensetracker.Model.CategoryClass
+import com.example.expensetracker.Utilities.Constants.EXPENSE
+import com.example.expensetracker.Utilities.Constants.INCOME
 import com.example.expensetracker.Utilities.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -31,8 +32,12 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
     private val _onlyExpenseCategoryNames = MutableStateFlow<List<CategoryClass>>(listOf())
     val onlyExpenseCategoryNames: StateFlow<List<CategoryClass>> = _onlyExpenseCategoryNames
 
-    val categoryNames: Flow<List<CategoryClass>>
-        get() = categoryRepository.allCategories
+    //flow for only Expense Category names
+    private var _categoryList = MutableStateFlow<List<CategoryClass>>(listOf())
+    val categoryList: StateFlow<List<CategoryClass>> = _categoryList
+
+//    val categoryNames: Flow<List<CategoryClass>>
+//        get() = categoryRepository.allCategories
 
 
     fun getOnlyExpenseCategoryNames() {
@@ -42,12 +47,23 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
                 .collect { categoryClassesList ->
                     _onlyExpenseCategoryNames.value = categoryClassesList
                     completed()
-                    onlyExpenseCategoryNames.value.forEach{
-                        it -> Log.d("hello1",it.categoryName)
+                    onlyExpenseCategoryNames.value.forEach { it ->
+                        Log.d("hello1", it.categoryName)
                     }
                 }
         }
     }
+
+    fun getCorrespondingList(type: String) {
+        viewModelScope.launch {
+            if (type == EXPENSE) {
+                _onlyExpenseCategoryNames.collect { categoryList -> _categoryList.value = categoryList}
+            } else if (type == INCOME) {
+                _onlyIncomeCategoryNames.collect { categoryList -> _categoryList.value = categoryList}
+            }
+        }
+    }
+
 
     fun getOnlyIncomeCategoryNames() {
         viewModelScope.launch {

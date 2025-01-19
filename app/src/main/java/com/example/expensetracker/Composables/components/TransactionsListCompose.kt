@@ -27,6 +27,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowForward
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material3.Button
@@ -38,7 +39,9 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.ModalBottomSheet
@@ -68,7 +71,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.expensetracker.Composables.CustomFonts
 import com.example.expensetracker.Composables.ExpenseTrackerTheme
@@ -77,20 +79,22 @@ import com.example.expensetracker.Composables.failureColor
 import com.example.expensetracker.Composables.greenColor
 import com.example.expensetracker.Composables.successColor
 import com.example.expensetracker.Composables.utils.HarmonizedColorPalette
+import com.example.expensetracker.Composables.utils.IconState
+import com.example.expensetracker.Composables.utils.IconStateForType
 import com.example.expensetracker.Composables.utils.combineColors
 import com.example.expensetracker.Composables.utils.toPalette
 import com.example.expensetracker.Converters.TransactionConverter
 import com.example.expensetracker.Model.CategoryClass
 import com.example.expensetracker.Model.TransactionClass
-import com.example.expensetracker.R
+import com.example.expensetracker.Model.TransactionTypeClass
 import com.example.expensetracker.Utilities.Constants.EXPENSE
+import com.example.expensetracker.Utilities.Constants.INCOME
 import com.example.expensetracker.Utilities.convertLocalDateToLong
 import com.example.expensetracker.Utilities.convertMillisToDateString
 import com.example.expensetracker.Utilities.getDateFromMillis
 import com.example.expensetracker.ViewModels.CategoryViewModel
 import com.example.expensetracker.ViewModels.TransactionsViewModel
 import java.time.LocalDate
-import kotlin.random.Random
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
@@ -160,19 +164,6 @@ fun TransactionsListCompose(
     }
 }
 
-val iconList = listOf(
-    R.drawable.ic_category_1,
-    R.drawable.ic_category_2,
-    R.drawable.ic_category_3,
-    R.drawable.ic_category_4,
-    R.drawable.ic_category_5,
-    R.drawable.ic_category_6,
-    R.drawable.ic_category_7,
-    R.drawable.ic_category_8,
-    R.drawable.ic_category_9,
-    R.drawable.ic_category_10,
-)
-
 @Composable
 fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionClass) -> Unit) {
     Card(
@@ -204,9 +195,6 @@ fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionCla
                 amount = "+₹" + amount
                 amountColor = successColor
             }
-            val randomNumber = Random.nextInt(0, 9)
-
-
             Surface(
                 shape = CircleShape,
                 modifier = Modifier
@@ -217,7 +205,7 @@ fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionCla
                 Box(
                     modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                 ) {
-                    val image = rememberAsyncImagePainter(R.drawable.ic_category_1)
+                    val image = rememberAsyncImagePainter(IconState.fromNumber(item.categoryIcon))
                     Image(
                         painter = image,
                         contentDescription = "Test Image",
@@ -298,9 +286,15 @@ fun SingleTransactionNew(item: TransactionClass, onSingleItemClick: (Transaction
                     ),
                 ),
             ) {
-                SingleTransaction(item = TransactionClass("Expesne", 20L, "Hello", "", 0L, 0L), {})
-                SingleTransaction(item = TransactionClass("Expesne", 20L, "Hello", "", 0L, 0L), {})
-                SingleTransaction(item = TransactionClass("Expesne", 20L, "Hello", "", 0L, 0L), {})
+                SingleTransaction(
+                    item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L),
+                    {})
+                SingleTransaction(
+                    item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L),
+                    {})
+                SingleTransaction(
+                    item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L),
+                    {})
             }
 
         }
@@ -331,7 +325,7 @@ fun BottomSheetContentItemDetails(sheetState: SheetState, closeBottomSheet: () -
             .imePadding()
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
-        BottomSheetContentItemDetailsContent(modifier = Modifier)
+        BottomSheetContentItemDetailsContent(modifier = Modifier,closeBottomSheet)
     }
 }
 
@@ -341,20 +335,31 @@ val bottomSheetTopBottomPadding = 0.dp
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 fun BottomSheetContentItemDetailsContent(
-    modifier: Modifier,
-    categoryViewModel: CategoryViewModel = viewModel()
+    modifier: Modifier,closeBottomSheet: () -> Unit, categoryViewModel: CategoryViewModel = hiltViewModel(),
+    transactionsViewModel: TransactionsViewModel = hiltViewModel()
 ) {
     var cashMenuExpanded by remember { mutableStateOf(false) }
     var categoryMenuExpanded by remember { mutableStateOf(false) }
     var expenseValue by remember { mutableStateOf(TextFieldValue("")) }
     var comment by remember { mutableStateOf(TextFieldValue("")) }
+    var selectedDate by remember { mutableStateOf<Long?>(System.currentTimeMillis()) }
     val focusRequester = remember { FocusRequester() }
-    val expenseCategoryList by categoryViewModel.onlyExpenseCategoryNames.collectAsState()
+    val categoryList by categoryViewModel.categoryList.collectAsState()
+    var selectedCategory by remember { mutableStateOf(CategoryClass(-1, "Select", 1, 99, EXPENSE)) }
+    val list = listOf(
+        TransactionTypeClass(1, EXPENSE),
+        TransactionTypeClass(2, INCOME)
+    )
+    var selectedType by remember { mutableStateOf(TransactionTypeClass(1, EXPENSE)) }
+
 
     // Request focus once when the composable is first composed
     LaunchedEffect(Unit) {
         // Request focus for the TextField
         focusRequester.requestFocus()
+        categoryViewModel.getCorrespondingList(selectedType.type)
+        categoryViewModel.getOnlyExpenseCategoryNames()
+        categoryViewModel.getOnlyIncomeCategoryNames()
     }
 
     Column(
@@ -365,21 +370,21 @@ fun BottomSheetContentItemDetailsContent(
         Column(
 
         ) {
-//            Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
-//                FilledTonalIconButton(
-//                    onClick = {},
-//                    colors = IconButtonDefaults.filledTonalIconButtonColors(
-//                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-//                        contentColor = MaterialTheme.colorScheme.onSurface
-//                    )
-//                ) {
-//                    Icon(
-//                        Icons.Filled.ArrowForward,
-//                        contentDescription = "ArrowUp",
-//                    )
-//                }
-//                RestBudgetPill(LocalDate.now())
-//            }
+            Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
+                FilledTonalIconButton(
+                    onClick = {},
+                    colors = IconButtonDefaults.filledTonalIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    )
+                ) {
+                    Icon(
+                        Icons.Filled.ArrowForward,
+                        contentDescription = "ArrowUp",
+                    )
+                }
+                RestBudgetPill(LocalDate.now())
+            }
 
             Spacer(Modifier.height(16.dp))
 
@@ -403,7 +408,8 @@ fun BottomSheetContentItemDetailsContent(
                             start = 20.dp, end = 10.dp, top = 16.dp, bottom = 16.dp
                         )
                     ) {
-                        val image = rememberAsyncImagePainter(R.drawable.ic_category_1)
+                        val image =
+                            rememberAsyncImagePainter(IconStateForType.fromNumber(selectedType.iconNumber))
                         Image(
                             painter = image,
                             contentDescription = "Test Image",
@@ -411,10 +417,10 @@ fun BottomSheetContentItemDetailsContent(
                         )
 
                         Text(
-                            text = "Cash",
+                            text = selectedType.type,
                             modifier = Modifier
                                 .weight(0.6f)
-                                .padding(start = 5.dp),
+                                .padding(start = 8.dp),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -424,10 +430,23 @@ fun BottomSheetContentItemDetailsContent(
                             modifier = Modifier.weight(0.2f)
                         )
                     }
-//                    DropDownMenu(modifier,
-//                        cashMenuExpanded,
-//                        colorPalletBlue,
-//                        onDismiss = { cashMenuExpanded = false })
+
+                    DropDownMenu(
+                        modifier,
+                        cashMenuExpanded,
+                        colorPalletBlue,
+                        onDismiss = { cashMenuExpanded = false },
+                        2,
+                        null,
+                        list,
+                        selectedType,
+                        selectedTypeSetter = {
+                            selectedType = it
+                            categoryViewModel.getCorrespondingList(it.type)
+                        },
+                        selectedCategory = selectedCategory,
+                        selectedCategorySetter = { selectedCategory = it },
+                    )
                 }
                 Box(
                     modifier = modifier
@@ -448,7 +467,8 @@ fun BottomSheetContentItemDetailsContent(
                             start = 20.dp, end = 10.dp, top = 16.dp, bottom = 16.dp
                         )
                     ) {
-                        val image = rememberAsyncImagePainter(R.drawable.ic_category_1)
+                        val image =
+                            rememberAsyncImagePainter(IconState.fromNumber(selectedCategory.categoryIconNumber))
                         Image(
                             painter = image,
                             contentDescription = "Test Image",
@@ -456,10 +476,10 @@ fun BottomSheetContentItemDetailsContent(
                         )
 
                         Text(
-                            text = "Entertainment",
+                            text = selectedCategory.categoryName,
                             modifier = Modifier
                                 .weight(0.6f)
-                                .padding(start = 5.dp),
+                                .padding(start = 8.dp),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis
                         )
@@ -475,7 +495,16 @@ fun BottomSheetContentItemDetailsContent(
                         categoryMenuExpanded,
                         colorPalletGreen,
                         onDismiss = { categoryMenuExpanded = false },
-                        expenseCategoryList
+                        1,
+                        categoryList,
+                        null,
+                        selectedType,
+                        selectedTypeSetter = {
+                            selectedType = it
+                            categoryViewModel.getCorrespondingList(it.type)
+                        },
+                        selectedCategory = selectedCategory,
+                        selectedCategorySetter = { selectedCategory = it },
                     )
                 }
             }
@@ -594,16 +623,34 @@ fun BottomSheetContentItemDetailsContent(
 
         }
         Row {
-            BottomRow(modifier)
+            BottomRow(
+                modifier,
+                selectedDate,
+                { selectedDate = it }, buttonClicked = {
+                    transactionsViewModel.validateTransactionData(
+                        selectedType.type,
+                        selectedCategory,
+                        expenseValue.text,
+                        comment.text,
+                        selectedDate
+                    )
+                    closeBottomSheet()
+                }
+            )
         }
         Spacer(Modifier.height(8.dp))
     }
 }
 
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomRow(modifier: Modifier) {
-    var selectedDate by remember { mutableStateOf<Long?>(System.currentTimeMillis()) }
+fun BottomRow(
+    modifier: Modifier,
+    selectedDate: Long?,
+    selectedDateSetter: (Long?) -> Unit,
+    buttonClicked: () -> Unit
+) {
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState =
         rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
@@ -618,6 +665,7 @@ fun BottomRow(modifier: Modifier) {
             FilledTonalButton(
                 onClick = {
                     showDatePicker = !showDatePicker
+                    selectedDateSetter(selectedDate)
                 }, colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.onSurface.copy(
                         alpha = 0.6f
@@ -625,7 +673,7 @@ fun BottomRow(modifier: Modifier) {
                 ), contentPadding = PaddingValues(start = 12.dp, end = 12.dp)
             ) {
                 Icon(Icons.Rounded.DateRange, contentDescription = null)
-                Spacer(Modifier.width(3.dp))
+                Spacer(Modifier.width(8.dp))
                 Text(text = if (selectedDate?.let { convertMillisToDateString(it) } == convertMillisToDateString(
                         System.currentTimeMillis()
                     )) {
@@ -642,7 +690,7 @@ fun BottomRow(modifier: Modifier) {
         }
         Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.End) {
             FilledTonalButton(
-                onClick = { },
+                onClick = { buttonClicked() },
             ) {
                 Text("Save")
             }
@@ -650,43 +698,67 @@ fun BottomRow(modifier: Modifier) {
     }
     if (showDatePicker) {
         DatePickerModal(datePickerState, onDateSelected = { date ->
-            selectedDate = date
+            selectedDateSetter(date)
         }, onDismiss = { showDatePicker = !showDatePicker })
     }
 }
 
-
+//type 1 -> CategoryList
+//type 2 -> expense/Income
 @Composable
 fun DropDownMenu(
     modifier: Modifier,
     menuExpanded: Boolean,
     colorPallet: HarmonizedColorPalette,
     onDismiss: () -> Unit,
-    itemList: List<CategoryClass>
+    type: Int,
+    itemList: List<CategoryClass>?,
+    typeList: List<TransactionTypeClass>?,
+    selectedType: TransactionTypeClass,
+    selectedTypeSetter: (TransactionTypeClass) -> Unit,
+    selectedCategory: CategoryClass,
+    selectedCategorySetter: (CategoryClass) -> Unit
 ) {
     DropdownMenu(
         expanded = menuExpanded,
         onDismissRequest = { onDismiss() },
         containerColor = colorPallet.surfaceVariant,
         shape = RoundedCornerShape(24.dp),
-
-        ) {
-//
-//        val category2 = rememberAsyncImagePainter(R.drawable.ic_category_2)
-//        val category3 = rememberAsyncImagePainter(R.drawable.ic_category_3)
-//        val category4 = rememberAsyncImagePainter(R.drawable.ic_category_4)
-//        val category5 = rememberAsyncImagePainter(R.drawable.ic_category_6)
-
-        itemList.forEach { categoryClass ->
-            val selectedIcon = rememberAsyncImagePainter(R.drawable.ic_category_2)
-            DropdownMenuItem(text = { Text(text = categoryClass.categoryName) }, leadingIcon = {
-                Image(
-                    painter = selectedIcon,
-                    contentDescription = categoryClass.categoryName,
-                    modifier = Modifier.size(24.dp),
-                )
-            }, onClick = { /* Do something... */ })
+    ) {
+        if (type == 1) {
+            itemList?.forEach { categoryClass ->
+                val selectedIcon =
+                    rememberAsyncImagePainter(IconState.fromNumber(categoryClass.categoryIconNumber))
+                DropdownMenuItem(text = { Text(text = categoryClass.categoryName) }, leadingIcon = {
+                    Image(
+                        painter = selectedIcon,
+                        contentDescription = categoryClass.categoryName,
+                        modifier = Modifier.size(24.dp),
+                    )
+                }, onClick = {
+                    selectedCategorySetter(categoryClass)
+                    onDismiss()
+                })
+            }
         }
+        if (type == 2) {
+            typeList?.forEach { transactionTypeClass ->
+                val selectedIcon =
+                    rememberAsyncImagePainter(IconStateForType.fromNumber(transactionTypeClass.iconNumber))
+                DropdownMenuItem(text = { Text(text = transactionTypeClass.type) }, leadingIcon = {
+                    Image(
+                        painter = selectedIcon,
+                        contentDescription = "",
+                        modifier = Modifier.size(24.dp),
+                    )
+                }, onClick = {
+                    selectedTypeSetter(transactionTypeClass)
+                    selectedCategorySetter(CategoryClass(-1, "Select", 1, 99, EXPENSE))
+                    onDismiss()
+                })
+            }
+        }
+
     }
 }
 
@@ -695,7 +767,7 @@ fun DropDownMenu(
 fun BottomSheetPreview() {
     ExpenseTrackerTheme {
         Surface {
-            BottomSheetContentItemDetailsContent(Modifier)
+            BottomSheetContentItemDetailsContent(Modifier,{})
         }
     }
 }
@@ -703,14 +775,14 @@ fun BottomSheetPreview() {
 @Preview
 @Composable
 fun SingleTransactionPreview() {
-    SingleTransaction(item = TransactionClass("Expesne", 20L, "Hello", "", 0L, 0L), {})
+    SingleTransaction(item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L), {})
 }
 
 
 @Preview
 @Composable
 fun SingleTransactionNewPreview() {
-    SingleTransactionNew(item = TransactionClass("Expesne", 20L, "Hello", "", 0L, 0L)) {}
+    SingleTransactionNew(item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L)) {}
 }
 
 @Preview
