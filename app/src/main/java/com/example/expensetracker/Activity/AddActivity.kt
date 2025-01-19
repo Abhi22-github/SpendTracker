@@ -10,6 +10,7 @@ import android.widget.ImageButton
 import android.widget.RelativeLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.RecyclerView
 import com.example.expensetracker.Adapters.CategoryExpenseViewChipAdapter
 import com.example.expensetracker.Adapters.CategoryIncomeViewChipAdapter
@@ -32,6 +33,7 @@ import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import java.text.SimpleDateFormat
@@ -138,6 +140,20 @@ class AddActivity : AppCompatActivity(), View.OnClickListener {
             categoryExpenseViewChipAdapter =
                 CategoryExpenseViewChipAdapter(this@AddActivity, it)
             recyclerViewLayoutCategoryExpense.adapter = categoryExpenseViewChipAdapter
+        }
+        lifecycleScope.launch {
+            categoryViewModel.onlyExpenseCategoryNames.collect { it ->
+                categoryExpenseViewChipAdapter =
+                    CategoryExpenseViewChipAdapter(this@AddActivity, it)
+                recyclerViewLayoutCategoryExpense.adapter = categoryExpenseViewChipAdapter
+            }
+        }
+        lifecycleScope.launch {
+            categoryViewModel.onlyIncomeCategoryNames.collect { it ->
+                categoryIncomeViewChipAdapter =
+                    CategoryIncomeViewChipAdapter(this@AddActivity, it)
+                recyclerViewLayoutCategoryIncome.adapter = categoryIncomeViewChipAdapter
+            }
         }
 
         categoryViewModel.onlyIncomeCategoryNames.onEach {

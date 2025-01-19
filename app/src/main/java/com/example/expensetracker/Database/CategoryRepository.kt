@@ -23,11 +23,11 @@ class CategoryRepository(@ApplicationContext applicationContext: Context) {
         allCategories = categoryDao.allCategory
     }
 
-    suspend fun getOnlyExpenseCategories(): Flow<List<CategoryClass>> {
+     fun getOnlyExpenseCategories(): Flow<List<CategoryClass>> {
         return categoryDao.getOnlyExpenseCategories(Constants.EXPENSE)
     }
 
-    suspend fun getOnlyIncomeCategories(): Flow<List<CategoryClass>> {
+     fun getOnlyIncomeCategories(): Flow<List<CategoryClass>> {
         return categoryDao.getOnlyExpenseCategories(Constants.INCOME)
     }
 
