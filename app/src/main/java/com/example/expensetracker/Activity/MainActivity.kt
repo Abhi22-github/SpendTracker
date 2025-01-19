@@ -14,6 +14,8 @@ import androidx.fragment.app.FragmentTransaction
 import androidx.navigation.ui.AppBarConfiguration
 import androidx.viewpager.widget.ViewPager
 import com.example.expensetracker.Adapters.TransactionViewAdapter
+import com.example.expensetracker.Composables.ExpenseTrackerTheme
+import com.example.expensetracker.Composables.components.AddBottomSheet
 import com.example.expensetracker.Events.EventMessage
 import com.example.expensetracker.Fragments.DayViewFragment
 import com.example.expensetracker.Fragments.ListViewFragment
@@ -29,13 +31,15 @@ import com.google.android.material.appbar.MaterialToolbar
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.google.android.material.navigation.NavigationView
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private val appBarConfiguration: AppBarConfiguration? = null
-    private var binding: ActivityMainBinding? = null
+    private lateinit var binding: ActivityMainBinding
 
     private var fabAddExpense: FloatingActionButton? = null
 
@@ -63,7 +67,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding!!.root)
+        setContentView(binding.root)
 
         // method to initialize vars
         initVars()
@@ -71,7 +75,16 @@ class MainActivity : AppCompatActivity() {
         // method to initialize views
         initViews()
 
-        fabAddExpense!!.setOnClickListener { v: View? -> sendUserToAddActivity() }
+        binding.bottomSheetAddActivityMain.setContent {
+            ExpenseTrackerTheme {
+                AddBottomSheet()
+            }
+        }
+        fabAddExpense!!.setOnClickListener { v: View? ->
+            GlobalScope.launch {
+                transactionViewModel.bottomSheetStatus.emit(true)
+            }
+        }
 
         toolbar!!.setNavigationOnClickListener { v: View? -> drawerLayout!!.open() }
 
@@ -148,7 +161,10 @@ class MainActivity : AppCompatActivity() {
                 sendUserToStatisticsActivity()
             } else if (menuID == R.id.item_bankAccounts_sideNavigation) {
                 sendUserToManageAccountsActivity()
-            } else {
+            } else if (menuID == R.id.item_test1_sideNavigation) {
+                sendUserToAddActivity()
+            } else if (menuID == R.id.item_test2_sideNavigation) {
+
             }
         }, 300)
         navigationView?.setCheckedItem(selectedItem)
