@@ -68,6 +68,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.expensetracker.Composables.CustomFonts
 import com.example.expensetracker.Composables.ExpenseTrackerTheme
@@ -85,6 +86,7 @@ import com.example.expensetracker.Utilities.Constants.EXPENSE
 import com.example.expensetracker.Utilities.convertLocalDateToLong
 import com.example.expensetracker.Utilities.convertMillisToDateString
 import com.example.expensetracker.Utilities.getDateFromMillis
+import com.example.expensetracker.ViewModels.CategoryViewModel
 import com.example.expensetracker.ViewModels.TransactionsViewModel
 import java.time.LocalDate
 import kotlin.random.Random
@@ -339,6 +341,7 @@ val bottomSheetTopBottomPadding = 0.dp
 @Composable
 fun BottomSheetContentItemDetailsContent(
     modifier: Modifier,
+    categoryViewModel: CategoryViewModel = viewModel()
 ) {
     var cashMenuExpanded by remember { mutableStateOf(false) }
     var categoryMenuExpanded by remember { mutableStateOf(false) }
@@ -419,10 +422,10 @@ fun BottomSheetContentItemDetailsContent(
                             modifier = Modifier.weight(0.2f)
                         )
                     }
-                    DropDownMenu(modifier,
-                        cashMenuExpanded,
-                        colorPalletBlue,
-                        onDismiss = { cashMenuExpanded = false })
+//                    DropDownMenu(modifier,
+//                        cashMenuExpanded,
+//                        colorPalletBlue,
+//                        onDismiss = { cashMenuExpanded = false })
                 }
                 Box(
                     modifier = modifier
@@ -464,10 +467,11 @@ fun BottomSheetContentItemDetailsContent(
                             modifier = Modifier.weight(0.2f)
                         )
                     }
-                    DropDownMenu(modifier,
-                        categoryMenuExpanded,
-                        colorPalletGreen,
-                        onDismiss = { categoryMenuExpanded = false })
+//                    DropDownMenu(modifier,
+//                        categoryMenuExpanded,
+//                        colorPalletGreen,
+//                        onDismiss = { categoryMenuExpanded = false },
+//                        )
                 }
             }
 
@@ -653,6 +657,7 @@ fun DropDownMenu(
     menuExpanded: Boolean,
     colorPallet: HarmonizedColorPalette,
     onDismiss: () -> Unit,
+    itemList: Map<Int, String>
 ) {
     DropdownMenu(
         expanded = menuExpanded,
@@ -661,21 +666,22 @@ fun DropDownMenu(
         shape = RoundedCornerShape(24.dp),
 
         ) {
-        val category1 = rememberAsyncImagePainter(R.drawable.ic_category_1)
-        val category2 = rememberAsyncImagePainter(R.drawable.ic_category_2)
-        val category3 = rememberAsyncImagePainter(R.drawable.ic_category_3)
-        val category4 = rememberAsyncImagePainter(R.drawable.ic_category_4)
-        val category5 = rememberAsyncImagePainter(R.drawable.ic_category_6)
+//
+//        val category2 = rememberAsyncImagePainter(R.drawable.ic_category_2)
+//        val category3 = rememberAsyncImagePainter(R.drawable.ic_category_3)
+//        val category4 = rememberAsyncImagePainter(R.drawable.ic_category_4)
+//        val category5 = rememberAsyncImagePainter(R.drawable.ic_category_6)
 
-
-        DropdownMenuItem(text = { Text("Food") }, leadingIcon = {
-            Image(
-                painter = category1,
-                contentDescription = "Test Image",
-                modifier = Modifier.size(24.dp),
-            )
-        }, onClick = { /* Do something... */ })
-
+        itemList.forEach { (icon, name) ->
+            val selectedIcon = rememberAsyncImagePainter(icon)
+            DropdownMenuItem(text = { Text(text = name) }, leadingIcon = {
+                Image(
+                    painter = selectedIcon,
+                    contentDescription = name,
+                    modifier = Modifier.size(24.dp),
+                )
+            }, onClick = { /* Do something... */ })
+        }
     }
 }
 

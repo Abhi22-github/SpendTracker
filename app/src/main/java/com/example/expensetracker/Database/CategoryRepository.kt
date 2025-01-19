@@ -1,132 +1,55 @@
-package com.example.expensetracker.Database;
+package com.example.expensetracker.Database
 
-import android.content.Context;
-import android.os.AsyncTask;
+import android.content.Context
+import com.example.expensetracker.Database.TransactionDatabase.Companion.getInstance
+import com.example.expensetracker.Model.CategoryClass
+import com.example.expensetracker.Utilities.Constants
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
 
-import androidx.lifecycle.LiveData;
-
-import com.example.expensetracker.Model.CategoryClass;
-import com.example.expensetracker.Utilities.Constants;
-
-import java.util.List;
-
-import dagger.hilt.android.qualifiers.ApplicationContext;
-
-public class CategoryRepository {
+class CategoryRepository(@ApplicationContext applicationContext: Context) {
     // below line is the create a variable  
     // for dao and list for all category. 
-    private CategoryDao categoryDao;
-    private LiveData<List<CategoryClass>> allCategories,allExpenseCategories,allIncomeCategories;
+    private val categoryDao: CategoryDao
+
+    // below method is to read all category from database.
+    val allCategories: Flow<List<CategoryClass>>
 
     // creating a constructor for our variables 
     // and passing the variables to it.
+    init {
+        val database = getInstance(applicationContext)
+        categoryDao = database.categoryDao()
+        allCategories = categoryDao.allCategory
+    }
 
-    public CategoryRepository(@ApplicationContext Context applicationContext) {
-        TransactionDatabase database = TransactionDatabase.getInstance(applicationContext);
-        categoryDao = database.categoryDao();
-        allCategories = categoryDao.getAllCategory();
-        allExpenseCategories = categoryDao.getOnlyExpenseCategories(Constants.EXPENSE);
-        allIncomeCategories = categoryDao.getOnlyIncomeCategories(Constants.INCOME);
+    suspend fun getOnlyExpenseCategories(): Flow<List<CategoryClass>> {
+        return categoryDao.getOnlyExpenseCategories(Constants.EXPENSE)
+    }
+
+    suspend fun getOnlyIncomeCategories(): Flow<List<CategoryClass>> {
+        return categoryDao.getOnlyExpenseCategories(Constants.INCOME)
     }
 
     // creating a method to insert the data to our database. 
-    public void insert(CategoryClass model) {
-        new CategoryRepository.InsertCourseAsyncTask(categoryDao).execute(model);
+    suspend fun insert(categoryClass: CategoryClass) {
+        categoryDao.insert(categoryClass)
     }
 
     // creating a method to update data in database. 
-    public void update(CategoryClass model) {
-        new CategoryRepository.UpdateCourseAsyncTask(categoryDao).execute(model);
+    suspend fun update(categoryClass: CategoryClass) {
+        categoryDao.update(categoryClass)
     }
 
     // creating a method to delete the data in our database. 
-    public void delete(CategoryClass model) {
-        new CategoryRepository.DeleteCourseAsyncTask(categoryDao).execute(model);
+    suspend fun delete(categoryClass: CategoryClass) {
+        categoryDao.delete(categoryClass = categoryClass)
     }
 
     // below is the method to delete all the category. 
-    public void deleteAllTransaction() {
-        new CategoryRepository.DeleteAllCoursesAsyncTask(categoryDao).execute();
+    suspend fun deleteAllTransaction() {
+        categoryDao.deleteAllCategory()
     }
 
 
-    // below method is to read all category from database. 
-    public LiveData<List<CategoryClass>> getAllCategories() {
-        return allCategories;
-    }
-
-    // below method is to read only expenses category from database. 
-    public LiveData<List<CategoryClass>> getOnlyExpenseCategories() {
-        return allExpenseCategories;
-    }
-
-    // below method is to read only expenses category from database.
-    public LiveData<List<CategoryClass>> getOnlyIncomeCategories() {
-        return allIncomeCategories;
-    }
-
-    // we are creating a async task method to insert new course. 
-    private static class InsertCourseAsyncTask extends AsyncTask<CategoryClass, Void, Void> {
-        private CategoryDao categoryDao;
-
-        private InsertCourseAsyncTask(CategoryDao categoryDao) {
-            this.categoryDao = categoryDao;
-        }
-
-        @Override
-        protected Void doInBackground(CategoryClass... model) {
-            // below line is use to insert our modal in dao. 
-            categoryDao.insert(model[0]);
-            return null;
-        }
-    }
-
-    // we are creating a async task method to update our course. 
-    private static class UpdateCourseAsyncTask extends AsyncTask<CategoryClass, Void, Void> {
-        private CategoryDao categoryDao;
-
-        private UpdateCourseAsyncTask(CategoryDao categoryDao) {
-            this.categoryDao = categoryDao;
-        }
-
-        @Override
-        protected Void doInBackground(CategoryClass... models) {
-            // below line is use to update 
-            // our modal in dao. 
-            categoryDao.update(models[0]);
-            return null;
-        }
-    }
-
-    // we are creating a async task method to delete course. 
-    private static class DeleteCourseAsyncTask extends AsyncTask<CategoryClass, Void, Void> {
-        private CategoryDao categoryDao;
-
-        private DeleteCourseAsyncTask(CategoryDao categoryDao) {
-            this.categoryDao = categoryDao;
-        }
-
-        @Override
-        protected Void doInBackground(CategoryClass... models) {
-            // below line is use to delete  
-            // our course modal in dao. 
-            categoryDao.delete(models[0]);
-            return null;
-        }
-    }
-
-    // we are creating a async task method to delete all category. 
-    private static class DeleteAllCoursesAsyncTask extends AsyncTask<Void, Void, Void> {
-        private CategoryDao categoryDao;
-        private DeleteAllCoursesAsyncTask(CategoryDao categoryDao) {
-            this.categoryDao = categoryDao;
-        }
-        @Override
-        protected Void doInBackground(Void... voids) {
-            // on below line calling method 
-            // to delete all category. 
-            categoryDao.deleteAllCategory();
-            return null;
-        }
-    }
 }

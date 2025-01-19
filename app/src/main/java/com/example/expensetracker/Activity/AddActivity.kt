@@ -4,12 +4,12 @@ import android.content.Context
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.View
 import android.widget.ImageButton
 import android.widget.RelativeLayout
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.RecyclerView
 import com.example.expensetracker.Adapters.CategoryExpenseViewChipAdapter
 import com.example.expensetracker.Adapters.CategoryIncomeViewChipAdapter
@@ -31,6 +31,7 @@ import com.google.android.material.datepicker.MaterialDatePicker
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.onEach
 import org.greenrobot.eventbus.EventBus
 import org.greenrobot.eventbus.Subscribe
 import java.text.SimpleDateFormat
@@ -129,23 +130,22 @@ class AddActivity : AppCompatActivity(), View.OnClickListener {
 
         editTextAmount.requestFocus()
 
-        categoryViewModel.onlyExpenseCategoryNames.observe(
-            this,
-            object : Observer<List<CategoryClass>> {
-                override fun onChanged(value: List<CategoryClass>) {
-                    categoryExpenseViewChipAdapter =
-                        CategoryExpenseViewChipAdapter(this@AddActivity, value)
-                    recyclerViewLayoutCategoryExpense.adapter = categoryExpenseViewChipAdapter
-                }
-            })
 
-        categoryViewModel.onlyIncomeCategoryNames.observe(this, object : Observer<List<CategoryClass>> {
-            override fun onChanged(value: List<CategoryClass>) {
-                categoryIncomeViewChipAdapter =
-                    CategoryIncomeViewChipAdapter(this@AddActivity, value)
-                recyclerViewLayoutCategoryIncome.adapter = categoryIncomeViewChipAdapter
-            }
-        })
+        categoryViewModel.getOnlyExpenseCategoryNames()
+        categoryViewModel.getOnlyIncomeCategoryNames()
+        categoryViewModel.onlyExpenseCategoryNames.onEach {
+            Log.d("test123", it.toString())
+            categoryExpenseViewChipAdapter =
+                CategoryExpenseViewChipAdapter(this@AddActivity, it)
+            recyclerViewLayoutCategoryExpense.adapter = categoryExpenseViewChipAdapter
+        }
+
+        categoryViewModel.onlyIncomeCategoryNames.onEach {
+            categoryIncomeViewChipAdapter =
+                CategoryIncomeViewChipAdapter(this@AddActivity, it)
+            recyclerViewLayoutCategoryIncome.adapter = categoryIncomeViewChipAdapter
+        }
+
     }
 
     private fun initVars() {

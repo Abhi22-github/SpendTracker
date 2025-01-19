@@ -61,47 +61,4 @@ class TransactionRepository(@ApplicationContext applicationContext: Context) {
     suspend fun deleteAllTransaction() {
         transactionDao.deleteAllTransaction()
     }
-
-//    // we are creating a async task method to insert new course.
-//    private class InsertCourseAsyncTask(private val transactionDao: TransactionDao) :
-//        AsyncTask<TransactionClass?, Void?, Void?>() {
-//        override fun doInBackground(vararg model: TransactionClass): Void? {
-//            // below line is use to insert our modal in dao.
-//            transactionDao.insert(model[0])
-//            return null
-//        }
-//    }
-//
-//    // we are creating a async task method to update our course.
-//    private class UpdateCourseAsyncTask(private val transactionDao: TransactionDao) :
-//        AsyncTask<TransactionClass?, Void?, Void?>() {
-//        override fun doInBackground(vararg models: TransactionClass): Void? {
-//            // below line is use to update
-//            // our modal in dao.
-//            transactionDao.update(models[0])
-//            return null
-//        }
-//    }
-//
-//    // we are creating a async task method to delete course.
-//    private class DeleteCourseAsyncTask(private val transactionDao: TransactionDao) :
-//        AsyncTask<TransactionClass?, Void?, Void?>() {
-//        override fun doInBackground(vararg models: TransactionClass): Void? {
-//            // below line is use to delete
-//            // our course modal in dao.
-//            transactionDao.delete(models[0])
-//            return null
-//        }
-//    }
-//
-//    // we are creating a async task method to delete all courses.
-//    private class DeleteAllCoursesAsyncTask(private val transactionDao: TransactionDao) :
-//        AsyncTask<Void?, Void?, Void?>() {
-//        override fun doInBackground(vararg voids: Void): Void? {
-//            // on below line calling method
-//            // to delete all courses.
-//            transactionDao.deleteAllTransaction()
-//            return null
-//        }
-//    }
 }

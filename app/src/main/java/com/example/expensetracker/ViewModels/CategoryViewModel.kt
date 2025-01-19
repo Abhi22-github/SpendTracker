@@ -1,25 +1,63 @@
 package com.example.expensetracker.ViewModels
 
-import androidx.lifecycle.LiveData
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.expensetracker.Database.CategoryRepository
 import com.example.expensetracker.Events.EventMessage
 import com.example.expensetracker.Model.CategoryClass
+import com.example.expensetracker.Utilities.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
 import javax.inject.Inject
 
 @HiltViewModel
-class CategoryViewModel @Inject constructor(private val categoryRepository: CategoryRepository) : ViewModel() {
+class CategoryViewModel @Inject constructor(private val categoryRepository: CategoryRepository) :
+    ViewModel() {
+    //flow for Ui states
+    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
+    val uiState: StateFlow<UiState> = _uiState
 
-    val categoryNames: LiveData<List<CategoryClass>>
+    //flow for only Income Category names
+    private val _onlyIncomeCategoryNames = MutableStateFlow<List<CategoryClass>>(listOf())
+    val onlyIncomeCategoryNames:StateFlow<List<CategoryClass>> = _onlyIncomeCategoryNames
+
+    //flow for only Expense Category names
+    private val _onlyExpenseCategoryNames = MutableStateFlow<List<CategoryClass>>(listOf())
+    val onlyExpenseCategoryNames:StateFlow<List<CategoryClass>> = _onlyExpenseCategoryNames
+
+    val categoryNames: Flow<List<CategoryClass>>
         get() = categoryRepository.allCategories
 
-    val onlyIncomeCategoryNames: LiveData<List<CategoryClass>>
-        get() = categoryRepository.onlyIncomeCategories
 
-    val onlyExpenseCategoryNames: LiveData<List<CategoryClass>>
-        get() = categoryRepository.onlyExpenseCategories
+    fun getOnlyExpenseCategoryNames() {
+        viewModelScope.launch {
+            loading()
+            categoryRepository.getOnlyExpenseCategories().catch { error(it) }
+                .collect { categoryClassesList ->
+                    _onlyExpenseCategoryNames.value = categoryClassesList
+                    completed()
+                    onlyExpenseCategoryNames.value.forEach{
+                    }
+                }
+        }
+    }
+
+    fun getOnlyIncomeCategoryNames() {
+        viewModelScope.launch {
+            loading()
+            categoryRepository.getOnlyIncomeCategories().catch { error(it) }
+                .collect { categoryClassesList ->
+                    _onlyIncomeCategoryNames.value = categoryClassesList
+                    completed()
+                }
+        }
+    }
 
     fun validateCategoryData(categoryClass: CategoryClass) {
         if (categoryClass.categoryName!!.isEmpty()) {
@@ -38,25 +76,46 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
 
     fun fillCategoriesInDatabase(categoryClassesList: ArrayList<CategoryClass>) {
         for (categoryClass in categoryClassesList) {
-            categoryRepository.insert(categoryClass)
+            viewModelScope.launch {
+                categoryRepository.insert(categoryClass)
+            }
         }
         EventBus.getDefault().post(EventMessage(9, "success"))
     }
 
     //to delete categories from database
-    fun deleteCategoryFromDatabase(categoryClass: CategoryClass?) {
-        categoryRepository.delete(categoryClass)
+    fun deleteCategoryFromDatabase(categoryClass: CategoryClass) {
+        viewModelScope.launch {
+            categoryRepository.delete(categoryClass)
+        }
     }
 
     private fun storeCategoryInDatabase(categoryClass: CategoryClass) {
         if (categoryClass.id == 0L) {
             //new category insert
-            categoryRepository.insert(categoryClass)
+            viewModelScope.launch {
+                categoryRepository.insert(categoryClass)
+            }
         } else {
             //existing category update
-            categoryRepository.update(categoryClass)
+            viewModelScope.launch {
+                categoryRepository.update(categoryClass)
+            }
         }
 
         EventBus.getDefault().post(EventMessage(3, "closing bottom sheet"))
+    }
+
+    fun loading() {
+        _uiState.value = UiState.Loading
+    }
+
+    fun completed() {
+        _uiState.value = UiState.Success
+    }
+
+    fun error(error: Throwable) {
+        _uiState.value = UiState.Error(error.toString())
+        Log.d("Hello Error reason", error.toString())
     }
 }

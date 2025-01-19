@@ -1,38 +1,34 @@
-package com.example.expensetracker.Database;
+package com.example.expensetracker.Database
 
-import androidx.lifecycle.LiveData;
-import androidx.room.Delete;
-import androidx.room.Insert;
-import androidx.room.OnConflictStrategy;
-import androidx.room.Query;
-import androidx.room.Update;
+import androidx.room.Dao
+import androidx.room.Delete
+import androidx.room.Insert
+import androidx.room.OnConflictStrategy
+import androidx.room.Query
+import androidx.room.Update
+import com.example.expensetracker.Model.CategoryClass
+import kotlinx.coroutines.flow.Flow
 
-import com.example.expensetracker.Model.CategoryClass;
-import com.example.expensetracker.Model.TransactionClass;
-
-import java.util.List;
-
-@androidx.room.Dao
-public interface CategoryDao {
-
+@Dao
+interface CategoryDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    void insert(CategoryClass categoryClass);
+    suspend fun insert(categoryClass: CategoryClass)
 
     @Delete
-    void delete(CategoryClass categoryClass);
+    suspend fun delete(categoryClass: CategoryClass)
 
     @Update
-    void update(CategoryClass categoryClass);
+    suspend fun update(categoryClass: CategoryClass)
 
     @Query("SELECT * FROM category_table WHERE categoryType = :expense ORDER BY categoryName")
-    LiveData<List<CategoryClass>> getOnlyExpenseCategories(String expense);
+    fun getOnlyExpenseCategories(expense: String): Flow<List<CategoryClass>>
 
     @Query("SELECT * FROM category_table WHERE categoryType = :income ORDER BY categoryName")
-    LiveData<List<CategoryClass>> getOnlyIncomeCategories(String income);
+    fun getOnlyIncomeCategories(income: String): Flow<List<CategoryClass>>
 
     @Query("DELETE FROM category_table")
-    void deleteAllCategory();
+    suspend fun deleteAllCategory()
 
-    @Query("SELECT * FROM category_table ORDER BY categoryName DESC")
-    LiveData<List<CategoryClass>> getAllCategory();
+    @get:Query("SELECT * FROM category_table ORDER BY categoryName DESC")
+    val allCategory: Flow<List<CategoryClass>>
 }
