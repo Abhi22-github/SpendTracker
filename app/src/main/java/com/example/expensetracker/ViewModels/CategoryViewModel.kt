@@ -25,11 +25,11 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
 
     //flow for only Income Category names
     private val _onlyIncomeCategoryNames = MutableStateFlow<List<CategoryClass>>(listOf())
-    val onlyIncomeCategoryNames:StateFlow<List<CategoryClass>> = _onlyIncomeCategoryNames
+    val onlyIncomeCategoryNames: StateFlow<List<CategoryClass>> = _onlyIncomeCategoryNames
 
     //flow for only Expense Category names
     private val _onlyExpenseCategoryNames = MutableStateFlow<List<CategoryClass>>(listOf())
-    val onlyExpenseCategoryNames:StateFlow<List<CategoryClass>> = _onlyExpenseCategoryNames
+    val onlyExpenseCategoryNames: StateFlow<List<CategoryClass>> = _onlyExpenseCategoryNames
 
     val categoryNames: Flow<List<CategoryClass>>
         get() = categoryRepository.allCategories
@@ -43,6 +43,7 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
                     _onlyExpenseCategoryNames.value = categoryClassesList
                     completed()
                     onlyExpenseCategoryNames.value.forEach{
+                        it -> Log.d("hello1",it.categoryName)
                     }
                 }
         }
