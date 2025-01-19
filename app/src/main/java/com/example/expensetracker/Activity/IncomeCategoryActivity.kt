@@ -69,8 +69,13 @@ class IncomeCategoryActivity : AppCompatActivity(), Actions {
     }
 
     private fun openBottomSheetModel() {
-        val categoryClass = CategoryClass()
-        categoryClass.categoryType = Constants.INCOME
+        val categoryClass = CategoryClass(
+            id = 0,
+            categoryName = "",
+            categoryColorNumber = 1,
+            categoryIconNumber = 1,
+            categoryType = Constants.INCOME
+        )
         val addCategoryBottomSheet = AddCategoryBottomSheet(categoryClass)
         addCategoryBottomSheet.show(supportFragmentManager, "addCategory")
     }

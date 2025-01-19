@@ -9,33 +9,24 @@ import androidx.room.PrimaryKey
     tableName = "category_table",
     indices = [Index(value = ["categoryName", "categoryType"], unique = true)]
 )
-class CategoryClass() {
+data class CategoryClass(
     @JvmField
     @PrimaryKey(autoGenerate = true)
-    var id: Long = 0
+    var id: Long,
 
     @JvmField
     @ColumnInfo(name = "categoryName")
-    var categoryName: String? = null
+    var categoryName: String,
 
     @JvmField
-    var categoryColorNumber: Int? = null
+    var categoryColorNumber: Int,
 
     @JvmField
-    var categoryIconNumber: Int? = null
+    var categoryIconNumber: Int,
 
     @JvmField
     @ColumnInfo(name = "categoryType")
-    var categoryType: String? = null
+    var categoryType: String,
 
 
-    constructor(
-        categoryName: String?, categoryColorNumber: Int?, categoryIconNumber: Int?,
-        categoryType: String?
-    ) : this() {
-        this.categoryName = categoryName
-        this.categoryColorNumber = categoryColorNumber
-        this.categoryIconNumber = categoryIconNumber
-        this.categoryType = categoryType
-    }
-}
+    )
