@@ -32,6 +32,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,6 +52,8 @@ import com.example.expensetracker.Utilities.Constants.EXPENSE
 import com.example.expensetracker.Utilities.convertLocalDateToLong
 import com.example.expensetracker.Utilities.getDateFromMillis
 import com.example.expensetracker.ViewModels.TransactionsViewModel
+import com.example.expensetracker.ViewModels.UiViewModel
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -58,10 +61,13 @@ import java.time.LocalDate
 fun TransactionsListCompose(
     showSingleDateTransactions: Boolean,
     date: LocalDate,
-    viewModel: TransactionsViewModel = hiltViewModel()
+    viewModel: TransactionsViewModel = hiltViewModel(),
+    uiViewModel: UiViewModel = hiltViewModel()
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var bottomSheet by remember { mutableStateOf(false) }
+    val bottomSheet by uiViewModel.transactionDetailBottomSheetValue.collectAsState()
+    var singleTransaction by remember { mutableStateOf(TransactionClass()) }
+    val scope = rememberCoroutineScope()
     //  val uiState by viewModel.uiState.collectAsState()
 //    LaunchedEffect(uiState) {
 //        when(uiState){
@@ -89,8 +95,10 @@ fun TransactionsListCompose(
                     item { Header(transactionList.get(0).dateWithTime) }
                     items(transactionList, key = { it.id }) { item ->
                         SingleTransaction(item, onSingleItemClick = {
-                            onSingleItemClick(item)
-                            bottomSheet = true
+                            singleTransaction = (item)
+                            scope.launch {
+                                uiViewModel.transactionDetailBottomSheetValue.emit(true)
+                            }
                         })
                     }
                 }
@@ -107,8 +115,10 @@ fun TransactionsListCompose(
             ) {
                 items(transactionList, key = { it.id }) { item ->
                     SingleTransaction(item, onSingleItemClick = {
-                        onSingleItemClick(item)
-                        bottomSheet = true
+                        singleTransaction = (item)
+                        scope.launch {
+                            uiViewModel.transactionDetailBottomSheetValue.emit(true)
+                        }
                     })
                 }
             }
@@ -117,7 +127,7 @@ fun TransactionsListCompose(
     }
 
     if (bottomSheet) {
-        BottomSheetContentItemDetails(bottomSheetState) { bottomSheet = false }
+        BottomSheetContentItemDetails(bottomSheetState, singleTransaction)
     }
 }
 
@@ -210,9 +220,6 @@ fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionCla
     }
 }
 
-fun onSingleItemClick(item: TransactionClass) {
-
-}
 
 @Composable
 fun SingleTransactionNew(item: TransactionClass, onSingleItemClick: (TransactionClass) -> Unit) {
@@ -271,7 +278,6 @@ fun Header(date: Long) {
             .padding(16.dp, 14.dp, 8.dp, 4.dp)
     )
 }
-
 
 
 @Preview

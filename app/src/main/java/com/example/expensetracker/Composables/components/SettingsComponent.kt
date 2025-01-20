@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -18,7 +17,6 @@ import androidx.compose.material3.RadioButton
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -61,7 +59,7 @@ fun SingleItemRadioButton(
             colors = radioButtonColors
         )
         Text(
-            text = labelText,
+            text = labelText.lowercase().replaceFirstChar { it -> it.uppercase() },
             style = MaterialTheme.typography.labelLarge,
             modifier = Modifier.align(Alignment.CenterVertically)
         )
@@ -185,47 +183,7 @@ fun BottomSheetContent(
 }
 
 
-@Composable
-fun ConfirmationAlertDialog(
-    onDismissRequest: () -> Unit,
-    onConfirmation: () -> Unit,
-    dialogTitle: String,
-    dialogText: String,
-    icon: ImageVector,
-) {
-    AlertDialog(
-        icon = {
-            Icon(icon, contentDescription = "Example Icon")
-        },
-        title = {
-            Text(text = dialogTitle)
-        },
-        text = {
-            Text(text = dialogText)
-        },
-        onDismissRequest = {
-            onDismissRequest()
-        },
-        confirmButton = {
-            TextButton(
-                onClick = {
-                    onConfirmation()
-                }
-            ) {
-                Text("Confirm")
-            }
-        },
-        dismissButton = {
-            TextButton(
-                onClick = {
-                    onDismissRequest()
-                }
-            ) {
-                Text("Cancel")
-            }
-        }
-    )
-}
+
 
 
 //class NumberCommaTransformation : VisualTransformation {
@@ -263,21 +221,6 @@ fun saveDateToDevice(
 
 }
 
-@Preview
-@Composable
-fun AlertDialogPreview() {
-    ExpenseTrackerTheme {
-        Surface {
-            ConfirmationAlertDialog(
-                {},
-                {},
-                "Change Budget",
-                "Are you sure, you want to change the current budget?",
-                ImageVector.vectorResource(R.drawable.icon_expense)
-            )
-        }
-    }
-}
 
 @Preview
 @Composable
