@@ -14,6 +14,7 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButtonColors
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -23,12 +24,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.expensetracker.Composables.ThemeMode
 import com.example.expensetracker.Composables.components.BudgetBottomSheet
 import com.example.expensetracker.Composables.components.SingleItemRadioButton
 import com.example.expensetracker.Composables.components.SpendsBudgetCard
@@ -50,21 +55,52 @@ fun SettingsScreen(
     sendUserBack: () -> Unit,
     preferenceViewModel: PreferencesViewModel = hiltViewModel()
 ) {
-
     val isBudgetSet by preferenceViewModel.isBudgetSet.collectAsState(false)
     val budget by preferenceViewModel.getBudgetValue.collectAsState(0f)
     SettingsScreenContent(sendUserBack, isBudgetSet, budget)
 }
 
+val startEndPadding = 16.dp
+val topBottomPadding = 0.dp
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SettingsScreenContent(sendUserBack: () -> Unit, isBudgetSet: Boolean, budget: Float?) {
-    var themeSelected by remember {
-        mutableStateOf("Light")
-    }
+fun SettingsScreenContent(
+    sendUserBack: () -> Unit,
+    isBudgetSet: Boolean,
+    budget: Float?,
+    preferenceViewModel: PreferencesViewModel = hiltViewModel()
+) {
+    val themeSelected by preferenceViewModel.getThemeMode.collectAsState(ThemeMode.SYSTEM.toString())
+    var checked by remember { mutableStateOf(true) }
     val sheetState = rememberModalBottomSheetState()
     var bottomSheet by remember { mutableStateOf(false) }
-    val list = listOf("Light", "Dark", "System Default")
+    val list = listOf("LIGHT", "NIGHT", "SYSTEM")
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+//    LaunchedEffect(themeSelected) {
+//        var mode = when (themeSelected) {
+//            "Light" -> {
+//                ThemeMode.LIGHT
+//            }
+//
+//            "Dark" -> {
+//                ThemeMode.NIGHT
+//            }
+//
+//            "System Defaults" -> {
+//                ThemeMode.SYSTEM
+//            }
+//
+//            else -> {
+//                ThemeMode.SYSTEM
+//            }
+//        }
+//        scope.launch {
+//            switchTheme(context, mode)
+//        }
+//    }
 
     Column {
         TopBar(title = "Settings") {
@@ -75,23 +111,54 @@ fun SettingsScreenContent(sendUserBack: () -> Unit, isBudgetSet: Boolean, budget
             Text(
                 text = "Theme", style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(16.dp, 0.dp)
+                modifier = Modifier.padding(startEndPadding, topBottomPadding)
             )
             Text(
                 text = "Please select theme according to your preferences or you can set it according to your device theme",
                 style = MaterialTheme.typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.6f),
-                modifier = Modifier.padding(16.dp, 0.dp)
+                modifier = Modifier.padding(startEndPadding, topBottomPadding)
             )
-            Column(modifier = Modifier.padding(16.dp, 0.dp)) {
+            Column(modifier = Modifier.padding(startEndPadding, topBottomPadding)) {
                 list.map {
-                    SingleItemRadioButton(it, selectedItem = { themeSelected = it }, themeSelected)
+                    SingleItemRadioButton(
+                        it,
+                        selectedItem = { preferenceViewModel.saveTheme(it) },
+                        themeSelected
+                    )
                 }
             }
+
+            Spacer(Modifier.height(24.dp))
+            Row() {
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        text = "Forecast Budget", style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.padding(startEndPadding, topBottomPadding)
+                    )
+                    Text(
+                        text = "Show Forecast budget bar while Adding the transactions",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.6f),
+                        modifier = Modifier.padding(startEndPadding, topBottomPadding)
+                    )
+                }
+                Switch(
+                    checked = checked,
+                    onCheckedChange = {
+                        checked = it
+                    },
+                    modifier = Modifier
+                        .weight(.3f)
+                        .align(Alignment.CenterVertically)
+                )
+            }
+
             Spacer(Modifier.height(24.dp))
             Column(
                 modifier = Modifier
-                    .padding(16.dp, 4.dp)
+                    .padding(startEndPadding, 4.dp)
                     .fillMaxWidth()
             ) {
                 Text(

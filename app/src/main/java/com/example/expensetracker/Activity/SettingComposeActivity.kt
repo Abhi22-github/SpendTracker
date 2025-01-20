@@ -12,7 +12,7 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class SettingComposeActivity : ComponentActivity() {
-    val viewmodel:TransactionsViewModel by viewModels()
+    val viewmodel: TransactionsViewModel by viewModels()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
