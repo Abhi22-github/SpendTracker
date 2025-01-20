@@ -139,7 +139,18 @@ fun BottomSheetContentItemAddContent(
     val focusRequester = remember { FocusRequester() }
     val categoryList by categoryViewModel.categoryList.collectAsState()
     val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
-    var selectedCategory by remember { mutableStateOf(CategoryClass(-1, "Select Category", 1, 99, EXPENSE)) }
+    val firstSampleClass = CategoryClass(
+        -1,
+        "Select Category",
+        1,
+        -99,
+        EXPENSE
+    )
+    var selectedCategory by remember {
+        mutableStateOf(
+            firstSampleClass
+        )
+    }
 
     val expenseType = TransactionTypeClass(1, EXPENSE)
     val incomeType = TransactionTypeClass(2, INCOME)
@@ -227,6 +238,7 @@ fun BottomSheetContentItemAddContent(
                             } else {
                                 typeToggle = !typeToggle
                                 categoryViewModel.getCorrespondingList(if (typeToggle) expenseType.type else incomeType.type)
+                                selectedCategory = firstSampleClass
                             }
                         }
                         .height(56.dp)) {
@@ -438,7 +450,11 @@ fun BottomSheetContentItemAddContent(
                         containerColor = MaterialTheme.colorScheme.errorContainer
                     )
                 ) {
-                    Row(modifier = modifier.padding(16.dp, 12.dp).fillMaxWidth()) {
+                    Row(
+                        modifier = modifier
+                            .padding(16.dp, 12.dp)
+                            .fillMaxWidth()
+                    ) {
                         ErrorRow(uiViewModel)
                     }
                 }
@@ -477,7 +493,7 @@ fun validateTransactionData(
 ) {
 
     scope.launch {
-        if (selectedCategory.categoryName == "Select") {
+        if (selectedCategory.categoryName == "Select Category") {
             uiViewModel.errorStatusInAddBottomSheet.emit(true)
             uiViewModel.errorStatusMessage.emit("Please select a category")
             return@launch
@@ -909,7 +925,8 @@ fun BottomSheetContentItemDetailsContent(
         }
         Spacer(Modifier.height(16.dp))
         AnimatedVisibility(showDeleteConfirmation) {
-            ConfirmationAlertDialog(onDismissRequest = { showDeleteConfirmation = false },
+            ConfirmationAlertDialog(
+                onDismissRequest = { showDeleteConfirmation = false },
                 onConfirmation = {
                     scope.launch {
                         transactionsViewModel.deleteSingleTransaction(singleTransaction)
