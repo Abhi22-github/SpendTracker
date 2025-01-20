@@ -106,7 +106,7 @@ class MainActivity : AppCompatActivity() {
                 R.id.frameLayout_fragment_mainActivity,
                 ListViewFragment()
             )
-            fragmentTransaction!!.commit()
+            fragmentTransaction!!.commitAllowingStateLoss()
         }
     }
 

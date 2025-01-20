@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
+import com.example.expensetracker.Composables.ThemeMode
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -30,17 +31,33 @@ class PreferenceManager @Inject constructor(@ApplicationContext val context: Con
             }
     }
 
+    //save Boolean value
     suspend fun saveBooleanValue(value: Boolean, key: Preferences.Key<Boolean>) {
         dataStore.edit { preferences ->
             preferences[key] = value
         }
     }
 
-    // Retrieve float value
+    // Retrieve Boolean value
     fun getBooleanValue(key: Preferences.Key<Boolean>): Flow<Boolean> {
         return context.dataStore.data
             .map { preferences ->
                 preferences[key] ?: false
+            }
+    }
+
+    // Save Theme value
+    suspend fun saveThemeValue(value: String, key: Preferences.Key<String>) {
+        dataStore.edit { preferences ->
+            preferences[key] = value
+        }
+    }
+
+    // Retrieve Theme value
+    fun getThemeValue(key: Preferences.Key<String>): Flow<String> {
+        return context.dataStore.data
+            .map { preferences ->
+                preferences[key] ?: ThemeMode.SYSTEM.toString()
             }
     }
 }

@@ -1,7 +1,10 @@
 package com.example.expensetracker.Composables
 
 
+import android.content.Context
 import android.os.Build
+import android.util.Log
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
@@ -10,11 +13,23 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Immutable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.datastore.preferences.core.edit
+import androidx.hilt.navigation.compose.hiltViewModel
+import com.example.expensetracker.Utilities.PreferenceManger.THEME_MODE
+import com.example.expensetracker.Utilities.PreferenceManger.dataStore
+import com.example.expensetracker.ViewModels.PreferencesViewModel
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.runBlocking
 
 
 enum class ThemeMode { LIGHT, NIGHT, SYSTEM }
+
 //
 //fun darkColorScheme(): ColorScheme {
 //    val palette = CorePalette.contentOf(colorSeed.toArgb())
@@ -89,12 +104,7 @@ enum class ThemeMode { LIGHT, NIGHT, SYSTEM }
 //}
 //
 //
-@Composable
-fun isNightMode(): Boolean = when (ThemeMode.SYSTEM) {
-    ThemeMode.LIGHT -> false
-    ThemeMode.NIGHT -> true
-    else -> isSystemInDarkTheme()
-}
+
 
 private val lightScheme = lightColorScheme(
     primary = primaryLight,
@@ -338,19 +348,23 @@ val unspecified_scheme = ColorFamily(
 
 @Composable
 fun ExpenseTrackerTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = isNightMode(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable() () -> Unit
 ) {
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        syncTheme(context)
+    }
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
 
-        darkTheme -> darkScheme
-        else -> lightScheme
+        darkTheme -> lightScheme
+        else -> darkScheme
     }
 
     MaterialTheme(
@@ -358,7 +372,56 @@ fun ExpenseTrackerTheme(
         typography = typography(LocalContext.current),
         content = content
     )
+
 }
+
+suspend fun switchTheme(context: Context, mode: ThemeMode) {
+    context.dataStore.edit {
+        it[THEME_MODE] = mode.toString()
+    }
+    syncTheme(context)
+}
+
+fun syncTheme(context: Context) {
+    val currentValue = runBlocking { context.dataStore.data.first() }
+    val mode = runBlocking {
+        context.dataStore.data
+            .map { preferences ->
+                preferences[THEME_MODE] ?: ThemeMode.SYSTEM.toString()
+            }.first()
+    }
+    changeThemeSystemWide(mode)
+}
+
+@Composable
+fun isNightMode(preferencesViewModel: PreferencesViewModel = hiltViewModel()): Boolean {
+    val themeMode by preferencesViewModel.getThemeMode.collectAsState(ThemeMode.SYSTEM)
+    val p = when (themeMode) {
+        ThemeMode.LIGHT.toString() -> false
+        ThemeMode.NIGHT.toString() -> true
+        else -> isSystemInDarkTheme()
+    }
+    Log.d("test", p.toString() + themeMode)
+    return p
+}
+
+fun changeThemeSystemWide(mode: String) {
+    Log.d("test122", mode.toString())
+    when (mode) {
+        ThemeMode.LIGHT.toString() -> {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+        }
+
+        ThemeMode.SYSTEM.toString() -> {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+        }
+
+        ThemeMode.NIGHT.toString() -> {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+        }
+    }
+}
+
 
 //@Composable
 //fun ExpenseTrackerTheme(

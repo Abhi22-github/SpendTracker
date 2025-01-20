@@ -152,7 +152,7 @@ fun BottomSheetContent(
         TextField(
             value = dailySpendLimit,
             onValueChange = { newText ->
-                val modifiedString = newText.text.filter{it in '0'..'9' || it == '.'}
+                val modifiedString = newText.text.filter { it in '0'..'9' || it == '.' }
                 amountTextValueChange(TextFieldValue(modifiedString, newText.selection))
             },
             singleLine = true,
