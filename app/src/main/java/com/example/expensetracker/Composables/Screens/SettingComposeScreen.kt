@@ -39,6 +39,7 @@ import com.example.expensetracker.Composables.components.SingleItemRadioButton
 import com.example.expensetracker.Composables.components.SpendsBudgetCard
 import com.example.expensetracker.Composables.components.TopBar
 import com.example.expensetracker.ViewModels.PreferencesViewModel
+import kotlinx.coroutines.launch
 
 val radioButtonColors
     @Composable
@@ -72,35 +73,13 @@ fun SettingsScreenContent(
     preferenceViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val themeSelected by preferenceViewModel.getThemeMode.collectAsState(ThemeMode.SYSTEM.toString())
-    var checked by remember { mutableStateOf(true) }
+    val showForecast by preferenceViewModel.showForecastBar.collectAsState(false)
     val sheetState = rememberModalBottomSheetState()
     var bottomSheet by remember { mutableStateOf(false) }
     val list = listOf("LIGHT", "NIGHT", "SYSTEM")
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-//    LaunchedEffect(themeSelected) {
-//        var mode = when (themeSelected) {
-//            "Light" -> {
-//                ThemeMode.LIGHT
-//            }
-//
-//            "Dark" -> {
-//                ThemeMode.NIGHT
-//            }
-//
-//            "System Defaults" -> {
-//                ThemeMode.SYSTEM
-//            }
-//
-//            else -> {
-//                ThemeMode.SYSTEM
-//            }
-//        }
-//        scope.launch {
-//            switchTheme(context, mode)
-//        }
-//    }
 
     Column {
         TopBar(title = "Settings") {
@@ -129,7 +108,7 @@ fun SettingsScreenContent(
                 }
             }
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(32.dp))
             Row() {
                 Column(Modifier.weight(1f)) {
                     Text(
@@ -145,9 +124,11 @@ fun SettingsScreenContent(
                     )
                 }
                 Switch(
-                    checked = checked,
+                    checked = showForecast,
                     onCheckedChange = {
-                        checked = it
+                        scope.launch {
+                            preferenceViewModel.setForecastState(it)
+                        }
                     },
                     modifier = Modifier
                         .weight(.3f)
@@ -155,7 +136,7 @@ fun SettingsScreenContent(
                 )
             }
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(32.dp))
             Column(
                 modifier = Modifier
                     .padding(startEndPadding, 4.dp)

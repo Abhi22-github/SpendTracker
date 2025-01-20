@@ -26,6 +26,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material3.Button
@@ -35,6 +37,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
@@ -42,6 +45,7 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.SheetState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
@@ -59,6 +63,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -67,6 +73,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
+import com.example.expensetracker.Composables.CustomFonts.numberFont
 import com.example.expensetracker.Composables.ExpenseTrackerTheme
 import com.example.expensetracker.Composables.blueColor
 import com.example.expensetracker.Composables.greenColor
@@ -74,12 +81,16 @@ import com.example.expensetracker.Composables.orange
 import com.example.expensetracker.Composables.successColor
 import com.example.expensetracker.Composables.utils.IconState
 import com.example.expensetracker.Composables.utils.IconStateForType
+import com.example.expensetracker.Composables.utils.combineColors
 import com.example.expensetracker.Composables.utils.toPalette
 import com.example.expensetracker.Model.CategoryClass
+import com.example.expensetracker.Model.TransactionClass
 import com.example.expensetracker.Model.TransactionTypeClass
+import com.example.expensetracker.R
 import com.example.expensetracker.Utilities.Constants.EXPENSE
 import com.example.expensetracker.Utilities.Constants.INCOME
 import com.example.expensetracker.Utilities.convertMillisToDateString
+import com.example.expensetracker.Utilities.parseAmount
 import com.example.expensetracker.ViewModels.AnimationViewModel
 import com.example.expensetracker.ViewModels.CategoryViewModel
 import com.example.expensetracker.ViewModels.PreferencesViewModel
@@ -92,7 +103,7 @@ import java.time.LocalDate
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun BottomSheetContentItemDetails(sheetState: SheetState, closeBottomSheet: () -> Unit) {
+fun BottomSheetContentAddItem(sheetState: SheetState, closeBottomSheet: () -> Unit) {
     ModalBottomSheet(onDismissRequest = {
         closeBottomSheet()
     },
@@ -101,7 +112,7 @@ fun BottomSheetContentItemDetails(sheetState: SheetState, closeBottomSheet: () -
             .imePadding()
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
-        BottomSheetContentItemDetailsContent(modifier = Modifier)
+        BottomSheetContentItemAddContent(modifier = Modifier)
     }
 }
 
@@ -111,7 +122,7 @@ val bottomSheetTopBottomPadding = 0.dp
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
-fun BottomSheetContentItemDetailsContent(
+fun BottomSheetContentItemAddContent(
     modifier: Modifier,
 
     categoryViewModel: CategoryViewModel = hiltViewModel(),
@@ -121,13 +132,13 @@ fun BottomSheetContentItemDetailsContent(
     preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
-    var cashMenuExpanded by remember { mutableStateOf(false) }
     var categoryMenuExpanded by remember { mutableStateOf(false) }
     var expenseValue by remember { mutableStateOf(TextFieldValue("")) }
     var comment by remember { mutableStateOf(TextFieldValue("")) }
     var selectedDate by remember { mutableStateOf<Long?>(System.currentTimeMillis()) }
     val focusRequester = remember { FocusRequester() }
     val categoryList by categoryViewModel.categoryList.collectAsState()
+    val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
     var selectedCategory by remember { mutableStateOf(CategoryClass(-1, "Select", 1, 99, EXPENSE)) }
 
     val expenseType = TransactionTypeClass(1, EXPENSE)
@@ -140,7 +151,9 @@ fun BottomSheetContentItemDetailsContent(
     //animations
     var expanded by remember { mutableStateOf(false) }
     var typeToggle by remember { mutableStateOf(true) }
-    val boxSize by animateDpAsState(targetValue = if (expanded) 160.dp else 56.dp, animationSpec = tween(500))
+    val boxSize by animateDpAsState(
+        targetValue = if (expanded) 160.dp else 56.dp, animationSpec = tween(500)
+    )
     val colorAnimate by animateColorAsState(
         targetValue = if (typeToggle) orange.copy(alpha = .20f) else successColor.copy(
             alpha = 0.20f
@@ -171,16 +184,16 @@ fun BottomSheetContentItemDetailsContent(
     }
     val budget by preferencesViewModel.getBudgetValue.collectAsState(1f)
     val oldAmount by transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
-    val newAmountTemp  = if(expenseValue.text.isEmpty()) 0L else expenseValue.text.toLong()
-    val newDailyBudget = oldAmount+newAmountTemp
+    val newAmountTemp = if (expenseValue.text.isEmpty()) 0L else expenseValue.text.toLong()
+    val newDailyBudget = oldAmount + newAmountTemp
     val amountInString = String.format("%.2f", newDailyBudget.toFloat())
     val percent = if (budget != 0f) {
         newDailyBudget / budget
     } else {
         0f
     }
-    animationViewModel.method("₹$amountInString",percent)
-    Log.d("Hello",percent.toString())
+    animationViewModel.method("₹$amountInString", percent)
+    Log.d("Hello", percent.toString())
 
     LaunchedEffect(percent) {
         scope.launch {
@@ -194,12 +207,12 @@ fun BottomSheetContentItemDetailsContent(
             .imePadding()
     ) {
         Column() {
-            Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
-
-                RestBudgetPill(LocalDate.now())
+            AnimatedVisibility(showForecast) {
+                Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
+                    RestBudgetPill(LocalDate.now())
+                }
+                Spacer(Modifier.height(16.dp))
             }
-
-            Spacer(Modifier.height(16.dp))
             Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
 
                 Box(contentAlignment = Alignment.Center,
@@ -213,19 +226,16 @@ fun BottomSheetContentItemDetailsContent(
                                 expanded = !expanded
                             } else {
                                 typeToggle = !typeToggle
-                                categoryViewModel.getCorrespondingList(if(typeToggle) expenseType.type else incomeType.type)
+                                categoryViewModel.getCorrespondingList(if (typeToggle) expenseType.type else incomeType.type)
                             }
                         }
                         .height(56.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         val colorPalletBlue = toPalette(blueColor)
-                        val image =
-                            rememberAsyncImagePainter(
-                                if (typeToggle)
-                                    IconStateForType.fromNumber(expenseType.iconNumber)
-                                else
-                                    IconStateForType.fromNumber(incomeType.iconNumber)
-                            )
+                        val image = rememberAsyncImagePainter(
+                            if (typeToggle) IconStateForType.fromNumber(expenseType.iconNumber)
+                            else IconStateForType.fromNumber(incomeType.iconNumber)
+                        )
                         Image(
                             painter = image,
                             contentDescription = "Test Image",
@@ -561,9 +571,7 @@ fun BottomRow(
 fun ErrorRow(uiViewModel: UiViewModel) {
     val errorMessage by uiViewModel.errorStatusMessage.collectAsState()
     Text(
-        text = errorMessage,
-        textAlign = TextAlign.Start,
-        style = MaterialTheme.typography.bodyMedium
+        text = errorMessage, textAlign = TextAlign.Start, style = typography.bodyMedium
     )
 }
 
@@ -578,7 +586,7 @@ fun AddBottomSheet(
     val scope = rememberCoroutineScope()
     val bottomSheet by transactionsViewModel.bottomSheetStatus.collectAsState(false)
     if (bottomSheet) {
-        BottomSheetContentItemDetails(bottomSheetState) {
+        BottomSheetContentAddItem(bottomSheetState) {
             scope.launch {
                 transactionsViewModel.bottomSheetStatus.emit(
                     !bottomSheet
@@ -588,12 +596,354 @@ fun AddBottomSheet(
     }
 }
 
+//bottom sheet to show item Details
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun BottomSheetContentItemDetails(
+    sheetState: SheetState,
+    singleTransaction: TransactionClass,
+    uiViewModel: UiViewModel = hiltViewModel()
+) {
+    val scope = rememberCoroutineScope()
+    ModalBottomSheet(onDismissRequest = {
+        scope.launch {
+            uiViewModel.transactionDetailBottomSheetValue.emit(false)
+        }
+    },
+        sheetState = sheetState,
+        modifier = Modifier
+            .imePadding()
+            .fillMaxWidth(),
+        contentWindowInsets = { WindowInsets.ime }) {
+        BottomSheetContentItemDetailsContent(modifier = Modifier, singleTransaction, uiViewModel)
+    }
+}
+
+val valueArrangement = Arrangement.End
+val spaceHeightInDetail = 10.dp
+
+
+@Composable
+fun BottomSheetContentItemDetailsContent(
+    modifier: Modifier,
+    singleTransaction: TransactionClass,
+    uiViewModel: UiViewModel,
+    transactionsViewModel: TransactionsViewModel = hiltViewModel()
+) {
+    var showDeleteConfirmation by remember { mutableStateOf(false) }
+    val labelAndValueStyle = typography.bodyMedium
+    val scope = rememberCoroutineScope()
+    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+        Text(
+            text = "₹" + parseAmount(singleTransaction.amount),
+            style = typography.headlineLarge,
+            fontFamily = numberFont
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = singleTransaction.note,
+            style = typography.bodyMedium.copy(
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+            ),
+        )
+        Spacer(Modifier.height(20.dp))
+        Row(
+            Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
+        ) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .weight(1f)
+                    .background(
+                        color = combineColors(
+                            MaterialTheme.colorScheme.surface,
+                            MaterialTheme.colorScheme.surfaceVariant,
+                            angle = 0.8f,
+                        ), shape = RoundedCornerShape(30.dp)
+                    )
+                    .padding(16.dp),
+            ) {
+                Spacer(Modifier.width(12.dp))
+                Column {
+                    Row(
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            Modifier.weight(1f),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = "Type",
+                                modifier = Modifier.padding(start = 8.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                                style = labelAndValueStyle
+                            )
+                        }
+                        Row(
+                            Modifier.weight(1f),
+                            horizontalArrangement = valueArrangement,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            val image = rememberAsyncImagePainter(
+                                if (singleTransaction.type == EXPENSE) R.drawable.icon_expense else R.drawable.icon_income
+                            )
+                            Image(
+                                painter = image,
+                                contentDescription = "Test Image",
+                                modifier = Modifier.size(24.dp),
+                            )
+                            Text(
+                                text = singleTransaction.type,
+                                modifier = Modifier.padding(start = 8.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                style = labelAndValueStyle
+                            )
+                        }
+                    }
+
+                    Spacer(Modifier.height(spaceHeightInDetail))
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.surfaceContainer, thickness = 1.dp
+                    )
+                    Spacer(Modifier.height(spaceHeightInDetail))
+
+                    Row(
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            Modifier.weight(1f),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = "Category",
+                                modifier = Modifier.padding(start = 8.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                                style = labelAndValueStyle
+                            )
+                        }
+                        Row(
+                            Modifier.weight(1f),
+                            horizontalArrangement = valueArrangement,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            val image = rememberAsyncImagePainter(
+                                IconState.fromNumber(singleTransaction.categoryIcon)
+                            )
+                            Image(
+                                painter = image,
+                                contentDescription = "Test Image",
+                                modifier = Modifier.size(24.dp),
+                            )
+                            Text(
+                                text = singleTransaction.category,
+                                modifier = Modifier.padding(start = 8.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                style = labelAndValueStyle
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(spaceHeightInDetail))
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.surfaceContainer, thickness = 1.dp
+                    )
+                    Spacer(Modifier.height(spaceHeightInDetail))
+                    Row(
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            Modifier.weight(1f),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = "Date",
+                                modifier = Modifier.padding(start = 8.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                                style = labelAndValueStyle
+                            )
+                        }
+                        Row(
+                            Modifier.weight(1f),
+                            horizontalArrangement = valueArrangement,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            val image = rememberAsyncImagePainter(
+                                R.drawable.ic_category_10
+                            )
+                            Image(
+                                painter = image,
+                                contentDescription = "Test Image",
+                                modifier = Modifier.size(24.dp),
+                            )
+                            Text(
+                                text = convertMillisToDateString(singleTransaction.dateWithTime),
+                                modifier = Modifier.padding(start = 8.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                style = labelAndValueStyle
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(spaceHeightInDetail))
+                    HorizontalDivider(
+                        color = MaterialTheme.colorScheme.surfaceContainer, thickness = 1.dp
+                    )
+                    Spacer(Modifier.height(spaceHeightInDetail))
+                    Row(
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            Modifier.weight(1f),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Text(
+                                text = "Paid by",
+                                modifier = Modifier.padding(start = 8.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                                style = labelAndValueStyle
+                            )
+                        }
+                        Row(
+                            Modifier.weight(1f),
+                            horizontalArrangement = valueArrangement,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            val image = rememberAsyncImagePainter(
+                                R.drawable.ic_category_9
+                            )
+                            Image(
+                                painter = image,
+                                contentDescription = "Test Image",
+                                modifier = Modifier.size(24.dp),
+                            )
+                            Text(
+                                text = "Bank",
+                                modifier = Modifier.padding(start = 8.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                                style = labelAndValueStyle
+                            )
+                        }
+                    }
+                }
+            }
+        }
+
+        Row(
+            Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
+        ) {
+
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(0.dp, 8.dp),
+            ) {
+                Column {
+                    Row(
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            Modifier.weight(1f),
+                            horizontalArrangement = Arrangement.Start,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            TextButton(onClick = { }) {
+                                Icon(
+                                    Icons.Filled.Edit,
+                                    contentDescription = "edit",
+                                    modifier = Modifier.padding(end = 4.dp)
+                                )
+                                Text("Edit")
+                            }
+                        }
+                        Row(
+                            Modifier.weight(1f),
+                            horizontalArrangement = Arrangement.End,
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+
+                            TextButton(
+                                onClick = {
+                                    showDeleteConfirmation = !showDeleteConfirmation
+                                },
+                                colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+
+                                ) {
+                                Icon(
+                                    Icons.Filled.Delete,
+                                    contentDescription = "delete",
+                                    modifier = Modifier.padding(end = 4.dp)
+                                )
+                                Text("Delete")
+                            }
+                        }
+                    }
+
+                }
+            }
+        }
+        Spacer(Modifier.height(16.dp))
+        AnimatedVisibility(showDeleteConfirmation) {
+            ConfirmationAlertDialog(onDismissRequest = { showDeleteConfirmation = false },
+                onConfirmation = {
+                    scope.launch {
+                        transactionsViewModel.deleteSingleTransaction(singleTransaction)
+                        showDeleteConfirmation = false
+                        scope.launch {
+                            uiViewModel.transactionDetailBottomSheetValue.emit(false)
+                        }
+                    }
+                },
+                dialogTitle = "Delete Transaction",
+                dialogText = "Are you sure, you want to delete this transaction",
+                icon = ImageVector.vectorResource(R.drawable.icon_expense)
+            )
+        }
+    }
+}
+
+@Preview
+@Composable
+private fun BottomSheetContentItemDetailsPreview() {
+    ExpenseTrackerTheme {
+        Surface {
+            // BottomSheetContentItemDetailsContent(Modifier, singleTransaction)
+        }
+    }
+}
+
+
 @Preview
 @Composable
 fun BottomSheetPreview() {
     ExpenseTrackerTheme {
         Surface {
-            BottomSheetContentItemDetailsContent(Modifier)
+            BottomSheetContentItemAddContent(Modifier)
         }
     }
 }

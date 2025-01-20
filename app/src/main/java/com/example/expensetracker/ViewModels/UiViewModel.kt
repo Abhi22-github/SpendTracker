@@ -7,6 +7,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UiViewModel @Inject constructor() : ViewModel() {
+    var transactionDetailBottomSheetValue = MutableStateFlow<Boolean>(false)
     var errorStatusInAddBottomSheet = MutableStateFlow<Boolean>(false)
     var errorStatusMessage = MutableStateFlow<String>("")
 }
