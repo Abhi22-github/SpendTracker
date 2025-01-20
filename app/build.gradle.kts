@@ -97,7 +97,7 @@ dependencies {
     implementation("androidx.datastore:datastore-preferences:1.1.1")
     implementation("com.airbnb.android:lottie-compose:6.0.0")
     implementation("io.coil-kt:coil-compose:2.7.0")
-
+    implementation("com.google.accompanist:accompanist-systemuicontroller:0.25.1")
 
 
 }

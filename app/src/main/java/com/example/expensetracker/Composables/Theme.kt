@@ -1,9 +1,9 @@
 package com.example.expensetracker.Composables
 
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
-import android.util.Log
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -23,6 +23,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.expensetracker.Utilities.PreferenceManger.THEME_MODE
 import com.example.expensetracker.Utilities.PreferenceManger.dataStore
 import com.example.expensetracker.ViewModels.PreferencesViewModel
+import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
@@ -346,6 +347,7 @@ val unspecified_scheme = ColorFamily(
     Color.Unspecified, Color.Unspecified, Color.Unspecified, Color.Unspecified
 )
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun ExpenseTrackerTheme(
     darkTheme: Boolean = isNightMode(),
@@ -353,10 +355,14 @@ fun ExpenseTrackerTheme(
     dynamicColor: Boolean = true,
     content: @Composable() () -> Unit
 ) {
+
+    SetStatusBarColor(darkTheme)
     val context = LocalContext.current
+
     LaunchedEffect(Unit) {
         syncTheme(context)
     }
+
     val colorScheme = when {
         dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
@@ -367,6 +373,15 @@ fun ExpenseTrackerTheme(
         else -> darkScheme
     }
 
+//    val view = LocalView.current
+//    if(!view.isInEditMode){
+//        SideEffect {
+//            val window = (view.context as Activity).window
+//            window.statusBarColor = Color.Transparent.toArgb()
+//            WindowCompat.getInsetsController(window,view).isAppearanceLightStatusBars = !darkTheme
+//        }
+//    }
+
     MaterialTheme(
         colorScheme = colorScheme,
         typography = typography(LocalContext.current),
@@ -374,6 +389,16 @@ fun ExpenseTrackerTheme(
     )
 
 }
+
+@Composable
+fun SetStatusBarColor(isDarkTheme: Boolean) {
+    val systemUiController = rememberSystemUiController()
+    systemUiController.setStatusBarColor(
+        color = Color.Transparent,
+       darkIcons = !isDarkTheme
+    )
+}
+
 
 suspend fun switchTheme(context: Context, mode: ThemeMode) {
     context.dataStore.edit {
@@ -401,12 +426,10 @@ fun isNightMode(preferencesViewModel: PreferencesViewModel = hiltViewModel()): B
         ThemeMode.NIGHT.toString() -> true
         else -> isSystemInDarkTheme()
     }
-    Log.d("test", p.toString() + themeMode)
     return p
 }
 
 fun changeThemeSystemWide(mode: String) {
-    Log.d("test122", mode.toString())
     when (mode) {
         ThemeMode.LIGHT.toString() -> {
             AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
