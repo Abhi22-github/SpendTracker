@@ -1,5 +1,6 @@
 package com.example.expensetracker.Composables.components
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
@@ -79,7 +80,9 @@ import com.example.expensetracker.Model.TransactionTypeClass
 import com.example.expensetracker.Utilities.Constants.EXPENSE
 import com.example.expensetracker.Utilities.Constants.INCOME
 import com.example.expensetracker.Utilities.convertMillisToDateString
+import com.example.expensetracker.ViewModels.AnimationViewModel
 import com.example.expensetracker.ViewModels.CategoryViewModel
+import com.example.expensetracker.ViewModels.PreferencesViewModel
 import com.example.expensetracker.ViewModels.TransactionsViewModel
 import com.example.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.CoroutineScope
@@ -113,7 +116,9 @@ fun BottomSheetContentItemDetailsContent(
 
     categoryViewModel: CategoryViewModel = hiltViewModel(),
     transactionsViewModel: TransactionsViewModel = hiltViewModel(),
-    uiViewModel: UiViewModel = hiltViewModel()
+    uiViewModel: UiViewModel = hiltViewModel(),
+    animationViewModel: AnimationViewModel = hiltViewModel(),
+    preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
     var cashMenuExpanded by remember { mutableStateOf(false) }
@@ -164,6 +169,24 @@ fun BottomSheetContentItemDetailsContent(
             expanded = false
         }
     }
+    val budget by preferencesViewModel.getBudgetValue.collectAsState(1f)
+    val oldAmount by transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
+    val newAmountTemp  = if(expenseValue.text.isEmpty()) 0L else expenseValue.text.toLong()
+    val newDailyBudget = oldAmount+newAmountTemp
+    val amountInString = String.format("%.2f", newDailyBudget.toFloat())
+    val percent = if (budget != 0f) {
+        newDailyBudget / budget
+    } else {
+        0f
+    }
+    animationViewModel.method("₹$amountInString",percent)
+    Log.d("Hello",percent.toString())
+
+    LaunchedEffect(percent) {
+        scope.launch {
+            animationViewModel.newSpentPercentage.emit(percent)
+        }
+    }
 
     Column(
         modifier
@@ -172,6 +195,7 @@ fun BottomSheetContentItemDetailsContent(
     ) {
         Column() {
             Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
+
                 RestBudgetPill(LocalDate.now())
             }
 

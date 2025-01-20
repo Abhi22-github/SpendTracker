@@ -126,7 +126,7 @@ fun RowScope.RestBudgetPill(
                 StatusLabel(harmonizedColor)
                 Spacer(modifier = Modifier.weight(1f))
                 AnimatedNumber(
-                    value = "₹"+newDailyBudget.toString(),
+                    value = "₹" + newDailyBudget.toString(),
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontSize = MaterialTheme.typography.titleLarge.fontSize
                     ),
