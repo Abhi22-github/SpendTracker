@@ -68,14 +68,6 @@ fun TransactionsListCompose(
     val bottomSheet by uiViewModel.transactionDetailBottomSheetValue.collectAsState()
     var singleTransaction by remember { mutableStateOf(TransactionClass()) }
     val scope = rememberCoroutineScope()
-    //  val uiState by viewModel.uiState.collectAsState()
-//    LaunchedEffect(uiState) {
-//        when(uiState){
-//            is UiState.Loading -> viewModel.getAllTransactionsForDate(LocalDateToLong(date))
-//            is UiState.Error -> {}
-//            UiState.Success -> {}
-//        }
-//    }
 
     if (!showSingleDateTransactions) {
         val transactionList by viewModel.allTransactions.collectAsState(emptyList<TransactionClass>())
@@ -92,7 +84,8 @@ fun TransactionsListCompose(
                 modifier = Modifier.fillMaxWidth(), state = lazyList
             ) {
                 transactionConverterList.forEach { (date, transactionList) ->
-                    item { Header(transactionList.get(0).dateWithTime) }
+                    val date = getDateFromMillis(transactionList.get(0).dateWithTime)
+                    item { Header(if (date == getDateFromMillis(System.currentTimeMillis())) "Today" else date) }
                     items(transactionList, key = { it.id }) { item ->
                         SingleTransaction(item, onSingleItemClick = {
                             singleTransaction = (item)
@@ -268,9 +261,9 @@ fun SingleTransactionNew(item: TransactionClass, onSingleItemClick: (Transaction
 }
 
 @Composable
-fun Header(date: Long) {
+fun Header(date: String) {
     Text(
-        text = getDateFromMillis(date),
+        text = date,
         style = typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurface.copy(0.6f),
         modifier = Modifier
@@ -296,5 +289,5 @@ fun SingleTransactionNewPreview() {
 @Preview
 @Composable
 fun HeaderPreview() {
-    Header(11L)
+    Header("Today")
 }
