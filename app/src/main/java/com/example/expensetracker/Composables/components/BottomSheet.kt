@@ -139,7 +139,7 @@ fun BottomSheetContentItemAddContent(
     val focusRequester = remember { FocusRequester() }
     val categoryList by categoryViewModel.categoryList.collectAsState()
     val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
-    var selectedCategory by remember { mutableStateOf(CategoryClass(-1, "Select", 1, 99, EXPENSE)) }
+    var selectedCategory by remember { mutableStateOf(CategoryClass(-1, "Select Category", 1, 99, EXPENSE)) }
 
     val expenseType = TransactionTypeClass(1, EXPENSE)
     val incomeType = TransactionTypeClass(2, INCOME)
@@ -438,7 +438,7 @@ fun BottomSheetContentItemAddContent(
                         containerColor = MaterialTheme.colorScheme.errorContainer
                     )
                 ) {
-                    Row(modifier = modifier.padding(16.dp, 12.dp)) {
+                    Row(modifier = modifier.padding(16.dp, 12.dp).fillMaxWidth()) {
                         ErrorRow(uiViewModel)
                     }
                 }
@@ -639,7 +639,7 @@ fun BottomSheetContentItemDetailsContent(
             style = typography.headlineLarge,
             fontFamily = numberFont
         )
-        Spacer(Modifier.height(4.dp))
+//        Spacer(Modifier.height(4.dp))
         Text(
             text = singleTransaction.note,
             style = typography.bodyMedium.copy(
@@ -660,7 +660,7 @@ fun BottomSheetContentItemDetailsContent(
                             MaterialTheme.colorScheme.surface,
                             MaterialTheme.colorScheme.surfaceVariant,
                             angle = 0.8f,
-                        ), shape = RoundedCornerShape(30.dp)
+                        ), shape = RoundedCornerShape(20.dp)
                     )
                     .padding(16.dp),
             ) {
