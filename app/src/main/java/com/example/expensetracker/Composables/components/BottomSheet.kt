@@ -140,11 +140,7 @@ fun BottomSheetContentItemAddContent(
     val categoryList by categoryViewModel.categoryList.collectAsState()
     val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
     val firstSampleClass = CategoryClass(
-        -1,
-        "Select Category",
-        1,
-        -99,
-        EXPENSE
+        -1, "Select Category", 1, -99, EXPENSE
     )
     var selectedCategory by remember {
         mutableStateOf(
@@ -218,10 +214,20 @@ fun BottomSheetContentItemAddContent(
             .imePadding()
     ) {
         Column() {
+            Text(
+                text = "Add Transaction",
+                modifier = modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.height(16.dp))
             AnimatedVisibility(showForecast) {
                 Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
                     RestBudgetPill(LocalDate.now())
                 }
+            }
+            if (showForecast) {
                 Spacer(Modifier.height(16.dp))
             }
             Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
@@ -925,8 +931,7 @@ fun BottomSheetContentItemDetailsContent(
         }
         Spacer(Modifier.height(16.dp))
         AnimatedVisibility(showDeleteConfirmation) {
-            ConfirmationAlertDialog(
-                onDismissRequest = { showDeleteConfirmation = false },
+            ConfirmationAlertDialog(onDismissRequest = { showDeleteConfirmation = false },
                 onConfirmation = {
                     scope.launch {
                         transactionsViewModel.deleteSingleTransaction(singleTransaction)
