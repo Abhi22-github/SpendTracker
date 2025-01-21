@@ -80,6 +80,8 @@ import com.example.expensetracker.Composables.ExpenseTrackerTheme
 import com.example.expensetracker.Composables.blueColor
 import com.example.expensetracker.Composables.greenColor
 import com.example.expensetracker.Composables.orange
+import com.example.expensetracker.Composables.secondaryAlpha
+import com.example.expensetracker.Composables.secondaryAlphaForElements
 import com.example.expensetracker.Composables.successColor
 import com.example.expensetracker.Composables.utils.IconState
 import com.example.expensetracker.Composables.utils.IconStateForType
@@ -362,7 +364,7 @@ fun BottomSheetContentItemAddContent(
                                 .fillMaxWidth()
                                 .align(Alignment.Center),
                             textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
                         )
                     },
                     shape = RoundedCornerShape(24.dp),
@@ -404,7 +406,7 @@ fun BottomSheetContentItemAddContent(
                             style = typography.bodyLarge,
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Center,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
                         )
                     },
                     shape = RoundedCornerShape(24.dp),
@@ -416,7 +418,7 @@ fun BottomSheetContentItemAddContent(
                     ),
                     textStyle = typography.bodyLarge.copy(
                         textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
                     ),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
                 )
@@ -444,7 +446,7 @@ fun BottomSheetContentItemAddContent(
 //                                modifier = Modifier
 //                                    .wrapContentWidth(),
 //                                textAlign = TextAlign.Center,
-//                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+//                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
 //                            )
 //                        },
 //                        shape = RoundedCornerShape(24.dp),
@@ -567,7 +569,7 @@ fun BottomRow(
                     selectedDateSetter(selectedDate)
                 }, colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.onSurface.copy(
-                        alpha = 0.6f
+                        alpha = secondaryAlphaForElements
                     )
                 ), contentPadding = PaddingValues(start = 12.dp, end = 12.dp)
             ) {
@@ -679,7 +681,7 @@ fun BottomSheetContentItemDetailsContent(
             text = singleTransaction.note,
             style = typography.bodyMedium.copy(
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
             ),
         )
         Spacer(Modifier.height(20.dp))
@@ -716,7 +718,7 @@ fun BottomSheetContentItemDetailsContent(
                                 modifier = Modifier.padding(start = 8.dp),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha),
                                 style = labelAndValueStyle
                             )
                         }
@@ -764,7 +766,7 @@ fun BottomSheetContentItemDetailsContent(
                                 modifier = Modifier.padding(start = 8.dp),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha),
                                 style = labelAndValueStyle
                             )
                         }
@@ -810,7 +812,7 @@ fun BottomSheetContentItemDetailsContent(
                                 modifier = Modifier.padding(start = 8.dp),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha),
                                 style = labelAndValueStyle
                             )
                         }
@@ -856,7 +858,7 @@ fun BottomSheetContentItemDetailsContent(
                                 modifier = Modifier.padding(start = 8.dp),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha),
                                 style = labelAndValueStyle
                             )
                         }

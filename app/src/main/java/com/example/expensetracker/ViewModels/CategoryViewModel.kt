@@ -45,6 +45,8 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
 
     init {
         getAllCategoriesFromDatabase()
+        getOnlyExpenseCategoryNames()
+        getOnlyIncomeCategoryNames()
     }
 
     fun getAllCategoriesFromDatabase() {
