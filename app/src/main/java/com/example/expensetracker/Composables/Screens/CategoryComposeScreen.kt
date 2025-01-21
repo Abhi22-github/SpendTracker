@@ -27,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -72,17 +73,17 @@ fun CategoryScreen(
 
             Spacer(Modifier.height(4.dp))
 
+
             Column {
                 for (i in allIncomeCategory.chunked(2)) {
-                    Row(modifier = Modifier) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Spacer(Modifier.width(16.dp))
                         // First item in the row
                         i.getOrNull(0)?.let {
                             SingleCategory(
                                 Modifier
-                                    .weight(1f)
+                                    .weight(0.5f)
                                     .padding(
-                                        start = 16.dp,
-                                        end = 8.dp,
                                         top = 8.dp,
                                         bottom = 8.dp
                                     ),
@@ -92,12 +93,11 @@ fun CategoryScreen(
 
                         // Second item in the row
                         i.getOrNull(1)?.let {
+                            Spacer(Modifier.width(16.dp))
                             SingleCategory(
                                 Modifier
-                                    .weight(1f)
+                                    .weight(0.5f)
                                     .padding(
-                                        start = 8.dp,
-                                        end = 16.dp,
                                         top = 8.dp,
                                         bottom = 8.dp
                                     ),
@@ -105,9 +105,12 @@ fun CategoryScreen(
                             ) { }
 
                         }
+                        Spacer(Modifier.width(16.dp))
                     }
 
                 }
+
+                Spacer(Modifier.height(32.dp))
             }
 
             Spacer(Modifier.height(32.dp))
@@ -128,15 +131,14 @@ fun CategoryScreen(
 
             Column {
                 for (i in allExpenseCategory.chunked(2)) {
-                    Row(modifier = Modifier) {
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Spacer(Modifier.width(16.dp))
                         // First item in the row
                         i.getOrNull(0)?.let {
                             SingleCategory(
                                 Modifier
                                     .weight(0.5f)
                                     .padding(
-                                        start = 16.dp,
-                                        end = 8.dp,
                                         top = 8.dp,
                                         bottom = 8.dp
                                     ),
@@ -146,12 +148,11 @@ fun CategoryScreen(
 
                         // Second item in the row
                         i.getOrNull(1)?.let {
+                            Spacer(Modifier.width(16.dp))
                             SingleCategory(
                                 Modifier
                                     .weight(0.5f)
                                     .padding(
-                                        start = 8.dp,
-                                        end = 16.dp,
                                         top = 8.dp,
                                         bottom = 8.dp
                                     ),
@@ -159,8 +160,11 @@ fun CategoryScreen(
                             ) { }
 
                         }
+                        Spacer(Modifier.width(16.dp))
                     }
+
                 }
+
                 Spacer(Modifier.height(32.dp))
             }
         }
@@ -223,7 +227,7 @@ fun SingleCategory(
                 Column(
                     modifier = Modifier
                         .align(Alignment.CenterVertically)
-                        .fillMaxWidth(0.70f)
+                        .fillMaxWidth(1f)
 
                 ) {
                     Text(
@@ -231,6 +235,7 @@ fun SingleCategory(
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
                     )
                     if (false) {
                         Text(
