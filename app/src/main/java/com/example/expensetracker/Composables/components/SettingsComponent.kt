@@ -145,7 +145,7 @@ fun BottomSheetContent(
         Text(
             text = "Enter your daily budget amount",
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.6f)
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.38f)
         )
         TextField(
             value = dailySpendLimit,

@@ -113,6 +113,9 @@ object CustomFonts{
     val numberFont = FontFamily(Font(R.font.googlesansmedium))
 }
 
+val secondaryAlpha = 0.38f
+val secondaryAlphaForElements = 0.6f
+
 @Preview
 @Composable
 fun PreviewTypography() {
