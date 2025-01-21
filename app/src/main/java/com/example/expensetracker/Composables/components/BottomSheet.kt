@@ -65,6 +65,8 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextRange
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -90,6 +92,7 @@ import com.example.expensetracker.R
 import com.example.expensetracker.Utilities.Constants.EXPENSE
 import com.example.expensetracker.Utilities.Constants.INCOME
 import com.example.expensetracker.Utilities.convertMillisToDateString
+import com.example.expensetracker.Utilities.extractNumbers
 import com.example.expensetracker.Utilities.parseAmount
 import com.example.expensetracker.ViewModels.AnimationViewModel
 import com.example.expensetracker.ViewModels.CategoryViewModel
@@ -191,7 +194,8 @@ fun BottomSheetContentItemAddContent(
     }
     val budget by preferencesViewModel.getBudgetValue.collectAsState(1f)
     val oldAmount by transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
-    val newAmountTemp = if (expenseValue.text.isEmpty()) 0L else expenseValue.text.toLong()
+    val newAmountTemp =
+        if (expenseValue.text.isEmpty()) 0L else extractNumbers(expenseValue.text)
     val newDailyBudget = oldAmount + newAmountTemp
     val amountInString = String.format("%.2f", newDailyBudget.toFloat())
     val percent = if (budget != 0f) {
@@ -336,7 +340,10 @@ fun BottomSheetContentItemAddContent(
                 TextField(
                     value = expenseValue,
                     onValueChange = { newValue ->
-                        expenseValue = newValue
+                        expenseValue = TextFieldValue(
+                            extractNumbers(newValue.text).toString(),
+                            selection = TextRange(extractNumbers(newValue.text).toString().length)
+                        )
                         scope.launch {
                             uiViewModel.errorStatusInAddBottomSheet.emit(false)
                         }
@@ -365,8 +372,14 @@ fun BottomSheetContentItemAddContent(
                         unfocusedContainerColor = Color.Transparent,
                         focusedContainerColor = Color.Transparent,
                     ),
-                    textStyle = typography.displayMedium.copy(textAlign = TextAlign.Center),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                    textStyle = typography.displayMedium.copy(
+                        textAlign = TextAlign.Center,
+                        fontFamily = numberFont
+                    ),
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Number,
+                        imeAction = ImeAction.Next
+                    ),
                 )
             }
             Spacer(Modifier.height(0.dp))
@@ -473,7 +486,7 @@ fun BottomSheetContentItemAddContent(
                 validateTransactionData(
                     selectedType,
                     selectedCategory,
-                    expenseValue.text,
+                    expenseValue.text.replace(",", ""),
                     comment.text,
                     selectedDate,
                     scope,
@@ -931,7 +944,8 @@ fun BottomSheetContentItemDetailsContent(
         }
         Spacer(Modifier.height(16.dp))
         AnimatedVisibility(showDeleteConfirmation) {
-            ConfirmationAlertDialog(onDismissRequest = { showDeleteConfirmation = false },
+            ConfirmationAlertDialog(
+                onDismissRequest = { showDeleteConfirmation = false },
                 onConfirmation = {
                     scope.launch {
                         transactionsViewModel.deleteSingleTransaction(singleTransaction)

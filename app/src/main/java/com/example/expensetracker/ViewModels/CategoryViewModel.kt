@@ -36,8 +36,28 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
     private var _categoryList = MutableStateFlow<List<CategoryClass>>(listOf())
     val categoryList: StateFlow<List<CategoryClass>> = _categoryList
 
-//    val categoryNames: Flow<List<CategoryClass>>
+    private var _allCategoryList = MutableStateFlow<List<CategoryClass>>(listOf())
+    val allCategoryList: StateFlow<List<CategoryClass>> = _allCategoryList
+
+//    val allCategoryNames: Flow<List<CategoryClass>>
 //        get() = categoryRepository.allCategories
+
+
+    init {
+        getAllCategoriesFromDatabase()
+    }
+
+    fun getAllCategoriesFromDatabase() {
+        viewModelScope.launch {
+            loading()
+            categoryRepository.allCategories.catch {
+                error(it)
+            }.collect {
+                _allCategoryList.value = it
+                completed()
+            }
+        }
+    }
 
 
     fun getOnlyExpenseCategoryNames() {
@@ -54,9 +74,13 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
     fun getCorrespondingList(type: String) {
         viewModelScope.launch {
             if (type == EXPENSE) {
-                _onlyExpenseCategoryNames.collect { categoryList -> _categoryList.value = categoryList}
+                _onlyExpenseCategoryNames.collect { categoryList ->
+                    _categoryList.value = categoryList
+                }
             } else if (type == INCOME) {
-                _onlyIncomeCategoryNames.collect { categoryList -> _categoryList.value = categoryList}
+                _onlyIncomeCategoryNames.collect { categoryList ->
+                    _categoryList.value = categoryList
+                }
             }
         }
     }

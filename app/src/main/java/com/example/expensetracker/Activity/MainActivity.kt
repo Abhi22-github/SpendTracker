@@ -155,6 +155,9 @@ class MainActivity : AppCompatActivity() {
             } else if (menuID == R.id.item_dayView_sideNavigation) {
                 setUpDayFragment()
                 selectedItem = R.id.item_dayView_sideNavigation
+            } else if (menuID == R.id.item_category_sideNavigation) {
+                sendUserToCategoryActivity()
+                selectedItem = R.id.item_category_sideNavigation
             } else if (menuID == R.id.item_expenseCategory_sideNavigation) {
                 sendUserToExpenseCategoryActivity()
                 selectedItem = R.id.item_listView_sideNavigation
@@ -259,6 +262,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun sendUserToStatisticsActivity() {
         val intent = Intent(context, StatisticsActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun sendUserToCategoryActivity() {
+        val intent = Intent(context, CategoryActivity::class.java)
         startActivity(intent)
     }
 

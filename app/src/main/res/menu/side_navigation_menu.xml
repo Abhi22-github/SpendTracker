@@ -21,6 +21,10 @@
         android:id="@+id/group_more_sideNavigation"
         android:checkableBehavior="single">
         <item
+            android:id="@+id/item_category_sideNavigation"
+            android:icon="@drawable/add_category_icon_selector"
+            android:title="Category" />
+        <item
             android:id="@+id/item_expenseCategory_sideNavigation"
             android:icon="@drawable/add_category_icon_selector"
             android:title="Expense Category" />
