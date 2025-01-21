@@ -1,9 +1,11 @@
 package com.example.expensetracker.Composables.Screens
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,14 +15,19 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FabPosition
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -44,134 +51,155 @@ import com.example.expensetracker.Model.CategoryClass
 import com.example.expensetracker.Utilities.Constants.EXPENSE
 import com.example.expensetracker.ViewModels.CategoryViewModel
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun CategoryScreen(
     sendUserBack: () -> Unit,
-    categoryViewModel: CategoryViewModel = hiltViewModel()
-) {
-    val allExpenseCategory by categoryViewModel.onlyExpenseCategoryNames.collectAsStateWithLifecycle()
-    val allIncomeCategory by categoryViewModel.onlyIncomeCategoryNames.collectAsStateWithLifecycle()
-    val lazyList = rememberLazyListState()
-    val scrollState = rememberScrollState()
+
+    ) {
     Surface {
-        Column(Modifier.verticalScroll(scrollState)) {
-            TopBar("Category") { sendUserBack() }
+        Scaffold(topBar = { TopBar("Category") { sendUserBack() } },
+            content = { paddingValues ->
+                ScaffoldContent(paddingValues)
+            },
+            floatingActionButton = {
+                ExtendedFloatingActionButton(
+                    onClick = { /* do something */ },
+                    icon = { Icon(Icons.Filled.Add, "Localized description") },
+                    text = { Text(text = "Add Category") },
+                )
+            },
+            floatingActionButtonPosition = FabPosition.EndOverlay
 
-            Spacer(Modifier.height(12.dp))
-
-            Text(
-                text = "Income Category", style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(startEndPadding, topBottomPadding)
-            )
-            Text(
-                text = "This categories will be shown when the transaction type is expense",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha),
-                modifier = Modifier.padding(startEndPadding, topBottomPadding)
-            )
-
-            Spacer(Modifier.height(4.dp))
-
-
-            Column {
-                for (i in allIncomeCategory.chunked(2)) {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        Spacer(Modifier.width(16.dp))
-                        // First item in the row
-                        i.getOrNull(0)?.let {
-                            SingleCategory(
-                                Modifier
-                                    .weight(0.5f)
-                                    .padding(
-                                        top = 8.dp,
-                                        bottom = 8.dp
-                                    ),
-                                it
-                            ) { }
-                        }
-
-                        // Second item in the row
-                        i.getOrNull(1)?.let {
-                            Spacer(Modifier.width(16.dp))
-                            SingleCategory(
-                                Modifier
-                                    .weight(0.5f)
-                                    .padding(
-                                        top = 8.dp,
-                                        bottom = 8.dp
-                                    ),
-                                it
-                            ) { }
-
-                        }
-                        Spacer(Modifier.width(16.dp))
-                    }
-
-                }
-
-                Spacer(Modifier.height(32.dp))
-            }
-
-            Spacer(Modifier.height(32.dp))
-
-            Text(
-                text = "Income Category", style = MaterialTheme.typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-                modifier = Modifier.padding(startEndPadding, topBottomPadding)
-            )
-            Text(
-                text = "This categories will be shown when the transaction type is expense",
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha),
-                modifier = Modifier.padding(startEndPadding, topBottomPadding)
-            )
-
-            Spacer(Modifier.height(4.dp))
-
-            Column {
-                for (i in allExpenseCategory.chunked(2)) {
-                    Row(modifier = Modifier.fillMaxWidth()) {
-                        Spacer(Modifier.width(16.dp))
-                        // First item in the row
-                        i.getOrNull(0)?.let {
-                            SingleCategory(
-                                Modifier
-                                    .weight(0.5f)
-                                    .padding(
-                                        top = 8.dp,
-                                        bottom = 8.dp
-                                    ),
-                                it
-                            ) { }
-                        }
-
-                        // Second item in the row
-                        i.getOrNull(1)?.let {
-                            Spacer(Modifier.width(16.dp))
-                            SingleCategory(
-                                Modifier
-                                    .weight(0.5f)
-                                    .padding(
-                                        top = 8.dp,
-                                        bottom = 8.dp
-                                    ),
-                                it
-                            ) { }
-
-                        }
-                        Spacer(Modifier.width(16.dp))
-                    }
-
-                }
-
-                Spacer(Modifier.height(32.dp))
-            }
-        }
+        )
     }
 
 }
 
+@Composable
+fun ScaffoldContent(
+    paddingValues: PaddingValues,
+    categoryViewModel: CategoryViewModel = hiltViewModel()
+) {
+    val allExpenseCategory by categoryViewModel.onlyExpenseCategoryNames.collectAsStateWithLifecycle()
+    val allIncomeCategory by categoryViewModel.onlyIncomeCategoryNames.collectAsStateWithLifecycle()
+    val scrollState = rememberScrollState()
+
+    Column(
+        Modifier
+            .verticalScroll(scrollState)
+            .padding(paddingValues)
+    ) {
+
+        Spacer(Modifier.height(12.dp))
+
+        Text(
+            text = "Income Category", style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(startEndPadding, topBottomPadding)
+        )
+        Text(
+            text = "This categories will be shown when the transaction type is expense",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha),
+            modifier = Modifier.padding(startEndPadding, topBottomPadding)
+        )
+
+        Spacer(Modifier.height(4.dp))
+
+
+        Column {
+            for (i in allIncomeCategory.chunked(2)) {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Spacer(Modifier.width(16.dp))
+                    // First item in the row
+                    i.getOrNull(0)?.let {
+                        SingleCategory(
+                            Modifier
+                                .weight(0.5f)
+                                .padding(
+                                    top = 8.dp,
+                                    bottom = 8.dp
+                                ),
+                            it
+                        ) { }
+                    }
+
+                    // Second item in the row
+                    i.getOrNull(1)?.let {
+                        Spacer(Modifier.width(16.dp))
+                        SingleCategory(
+                            Modifier
+                                .weight(0.5f)
+                                .padding(
+                                    top = 8.dp,
+                                    bottom = 8.dp
+                                ),
+                            it
+                        ) { }
+
+                    }
+                    Spacer(Modifier.width(16.dp))
+                }
+            }
+        }
+
+        Spacer(Modifier.height(24.dp))
+
+        Text(
+            text = "Income Category", style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+            modifier = Modifier.padding(startEndPadding, topBottomPadding)
+        )
+        Text(
+            text = "This categories will be shown when the transaction type is expense",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha),
+            modifier = Modifier.padding(startEndPadding, topBottomPadding)
+        )
+
+        Spacer(Modifier.height(4.dp))
+
+        Column {
+            for (i in allExpenseCategory.chunked(2)) {
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    Spacer(Modifier.width(16.dp))
+                    // First item in the row
+                    i.getOrNull(0)?.let {
+                        SingleCategory(
+                            Modifier
+                                .weight(0.5f)
+                                .padding(
+                                    top = 8.dp,
+                                    bottom = 8.dp
+                                ),
+                            it
+                        ) { }
+                    }
+
+                    // Second item in the row
+                    i.getOrNull(1)?.let {
+                        Spacer(Modifier.width(16.dp))
+                        SingleCategory(
+                            Modifier
+                                .weight(0.5f)
+                                .padding(
+                                    top = 8.dp,
+                                    bottom = 8.dp
+                                ),
+                            it
+                        ) { }
+
+                    }
+                    Spacer(Modifier.width(16.dp))
+                }
+
+            }
+
+            Spacer(Modifier.height(64.dp))
+        }
+    }
+}
 
 @Composable
 fun SingleCategory(
