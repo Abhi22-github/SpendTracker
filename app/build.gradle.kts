@@ -64,6 +64,7 @@ dependencies {
     implementation(libs.places)
     implementation(libs.core.ktx)
     implementation(libs.androidx.palette.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
     testImplementation(libs.junit)
     implementation(libs.ui.tooling.preview)
     androidTestImplementation(libs.ext.junit)
@@ -73,6 +74,9 @@ dependencies {
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     implementation(libs.kotlinx.coroutines.android)
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    debugImplementation(libs.androidx.ui.test.manifest)
     //add below dependancy for using room.
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.core)

@@ -1,6 +1,7 @@
 package com.example.expensetracker.Utilities
 
 import com.example.expensetracker.Model.TotalExpenseIncomeClass
+import okhttp3.internal.toLongOrDefault
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.time.LocalDate
@@ -129,4 +130,8 @@ fun convertMillisToDateString(millis: Long): String {
     val format = SimpleDateFormat("dd MMM YYYY", Locale.getDefault())
     val date = Date(millis)
     return format.format(date)
+}
+
+fun extractNumbers(input: String): Long {
+    return input.filter { it.isDigit() }.toLongOrDefault(0L)
 }
