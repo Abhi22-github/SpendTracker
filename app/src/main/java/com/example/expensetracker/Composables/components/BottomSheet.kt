@@ -60,6 +60,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
@@ -244,6 +245,7 @@ fun BottomSheetContentItemAddContent(
                         .background(
                             color = colorAnimate, shape = RoundedCornerShape(30.dp)
                         )
+                        .clip(RoundedCornerShape(30.dp))
                         .clickable {
                             if (!expanded) {
                                 expanded = !expanded

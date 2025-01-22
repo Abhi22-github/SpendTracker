@@ -34,6 +34,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -58,7 +59,8 @@ fun CategoryScreen(
 
     ) {
     Surface {
-        Scaffold(topBar = { TopBar("Category") { sendUserBack() } },
+        Scaffold(
+            topBar = { TopBar("Category") { sendUserBack() } },
             content = { paddingValues ->
                 ScaffoldContent(paddingValues)
             },
@@ -214,11 +216,13 @@ fun SingleCategory(
     )
     Card(
         shape = RoundedCornerShape(12.dp), modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
             .clickable {
                 onSingleItemClick(item)
             }, colors = CardDefaults.cardColors(
-            containerColor = containerColor
-        )
+            containerColor = containerColor,
+
+            )
     ) {
 
         Row(
