@@ -1,97 +1,422 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearOutSlowInEasing
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilledTonalIconButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.ContentDrawScope
+import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
+import com.roaa.expensetracker.Composables.components.BottomSheetIconPicker
+import com.roaa.expensetracker.Composables.components.ErrorRow
 import com.roaa.expensetracker.Composables.components.TopBar
+import com.roaa.expensetracker.Composables.greenColor
+import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.secondaryAlpha
+import com.roaa.expensetracker.Composables.utils.IconState
+import com.roaa.expensetracker.Composables.utils.combineColors
+import com.roaa.expensetracker.Utilities.Constants.EXPENSE
+import com.roaa.expensetracker.Utilities.Constants.INCOME
+import com.roaa.expensetracker.ViewModels.CategoryViewModel
+import com.roaa.expensetracker.ViewModels.UiViewModel
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun AddCategory(navController: NavController) {
-    var categoryName by remember { mutableStateOf("") }
+fun AddCategory(navController: NavController, uiViewModel: UiViewModel = hiltViewModel()) {
+    val backPress by uiViewModel.addCategoryBackPressed.collectAsState()
     ExpenseTrackerTheme {
         Scaffold(topBar = {
             TopBar("Add Category") {
                 navController.popBackStack()
             }
         }) { paddingValues ->
-            Column(
-                Modifier
-                    .padding(paddingValues)
-                    .padding(16.dp)
-            ) {
-                Text(
-                    text = "Category Name", style = MaterialTheme.typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                    text = "give some category name",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
-                )
-                TextField(
-                    value = categoryName,
-                    onValueChange = { newText ->
-                        categoryName = newText
-                    },
-                    singleLine = true,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(0.dp, 8.dp),
-                    placeholder = {
-                        Text(
-                            "Category Name",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
-                        )
-                    },
-                    shape = RoundedCornerShape(24.dp),
-                    colors = TextFieldDefaults.colors(
-                        focusedIndicatorColor = Color.Transparent,
-                        unfocusedIndicatorColor = Color.Transparent,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-                    ),
-                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                )
-                /*
-                * Icons Box
-                */
-                Card() { }
+            ScaffoldContent(paddingValues)
+        }
+    }
+    if (backPress)
+        navController.popBackStack()
+}
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ScaffoldContent(
+    paddingValues: PaddingValues, uiViewModel: UiViewModel = hiltViewModel(),
+    categoryViewModel: CategoryViewModel = hiltViewModel()
+) {
+    var categoryName by remember { mutableStateOf("") }
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val selectedIcon by uiViewModel.selectedIconFromBottomSheet.collectAsState()
+    var bottomSheetStatus by remember { mutableStateOf(true) }
+    var selectedIndex by remember { mutableIntStateOf(0) }
+    val errorStatus by uiViewModel.errorStatusInAddCategory.collectAsState(false)
+    val scope = rememberCoroutineScope()
+    val containerColor by animateColorAsState(
+        targetValue = combineColors(
+            MaterialTheme.colorScheme.surface,
+            if (selectedIndex == 0) orange else greenColor,
+            angle = 0.1f,
+        )
+    )
+    LaunchedEffect(selectedIcon) {
 
-                /*Button*/
-                FilledTonalButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = { },
-                ) {
-                    Text(text = "Save Category")
+        scope.launch {
+            uiViewModel.errorStatusInAddCategory.emit(false)
+        }
+
+    }
+
+    Column(
+        Modifier
+            .padding(paddingValues)
+            .padding(16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        val options = listOf("Expense", "Income")
+
+        Spacer(Modifier.height(12.dp))
+
+        Column {
+            TextSwitch(
+                selectedIndex = selectedIndex,
+                items = options,
+                onSelectionChange = {
+                    selectedIndex = it
                 }
+            )
+        }
+
+        Spacer(Modifier.height(40.dp))
+        AnimatedVisibility(errorStatus) {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                Card(
+                    modifier = Modifier.padding(16.dp, 0.dp), colors = CardDefaults.cardColors(
+                        contentColor = MaterialTheme.colorScheme.error,
+                        containerColor = MaterialTheme.colorScheme.errorContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .padding(16.dp, 12.dp)
+                            .fillMaxWidth()
+                    ) {
+                        ErrorRow(uiViewModel)
+                    }
+                }
+            }
+
+        }
+
+        Spacer(Modifier.height(40.dp))
+        Box() {
+            Surface(
+                shape = RoundedCornerShape(20),
+                modifier = Modifier
+                    .size(160.dp)
+                    .fillMaxSize(),
+                color = containerColor
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+
+                    AnimatedContent(targetState = selectedIcon) { index ->
+                        val image =
+                            rememberAsyncImagePainter(IconState.fromNumber(index))
+                        Image(
+                            painter = image,
+                            contentDescription = "Test Image",
+                            modifier = Modifier.size(96.dp),
+                        )
+                    }
+                }
+            }
+            FilledTonalIconButton(
+                onClick = {
+                    bottomSheetStatus = !bottomSheetStatus
+                },
+                Modifier
+                    .align(Alignment.BottomEnd)
+                    .offset(x = 8.dp, y = 8.dp)
+            ) {
+                Icon(Icons.Filled.Edit, contentDescription = "edit")
+            }
+        }
+
+        Spacer(Modifier.height(32.dp))
+
+        TextField(
+            value = categoryName,
+            onValueChange = { newText ->
+                categoryName = newText
+                scope.launch {
+                    uiViewModel.errorStatusInAddCategory.emit(false)
+                }
+            },
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(30.dp, 8.dp),
+            placeholder = {
+                Text(
+                    "Category Name",
+                    Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha),
+                    textAlign = TextAlign.Center
+                )
+            },
+            shape = RoundedCornerShape(36.dp),
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            ),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            textStyle = MaterialTheme.typography.titleMedium.copy(textAlign = TextAlign.Center)
+
+        )
+
+        Spacer(Modifier.height(12.dp))
+
+        /*Button*/
+        FilledTonalButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(30.dp, 8.dp),
+            onClick = {
+                validateCategoryData(
+                    categoryName,
+                    selectedIcon,
+                    selectedIndex,
+                    scope,
+                    uiViewModel,
+                    categoryViewModel,
+
+                    )
+            },
+        ) {
+            Text(
+                text = "Save", Modifier.padding(12.dp, 6.dp),
+                style = MaterialTheme.typography.titleMedium
+            )
+        }
 
 
+    }
+    if (bottomSheetStatus) {
+        BottomSheetIconPicker(bottomSheetState) { bottomSheetStatus = !bottomSheetStatus }
+    }
+
+}
+
+fun validateCategoryData(
+    categoryName: String,
+    selectedIcon: Int,
+    selectedType: Int,
+    scope: CoroutineScope,
+    uiViewModel: UiViewModel,
+    categoryViewModel: CategoryViewModel
+) {
+    scope.launch {
+        if (categoryName.isEmpty()) {
+
+            uiViewModel.errorStatusInAddCategory.emit(true)
+            uiViewModel.errorStatusMessage.emit("Please provide the category name")
+            return@launch
+
+        }
+        if (selectedIcon == 99) {
+            uiViewModel.errorStatusInAddCategory.emit(true)
+            uiViewModel.errorStatusMessage.emit("Please select icon for Category")
+            return@launch
+
+        }
+        categoryViewModel.validateCategoryData(
+            categoryName,
+            selectedIcon,
+            if (selectedType == 0) EXPENSE else INCOME
+        )
+        scope.launch {
+            uiViewModel.addCategoryBackPressed.emit(true)
+        }
+    }
+
+}
+
+
+fun ContentDrawScope.drawWithLayer(block: ContentDrawScope.() -> Unit) {
+    with(drawContext.canvas.nativeCanvas) {
+        val checkPoint = saveLayer(null, null)
+        block()
+        restoreToCount(checkPoint)
+    }
+}
+
+@Composable
+private fun TextSwitch(
+    modifier: Modifier = Modifier,
+    selectedIndex: Int,
+    items: List<String>,
+    onSelectionChange: (Int) -> Unit
+) {
+    val surfaceColor = MaterialTheme.colorScheme.surfaceContainerLow
+    val selectedButtonColor = MaterialTheme.colorScheme.surfaceContainerHigh
+    val selectedButtonTextColor = MaterialTheme.colorScheme.onSurface
+
+    BoxWithConstraints(
+        modifier
+            .padding(8.dp)
+            .width(250.dp)
+            .height(60.dp)
+            .clip(RoundedCornerShape(35.dp))
+            .background(surfaceColor)
+            .padding(8.dp)
+    ) {
+        if (items.isNotEmpty()) {
+
+            val maxWidth = this.maxWidth
+            val tabWidth = maxWidth / items.size
+
+            val indicatorOffset by animateDpAsState(
+                targetValue = tabWidth * selectedIndex,
+                animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing),
+                label = "indicator offset"
+            )
+
+            // This is for shadow layer matching white background
+            Box(
+                modifier = Modifier
+                    .offset(x = indicatorOffset)
+                    .shadow(0.dp, RoundedCornerShape(35.dp))
+                    .width(tabWidth)
+                    .fillMaxHeight()
+
+            )
+
+            Row(modifier = Modifier
+                .fillMaxWidth()
+
+                .drawWithContent {
+
+                    //   This is for setting black text while drawing on white background
+                    val padding = 8.dp.toPx()
+                    drawRoundRect(
+                        topLeft = Offset(x = indicatorOffset.toPx() + padding, padding),
+                        size = Size(size.width / 2 - padding * 2, size.height - padding * 2),
+                        color = selectedButtonTextColor,
+                        cornerRadius = CornerRadius(x = 35.dp.toPx(), y = 35.dp.toPx()),
+                    )
+
+                    drawWithLayer {
+                        drawContent()
+
+                        // This is white top rounded rectangle
+                        drawRoundRect(
+                            topLeft = Offset(x = indicatorOffset.toPx(), 0f),
+                            size = Size(size.width / 2, size.height),
+                            color = selectedButtonColor,
+                            cornerRadius = CornerRadius(x = 35.dp.toPx(), y = 35.dp.toPx()),
+                            blendMode = BlendMode.SrcOut
+                        )
+                    }
+
+                }
+            ) {
+                items.forEachIndexed { index, text ->
+                    Box(
+                        modifier = Modifier
+                            .width(tabWidth)
+                            .fillMaxHeight()
+                            .clickable(
+                                interactionSource = remember {
+                                    MutableInteractionSource()
+                                },
+                                indication = null,
+                                onClick = {
+                                    onSelectionChange(index)
+                                }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = text,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.80f),
+                        )
+                    }
+                }
             }
         }
     }
 }
+
