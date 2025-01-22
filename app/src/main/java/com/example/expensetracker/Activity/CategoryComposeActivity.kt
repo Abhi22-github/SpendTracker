@@ -10,7 +10,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.example.expensetracker.Composables.ExpenseTrackerTheme
-import com.example.expensetracker.Composables.Screens.CategoryScreen
+import com.example.expensetracker.Composables.Navigation.SetupNavigationGraph
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -20,17 +20,21 @@ class CategoryActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+
             ExpenseTrackerTheme {
                 Scaffold {
                     Surface(modifier = Modifier.statusBarsPadding()) {
-                        CategoryScreen(
-                            sendUserBack = { sendUserBack() },
-                        )
+//                        CategoryScreen(
+//                            navController = navController,
+//                            sendUserBack = { sendUserBack() },
+//                        )
+                        SetupNavigationGraph()
                     }
                 }
             }
         }
     }
+
 
     private fun sendUserBack() {
         onBackPressedDispatcher.onBackPressed()
