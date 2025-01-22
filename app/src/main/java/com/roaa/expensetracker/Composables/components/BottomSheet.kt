@@ -16,13 +16,19 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -87,6 +93,7 @@ import com.roaa.expensetracker.Composables.successColor
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.IconStateForType
 import com.roaa.expensetracker.Composables.utils.combineColors
+import com.roaa.expensetracker.Composables.utils.iconsList
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Model.TransactionClass
@@ -607,7 +614,7 @@ fun BottomRow(
 }
 
 @Composable
-fun ErrorRow(uiViewModel: UiViewModel) {
+fun ErrorRow(uiViewModel: UiViewModel = hiltViewModel()) {
     val errorMessage by uiViewModel.errorStatusMessage.collectAsState()
     Text(
         text = errorMessage, textAlign = TextAlign.Start, style = typography.bodyMedium
@@ -966,6 +973,80 @@ fun BottomSheetContentItemDetailsContent(
         }
     }
 }
+
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun BottomSheetIconPicker(sheetState: SheetState, closeBottomSheet: () -> Unit) {
+    ModalBottomSheet(
+        onDismissRequest = {
+            closeBottomSheet()
+        },
+        sheetState = sheetState,
+        modifier = Modifier
+            .fillMaxWidth(),
+        contentWindowInsets = { WindowInsets.ime },
+
+        scrimColor = Color.Transparent
+    ) {
+        BottomSheetContentIconPicker(modifier = Modifier)
+    }
+}
+
+@Composable
+fun BottomSheetContentIconPicker(modifier: Modifier = Modifier) {
+    Column(Modifier.heightIn(max = 400.dp)) {
+        Text(
+            text = "Choose Icon",
+            modifier = modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+
+        val items = iconsList
+
+        // LazyVerticalGrid with a fixed number of columns (e.g., 2 columns)
+        LazyVerticalGrid(
+            columns = GridCells.Adaptive(minSize = 60.dp), // 2 columns
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+            horizontalArrangement = Arrangement.spacedBy(16.dp),
+            contentPadding = PaddingValues(16.dp) // Optional padding for content
+        ) {
+            items(items) { item ->
+                SingleIcon(item)
+            }
+
+        }
+    }
+}
+
+@Composable
+fun SingleIcon(item: Int, uiViewModel: UiViewModel = hiltViewModel()) {
+    val scope = rememberCoroutineScope()
+    Surface(
+        shape = CircleShape,
+        modifier = Modifier
+            .size(70.dp)
+            .fillMaxSize()
+            .clip(shape = RoundedCornerShape(50))
+            .clickable { scope.launch { uiViewModel.selectedIconFromBottomSheet.emit(item) } },
+        color = MaterialTheme.colorScheme.surfaceVariant
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+        ) {
+            val image = rememberAsyncImagePainter(IconState.fromNumber(item))
+            Image(
+                painter = image,
+                contentDescription = "Test Image",
+                Modifier.size(32.dp)
+            )
+        }
+    }
+}
+
 
 @Preview
 @Composable

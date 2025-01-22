@@ -158,4 +158,15 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
         _uiState.value = UiState.Error(error.toString())
         Log.d("Hello Error reason", error.toString())
     }
+
+    fun validateCategoryData(categoryName: String, categoryIcon: Int, categoryType: String) {
+        val categoryClass = CategoryClass(
+            id = 0L,
+            categoryName = categoryName,
+            categoryColorNumber = 1,
+            categoryIconNumber = categoryIcon,
+            categoryType = categoryType
+        )
+        storeCategoryInDatabase(categoryClass)
+    }
 }

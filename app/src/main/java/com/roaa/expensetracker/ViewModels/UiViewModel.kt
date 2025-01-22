@@ -9,5 +9,9 @@ import javax.inject.Inject
 class UiViewModel @Inject constructor() : ViewModel() {
     var transactionDetailBottomSheetValue = MutableStateFlow<Boolean>(false)
     var errorStatusInAddBottomSheet = MutableStateFlow<Boolean>(false)
+    var errorStatusInAddCategory = MutableStateFlow<Boolean>(false)
     var errorStatusMessage = MutableStateFlow<String>("")
+
+    var selectedIconFromBottomSheet = MutableStateFlow<Int>(99)
+    var addCategoryBackPressed = MutableStateFlow(false)
 }
