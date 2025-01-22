@@ -40,8 +40,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.expensetracker.Composables.ExpenseTrackerTheme
+import com.example.expensetracker.Composables.Navigation.ScreenB
 import com.example.expensetracker.Composables.components.TopBar
 import com.example.expensetracker.Composables.greenColor
 import com.example.expensetracker.Composables.orange
@@ -55,18 +57,18 @@ import com.example.expensetracker.ViewModels.CategoryViewModel
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun CategoryScreen(
+    navController: NavHostController,
     sendUserBack: () -> Unit,
-
-    ) {
+) {
     Surface {
         Scaffold(
             topBar = { TopBar("Category") { sendUserBack() } },
             content = { paddingValues ->
-                ScaffoldContent(paddingValues)
+                ScaffoldContent(paddingValues, navController)
             },
             floatingActionButton = {
                 ExtendedFloatingActionButton(
-                    onClick = { /* do something */ },
+                    onClick = { navController.navigate(ScreenB) },
                     icon = { Icon(Icons.Filled.Add, "Localized description") },
                     text = { Text(text = "Add Category") },
                 )
@@ -81,6 +83,7 @@ fun CategoryScreen(
 @Composable
 fun ScaffoldContent(
     paddingValues: PaddingValues,
+    navController: NavHostController,
     categoryViewModel: CategoryViewModel = hiltViewModel()
 ) {
     val allExpenseCategory by categoryViewModel.onlyExpenseCategoryNames.collectAsStateWithLifecycle()
@@ -124,7 +127,9 @@ fun ScaffoldContent(
                                     bottom = 8.dp
                                 ),
                             it
-                        ) { }
+                        ) {
+                            navController.navigate(ScreenB)
+                        }
                     }
 
                     // Second item in the row
@@ -138,7 +143,9 @@ fun ScaffoldContent(
                                     bottom = 8.dp
                                 ),
                             it
-                        ) { }
+                        ) {
+                            navController.navigate(ScreenB)
+                        }
 
                     }
                     Spacer(Modifier.width(16.dp))
@@ -176,7 +183,9 @@ fun ScaffoldContent(
                                     bottom = 8.dp
                                 ),
                             it
-                        ) { }
+                        ) {
+                            navController.navigate(ScreenB)
+                        }
                     }
 
                     // Second item in the row
@@ -190,7 +199,9 @@ fun ScaffoldContent(
                                     bottom = 8.dp
                                 ),
                             it
-                        ) { }
+                        ) {
+                            navController.navigate(ScreenB)
+                        }
 
                     }
                     Spacer(Modifier.width(16.dp))
@@ -202,6 +213,12 @@ fun ScaffoldContent(
         }
     }
 }
+
+//@Composable
+//fun CategoryClicked(it: CategoryClass, navController: NavHostController) {
+//    val navController = rememberNavController()
+//    SendUserToAddCategoryActivity(navController)
+//}
 
 @Composable
 fun SingleCategory(
