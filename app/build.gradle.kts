@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+    alias(libs.plugins.kotlin.serialization)
     // Apply Hilt plugin
 }
 apply(plugin = "kotlin-kapt")
@@ -102,6 +103,9 @@ dependencies {
     implementation("com.airbnb.android:lottie-compose:6.0.0")
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.25.1")
+
+    implementation(libs.navigation.compose)
+    implementation(libs.kotlinx.serialization.json)
 
 
 }
