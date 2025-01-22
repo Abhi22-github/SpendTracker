@@ -1,0 +1,55 @@
+package com.roaa.expensetracker.Database
+
+import android.content.Context
+import com.roaa.expensetracker.Database.TransactionDatabase.Companion.getInstance
+import com.roaa.expensetracker.Model.CategoryClass
+import com.roaa.expensetracker.Utilities.Constants
+import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.flow.Flow
+
+class CategoryRepository(@ApplicationContext applicationContext: Context) {
+    // below line is the create a variable  
+    // for dao and list for all category. 
+    private val categoryDao: CategoryDao
+
+    // below method is to read all category from database.
+    val allCategories: Flow<List<CategoryClass>>
+
+    // creating a constructor for our variables 
+    // and passing the variables to it.
+    init {
+        val database = getInstance(applicationContext)
+        categoryDao = database.categoryDao()
+        allCategories = categoryDao.allCategory
+    }
+
+     fun getOnlyExpenseCategories(): Flow<List<CategoryClass>> {
+        return categoryDao.getOnlyExpenseCategories(Constants.EXPENSE)
+    }
+
+     fun getOnlyIncomeCategories(): Flow<List<CategoryClass>> {
+        return categoryDao.getOnlyExpenseCategories(Constants.INCOME)
+    }
+
+    // creating a method to insert the data to our database. 
+    suspend fun insert(categoryClass: CategoryClass) {
+        categoryDao.insert(categoryClass)
+    }
+
+    // creating a method to update data in database. 
+    suspend fun update(categoryClass: CategoryClass) {
+        categoryDao.update(categoryClass)
+    }
+
+    // creating a method to delete the data in our database. 
+    suspend fun delete(categoryClass: CategoryClass) {
+        categoryDao.delete(categoryClass = categoryClass)
+    }
+
+    // below is the method to delete all the category. 
+    suspend fun deleteAllTransaction() {
+        categoryDao.deleteAllCategory()
+    }
+
+
+}

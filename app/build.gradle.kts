@@ -14,11 +14,11 @@ apply(plugin = "kotlin-android")
 
 
 android {
-    namespace = "com.example.expensetracker"
+    namespace = "com.roaa.expensetracker"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.expensetracker"
+        applicationId = "com.roaa.expensetracker"
         minSdk = 26
         targetSdk = 34
         versionCode = 1
