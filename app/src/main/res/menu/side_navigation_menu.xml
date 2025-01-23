@@ -27,11 +27,13 @@
         <item
             android:id="@+id/item_expenseCategory_sideNavigation"
             android:icon="@drawable/add_category_icon_selector"
-            android:title="Expense Category" />
+            android:title="Expense Category"
+            android:visible="false" />
         <item
             android:id="@+id/item_incomeCategory_sideNavigation"
             android:icon="@drawable/add_category_icon_selector"
-            android:title="Income Category" />
+            android:title="Income Category"
+            android:visible="false" />
 
         <item
             android:id="@+id/item_settings_sideNavigation"
