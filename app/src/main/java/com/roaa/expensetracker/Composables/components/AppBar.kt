@@ -2,6 +2,7 @@ package com.roaa.expensetracker.Composables.components
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -14,7 +15,12 @@ import androidx.compose.ui.tooling.preview.Preview
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun TopBar(title:String,sendUserBackToPreviousActivity: () -> Unit) {
+fun TopBar(
+    title: String,
+    showDelete: Boolean,
+    sendUserBackToPreviousActivity: () -> Unit,
+    delete: () -> Unit
+) {
     TopAppBar(title = {
         Text(
             text = title,
@@ -22,14 +28,22 @@ fun TopBar(title:String,sendUserBackToPreviousActivity: () -> Unit) {
             modifier = Modifier
         )
     }, navigationIcon = {
-        IconButton(onClick = {sendUserBackToPreviousActivity()}) {
+        IconButton(onClick = { sendUserBackToPreviousActivity() }) {
             Icon(Icons.Filled.ArrowBack, "backIcon")
         }
-    })
+    },
+        actions = {
+            if (showDelete) {
+                IconButton(onClick = { delete() }) {
+                    Icon(Icons.Filled.Delete, "backIcon")
+                }
+            }
+        }
+    )
 }
 
 @Composable
 @Preview
 fun TopBarPreview() {
-    TopBar("Hello",{})
+    TopBar("Hello", true, {}, {})
 }
