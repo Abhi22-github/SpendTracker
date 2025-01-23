@@ -30,6 +30,7 @@ paletteKtx = "1.0.0"
 lifecycleRuntimeKtx = "2.8.7"
 composeNavigation = "2.8.5"
 serialization = "1.6.3"
+ui = "1.7.0-beta01"
 
 
 [libraries]
@@ -71,6 +72,7 @@ androidx-palette-ktx = { group = "androidx.palette", name = "palette-ktx", versi
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
 androidx-ui-test-manifest = { group = "androidx.compose.ui", name = "ui-test-manifest" }
 androidx-ui-test-junit4 = { group = "androidx.compose.ui", name = "ui-test-junit4" }
+ui = { module = "androidx.compose.ui:ui", version.ref = "ui" }
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "composeNavigation" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization"}
 

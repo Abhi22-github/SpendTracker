@@ -6,4 +6,9 @@ import kotlinx.serialization.Serializable
 object ScreenA
 
 @Serializable
-object ScreenB
+data class ScreenB(
+    val categoryId: Long,
+    val categoryName: String,
+    val categoryIconNumber: Int,
+    val categoryType: String
+)

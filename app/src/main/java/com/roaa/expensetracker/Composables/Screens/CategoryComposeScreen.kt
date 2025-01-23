@@ -1,6 +1,9 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -35,6 +38,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -44,6 +48,7 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
 import com.roaa.expensetracker.Composables.Navigation.ScreenB
+import com.roaa.expensetracker.Composables.Navigation.popBackStackOrFinish
 import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
@@ -54,36 +59,50 @@ import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.ViewModels.CategoryViewModel
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun CategoryScreen(
     navController: NavHostController,
-    sendUserBack: () -> Unit,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedContentScope,
 ) {
-    Surface {
-        Scaffold(
-            topBar = { TopBar("Category") { sendUserBack()
-            } },
-            content = { paddingValues ->
-                ScaffoldContent(paddingValues, navController)
-            },
-            floatingActionButton = {
-                ExtendedFloatingActionButton(
-                    onClick = { navController.navigate(ScreenB) },
-                    icon = { Icon(Icons.Filled.Add, "Localized description") },
-                    text = { Text(text = "Add Category") },
-                )
-            },
-            floatingActionButtonPosition = FabPosition.EndOverlay
-        )
+    with(sharedTransitionScope) {
+        val context = LocalContext.current
+        Surface {
+            Scaffold(
+                topBar = {
+                    TopBar("Category",false,{navController.popBackStackOrFinish(context)},{})
+                },
+                content = { paddingValues ->
+                    ScaffoldContent(
+                        paddingValues,
+                        navController,
+                        sharedTransitionScope,
+                        animatedVisibilityScope
+                    )
+                },
+                floatingActionButton = {
+                    ExtendedFloatingActionButton(
+                        onClick = { navController.navigate(ScreenB(0L, "", 99, EXPENSE)) },
+                        icon = { Icon(Icons.Filled.Add, "Localized description") },
+                        text = { Text(text = "Add Category") },
+                    )
+                },
+                floatingActionButtonPosition = FabPosition.EndOverlay
+            )
+        }
     }
 
 }
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun ScaffoldContent(
+fun SharedTransitionScope.ScaffoldContent(
     paddingValues: PaddingValues,
     navController: NavHostController,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedContentScope,
     categoryViewModel: CategoryViewModel = hiltViewModel()
 ) {
     val allExpenseCategory by categoryViewModel.onlyExpenseCategoryNames.collectAsStateWithLifecycle()
@@ -112,6 +131,37 @@ fun ScaffoldContent(
 
         Spacer(Modifier.height(4.dp))
 
+//        LazyVerticalGrid(
+//            columns = GridCells.Fixed(2), // 2 columns
+//            modifier = Modifier.fillMaxSize(),
+//            verticalArrangement = Arrangement.spacedBy(16.dp),
+//            horizontalArrangement = Arrangement.spacedBy(16.dp),
+//            contentPadding = PaddingValues(16.dp) // Optional padding for content
+//        ) {
+//            items(allIncomeCategory) { item ->
+//                SingleCategory(
+//                    Modifier
+//                        .weight(0.5f)
+//                        .padding(
+//                            top = 8.dp,
+//                            bottom = 8.dp
+//                        ),
+//                    item,
+//                    sharedTransitionScope, animatedVisibilityScope
+//                ) {
+//                    navController.navigate(
+//                        ScreenB(
+//                            it.id,
+//                            it.categoryName,
+//                            it.categoryIconNumber,
+//                            it.categoryType
+//                        )
+//                    )
+//                }
+//            }
+//
+//        }
+
 
         Column {
             for (i in allIncomeCategory.chunked(2)) {
@@ -126,9 +176,17 @@ fun ScaffoldContent(
                                     top = 8.dp,
                                     bottom = 8.dp
                                 ),
-                            it
+                            it,
+                            sharedTransitionScope, animatedVisibilityScope
                         ) {
-                            navController.navigate(ScreenB)
+                            navController.navigate(
+                                ScreenB(
+                                    it.id,
+                                    it.categoryName,
+                                    it.categoryIconNumber,
+                                    it.categoryType
+                                )
+                            )
                         }
                     }
 
@@ -142,9 +200,17 @@ fun ScaffoldContent(
                                     top = 8.dp,
                                     bottom = 8.dp
                                 ),
-                            it
+                            it,
+                            sharedTransitionScope, animatedVisibilityScope
                         ) {
-                            navController.navigate(ScreenB)
+                            navController.navigate(
+                                ScreenB(
+                                    it.id,
+                                    it.categoryName,
+                                    it.categoryIconNumber,
+                                    it.categoryType
+                                )
+                            )
                         }
 
                     }
@@ -182,9 +248,17 @@ fun ScaffoldContent(
                                     top = 8.dp,
                                     bottom = 8.dp
                                 ),
-                            it
+                            it,
+                            sharedTransitionScope, animatedVisibilityScope
                         ) {
-                            navController.navigate(ScreenB)
+                            navController.navigate(
+                                ScreenB(
+                                    it.id,
+                                    it.categoryName,
+                                    it.categoryIconNumber,
+                                    it.categoryType
+                                )
+                            )
                         }
                     }
 
@@ -198,9 +272,17 @@ fun ScaffoldContent(
                                     top = 8.dp,
                                     bottom = 8.dp
                                 ),
-                            it
+                            it,
+                            sharedTransitionScope, animatedVisibilityScope
                         ) {
-                            navController.navigate(ScreenB)
+                            navController.navigate(
+                                ScreenB(
+                                    it.id,
+                                    it.categoryName,
+                                    it.categoryIconNumber,
+                                    it.categoryType
+                                )
+                            )
                         }
                     }
                     Spacer(Modifier.width(16.dp))
@@ -219,86 +301,101 @@ fun ScaffoldContent(
 //    SendUserToAddCategoryActivity(navController)
 //}
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun SingleCategory(
+fun SharedTransitionScope.SingleCategory(
     modifier: Modifier,
     item: CategoryClass,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedContentScope,
     onSingleItemClick: (CategoryClass) -> Unit
 ) {
-    val containerColor = combineColors(
-        MaterialTheme.colorScheme.surface,
-        if (item.categoryType == EXPENSE) orange else greenColor,
-        angle = 0.1f,
-    )
-    Card(
-        shape = RoundedCornerShape(12.dp), modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .clickable {
-                onSingleItemClick(item)
-            }, colors = CardDefaults.cardColors(
-            containerColor = containerColor,
+    with(sharedTransitionScope) {
+        val containerColor = combineColors(
+            MaterialTheme.colorScheme.surface,
+            if (item.categoryType == EXPENSE) orange else greenColor,
+            angle = 0.1f,
+        )
+        Card(
+            shape = RoundedCornerShape(12.dp), modifier = modifier
+                .clip(RoundedCornerShape(12.dp))
+                .clickable {
+                    onSingleItemClick(item)
+                }, colors = CardDefaults.cardColors(
+                containerColor = containerColor,
 
-            )
-    ) {
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(16.dp, 12.dp),
-            verticalAlignment = Alignment.CenterVertically
+                )
         ) {
-            Row(modifier = Modifier.weight(1f)) {
-                Surface(
-                    shape = CircleShape,
-                    modifier = Modifier
-                        .size(36.dp)
-                        .fillMaxSize(),
-                    color = MaterialTheme.colorScheme.surfaceVariant
-                ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(16.dp, 12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(modifier = Modifier.weight(1f)) {
+                    Surface(
+                        shape = CircleShape,
+                        modifier = Modifier
+                            .size(36.dp)
+                            .fillMaxSize(),
+                        color = MaterialTheme.colorScheme.surfaceVariant
                     ) {
-                        val image =
-                            rememberAsyncImagePainter(IconState.fromNumber(item.categoryIconNumber))
-                        Image(
-                            painter = image,
-                            contentDescription = "Test Image",
-                            modifier = Modifier.size(24.dp),
-                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize(), contentAlignment = Alignment.Center
+                        ) {
+                            val image =
+                                rememberAsyncImagePainter(IconState.fromNumber(item.categoryIconNumber))
+                            Image(
+                                painter = image,
+                                contentDescription = "Test Image",
+                                modifier = Modifier
+                                    .size(24.dp)
+                                    .sharedElement(
+                                        state = rememberSharedContentState(key = "image/${item.id}"),
+                                        animatedVisibilityScope = animatedVisibilityScope,
+                                    ),
+                            )
+                        }
                     }
-                }
 
 
-                Spacer(modifier = Modifier.width(16.dp))
+                    Spacer(modifier = Modifier.width(16.dp))
 
-                Column(
-                    modifier = Modifier
-                        .align(Alignment.CenterVertically)
-                        .fillMaxWidth(1f)
+                    Column(
+                        modifier = Modifier
+                            .align(Alignment.CenterVertically)
+                            .fillMaxWidth(1f)
 
-                ) {
-                    Text(
-                        text = item.categoryName.replaceFirstChar { it.uppercase() },
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                    if (false) {
+                    ) {
                         Text(
-                            text = item.categoryType,
-                            style = MaterialTheme.typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            text = item.categoryName.replaceFirstChar { it.uppercase() },
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurface,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
+                            modifier = Modifier.sharedElement(
+                                state = rememberSharedContentState(key = "text/${item.id}"),
+                                animatedVisibilityScope = animatedVisibilityScope,
+                            )
                         )
+                        if (false) {
+                            Text(
+                                text = item.categoryType,
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                            )
+                        }
                     }
-                }
 
 //                Spacer(modifier = Modifier.width(16.dp))
-            }
+                }
 //            IconButton(
 //                onClick = {}
 //            ) { Icon(Icons.Filled.Delete, contentDescription = "delete") }
+            }
         }
     }
 }
@@ -307,15 +404,15 @@ fun SingleCategory(
 @Composable
 private fun SingleCategoryPreview() {
     ExpenseTrackerTheme {
-        SingleCategory(
-            Modifier,
-            CategoryClass(
-                id = 1,
-                categoryName = "Food & Drinks",
-                categoryColorNumber = 1,
-                categoryIconNumber = 2,
-                categoryType = "Expense"
-            )
-        ) { }
+//        SingleCategory(
+//            Modifier,
+//            CategoryClass(
+//                id = 1,
+//                categoryName = "Food & Drinks",
+//                categoryColorNumber = 1,
+//                categoryIconNumber = 2,
+//                categoryType = "Expense"
+//            )
+//        ) { }
     }
 }
