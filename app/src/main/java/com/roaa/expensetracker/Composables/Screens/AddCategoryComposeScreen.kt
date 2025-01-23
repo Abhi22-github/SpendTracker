@@ -1,8 +1,10 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.ExperimentalSharedTransitionApi
+import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
@@ -64,6 +66,7 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -71,6 +74,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
+import com.roaa.expensetracker.Composables.Navigation.popBackStackOrFinish
 import com.roaa.expensetracker.Composables.components.BottomSheetIconPicker
 import com.roaa.expensetracker.Composables.components.ErrorRow
 import com.roaa.expensetracker.Composables.components.TopBar
@@ -79,6 +83,7 @@ import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.secondaryAlpha
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
+import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
 import com.roaa.expensetracker.ViewModels.CategoryViewModel
@@ -86,34 +91,54 @@ import com.roaa.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
+@OptIn(ExperimentalSharedTransitionApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
-fun AddCategory(navController: NavController, uiViewModel: UiViewModel = hiltViewModel()) {
-    val backPress by uiViewModel.addCategoryBackPressed.collectAsState()
-    ExpenseTrackerTheme {
-        Scaffold(topBar = {
-            TopBar("Add Category") {
-                navController.popBackStack()
-            }
-        }) { paddingValues ->
-            ScaffoldContent(paddingValues)
-        }
-    }
-    if (backPress)
-        navController.popBackStack()
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun ScaffoldContent(
-    paddingValues: PaddingValues, uiViewModel: UiViewModel = hiltViewModel(),
+fun AddCategory(
+    navController: NavController,
+    categoryId: Long,
+    categoryName: String,
+    categoryIcon: Int,
+    categoryType: String,
+    sharedTransitionScope: SharedTransitionScope,
+    animatedVisibilityScope: AnimatedContentScope,
+    uiViewModel: UiViewModel = hiltViewModel(),
     categoryViewModel: CategoryViewModel = hiltViewModel()
 ) {
-    var categoryName by remember { mutableStateOf("") }
+    val category = CategoryClass(categoryId, categoryName, 1, categoryIcon, categoryType)
+    with(sharedTransitionScope) {
+        val backPress by uiViewModel.addCategoryBackPressed.collectAsState()
+        ExpenseTrackerTheme {
+            Scaffold(topBar = {
+                TopBar("Add Category", true, {
+                    navController.popBackStack()
+                }, {
+                    categoryViewModel.deleteCategoryFromDatabase(category)
+                    navController.popBackStack()
+                })
+            }) { paddingValues ->
+                ScaffoldContent(paddingValues, category, animatedVisibilityScope)
+            }
+        }
+        if (backPress)
+            navController.popBackStackOrFinish(LocalContext.current)
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+@Composable
+fun SharedTransitionScope.ScaffoldContent(
+    paddingValues: PaddingValues,
+    categoryClass: CategoryClass,
+    animatedVisibilityScope: AnimatedContentScope,
+    uiViewModel: UiViewModel = hiltViewModel(),
+    categoryViewModel: CategoryViewModel = hiltViewModel()
+) {
+    var categoryName by remember { mutableStateOf(categoryClass.categoryName) }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val selectedIcon by uiViewModel.selectedIconFromBottomSheet.collectAsState()
     var bottomSheetStatus by remember { mutableStateOf(true) }
-    var selectedIndex by remember { mutableIntStateOf(0) }
+    var selectedIndex by remember { mutableIntStateOf(if (categoryClass.categoryType == EXPENSE) 0 else 1) }
     val errorStatus by uiViewModel.errorStatusInAddCategory.collectAsState(false)
     val scope = rememberCoroutineScope()
     val containerColor by animateColorAsState(
@@ -127,6 +152,9 @@ fun ScaffoldContent(
 
         scope.launch {
             uiViewModel.errorStatusInAddCategory.emit(false)
+            if(categoryClass.categoryIconNumber != 99){
+                uiViewModel.selectedIconFromBottomSheet.emit(categoryClass.categoryIconNumber)
+            }
         }
 
     }
@@ -188,15 +216,21 @@ fun ScaffoldContent(
                     contentAlignment = Alignment.Center
                 ) {
 
-                    AnimatedContent(targetState = selectedIcon) { index ->
-                        val image =
-                            rememberAsyncImagePainter(IconState.fromNumber(index))
-                        Image(
-                            painter = image,
-                            contentDescription = "Test Image",
-                            modifier = Modifier.size(96.dp),
-                        )
-                    }
+                    //     AnimatedContent(targetState = selectedIcon) { index ->
+
+                    val image =
+                        rememberAsyncImagePainter(IconState.fromNumber(if (selectedIcon == 99) categoryClass.categoryIconNumber else selectedIcon))
+                    Image(
+                        painter = image,
+                        contentDescription = "Test Image",
+                        modifier = Modifier
+                            .size(96.dp)
+                            .sharedElement(
+                                state = rememberSharedContentState(key = "image/${categoryClass.id}"),
+                                animatedVisibilityScope = animatedVisibilityScope,
+                            ),
+                    )
+                    //  }
                 }
             }
             FilledTonalIconButton(
@@ -224,7 +258,11 @@ fun ScaffoldContent(
             singleLine = true,
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(30.dp, 8.dp),
+                .padding(30.dp, 8.dp)
+                .sharedElement(
+                    state = rememberSharedContentState(key = "text/${categoryClass.id}"),
+                    animatedVisibilityScope = animatedVisibilityScope,
+                ),
             placeholder = {
                 Text(
                     "Category Name",
@@ -242,8 +280,7 @@ fun ScaffoldContent(
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
             ),
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            textStyle = MaterialTheme.typography.titleMedium.copy(textAlign = TextAlign.Center)
-
+            textStyle = MaterialTheme.typography.titleMedium.copy(textAlign = TextAlign.Center),
         )
 
         Spacer(Modifier.height(12.dp))
@@ -255,14 +292,14 @@ fun ScaffoldContent(
                 .padding(30.dp, 8.dp),
             onClick = {
                 validateCategoryData(
+                    categoryClass.id,
                     categoryName,
                     selectedIcon,
                     selectedIndex,
                     scope,
                     uiViewModel,
                     categoryViewModel,
-
-                    )
+                )
             },
         ) {
             Text(
@@ -280,6 +317,7 @@ fun ScaffoldContent(
 }
 
 fun validateCategoryData(
+    categoryId: Long,
     categoryName: String,
     selectedIcon: Int,
     selectedType: Int,
@@ -289,19 +327,17 @@ fun validateCategoryData(
 ) {
     scope.launch {
         if (categoryName.isEmpty()) {
-
             uiViewModel.errorStatusInAddCategory.emit(true)
             uiViewModel.errorStatusMessage.emit("Please provide the category name")
             return@launch
-
         }
         if (selectedIcon == 99) {
             uiViewModel.errorStatusInAddCategory.emit(true)
             uiViewModel.errorStatusMessage.emit("Please select icon for Category")
             return@launch
-
         }
         categoryViewModel.validateCategoryData(
+            categoryId,
             categoryName,
             selectedIcon,
             if (selectedType == 0) EXPENSE else INCOME

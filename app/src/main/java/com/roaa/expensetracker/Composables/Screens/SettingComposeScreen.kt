@@ -82,9 +82,7 @@ fun SettingsScreenContent(
 
 
     Column {
-        TopBar(title = "Settings") {
-            sendUserBack()
-        }
+        TopBar(title = "Settings",false,{sendUserBack()},{})
         Column() {
             Spacer(Modifier.height(10.dp))
             Text(

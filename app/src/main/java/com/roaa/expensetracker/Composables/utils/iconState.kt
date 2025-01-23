@@ -3,17 +3,29 @@ package com.roaa.expensetracker.Composables.utils
 import com.roaa.expensetracker.R
 
 enum class IconState(val number: Int, val drawableResId: Int) {
-    ICON_ONE(1, R.drawable.ic_category_1),
-    ICON_TWO(2, R.drawable.ic_category_2),
-    ICON_THREE(3, R.drawable.ic_category_3),
-    ICON_FOUR(4, R.drawable.ic_category_4),
-    ICON_FIVE(5, R.drawable.ic_category_5),
-    ICON_SIX(6, R.drawable.ic_category_6),
-    ICON_SEVEN(7, R.drawable.ic_category_7),
-    ICON_EIGHT(8, R.drawable.ic_category_8),
-    ICON_NINE(9, R.drawable.ic_category_9),
-    ICON_TEN(10, R.drawable.ic_category_10),
-    ICON_NINTYNINE(99,R.drawable.ic_question_mark);
+    ICON_1(1, R.drawable.ic_category_1),
+    ICON_2(2, R.drawable.ic_category_2),
+    ICON_3(3, R.drawable.ic_category_3),
+    ICON_4(4, R.drawable.ic_category_4),
+    ICON_5(5, R.drawable.ic_category_5),
+    ICON_6(6, R.drawable.ic_category_6),
+    ICON_7(7, R.drawable.ic_category_7),
+    ICON_8(8, R.drawable.ic_category_8),
+    ICON_9(9, R.drawable.ic_category_9),
+    ICON_10(10, R.drawable.ic_category_10),
+    ICON_11(11, R.drawable.ic_category_11),
+    ICON_12(12, R.drawable.ic_category_12),
+    ICON_13(13, R.drawable.ic_category_13),
+    ICON_14(14, R.drawable.ic_category_14),
+    ICON_15(15, R.drawable.ic_category_15),
+    ICON_16(16, R.drawable.ic_category_16),
+    ICON_17(17, R.drawable.ic_category_17),
+    ICON_18(18, R.drawable.ic_category_18),
+    ICON_19(19, R.drawable.ic_category_19),
+    ICON_20(20, R.drawable.ic_category_20),
+    ICON_21(21, R.drawable.ic_category_21),
+    ICON_22(22, R.drawable.ic_category_22),
+    ICON_99(99,R.drawable.ic_question_mark);
 //    ICON_ELEVEN(11, R.drawable.ic_category_11),
 //    ICON_TWELVE(12, R.drawable.ic_category_12);
 
