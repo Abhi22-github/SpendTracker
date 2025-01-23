@@ -66,7 +66,9 @@ import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -76,6 +78,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
 import com.roaa.expensetracker.Composables.Navigation.popBackStackOrFinish
 import com.roaa.expensetracker.Composables.components.BottomSheetIconPicker
+import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.Composables.components.ErrorRow
 import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.greenColor
@@ -84,6 +87,7 @@ import com.roaa.expensetracker.Composables.secondaryAlpha
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Model.CategoryClass
+import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
 import com.roaa.expensetracker.ViewModels.CategoryViewModel
@@ -107,6 +111,9 @@ fun AddCategory(
 ) {
     val category = CategoryClass(categoryId, categoryName, 1, categoryIcon, categoryType)
     val showDeleteButton by remember { mutableStateOf(if (category.id == 0L) false else true) }
+    var showConfirmationDialog by remember { mutableStateOf(false) }
+    var confirmationDialogType by remember { mutableIntStateOf(1) }
+    val scope = rememberCoroutineScope()
     with(sharedTransitionScope) {
         val backPress by uiViewModel.addCategoryBackPressed.collectAsState()
         ExpenseTrackerTheme {
@@ -114,8 +121,8 @@ fun AddCategory(
                 TopBar("Add Category", showDeleteButton, {
                     navController.popBackStack()
                 }, {
-                    categoryViewModel.deleteCategoryFromDatabase(category)
-                    navController.popBackStack()
+                    showConfirmationDialog = !showConfirmationDialog
+                    confirmationDialogType = 1
                 })
             }) { paddingValues ->
                 ScaffoldContent(paddingValues, category, animatedVisibilityScope)
@@ -123,6 +130,38 @@ fun AddCategory(
         }
         if (backPress)
             navController.popBackStackOrFinish(LocalContext.current)
+    }
+    if (showConfirmationDialog) {
+        //for confirming the delete action
+        if (confirmationDialogType == 1) {
+            ConfirmationAlertDialog(
+                onDismissRequest = { showConfirmationDialog = !showConfirmationDialog },
+                onConfirmation = {
+                    categoryViewModel.deleteCategoryFromDatabase(category)
+
+                    showConfirmationDialog = !showConfirmationDialog
+                    navController.popBackStack()
+
+                },
+                dialogTitle = "Delete Category",
+                dialogText = "Are you sure, you want to delete the current category",
+                icon = ImageVector.vectorResource(R.drawable.icon_expense)
+            )
+        }
+        //for confirming the update action
+        if (confirmationDialogType == 2) {
+            ConfirmationAlertDialog(
+                onDismissRequest = { showConfirmationDialog = !showConfirmationDialog },
+                onConfirmation = {
+                    categoryViewModel.deleteCategoryFromDatabase(category)
+                    showConfirmationDialog = !showConfirmationDialog
+                    navController.popBackStack()
+                },
+                dialogTitle = "Update Category",
+                dialogText = "Are you sure, you want to update the current category",
+                icon = ImageVector.vectorResource(R.drawable.icon_expense)
+            )
+        }
     }
 }
 
