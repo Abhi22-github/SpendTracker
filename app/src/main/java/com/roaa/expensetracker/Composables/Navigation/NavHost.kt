@@ -1,5 +1,6 @@
 package com.roaa.expensetracker.Composables.Navigation
 
+import android.app.Activity
 import android.content.Context
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -55,9 +56,8 @@ private fun sendUserBack(context: Context) {
 }
 
 fun NavController.popBackStackOrFinish(context: Context) {
-//    if (!popBackStack()) {
-//        (context as Activity).finish()
-//    }
-    navigateUp()
+    if (!popBackStack()) {
+        (context as Activity).finish()
+    }
 }
 
