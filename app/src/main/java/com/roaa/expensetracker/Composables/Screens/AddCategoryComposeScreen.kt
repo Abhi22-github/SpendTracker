@@ -106,11 +106,12 @@ fun AddCategory(
     categoryViewModel: CategoryViewModel = hiltViewModel()
 ) {
     val category = CategoryClass(categoryId, categoryName, 1, categoryIcon, categoryType)
+    val showDeleteButton by remember { mutableStateOf(if (category.id == 0L) false else true) }
     with(sharedTransitionScope) {
         val backPress by uiViewModel.addCategoryBackPressed.collectAsState()
         ExpenseTrackerTheme {
             Scaffold(topBar = {
-                TopBar("Add Category", true, {
+                TopBar("Add Category", showDeleteButton, {
                     navController.popBackStack()
                 }, {
                     categoryViewModel.deleteCategoryFromDatabase(category)
@@ -152,7 +153,7 @@ fun SharedTransitionScope.ScaffoldContent(
 
         scope.launch {
             uiViewModel.errorStatusInAddCategory.emit(false)
-            if(categoryClass.categoryIconNumber != 99){
+            if (categoryClass.categoryIconNumber != 99) {
                 uiViewModel.selectedIconFromBottomSheet.emit(categoryClass.categoryIconNumber)
             }
         }
