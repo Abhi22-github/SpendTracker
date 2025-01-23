@@ -171,11 +171,11 @@ class MainActivity : AppCompatActivity() {
                 selectedItem = R.id.item_listView_sideNavigation
                 sendUserToStatisticsActivity()
             } else if (menuID == R.id.item_bankAccounts_sideNavigation) {
-                sendUserToManageAccountsActivity()
+                sendUserToPaymentMethodsActivity()
             } else if (menuID == R.id.item_test1_sideNavigation) {
                 sendUserToAddActivity()
             } else if (menuID == R.id.item_test2_sideNavigation) {
-
+                sendUserToManageAccountsActivity()
             }
         }, 300)
         navigationView?.setCheckedItem(selectedItem)
@@ -272,6 +272,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun sendUserToManageAccountsActivity() {
         val intent = Intent(context, ManageBankAccountActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun sendUserToPaymentMethodsActivity() {
+        val intent = Intent(context, PaymentMethodsComposeActivity::class.java)
         startActivity(intent)
     }
 
