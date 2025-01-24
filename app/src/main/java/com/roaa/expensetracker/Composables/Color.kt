@@ -20,6 +20,17 @@ val blueColor = Color(0xFF1A73E8)
 val greenColor = Color(0xFF34A853)
 val orange = Color(0xFFDF7D1A)
 
+val blueColorGradient1 = Color(0xFF2196f3)
+val blueColorGradient2 = Color(0xFF79C3Fd)
+
+val orangeColorGradient1 = Color(0xFFFF8400)
+val orangeColorGradient2 = Color(0xFFFDA35F)
+
+val greenColorGradient1 = Color(0xFF11B114)
+val greenColorGradient2 = Color(0xFF52DB59)
+
+
+
 
 val cardBackgroundColor
     @Composable
