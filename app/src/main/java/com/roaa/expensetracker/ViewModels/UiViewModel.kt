@@ -14,4 +14,12 @@ class UiViewModel @Inject constructor() : ViewModel() {
 
     var selectedIconFromBottomSheet = MutableStateFlow<Int>(99)
     var addCategoryBackPressed = MutableStateFlow(false)
+
+    var paymentMethodBottomSheetStatus = MutableStateFlow(false)
+
+    var showDimTextOnLivePaymentCard = MutableStateFlow(true)
+    var liveBankAmount = MutableStateFlow("")
+    var liveBankNumber = MutableStateFlow("")
+    var liveBankName = MutableStateFlow("")
+
 }
