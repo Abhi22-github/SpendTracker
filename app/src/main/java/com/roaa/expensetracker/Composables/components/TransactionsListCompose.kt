@@ -76,10 +76,7 @@ fun TransactionsListCompose(
     val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
     Column {
         if (!showSingleDateTransactions) {
-            if (showForecast)
-                SummaryCard(blueColor)
-            else
-                PaymentCard(blueColor)
+
             val transactionList by viewModel.allTransactions.collectAsState(emptyList<TransactionClass>())
             val transactionsMap =
                 transactionList.sortedByDescending { it.dateWithTime }.groupBy { it.date }
@@ -93,7 +90,12 @@ fun TransactionsListCompose(
                 if (!transactionConverterList.isEmpty()) LazyColumn(
                     modifier = Modifier.fillMaxWidth(), state = lazyList
                 ) {
-
+                    item {
+                        if (showForecast)
+                            SummaryCard(blueColor)
+                        else
+                            PaymentCard(blueColor)
+                    }
                     transactionConverterList.forEach { (date, transactionList) ->
                         val date = getDateFromMillis(transactionList.get(0).dateWithTime)
                         item { Header(if (date == getDateFromMillis(System.currentTimeMillis())) "Today" else date) }
