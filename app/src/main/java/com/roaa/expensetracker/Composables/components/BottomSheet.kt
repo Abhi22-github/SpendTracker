@@ -71,6 +71,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
@@ -84,6 +85,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
+import com.roaa.expensetracker.Composables.Screens.LivePaymentCard
 import com.roaa.expensetracker.Composables.blueColor
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
@@ -1044,6 +1046,179 @@ fun SingleIcon(item: Int, uiViewModel: UiViewModel = hiltViewModel()) {
                 Modifier.size(32.dp)
             )
         }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun AddPaymentMethodBottomSheet(
+    uiViewModel: UiViewModel = hiltViewModel()
+) {
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
+    val bottomSheet by uiViewModel.paymentMethodBottomSheetStatus.collectAsState(false)
+    if (bottomSheet) {
+        ModalBottomSheet(onDismissRequest = {
+            scope.launch {
+                uiViewModel.paymentMethodBottomSheetStatus.emit(
+                    !bottomSheet
+                )
+            }
+        },
+            sheetState = bottomSheetState,
+            modifier = Modifier
+                .imePadding()
+                .fillMaxWidth(),
+            contentWindowInsets = { WindowInsets.ime }) {
+            BottomSheetContentPaymentMethodAddContent(modifier = Modifier)
+        }
+
+    }
+}
+
+val horizontalPadding = 16.dp
+val verticalPadding = 0.dp
+
+@Composable
+fun BottomSheetContentPaymentMethodAddContent(
+    modifier: Modifier,
+    uiViewModel: UiViewModel = hiltViewModel()
+) {
+    val liveBankNumber by uiViewModel.liveBankNumber.collectAsState()
+    val liveBankName by uiViewModel.liveBankName.collectAsState()
+    val liveBankAmount by uiViewModel.liveBankAmount.collectAsState()
+
+    var bankAmount by remember { mutableStateOf(TextFieldValue("")) }
+    var bankNumber by remember { mutableStateOf(TextFieldValue("")) }
+    var bankName by remember { mutableStateOf(TextFieldValue("")) }
+
+    val scope = rememberCoroutineScope()
+
+    Column {
+        LivePaymentCard(blueColor)
+        Spacer(Modifier.height(24.dp))
+        TextField(
+            value = bankAmount,
+            onValueChange = { newText ->
+                bankAmount = TextFieldValue(
+                    extractNumbers(newText.text).toString(),
+                    selection = TextRange(extractNumbers(newText.text).toString().length)
+                )
+                scope.launch {
+                    uiViewModel.liveBankAmount.emit(extractNumbers(newText.text).toString())
+                }
+            },
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontalPadding, verticalPadding),
+            placeholder = {
+                Text(
+                    "Enter Amount ",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
+                )
+            },
+            leadingIcon = { Text("₹", style = MaterialTheme.typography.bodyLarge) },
+            shape = RoundedCornerShape(10.dp),
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            ),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            // visualTransformation = NumberCommaTransformation()
+        )
+        Spacer(Modifier.height(12.dp))
+        TextField(
+            value = bankNumber,
+            onValueChange = { newText ->
+                bankNumber = TextFieldValue(
+                    extractNumbers(newText.text).toString(),
+                    selection = TextRange(extractNumbers(newText.text).toString().length)
+                )
+                scope.launch {
+                    uiViewModel.liveBankNumber.emit(extractNumbers(newText.text).toString())
+                }
+            },
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontalPadding, verticalPadding),
+            placeholder = {
+                Text(
+                    "Bank Account Number",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
+                )
+            },
+            prefix = { Text("**** **** **** ") },
+            leadingIcon = {
+                Image(
+                    painter = painterResource(R.drawable.ic_card_number),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            },
+            shape = RoundedCornerShape(10.dp),
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            ),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            // visualTransformation = NumberCommaTransformation()
+        )
+        Spacer(Modifier.height(12.dp))
+        TextField(
+            value = bankName,
+            onValueChange = { newText ->
+                bankName = newText
+                scope.launch {
+                    uiViewModel.liveBankName.emit(newText.text)
+                }
+            },
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontalPadding, verticalPadding),
+            placeholder = {
+                Text(
+                    "Bank Name",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
+                )
+            },
+            leadingIcon = {
+                Image(
+                    painter = painterResource(IconState.fromNumber(24)!!),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
+                )
+            },
+            shape = RoundedCornerShape(10.dp),
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            ),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+            // visualTransformation = NumberCommaTransformation()
+        )
+        Spacer(Modifier.height(24.dp))
+        FilledTonalButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontalPadding, verticalPadding),
+            onClick = { },
+        ) {
+            Icon(painter = painterResource(R.drawable.icon_expense), contentDescription = null)
+            Text(text = "Create Budget")
+        }
+        Spacer(Modifier.height(32.dp))
     }
 }
 
