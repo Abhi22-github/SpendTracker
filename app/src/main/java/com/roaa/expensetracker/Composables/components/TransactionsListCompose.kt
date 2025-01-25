@@ -67,7 +67,7 @@ fun TransactionsListCompose(
     date: LocalDate,
     viewModel: TransactionsViewModel = hiltViewModel(),
     uiViewModel: UiViewModel = hiltViewModel(),
-    preferencesViewModel :PreferencesViewModel = hiltViewModel()
+    preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val bottomSheet by uiViewModel.transactionDetailBottomSheetValue.collectAsState()
@@ -76,10 +76,10 @@ fun TransactionsListCompose(
     val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
     Column {
         if (!showSingleDateTransactions) {
-            if(showForecast)
-            SummaryCard(blueColor)
+            if (showForecast)
+                SummaryCard(blueColor)
             else
-            PaymentCard(blueColor)
+                PaymentCard(blueColor)
             val transactionList by viewModel.allTransactions.collectAsState(emptyList<TransactionClass>())
             val transactionsMap =
                 transactionList.sortedByDescending { it.dateWithTime }.groupBy { it.date }
