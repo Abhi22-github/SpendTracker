@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -39,6 +41,9 @@
             android:exported="false" />
         <activity
             android:name=".Activity.SettingComposeActivity"
+            android:exported="false" />
+        <activity
+            android:name=".Activity.PaymentMethodsComposeActivity"
             android:exported="false" />
         <activity
             android:name=".Activity.MainActivity"

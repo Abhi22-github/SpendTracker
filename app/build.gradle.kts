@@ -14,15 +14,15 @@ apply(plugin = "kotlin-android")
 
 
 android {
-    namespace = "com.example.expensetracker"
+    namespace = "com.roaa.expensetracker"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.example.expensetracker"
+        applicationId = "com.roaa.expensetracker"
         minSdk = 26
         targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 2
+        versionName = "0.1"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
@@ -106,6 +106,8 @@ dependencies {
 
     implementation(libs.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.ui)
+    implementation("androidx.constraintlayout:constraintlayout-compose:1.1.0")
 
 
 }
