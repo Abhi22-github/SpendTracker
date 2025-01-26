@@ -1,9 +1,6 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -49,11 +46,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
@@ -71,6 +68,7 @@ import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.R
+import com.roaa.expensetracker.Utilities.extractNumbers
 import com.roaa.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.launch
 
@@ -361,13 +359,16 @@ fun PaymentMethodCardOld() {
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LivePaymentCard(color: Color, uiViewModel: UiViewModel = hiltViewModel()) {
-    val liveBankNumber by uiViewModel.liveBankNumber.collectAsState()
+fun LivePaymentCard(
+    color: Color,
+    sendBankAmount: (String) -> Unit,
+    sendBankName: (String) -> Unit,
+    uiViewModel: UiViewModel = hiltViewModel(),
+) {
     val liveBankName by uiViewModel.liveBankName.collectAsState()
     val liveBankAmount by uiViewModel.liveBankAmount.collectAsState()
 
     var bankAmount by remember { mutableStateOf(TextFieldValue("")) }
-    var bankNumber by remember { mutableStateOf(TextFieldValue("")) }
     var bankName by remember { mutableStateOf(TextFieldValue("")) }
 
     val hintStyleAmount = MaterialTheme.typography.titleLarge.copy(fontFamily = numberFont)
@@ -379,22 +380,15 @@ fun LivePaymentCard(color: Color, uiViewModel: UiViewModel = hiltViewModel()) {
         color,
         angle = 0.1f,
     )
-    val animatedColor by animateColorAsState(
-        newColor, animationSpec = tween(durationMillis = 4000, easing = LinearEasing)
-    )
-    var isAnimating by remember { mutableStateOf(false) }
-
     val scope = rememberCoroutineScope()
+
     Card(
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
             .padding(16.dp, 4.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .drawBehind {
-                drawRect(animatedColor)
-            },
+            .clip(RoundedCornerShape(12.dp)),
         colors = CardDefaults.cardColors(
-            containerColor = animatedColor
+            containerColor = newColor
         )
     ) {
 
@@ -406,7 +400,7 @@ fun LivePaymentCard(color: Color, uiViewModel: UiViewModel = hiltViewModel()) {
                 start.linkTo(parent.start, margin = 24.dp)
             }, verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "₹${liveBankAmount}",
+                    text = "₹",
                     style = MaterialTheme.typography.headlineMedium.copy(
                         fontFamily = numberFont,
                     ),
@@ -414,7 +408,14 @@ fun LivePaymentCard(color: Color, uiViewModel: UiViewModel = hiltViewModel()) {
                 Spacer(modifier = Modifier.width(8.dp))
                 Box() {
                     BasicTextField(value = bankAmount,
-                        onValueChange = { bankAmount = it },
+                        onValueChange = {
+                            bankAmount = TextFieldValue(
+                                extractNumbers(it.text).toString(),
+                                selection = TextRange(extractNumbers(it.text).toString().length)
+                            )
+                            sendBankAmount(bankAmount.text)
+                            scope.launch { uiViewModel.errorStatusInBankAccountAdd.emit(false) }
+                        },
                         cursorBrush = SolidColor(color),
                         modifier = Modifier
                             .background(
@@ -484,7 +485,11 @@ fun LivePaymentCard(color: Color, uiViewModel: UiViewModel = hiltViewModel()) {
                     Spacer(Modifier.height(2.dp))
                     BasicTextField(
                         value = bankName,
-                        onValueChange = { bankName = it },
+                        onValueChange = {
+                            bankName = it
+                            sendBankName(bankName.text)
+                            scope.launch { uiViewModel.errorStatusInBankAccountAdd.emit(false) }
+                        },
                         cursorBrush = SolidColor(color),
                         modifier = Modifier
                             .background(

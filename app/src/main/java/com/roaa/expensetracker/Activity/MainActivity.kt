@@ -32,7 +32,6 @@ import com.roaa.expensetracker.databinding.ActivityMainBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import org.greenrobot.eventbus.EventBus
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -235,11 +234,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStart() {
         super.onStart()
-        EventBus.getDefault().register(this)
     }
 
     override fun onStop() {
-        EventBus.getDefault().unregister(this)
         super.onStop()
     }
 

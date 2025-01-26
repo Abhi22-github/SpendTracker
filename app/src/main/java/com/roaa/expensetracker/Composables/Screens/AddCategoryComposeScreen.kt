@@ -2,7 +2,6 @@ package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateColorAsState
@@ -13,7 +12,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
@@ -32,8 +30,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilledTonalIconButton
@@ -220,25 +216,7 @@ fun SharedTransitionScope.ScaffoldContent(
         }
 
         Spacer(Modifier.height(40.dp))
-        AnimatedVisibility(errorStatus) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                Card(
-                    modifier = Modifier.padding(16.dp, 0.dp), colors = CardDefaults.cardColors(
-                        contentColor = MaterialTheme.colorScheme.error,
-                        containerColor = MaterialTheme.colorScheme.errorContainer
-                    )
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .padding(16.dp, 12.dp)
-                            .fillMaxWidth()
-                    ) {
-                        ErrorRow(uiViewModel)
-                    }
-                }
-            }
-
-        }
+        ErrorRow(errorStatus)
 
         Spacer(Modifier.height(40.dp))
         Box() {
