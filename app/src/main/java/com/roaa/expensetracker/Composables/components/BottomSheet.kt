@@ -1097,7 +1097,7 @@ fun BottomSheetContentPaymentMethodAddContent(
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(16.dp))
-        LivePaymentCard(blueColor)
+        LivePaymentCard(selectedColor)
         Text(
             text = "Enter total Amount present in bank along with bank name in designated field",
             style = MaterialTheme.typography.labelLarge,
@@ -1216,7 +1216,7 @@ fun BottomSheetContentPaymentMethodAddContent(
                 .padding(horizontalPadding, verticalPadding),
             onClick = { },
         ) {
-            Icon(painter = painterResource(R.drawable.icon_expense), contentDescription = null)
+//            Icon(painter = painterResource(R.drawable.icon_expense), contentDescription = null)
             Text(text = "Save")
         }
         Spacer(Modifier.height(32.dp))
