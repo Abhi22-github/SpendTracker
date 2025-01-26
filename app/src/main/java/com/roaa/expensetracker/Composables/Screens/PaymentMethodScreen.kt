@@ -2,6 +2,7 @@ package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +17,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
@@ -36,7 +39,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,6 +50,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
@@ -112,8 +120,7 @@ fun PaymentMethodScreen(
         }
 
     }
-    if (showBottomSheet)
-        AddPaymentMethodBottomSheet()
+    if (showBottomSheet) AddPaymentMethodBottomSheet()
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -167,7 +174,7 @@ fun PaymentCard(color: Color) {
                 Surface(
                     shape = RoundedCornerShape(12.dp),
                     modifier = Modifier
-                        .size(56.dp)
+                        .size(36.dp)
                         .fillMaxSize(),
                     color = MaterialTheme.colorScheme.surface
                 ) {
@@ -178,7 +185,7 @@ fun PaymentCard(color: Color) {
                         Image(
                             painter = image,
                             contentDescription = "Test Image",
-                            modifier = Modifier.size(24.dp),
+                            modifier = Modifier.size(18.dp),
                         )
                     }
                 }
@@ -191,18 +198,11 @@ fun PaymentCard(color: Color) {
                         .fillMaxWidth(0.80f)
 
                 ) {
-                    Text(
-                        text = "**** **** **** 3245",
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                        style = typography.titleMedium.copy(
-                            fontFamily = numberFont, fontWeight = FontWeight.SemiBold
-                        ),
-                    )
                     if (true) {
                         Text(
                             text = "Bank Of Maharshtra",
-                            style = typography.labelLarge.copy(fontWeight = FontWeight.Medium),
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                            style = typography.titleMedium.copy(fontWeight = FontWeight.Medium),
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         )
                     }
                 }
@@ -360,6 +360,16 @@ fun LivePaymentCard(color: Color, uiViewModel: UiViewModel = hiltViewModel()) {
     val liveBankNumber by uiViewModel.liveBankNumber.collectAsState()
     val liveBankName by uiViewModel.liveBankName.collectAsState()
     val liveBankAmount by uiViewModel.liveBankAmount.collectAsState()
+
+    var bankAmount by remember { mutableStateOf(TextFieldValue("")) }
+    var bankNumber by remember { mutableStateOf(TextFieldValue("")) }
+    var bankName by remember { mutableStateOf(TextFieldValue("")) }
+
+    val hintStyleAmount = MaterialTheme.typography.titleLarge.copy(fontFamily = numberFont)
+    val hintStyle = MaterialTheme.typography.bodyMedium
+    val hintColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.60f)
+
+    val scope = rememberCoroutineScope()
     Card(
         shape = RoundedCornerShape(12.dp),
         modifier = Modifier
@@ -374,17 +384,46 @@ fun LivePaymentCard(color: Color, uiViewModel: UiViewModel = hiltViewModel()) {
         )
     ) {
         ConstraintLayout(Modifier.fillMaxWidth()) {
-            val (balanceText, balanceLabel, cardNumber, moreIcon, backgroundImage1, backgroundImage2, progress) = createRefs()
+            val (balanceText, balanceLabel, cardNumber, moreIcon, backgroundImage1, backgroundImage2) = createRefs()
 
-            Text(text = "₹${liveBankAmount}",
-                style = MaterialTheme.typography.headlineMedium.copy(
-                    fontFamily = numberFont,
-                ),
-                modifier = Modifier.constrainAs(balanceText) {
-                    top.linkTo(parent.top, margin = 24.dp)
-                    start.linkTo(parent.start, margin = 24.dp)
-                })
-
+            Row(modifier = Modifier.constrainAs(balanceText) {
+                top.linkTo(parent.top, margin = 24.dp)
+                start.linkTo(parent.start, margin = 24.dp)
+            }, verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "₹${liveBankAmount}",
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        fontFamily = numberFont,
+                    ),
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                BasicTextField(
+                    value = bankAmount,
+                    onValueChange = { bankAmount = it },
+                    modifier = Modifier
+                        .background(
+                            color.copy(alpha = 0.2f), RoundedCornerShape(5.dp)
+                        )
+                        .padding(10.dp, 3.dp),
+                    textStyle = MaterialTheme.typography.titleLarge.copy(fontFamily = numberFont),
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
+                    maxLines = 1
+                ) {
+                    if (bankAmount.text.isEmpty()) {
+                        Text(
+                            text = "Amount",
+                            style = hintStyleAmount,
+                            color = hintColor,
+                        )
+                    } else {
+                        Text(
+                            text = bankAmount.text,
+                            style = hintStyleAmount,
+                            color = hintColor.copy(alpha = 1f),
+                        )
+                    }
+                }
+            }
             Text(text = "Amount",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.60f),
@@ -396,7 +435,7 @@ fun LivePaymentCard(color: Color, uiViewModel: UiViewModel = hiltViewModel()) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.constrainAs(cardNumber) {
-                    top.linkTo(progress.bottom, margin = 24.dp)
+                    top.linkTo(balanceLabel.bottom, margin = 24.dp)
                     start.linkTo(parent.start, margin = 24.dp)
                     bottom.linkTo(parent.bottom, margin = 24.dp)
                 },
@@ -429,18 +468,41 @@ fun LivePaymentCard(color: Color, uiViewModel: UiViewModel = hiltViewModel()) {
                         .fillMaxWidth(0.80f)
 
                 ) {
-                    Text(
-                        text = "**** **** **** ${liveBankNumber}",
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                        style = typography.titleMedium.copy(
-                            fontFamily = numberFont, fontWeight = FontWeight.SemiBold
+
+                    Spacer(Modifier.height(2.dp))
+                    BasicTextField(
+                        value = bankName,
+                        onValueChange = { bankName = it },
+                        modifier = Modifier
+                            .background(
+                                color.copy(alpha = 0.2f), RoundedCornerShape(5.dp)
+                            )
+                            .padding(10.dp, 3.dp),
+                        textStyle = MaterialTheme.typography.labelLarge.copy(
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                         ),
-                    )
-                    Text(
-                        text = liveBankName,
-                        style = typography.labelLarge.copy(fontWeight = FontWeight.Medium),
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                    )
+
+                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text)
+                    ) {
+                        if (bankName.text.isEmpty()) {
+                            Text(
+                                text = "Bank Name",
+                                style = hintStyleAmount.copy(),
+                                color = hintColor,
+                            )
+                        } else {
+                            Text(
+                                text = bankName.text,
+                                style = hintStyleAmount,
+                                color = hintColor.copy(alpha = 1f),
+                            )
+                        }
+                    }
+//                    Text(
+//                        text = liveBankName,
+//                        style = typography.labelLarge.copy(fontWeight = FontWeight.Medium),
+//                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+//                    )
 
                 }
 
@@ -460,27 +522,6 @@ fun LivePaymentCard(color: Color, uiViewModel: UiViewModel = hiltViewModel()) {
                 alpha = 0.1f,
                 colorFilter = ColorFilter.tint(color)
             )
-            LinearProgressIndicator(progress = { Math.random().toFloat() },
-                modifier = Modifier
-                    .height(10.dp)
-                    .constrainAs(progress) {
-                        top.linkTo(balanceLabel.bottom, 20.dp)
-                        start.linkTo(parent.start, 24.dp)
-                        end.linkTo(parent.end, 24.dp)
-                        width = Dimension.fillToConstraints
-                    },
-                color = color.copy(alpha = 0.30f),
-                trackColor = color.copy(alpha = 0.10f),
-                strokeCap = StrokeCap.Round,
-                gapSize = 0.dp,
-                drawStopIndicator = {
-                    drawStopIndicator(
-                        drawScope = this,
-                        stopSize = ProgressIndicatorDefaults.CircularStrokeWidth,
-                        color = color,
-                        strokeCap = StrokeCap.Round
-                    )
-                })
             Image(
                 painter = image,
                 contentDescription = "Test Image",

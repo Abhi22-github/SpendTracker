@@ -7,6 +7,7 @@ import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -81,6 +82,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
@@ -206,8 +208,7 @@ fun BottomSheetContentItemAddContent(
     }
     val budget by preferencesViewModel.getBudgetValue.collectAsState(1f)
     val oldAmount by transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
-    val newAmountTemp =
-        if (expenseValue.text.isEmpty()) 0L else extractNumbers(expenseValue.text)
+    val newAmountTemp = if (expenseValue.text.isEmpty()) 0L else extractNumbers(expenseValue.text)
     val newDailyBudget = oldAmount + newAmountTemp
     val amountInString = String.format("%.2f", newDailyBudget.toFloat())
     val percent = if (budget != 0f) {
@@ -386,12 +387,10 @@ fun BottomSheetContentItemAddContent(
                         focusedContainerColor = Color.Transparent,
                     ),
                     textStyle = typography.displayMedium.copy(
-                        textAlign = TextAlign.Center,
-                        fontFamily = numberFont
+                        textAlign = TextAlign.Center, fontFamily = numberFont
                     ),
                     keyboardOptions = KeyboardOptions.Default.copy(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Next
+                        keyboardType = KeyboardType.Number, imeAction = ImeAction.Next
                     ),
                 )
             }
@@ -985,8 +984,7 @@ fun BottomSheetIconPicker(sheetState: SheetState, closeBottomSheet: () -> Unit) 
             closeBottomSheet()
         },
         sheetState = sheetState,
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime },
 
         scrimColor = Color.Transparent
@@ -1041,9 +1039,7 @@ fun SingleIcon(item: Int, uiViewModel: UiViewModel = hiltViewModel()) {
         ) {
             val image = rememberAsyncImagePainter(IconState.fromNumber(item))
             Image(
-                painter = image,
-                contentDescription = "Test Image",
-                Modifier.size(32.dp)
+                painter = image, contentDescription = "Test Image", Modifier.size(32.dp)
             )
         }
     }
@@ -1081,134 +1077,139 @@ val verticalPadding = 0.dp
 
 @Composable
 fun BottomSheetContentPaymentMethodAddContent(
-    modifier: Modifier,
-    uiViewModel: UiViewModel = hiltViewModel()
+    modifier: Modifier, uiViewModel: UiViewModel = hiltViewModel()
 ) {
-    val liveBankNumber by uiViewModel.liveBankNumber.collectAsState()
-    val liveBankName by uiViewModel.liveBankName.collectAsState()
-    val liveBankAmount by uiViewModel.liveBankAmount.collectAsState()
 
     var bankAmount by remember { mutableStateOf(TextFieldValue("")) }
     var bankNumber by remember { mutableStateOf(TextFieldValue("")) }
     var bankName by remember { mutableStateOf(TextFieldValue("")) }
 
+    var selectedColor by remember { mutableStateOf(blueColor) }
+
     val scope = rememberCoroutineScope()
 
-    Column {
+    Column() {
+        Text(
+            text = "Add Bank Account",
+            modifier = modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(16.dp))
         LivePaymentCard(blueColor)
+        Text(
+            text = "Enter total Amount present in bank along with bank name in designated field",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha),
+            modifier = Modifier.padding(16.dp, 8.dp)
+        )
+        Spacer(Modifier.height(16.dp))
+
+//        Text(
+//            text = "Colors", style = MaterialTheme.typography.titleMedium,
+//            color = MaterialTheme.colorScheme.onSurface,
+//        )
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(15.dp),
+            modifier = Modifier.padding(16.dp, 8.dp)
+        ) {
+            SingleColorButton(blueColor, selectedColor) { selectedColor = it }
+            SingleColorButton(greenColor, selectedColor) { selectedColor = it }
+            SingleColorButton(orange, selectedColor) { selectedColor = it }
+        }
+        if (false) {
+            Spacer(Modifier.height(16.dp))
+            Text(
+                text = "Amount",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+
+            Text(
+                text = "Enter total Amount present in bank account",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
+            )
+            TextField(
+                value = bankAmount,
+                onValueChange = { newText ->
+                    bankAmount = newText
+                },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(0.dp, 8.dp),
+                placeholder = {
+                    Text(
+                        "Amount",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
+                    )
+                },
+                leadingIcon = { Text("₹", style = MaterialTheme.typography.bodyLarge) },
+                shape = RoundedCornerShape(24.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                ),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                // visualTransformation = NumberCommaTransformation()
+            )
+
+            Spacer(Modifier.height(12.dp))
+
+            Text(
+                text = "Bank Name",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = "Enter the name of your bank",
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
+            )
+            TextField(
+                value = bankAmount,
+                onValueChange = { newText ->
+                    bankAmount = newText
+                },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(0.dp, 8.dp),
+                placeholder = {
+                    Text(
+                        "Bank Name",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
+                    )
+                },
+                leadingIcon = {
+                    Image(
+                        painter = painterResource(IconState.fromNumber(24)!!),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                },
+                shape = RoundedCornerShape(24.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                ),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+                // visualTransformation = NumberCommaTransformation()
+            )
+
+        }
         Spacer(Modifier.height(24.dp))
-        TextField(
-            value = bankAmount,
-            onValueChange = { newText ->
-                bankAmount = TextFieldValue(
-                    extractNumbers(newText.text).toString(),
-                    selection = TextRange(extractNumbers(newText.text).toString().length)
-                )
-                scope.launch {
-                    uiViewModel.liveBankAmount.emit(extractNumbers(newText.text).toString())
-                }
-            },
-            singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontalPadding, verticalPadding),
-            placeholder = {
-                Text(
-                    "Enter Amount ",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
-                )
-            },
-            leadingIcon = { Text("₹", style = MaterialTheme.typography.bodyLarge) },
-            shape = RoundedCornerShape(10.dp),
-            colors = TextFieldDefaults.colors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-            ),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            // visualTransformation = NumberCommaTransformation()
-        )
-        Spacer(Modifier.height(12.dp))
-        TextField(
-            value = bankNumber,
-            onValueChange = { newText ->
-                bankNumber = TextFieldValue(
-                    extractNumbers(newText.text).toString(),
-                    selection = TextRange(extractNumbers(newText.text).toString().length)
-                )
-                scope.launch {
-                    uiViewModel.liveBankNumber.emit(extractNumbers(newText.text).toString())
-                }
-            },
-            singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontalPadding, verticalPadding),
-            placeholder = {
-                Text(
-                    "Bank Account Number",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
-                )
-            },
-            prefix = { Text("**** **** **** ") },
-            leadingIcon = {
-                Image(
-                    painter = painterResource(R.drawable.ic_card_number),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
-            },
-            shape = RoundedCornerShape(10.dp),
-            colors = TextFieldDefaults.colors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-            ),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            // visualTransformation = NumberCommaTransformation()
-        )
-        Spacer(Modifier.height(12.dp))
-        TextField(
-            value = bankName,
-            onValueChange = { newText ->
-                bankName = newText
-                scope.launch {
-                    uiViewModel.liveBankName.emit(newText.text)
-                }
-            },
-            singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontalPadding, verticalPadding),
-            placeholder = {
-                Text(
-                    "Bank Name",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
-                )
-            },
-            leadingIcon = {
-                Image(
-                    painter = painterResource(IconState.fromNumber(24)!!),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
-            },
-            shape = RoundedCornerShape(10.dp),
-            colors = TextFieldDefaults.colors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-            ),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            // visualTransformation = NumberCommaTransformation()
-        )
-        Spacer(Modifier.height(24.dp))
+
+
         FilledTonalButton(
             modifier = Modifier
                 .fillMaxWidth()
@@ -1216,9 +1217,33 @@ fun BottomSheetContentPaymentMethodAddContent(
             onClick = { },
         ) {
             Icon(painter = painterResource(R.drawable.icon_expense), contentDescription = null)
-            Text(text = "Create Budget")
+            Text(text = "Save")
         }
         Spacer(Modifier.height(32.dp))
+    }
+}
+
+@Composable
+fun SingleColorButton(color: Color, selectedColor: Color, setColor: (Color) -> Unit) {
+
+    Box(
+        modifier = Modifier
+            .then(
+                if (selectedColor == color) Modifier.border(
+                    3.dp,
+                    color,
+                    shape = RoundedCornerShape(50)
+                ) else Modifier
+            )
+            .zIndex(-1f)
+    ) {
+        Surface(shape = RoundedCornerShape(50),
+            modifier = Modifier
+                .size(48.dp)
+                .fillMaxSize()
+                .padding(6.dp),
+            color = color,
+            onClick = { setColor(color) }) {}
     }
 }
 
