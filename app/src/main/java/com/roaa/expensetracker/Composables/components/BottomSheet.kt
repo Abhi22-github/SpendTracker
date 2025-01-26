@@ -101,6 +101,7 @@ import com.roaa.expensetracker.Composables.utils.colorList
 import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.iconsList
 import com.roaa.expensetracker.Composables.utils.toPalette
+import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Model.TransactionClass
 import com.roaa.expensetracker.Model.TransactionTypeClass
@@ -1026,11 +1027,15 @@ fun SingleIcon(item: Int, uiViewModel: UiViewModel = hiltViewModel()) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddPaymentMethodBottomSheet(
+    bankAccountsClass: BankAccountsClass,
     uiViewModel: UiViewModel = hiltViewModel()
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     val bottomSheet by uiViewModel.paymentMethodBottomSheetStatus.collectAsState(false)
+    var isEdit by remember { mutableStateOf(false) }
+    if (bankAccountsClass.id != 0L) isEdit = true
+
     if (bottomSheet) {
         ModalBottomSheet(onDismissRequest = {
             scope.launch {
@@ -1044,7 +1049,11 @@ fun AddPaymentMethodBottomSheet(
                 .imePadding()
                 .fillMaxWidth(),
             contentWindowInsets = { WindowInsets.ime }) {
-            BottomSheetContentPaymentMethodAddContent(modifier = Modifier)
+            BottomSheetContentPaymentMethodAddContent(
+                modifier = Modifier,
+                isEdit,
+                bankAccountsClass
+            )
         }
 
     }
@@ -1056,20 +1065,24 @@ val verticalPadding = 0.dp
 @Composable
 fun BottomSheetContentPaymentMethodAddContent(
     modifier: Modifier,
+    isEdit: Boolean,
+    bankAccountsClass: BankAccountsClass,
     uiViewModel: UiViewModel = hiltViewModel(),
     bankAccountsViewModel: BankAccountsViewModel = hiltViewModel()
 ) {
     val showError by uiViewModel.errorStatusInBankAccountAdd.collectAsState()
-    var bankAmount by remember { mutableStateOf("") }
-    var bankName by remember { mutableStateOf("") }
+    var bankAmount by remember { mutableStateOf(bankAccountsClass.initialAmount.toString()) }
+    var bankName by remember { mutableStateOf(bankAccountsClass.bankName) }
 
-    var selectedColor by remember { mutableIntStateOf(1) }
+    var selectedColor by remember { mutableIntStateOf(bankAccountsClass.cardColorNumber) }
 
     val scope = rememberCoroutineScope()
 
+    val title = if (isEdit) "Edit Bank Account" else "Add Bank Account"
+
     Column() {
         Text(
-            text = "Add Bank Account",
+            text = title,
             modifier = modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
             style = MaterialTheme.typography.titleLarge,
@@ -1077,6 +1090,7 @@ fun BottomSheetContentPaymentMethodAddContent(
         )
         Spacer(Modifier.height(16.dp))
         LivePaymentCard(color = ColorState.fromNumber(selectedColor)!!,
+            bankAccountsClass,
             sendBankAmount = { bankAmount = it },
             sendBankName = { bankName = it })
         Text(
@@ -1210,7 +1224,7 @@ fun BottomSheetContentPaymentMethodAddContent(
                     }
                     if (!bankName.isEmpty() && !bankAmount.isEmpty()) {
                         bankAccountsViewModel.createObjectAndStoreIt(
-                            0L, bankAmount, bankName, selectedColor
+                            bankAccountsClass.id, bankAmount, bankName, selectedColor
                         )
                         uiViewModel.paymentMethodBottomSheetStatus.emit(false)
                     }
