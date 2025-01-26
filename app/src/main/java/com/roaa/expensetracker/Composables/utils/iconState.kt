@@ -28,7 +28,14 @@ enum class IconState(val number: Int, val drawableResId: Int) {
     ICON_23(23, R.drawable.ic_category_23),
     ICON_24(24, R.drawable.ic_category_24),
     ICON_25(25, R.drawable.ic_category_25),
-    ICON_99(99,R.drawable.ic_question_mark);
+    ICON_26(26, R.drawable.ic_category_26),
+    ICON_27(27, R.drawable.ic_category_27),
+    ICON_28(28, R.drawable.ic_category_28),
+    ICON_29(29, R.drawable.ic_category_29),
+    ICON_30(30, R.drawable.ic_category_30),
+    ICON_31(31, R.drawable.ic_category_31),
+    ICON_32(32, R.drawable.ic_category_32),
+    ICON_99(99, R.drawable.ic_question_mark);
 //    ICON_ELEVEN(11, R.drawable.ic_category_11),
 //    ICON_TWELVE(12, R.drawable.ic_category_12);
 
