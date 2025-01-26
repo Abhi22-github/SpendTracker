@@ -119,24 +119,6 @@ fun DropDownMenu(
                 onDismiss()
             })
         }
-        //     }
-//        if (type == 2) {
-//            typeList?.forEach { transactionTypeClass ->
-//                val selectedIcon =
-//                    rememberAsyncImagePainter(IconStateForType.fromNumber(transactionTypeClass.iconNumber))
-//                DropdownMenuItem(text = { Text(text = transactionTypeClass.type) }, leadingIcon = {
-//                    Image(
-//                        painter = selectedIcon,
-//                        contentDescription = "",
-//                        modifier = Modifier.size(24.dp),
-//                    )
-//                }, onClick = {
-//                    selectedTypeSetter(transactionTypeClass)
-//                    selectedCategorySetter(CategoryClass(-1, "Select", 1, 99, EXPENSE))
-//                    onDismiss()
-//                })
-//            }
-//        }
 
     }
 }
@@ -159,7 +141,7 @@ fun SummaryCard(color: Color) {
         )
     ) {
         ConstraintLayout(Modifier.fillMaxWidth()) {
-            val (balanceText, balanceLabel, expense,income, moreIcon, backgroundImage1, backgroundImage2, progress) = createRefs()
+            val (balanceText, balanceLabel, expense, income, moreIcon, backgroundImage1, backgroundImage2, progress) = createRefs()
 
             Text(text = "₹24,045",
                 style = MaterialTheme.typography.headlineMedium.copy(fontFamily = numberFont),
@@ -341,5 +323,60 @@ fun SummaryCard(color: Color) {
                 )
             }
         }
+    }
+}
+
+@Composable
+fun DropDownBankAccountOption(
+    menuExpanded: Boolean,
+    colorPallet: HarmonizedColorPalette,
+    onDismiss: () -> Unit,
+    editClicked: () -> Unit,
+    deleteClicked: () -> Unit
+) {
+    DropdownMenu(
+        expanded = menuExpanded,
+        onDismissRequest = { onDismiss() },
+        containerColor = colorPallet.surfaceVariant,
+        shape = RoundedCornerShape(12.dp),
+    ) {
+        val primaryIcon =
+            rememberAsyncImagePainter(R.drawable.round_star)
+        val editIcon =
+            rememberAsyncImagePainter(R.drawable.round_edit)
+        val deleteIcon =
+            rememberAsyncImagePainter(R.drawable.round_delete_outline_24)
+        DropdownMenuItem(text = { Text(text = "Set As Primary") }, leadingIcon = {
+            Image(
+                painter = primaryIcon,
+                contentDescription = "edit",
+                modifier = Modifier.size(24.dp),
+            )
+        }, onClick = {
+            editClicked()
+            onDismiss()
+        })
+        DropdownMenuItem(text = { Text(text = "Edit") }, leadingIcon = {
+            Image(
+                painter = editIcon,
+                contentDescription = "edit",
+                modifier = Modifier.size(24.dp),
+            )
+        }, onClick = {
+            editClicked()
+            onDismiss()
+        })
+        DropdownMenuItem(text = { Text(text = "Delete") }, leadingIcon = {
+            Image(
+                painter = deleteIcon,
+                contentDescription = "delete",
+                modifier = Modifier.size(24.dp),
+            )
+        }, onClick = {
+            deleteClicked()
+            onDismiss()
+        })
+
+
     }
 }
