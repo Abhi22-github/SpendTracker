@@ -46,6 +46,21 @@ class PreferenceManager @Inject constructor(@ApplicationContext val context: Con
             }
     }
 
+    //save Boolean value
+    suspend fun saveLongValue(value: Long, key: Preferences.Key<Long>) {
+        dataStore.edit { preferences ->
+            preferences[key] = value
+        }
+    }
+
+    // Retrieve Boolean value
+    fun getLongValue(key: Preferences.Key<Long>): Flow<Long> {
+        return context.dataStore.data
+            .map { preferences ->
+                preferences[key] ?: 1L
+            }
+    }
+
     // Save Theme value
     suspend fun saveThemeValue(value: String, key: Preferences.Key<String>) {
         dataStore.edit { preferences ->

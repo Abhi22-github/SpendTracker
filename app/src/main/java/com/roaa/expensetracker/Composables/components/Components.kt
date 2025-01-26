@@ -331,6 +331,7 @@ fun DropDownBankAccountOption(
     menuExpanded: Boolean,
     colorPallet: HarmonizedColorPalette,
     onDismiss: () -> Unit,
+    onPrimaryClicked: () -> Unit,
     editClicked: () -> Unit,
     deleteClicked: () -> Unit
 ) {
@@ -353,7 +354,7 @@ fun DropDownBankAccountOption(
                 modifier = Modifier.size(24.dp),
             )
         }, onClick = {
-            editClicked()
+            onPrimaryClicked()
             onDismiss()
         })
         DropdownMenuItem(text = { Text(text = "Edit") }, leadingIcon = {
