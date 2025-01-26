@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roaa.expensetracker.Database.BankAccountRepository
 import com.roaa.expensetracker.Model.BankAccountsClass
+import com.roaa.expensetracker.Utilities.Constants.PRIMARY
 import com.roaa.expensetracker.Utilities.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -43,6 +44,23 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
         viewModelScope.launch {
             bankAccountRepository.delete(bankAccountsClass)
         }
+    }
+
+    fun createObjectAndStoreIt(
+        id: Long,
+        bankAmount: String,
+        bankName: String,
+        selectedColor: Int
+    ) {
+        val bankAccountObj = BankAccountsClass(
+            id = id,
+            initialAmount = bankAmount.toLong(),
+            currentAmount = bankAmount.toLong(),
+            bankName = bankName,
+            cardColorNumber = selectedColor,
+            accountType = PRIMARY
+        )
+        storeBankAccount(bankAccountObj)
     }
 
     fun storeBankAccount(bankAccountsClass: BankAccountsClass) {
