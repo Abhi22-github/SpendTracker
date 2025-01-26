@@ -2,7 +2,6 @@ package com.roaa.expensetracker.Activity
 
 import android.content.Context
 import android.content.Intent
-import android.content.SharedPreferences
 import android.graphics.Color.TRANSPARENT
 import android.os.Bundle
 import android.os.Handler
@@ -23,12 +22,10 @@ import com.google.android.material.navigation.NavigationView
 import com.roaa.expensetracker.Adapters.TransactionViewAdapter
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
 import com.roaa.expensetracker.Composables.components.AddBottomSheet
-import com.roaa.expensetracker.Events.EventMessage
 import com.roaa.expensetracker.Fragments.DayViewFragment
 import com.roaa.expensetracker.Fragments.ListViewFragment
 import com.roaa.expensetracker.Fragments.MonthViewFragment
 import com.roaa.expensetracker.R
-import com.roaa.expensetracker.Utilities.Constants
 import com.roaa.expensetracker.ViewModels.CategoryViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import com.roaa.expensetracker.databinding.ActivityMainBinding
@@ -36,7 +33,6 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import org.greenrobot.eventbus.EventBus
-import org.greenrobot.eventbus.Subscribe
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -55,7 +51,6 @@ class MainActivity : AppCompatActivity() {
     private var navigationView: NavigationView? = null
 
     private val viewPagerCalender: ViewPager? = null
-    private var sharedPreferences: SharedPreferences? = null
     private var fragmentTransaction: FragmentTransaction? = null
 
     private var listViewFragment: ListViewFragment? = null
@@ -183,7 +178,6 @@ class MainActivity : AppCompatActivity() {
 
     private fun initVars() {
         context = applicationContext
-        sharedPreferences = getSharedPreferences(Constants.sharedPreferencesName, MODE_PRIVATE)
         listViewFragment = ListViewFragment()
         monthViewFragment = MonthViewFragment()
         dayViewFragment = DayViewFragment()
@@ -207,7 +201,6 @@ class MainActivity : AppCompatActivity() {
     private fun sendUserToExpenseCategoryActivity() {
         val intent = Intent(context, ExpenseCategoryActivity::class.java)
         startActivity(intent)
-        //MainActivity.this.overridePendingTransition(android.R.anim.fade_in, 0);
     }
 
     private fun sendUserToIncomeCategoryActivity() {
@@ -238,15 +231,6 @@ class MainActivity : AppCompatActivity() {
     private fun sendUserToPaymentMethodsActivity() {
         val intent = Intent(context, PaymentMethodsComposeActivity::class.java)
         startActivity(intent)
-    }
-
-    @Subscribe
-    fun EventHandler(eventMessage: EventMessage) {
-        if (eventMessage.getEventCode() == 9) {
-            val editor = sharedPreferences!!.edit()
-            editor.putInt(Constants.sharedPreferenceOneTimeCheckKey, 1)
-            editor.apply()
-        }
     }
 
     override fun onStart() {

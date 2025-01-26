@@ -13,7 +13,7 @@ class TransactionRepository(@ApplicationContext applicationContext: Context) {
     val allTransactions: Flow<List<TransactionClass>>
 
     init {
-        val database = TransactionDatabase.getInstance(applicationContext)
+        val database = AppDatabase.getInstance(applicationContext)
         transactionDao = database.transactionDao()
         allTransactions = transactionDao.allTransactions
     }

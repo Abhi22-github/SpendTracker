@@ -6,15 +6,20 @@ import androidx.room.Room.databaseBuilder
 import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Model.TransactionClass
 
-@Database(entities = [TransactionClass::class, CategoryClass::class], version = 1)
-abstract class TransactionDatabase : RoomDatabase() {
+@Database(
+    entities = [TransactionClass::class, CategoryClass::class, BankAccountsClass::class],
+    version = 1
+)
+abstract class AppDatabase : RoomDatabase() {
     // below line is to create
     // abstract variable for dao.
     abstract fun transactionDao(): TransactionDao
     abstract fun categoryDao(): CategoryDao
+    abstract fun bankAccountsDao(): BankAccountDao
 
 //    // we are creating an async task class to perform task in background.
 //    private class PopulateDbAsyncTask(instance: TransactionDatabase) :
@@ -32,12 +37,12 @@ abstract class TransactionDatabase : RoomDatabase() {
     companion object {
         // below line is to create instance
         // for our database class.
-        private var instance: TransactionDatabase? = null
+        private var instance: AppDatabase? = null
 
         // on below line we are getting instance for our database.
         @JvmStatic
         @Synchronized
-        fun getInstance(context: Context): TransactionDatabase {
+        fun getInstance(context: Context): AppDatabase {
             // below line is to check if
             // the instance is null or not.
             if (instance == null) {
@@ -48,7 +53,7 @@ abstract class TransactionDatabase : RoomDatabase() {
                         // our database class with our database name.
                     databaseBuilder(
                         context.applicationContext,
-                        TransactionDatabase::class.java, "transaction_database"
+                        AppDatabase::class.java, "database"
                     ) // below line is use to add fall back to
                         // destructive migration to our database.
                         .addMigrations(MIGRATION_1_2)// below line is to add callback
@@ -96,6 +101,9 @@ abstract class TransactionDatabase : RoomDatabase() {
                 db.execSQL("INSERT INTO category_table(categoryName, categoryColorNumber, categoryIconNumber, categoryType) VALUES('Rent',1,10,'Income') ")
                 db.execSQL("INSERT INTO category_table(categoryName, categoryColorNumber, categoryIconNumber, categoryType) VALUES('Salary',1,32,'Income') ")
                 db.execSQL("INSERT INTO category_table(categoryName, categoryColorNumber, categoryIconNumber, categoryType) VALUES('Other',1,99,'Income') ")
+
+                //payment method cash
+                db.execSQL("INSERT INTO bank_accounts(initialAmount, currentAmount, bankName, accountType) VALUES(0,0,'Cash','Cash') ")
             }
         }
     }
