@@ -103,7 +103,7 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("INSERT INTO category_table(categoryName, categoryColorNumber, categoryIconNumber, categoryType) VALUES('Other',1,99,'Income') ")
 
                 //payment method cash
-                db.execSQL("INSERT INTO bank_accounts(initialAmount, currentAmount, bankName, cardColorNumber,accountType) VALUES(0,0,'Cash',1,'Cash') ")
+                db.execSQL("INSERT INTO bank_accounts(initialAmount, currentAmount, bankName, cardColorNumber,accountType) VALUES(0,0,'Cash',1,'CASH') ")
             }
         }
     }
