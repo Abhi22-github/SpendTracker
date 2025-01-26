@@ -10,12 +10,12 @@ class BankAccountRepository(@ApplicationContext applicationContext: Context) {
     private val bankAccountsDao: BankAccountDao
 
     // below method is to read all category from database.
-    val allBankAccounts: Flow<List<BankAccountsClass>>
+    val allBankAccountsExceptCash: Flow<List<BankAccountsClass>>
 
     init {
         val database = getInstance(applicationContext)
         bankAccountsDao = database.bankAccountsDao()
-        allBankAccounts = bankAccountsDao.allBankAccountsClass
+        allBankAccountsExceptCash = bankAccountsDao.allBankAccountsClassExceptCash
     }
 
     // creating a method to insert the data to our database.

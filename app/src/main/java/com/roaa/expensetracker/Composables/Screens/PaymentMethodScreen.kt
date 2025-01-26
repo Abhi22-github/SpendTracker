@@ -94,7 +94,7 @@ fun PaymentMethodScreen(
     bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
 ) {
     val showBottomSheet by uiViewModel.paymentMethodBottomSheetStatus.collectAsState()
-    val bankAccountsList by bankAccountsViewModel.allBankAccountList.collectAsState()
+    val bankAccountsList by bankAccountsViewModel.allBankAccountListExceptCash.collectAsState()
 
     val lazyListState = rememberLazyListState()
     val scope = rememberCoroutineScope()
