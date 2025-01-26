@@ -20,6 +20,6 @@ class UiViewModel @Inject constructor() : ViewModel() {
     var showDimTextOnLivePaymentCard = MutableStateFlow(true)
     var liveBankAmount = MutableStateFlow("")
     var liveBankNumber = MutableStateFlow("")
-    var liveBankName = MutableStateFlow("")
+    var liveBankName = MutableStateFlow("Bank Name")
 
 }
