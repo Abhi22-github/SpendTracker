@@ -114,15 +114,6 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
     }
 
 
-    fun fillCategoriesInDatabase(categoryClassesList: ArrayList<CategoryClass>) {
-        for (categoryClass in categoryClassesList) {
-            viewModelScope.launch {
-                categoryRepository.insert(categoryClass)
-            }
-        }
-        EventBus.getDefault().post(EventMessage(9, "success"))
-    }
-
     //to delete categories from database
     fun deleteCategoryFromDatabase(categoryClass: CategoryClass) {
         viewModelScope.launch {

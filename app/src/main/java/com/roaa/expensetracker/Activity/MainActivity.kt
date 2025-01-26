@@ -27,7 +27,6 @@ import com.roaa.expensetracker.Events.EventMessage
 import com.roaa.expensetracker.Fragments.DayViewFragment
 import com.roaa.expensetracker.Fragments.ListViewFragment
 import com.roaa.expensetracker.Fragments.MonthViewFragment
-import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants
 import com.roaa.expensetracker.ViewModels.CategoryViewModel
@@ -104,7 +103,6 @@ class MainActivity : AppCompatActivity() {
 
         setUpTransactionFragment()
 
-        oneTimeOperationMethod()
     }
 
     private fun setUpTransactionFragment() {
@@ -200,44 +198,6 @@ class MainActivity : AppCompatActivity() {
         navigationView = findViewById(R.id.navigationView_navigationContent_mainActivity)
     }
 
-    private fun oneTimeOperationMethod() {
-        val check = sharedPreferences!!.getInt(Constants.sharedPreferenceOneTimeCheckKey, 0)
-        if (check == 0) {
-            val categoryClassesList = ArrayList<CategoryClass>()
-            val expenseArray = resources.getStringArray(R.array.expense_categories)
-
-            for (s in expenseArray) {
-                val categoryClassObject = CategoryClass(
-                    categoryName = s,
-                    categoryColorNumber = 1,
-                    categoryIconNumber = 1,
-                    categoryType = Constants.EXPENSE,
-                    id = 0,
-                )
-                categoryClassesList.add(categoryClassObject)
-            }
-
-            val incomeArray = resources.getStringArray(R.array.income_categories)
-
-            for (s in incomeArray) {
-                val categoryClassObject = CategoryClass(
-                    id = 0,
-                    categoryName = s,
-                    categoryColorNumber = 1,
-                    categoryIconNumber = 1,
-                    categoryType = Constants.INCOME,
-                )
-
-                categoryClassesList.add(categoryClassObject)
-            }
-
-            categoryViewModel.fillCategoriesInDatabase(categoryClassesList)
-
-            val editor = sharedPreferences!!.edit()
-            editor.putInt(Constants.sharedPreferenceOneTimeCheckKey, 1)
-            editor.apply()
-        }
-    }
 
     private fun sendUserToAddActivity() {
         val intent = Intent(context, AddActivity::class.java)
