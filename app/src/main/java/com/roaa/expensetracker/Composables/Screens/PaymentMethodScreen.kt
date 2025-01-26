@@ -100,16 +100,20 @@ fun PaymentMethodScreen(
     val scope = rememberCoroutineScope()
 
     //empty bank account class
+
+    val emptyBankAccountsClass = BankAccountsClass(
+        id = 0L,
+        initialAmount = 0,
+        currentAmount = 0,
+        bankName = "",
+        cardColorNumber = 1,
+        accountType = CASH
+    )
+
+
     var bankAccountsClass by remember {
         mutableStateOf(
-            BankAccountsClass(
-                id = 0L,
-                initialAmount = 0,
-                currentAmount = 0,
-                bankName = "",
-                cardColorNumber = 1,
-                accountType = CASH
-            )
+            emptyBankAccountsClass
         )
     }
 
@@ -143,15 +147,12 @@ fun PaymentMethodScreen(
                     )
                 }
                 items(bankAccountsList, key = { it.id }) {
-                    PaymentCard(
-                        it,
-                        bankAccountsViewModel,
-                        { bankAccounts ->
-                            bankAccountsClass = bankAccounts
-                            scope.launch {
-                                uiViewModel.paymentMethodBottomSheetStatus.emit(true)
-                            }
-                        })
+                    PaymentCard(it, bankAccountsViewModel, { bankAccounts ->
+                        bankAccountsClass = bankAccounts
+                        scope.launch {
+                            uiViewModel.paymentMethodBottomSheetStatus.emit(true)
+                        }
+                    })
                 }
                 item {
                     Spacer(Modifier.height(84.dp))
@@ -169,8 +170,11 @@ fun PaymentMethodScreen(
 
         }
     }
+    if (showBottomSheet) {
+        AddPaymentMethodBottomSheet(bankAccountsClass)
+        bankAccountsClass = emptyBankAccountsClass
+    }
 
-    if (showBottomSheet) AddPaymentMethodBottomSheet(bankAccountsClass)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -629,20 +633,16 @@ fun LivePaymentCard(
                 colorFilter = ColorFilter.tint(color)
             )
             var icon = Icons.TwoTone.Star
-            if (iconToggle)
-                icon = Icons.Filled.Star
-            else
-                icon = Icons.TwoTone.Star
+            if (iconToggle) icon = Icons.Filled.Star
+            else icon = Icons.TwoTone.Star
 
-            IconButton(
-                onClick = { iconToggle = !iconToggle },
+            IconButton(onClick = { iconToggle = !iconToggle },
                 modifier = Modifier.constrainAs(moreIcon) {
                     top.linkTo(parent.top, 18.dp)
                     end.linkTo(parent.end, 18.dp)
                 }) {
                 Icon(
-                    imageVector = icon, contentDescription = null,
-                    tint = color
+                    imageVector = icon, contentDescription = null, tint = color
                 )
             }
         }
