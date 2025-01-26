@@ -23,8 +23,9 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
     val uiState: StateFlow<UiState> = _uiState
 
     //flow to get all bank accounts
-    private var _allBankAccountsList = MutableStateFlow<List<BankAccountsClass>>(listOf())
-    val allBankAccountList: MutableStateFlow<List<BankAccountsClass>> = _allBankAccountsList
+    private var _allBankAccountListExceptCash = MutableStateFlow<List<BankAccountsClass>>(listOf())
+    val allBankAccountListExceptCash: MutableStateFlow<List<BankAccountsClass>> =
+        _allBankAccountListExceptCash
 
     init {
         getAllBankAccounts()
@@ -33,8 +34,8 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
     fun getAllBankAccounts() {
         viewModelScope.launch {
             loading()
-            bankAccountRepository.allBankAccounts.catch { error(it) }.collect {
-                _allBankAccountsList.value = it
+            bankAccountRepository.allBankAccountsExceptCash.catch { error(it) }.collect {
+                _allBankAccountListExceptCash.value = it
                 completed()
             }
         }
