@@ -58,6 +58,8 @@ private fun sendUserBack(context: Context) {
 fun NavController.popBackStackOrFinish(context: Context) {
     if (!popBackStack()) {
         (context as Activity).finish()
+    } else {
+        popBackStack()
     }
 }
 
