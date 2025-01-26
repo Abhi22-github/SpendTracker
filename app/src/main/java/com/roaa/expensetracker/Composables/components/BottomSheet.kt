@@ -239,7 +239,7 @@ fun BottomSheetContentItemAddContent(
                 text = "Add Transaction",
                 modifier = modifier.fillMaxWidth(),
                 textAlign = TextAlign.Center,
-                style = MaterialTheme.typography.titleLarge,
+                style = typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(16.dp))
@@ -979,7 +979,7 @@ fun BottomSheetContentIconPicker(modifier: Modifier = Modifier) {
             text = "Choose Icon",
             modifier = modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.titleLarge,
+            style = typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurface
         )
 
@@ -1033,6 +1033,7 @@ fun AddPaymentMethodBottomSheet(
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
     val bottomSheet by uiViewModel.paymentMethodBottomSheetStatus.collectAsState(false)
+    val bankAccountsClass by remember { mutableStateOf(bankAccountsClass) }
     var isEdit by remember { mutableStateOf(false) }
     if (bankAccountsClass.id != 0L) isEdit = true
 
@@ -1049,11 +1050,13 @@ fun AddPaymentMethodBottomSheet(
                 .imePadding()
                 .fillMaxWidth(),
             contentWindowInsets = { WindowInsets.ime }) {
+
             BottomSheetContentPaymentMethodAddContent(
                 modifier = Modifier,
                 isEdit,
                 bankAccountsClass
             )
+
         }
 
     }
@@ -1075,6 +1078,7 @@ fun BottomSheetContentPaymentMethodAddContent(
     var bankName by remember { mutableStateOf(bankAccountsClass.bankName) }
 
     var selectedColor by remember { mutableIntStateOf(bankAccountsClass.cardColorNumber) }
+    var showConfirmationDialog by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
 
@@ -1085,7 +1089,7 @@ fun BottomSheetContentPaymentMethodAddContent(
             text = title,
             modifier = modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.titleLarge,
+            style = typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(16.dp))
@@ -1095,7 +1099,7 @@ fun BottomSheetContentPaymentMethodAddContent(
             sendBankName = { bankName = it })
         Text(
             text = "Enter total Amount present in bank along with bank name in designated field",
-            style = MaterialTheme.typography.labelLarge,
+            style = typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha),
             modifier = Modifier.padding(16.dp, 8.dp)
         )
@@ -1223,10 +1227,16 @@ fun BottomSheetContentPaymentMethodAddContent(
                         uiViewModel.errorStatusInBankAccountAdd.emit(true)
                     }
                     if (!bankName.isEmpty() && !bankAmount.isEmpty()) {
-                        bankAccountsViewModel.createObjectAndStoreIt(
-                            bankAccountsClass.id, bankAmount, bankName, selectedColor
-                        )
-                        uiViewModel.paymentMethodBottomSheetStatus.emit(false)
+                        if (isEdit)
+                            showConfirmationDialog = isEdit
+                        else
+                            scope.launch {
+                                bankAccountsViewModel.createObjectAndStoreIt(
+                                    bankAccountsClass.id, bankAmount, bankName, selectedColor
+                                )
+                                uiViewModel.paymentMethodBottomSheetStatus.emit(false)
+                            }
+
                     }
 
 
@@ -1234,6 +1244,22 @@ fun BottomSheetContentPaymentMethodAddContent(
             },
         ) {
             Text(text = "Save")
+        }
+        if (showConfirmationDialog) {
+            ConfirmationAlertDialog(
+                onDismissRequest = { showConfirmationDialog = !showConfirmationDialog },
+                onConfirmation = {
+                    scope.launch {
+                        bankAccountsViewModel.createObjectAndStoreIt(
+                            bankAccountsClass.id, bankAmount, bankName, selectedColor
+                        )
+                        uiViewModel.paymentMethodBottomSheetStatus.emit(false)
+                    }
+                },
+                dialogTitle = "Change Bank Details",
+                dialogText = "Are you sure, that you want to change current bank details",
+                icon = ImageVector.vectorResource(R.drawable.icon_income)
+            )
         }
         Spacer(Modifier.height(32.dp))
     }
