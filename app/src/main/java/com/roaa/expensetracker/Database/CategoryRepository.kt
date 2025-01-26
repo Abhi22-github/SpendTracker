@@ -1,7 +1,7 @@
 package com.roaa.expensetracker.Database
 
 import android.content.Context
-import com.roaa.expensetracker.Database.TransactionDatabase.Companion.getInstance
+import com.roaa.expensetracker.Database.AppDatabase.Companion.getInstance
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Utilities.Constants
 import dagger.hilt.android.qualifiers.ApplicationContext
