@@ -26,7 +26,7 @@ import com.roaa.expensetracker.R
 
 
 @Composable
-fun EmptyScreen() {
+fun EmptyScreen(text: String = "No Transactions found") {
     val composition by rememberLottieComposition(LottieCompositionSpec.RawRes(R.raw.empty_screen_animation))
 
     // Box for centering content on the screen
@@ -38,7 +38,7 @@ fun EmptyScreen() {
         ) {
             LottieAnimation(composition = composition, modifier = Modifier.wrapContentSize())
             Text(
-                text = "No Transactions found", style = MaterialTheme.typography.titleMedium,
+                text = text, style = MaterialTheme.typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface,
             )
         }

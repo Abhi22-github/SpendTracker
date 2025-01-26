@@ -1236,10 +1236,7 @@ fun BottomSheetContentPaymentMethodAddContent(
                                 )
                                 uiViewModel.paymentMethodBottomSheetStatus.emit(false)
                             }
-
                     }
-
-
                 }
             },
         ) {

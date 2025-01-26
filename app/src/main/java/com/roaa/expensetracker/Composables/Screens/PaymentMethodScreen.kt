@@ -71,6 +71,7 @@ import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.components.AddPaymentMethodBottomSheet
 import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.Composables.components.DropDownBankAccountOption
+import com.roaa.expensetracker.Composables.components.EmptyScreen
 import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.ColorState
@@ -82,6 +83,7 @@ import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.CASH
 import com.roaa.expensetracker.Utilities.extractNumbers
 import com.roaa.expensetracker.ViewModels.BankAccountsViewModel
+import com.roaa.expensetracker.ViewModels.PreferencesViewModel
 import com.roaa.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.launch
 
@@ -92,15 +94,16 @@ fun PaymentMethodScreen(
     sendUserBack: () -> Unit,
     uiViewModel: UiViewModel = hiltViewModel(),
     bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
+    preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val showBottomSheet by uiViewModel.paymentMethodBottomSheetStatus.collectAsState()
     val bankAccountsList by bankAccountsViewModel.allBankAccountListExceptCash.collectAsState()
+    val primaryBankAccountNumber by preferencesViewModel.getPrimaryAccountNumber.collectAsState(1L);
 
     val lazyListState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
     //empty bank account class
-
     val emptyBankAccountsClass = BankAccountsClass(
         id = 0L,
         initialAmount = 0,
@@ -110,17 +113,25 @@ fun PaymentMethodScreen(
         accountType = CASH
     )
 
-
     var bankAccountsClass by remember {
         mutableStateOf(
             emptyBankAccountsClass
         )
     }
-
     val context = LocalContext.current
 
+    if (!bankAccountsList.isEmpty()) {
+        bankAccountsList.forEachIndexed { index, it ->
+            if (it.id == primaryBankAccountNumber) {
+                val temp = bankAccountsList.get(0)
+                bankAccountsList[0] = it
+                bankAccountsList[index] = temp
+            }
+        }
+    }
+
     Scaffold(topBar = {
-        TopBar(title = "Payment Methods",
+        TopBar(title = "Bank Accounts",
             showDelete = false,
             sendUserBackToPreviousActivity = { sendUserBack() },
             delete = {})
@@ -134,30 +145,66 @@ fun PaymentMethodScreen(
             icon = { Icon(Icons.Filled.Add, "Localized description") },
             text = { Text(text = "Add Payment Method") },
         )
-    }) {
-        Column(Modifier.padding(paddingValues = it)) {
-            Spacer(Modifier.height(10.dp))
-            LazyColumn(state = lazyListState) {
-                item {
-                    Text(
-                        text = "Primary Account",
-                        modifier = Modifier.padding(18.dp, 4.dp),
-                        style = typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.60f)
-                    )
-                }
-                items(bankAccountsList, key = { it.id }) {
-                    PaymentCard(it, bankAccountsViewModel, { bankAccounts ->
-                        bankAccountsClass = bankAccounts
-                        scope.launch {
-                            uiViewModel.paymentMethodBottomSheetStatus.emit(true)
+    }) { paddingValue ->
+        if (!bankAccountsList.isEmpty()) {
+            Column(Modifier.padding(paddingValues = paddingValue)) {
+                Spacer(Modifier.height(10.dp))
+                LazyColumn(state = lazyListState) {
+                    item {
+                        if (!bankAccountsList.take(1).isEmpty()) {
+                            Column(Modifier.padding(18.dp, 4.dp)) {
+                                Text(
+                                    text = "Primary Account",
+                                    style = typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "This will be selected as your default account for payments",
+                                    style = typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                )
+                            }
                         }
-                    })
+                    }
+                    items(bankAccountsList.take(1), key = { it.id }) {
+                        PaymentCard(
+                            Modifier.animateItem(),
+                            it,
+                            bankAccountsViewModel,
+                            { bankAccounts ->
+                                bankAccountsClass = bankAccounts
+                                scope.launch {
+                                    uiViewModel.paymentMethodBottomSheetStatus.emit(true)
+                                }
+                            })
+                    }
+                    item {
+                        if (!bankAccountsList.drop(1).isEmpty())
+                            Column {
+                                Text(
+                                    text = "Secondary Accounts",
+                                    modifier = Modifier.padding(18.dp, top = 24.dp, bottom = 4.dp),
+                                    style = typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                    }
+                    items(bankAccountsList.drop(1), key = { it.id }) {
+                        PaymentCard(
+                            Modifier.animateItem(),
+                            it,
+                            bankAccountsViewModel,
+                            { bankAccounts ->
+                                bankAccountsClass = bankAccounts
+                                scope.launch {
+                                    uiViewModel.paymentMethodBottomSheetStatus.emit(true)
+                                }
+                            })
+                    }
+                    item {
+                        Spacer(Modifier.height(84.dp))
+                    }
                 }
-                item {
-                    Spacer(Modifier.height(84.dp))
-                }
-            }
 
 
 //            Spacer(Modifier.height(24.dp))
@@ -167,7 +214,9 @@ fun PaymentMethodScreen(
 //                style = MaterialTheme.typography.bodyMedium,
 //                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.60f)
 //            )
-
+            }
+        } else {
+            EmptyScreen("No Bank Account Found")
         }
     }
     if (showBottomSheet) {
@@ -180,10 +229,12 @@ fun PaymentMethodScreen(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PaymentCard(
+    modifier: Modifier,
     bankAccountsClass: BankAccountsClass,
     bankAccountsViewModel: BankAccountsViewModel,
     editClicked: (bankAccountsClass: BankAccountsClass) -> Unit,
-    uiViewModel: UiViewModel = hiltViewModel()
+    uiViewModel: UiViewModel = hiltViewModel(),
+    preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val color = ColorState.fromNumber(bankAccountsClass.cardColorNumber)!!
     val scope = rememberCoroutineScope()
@@ -193,7 +244,7 @@ fun PaymentCard(
 
     Card(
         shape = RoundedCornerShape(12.dp),
-        modifier = Modifier
+        modifier = modifier
             .padding(16.dp, 4.dp)
             .clip(RoundedCornerShape(12.dp))
             .clickable {
@@ -337,6 +388,10 @@ fun PaymentCard(
                 if (showOptionMenu) DropDownBankAccountOption(menuExpanded = showOptionMenu,
                     colorPallet = colorPallet,
                     { showOptionMenu = false },
+                    onPrimaryClicked = {
+                        scope.launch { preferencesViewModel.setPrimaryAccount(bankAccountsClass.id) }
+                        showOptionMenu = false
+                    },
                     editClicked = {
                         editClicked(bankAccountsClass)
                     },
