@@ -43,7 +43,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts
-import com.roaa.expensetracker.Composables.Screens.PaymentCard
 import com.roaa.expensetracker.Composables.blueColor
 import com.roaa.expensetracker.Composables.failureColor
 import com.roaa.expensetracker.Composables.successColor
@@ -93,8 +92,6 @@ fun TransactionsListCompose(
                     item {
                         if (showForecast)
                             SummaryCard(blueColor)
-                        else
-                            PaymentCard(blueColor)
                     }
                     transactionConverterList.forEach { (date, transactionList) ->
                         val date = getDateFromMillis(transactionList.get(0).dateWithTime)
