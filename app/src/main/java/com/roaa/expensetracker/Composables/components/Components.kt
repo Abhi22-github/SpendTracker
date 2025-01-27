@@ -52,6 +52,7 @@ import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.utils.HarmonizedColorPalette
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
+import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.R
 
@@ -118,6 +119,42 @@ fun DropDownMenu(
                 selectedCategorySetter(categoryClass)
                 onDismiss()
             })
+        }
+
+    }
+}
+
+@Composable
+fun DropDownMenuForBankAccounts(
+    menuExpanded: Boolean,
+    colorPallet: HarmonizedColorPalette,
+    onDismiss: () -> Unit,
+    itemList: List<BankAccountsClass>,
+    selectedCategorySetter: (BankAccountsClass) -> Unit
+) {
+    DropdownMenu(
+        expanded = menuExpanded,
+        onDismissRequest = { onDismiss() },
+        containerColor = colorPallet.surfaceVariant,
+        shape = RoundedCornerShape(24.dp),
+    ) {
+//        if (type == 1) {
+        itemList.forEach { bankAccountClass ->
+            val selectedIcon =
+                rememberAsyncImagePainter(IconState.fromNumber(24))
+            DropdownMenuItem(
+                text = { Text(text = bankAccountClass.bankName) },
+                            leadingIcon = {
+                Image(
+                    painter = selectedIcon,
+                    contentDescription = "",
+                    modifier = Modifier.size(24.dp),
+                )
+            },
+                onClick = {
+                    selectedCategorySetter(bankAccountClass)
+                    onDismiss()
+                })
         }
 
     }

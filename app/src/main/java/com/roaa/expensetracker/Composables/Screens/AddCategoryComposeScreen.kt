@@ -405,7 +405,7 @@ fun ContentDrawScope.drawWithLayer(block: ContentDrawScope.() -> Unit) {
 }
 
 @Composable
-private fun TextSwitch(
+fun TextSwitch(
     modifier: Modifier = Modifier,
     selectedIndex: Int,
     items: List<String>,
