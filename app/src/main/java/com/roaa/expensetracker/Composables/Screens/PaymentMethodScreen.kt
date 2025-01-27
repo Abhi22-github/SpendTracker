@@ -110,6 +110,7 @@ fun PaymentMethodScreen(
         currentAmount = 0,
         bankName = "",
         cardColorNumber = 1,
+        cardIconNumber = 25,
         accountType = CASH
     )
 

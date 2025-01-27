@@ -358,7 +358,7 @@ fun BottomSheetContentItemAddContent(
                 }
             }
 
-            Spacer(Modifier.height(50.dp))
+            Spacer(Modifier.height(64.dp))
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -489,7 +489,7 @@ fun BottomSheetContentItemAddContent(
 
         ErrorRow(errorStatus)
 
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(64.dp))
         Row {
             BottomRow(modifier, selectedDate, { selectedDate = it }, buttonClicked = {
                 validateTransactionData(
@@ -505,6 +505,20 @@ fun BottomSheetContentItemAddContent(
             })
         }
         Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding),
+        ) {
+            FilledTonalButton(
+                onClick = { }, Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+            ) {
+                Text("Save")
+            }
+        }
+        Spacer(Modifier.height(24.dp))
     }
 }
 
@@ -557,7 +571,10 @@ fun BottomRow(
     modifier: Modifier,
     selectedDate: Long?,
     selectedDateSetter: (Long?) -> Unit,
-    buttonClicked: () -> Unit
+    buttonClicked: () -> Unit,
+    uiViewModel: UiViewModel = hiltViewModel(),
+    categoryViewModel: CategoryViewModel = hiltViewModel(),
+    bankAccountsViewModel: BankAccountsViewModel = hiltViewModel()
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState =
@@ -568,7 +585,7 @@ fun BottomRow(
             .fillMaxWidth()
             .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
     ) {
-        Row(modifier = modifier.weight(1f)) {
+        Row(modifier = modifier) {
 
             FilledTonalButton(
                 onClick = {
@@ -593,17 +610,59 @@ fun BottomRow(
                 })
 
             }
-
-
         }
-        Row(modifier = Modifier.weight(1f), horizontalArrangement = Arrangement.End) {
-            FilledTonalButton(
-                onClick = { buttonClicked() },
-            ) {
-                Text("Save")
+        Row(modifier = modifier.weight(1f), horizontalArrangement = Arrangement.End) {
+            var bankAccountMenuExpanded by remember { mutableStateOf(false) }
+            Box() {
+                FilledTonalButton(
+                    onClick = {
+                        bankAccountMenuExpanded = true
+                    }, colors = ButtonDefaults.outlinedButtonColors(
+                        contentColor = MaterialTheme.colorScheme.onSurface.copy(
+                            alpha = secondaryAlphaForElements
+                        )
+                    ), contentPadding = PaddingValues(start = 12.dp, end = 12.dp)
+                ) {
+                    Icon(Icons.Rounded.DateRange, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(text = "Bank of Maharashtra")
+
+                }
+
+                val scope = rememberCoroutineScope()
+                val bankAccountsList by bankAccountsViewModel.allBankAccountListExceptCash.collectAsState()
+
+                val bankAccountsClass = BankAccountsClass(
+                    id = 0L,
+                    initialAmount = 0,
+                    currentAmount = 0,
+                    bankName = "Temp",
+                    cardColorNumber = 1,
+                    cardIconNumber = 25,
+                    accountType = "CASH"
+                )
+                var selectedBankAccount by remember {
+                    mutableStateOf(
+                        bankAccountsClass
+                    )
+                }
+                val colorPalletBlue = toPalette(blueColor)
+                DropDownMenuForBankAccounts(
+                    bankAccountMenuExpanded,
+                    colorPalletBlue,
+                    onDismiss = { bankAccountMenuExpanded = false },
+                    bankAccountsList,
+                    selectedCategorySetter = {
+                        selectedBankAccount = it
+                        scope.launch {
+                            uiViewModel.errorStatusInAddBottomSheet.emit(false)
+                        }
+                    }
+                )
             }
         }
     }
+
     if (showDatePicker) {
         DatePickerModal(datePickerState, onDateSelected = { date ->
             selectedDateSetter(date)
@@ -651,7 +710,11 @@ fun BottomSheetContentItemDetails(
             .imePadding()
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
-        BottomSheetContentItemDetailsContent(modifier = Modifier, singleTransaction, uiViewModel)
+        BottomSheetContentItemDetailsContent(
+            modifier = Modifier,
+            singleTransaction,
+            uiViewModel
+        )
     }
 }
 
@@ -669,7 +732,10 @@ fun BottomSheetContentItemDetailsContent(
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     val labelAndValueStyle = typography.bodyMedium
     val scope = rememberCoroutineScope()
-    Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Text(
             text = "₹" + parseAmount(singleTransaction.amount),
             style = typography.headlineLarge,
@@ -1037,8 +1103,7 @@ fun SingleIcon(item: Int, uiViewModel: UiViewModel = hiltViewModel()) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddPaymentMethodBottomSheet(
-    bankAccountsClass: BankAccountsClass,
-    uiViewModel: UiViewModel = hiltViewModel()
+    bankAccountsClass: BankAccountsClass, uiViewModel: UiViewModel = hiltViewModel()
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
@@ -1062,9 +1127,7 @@ fun AddPaymentMethodBottomSheet(
             contentWindowInsets = { WindowInsets.ime }) {
 
             BottomSheetContentPaymentMethodAddContent(
-                modifier = Modifier,
-                isEdit,
-                bankAccountsClass
+                modifier = Modifier, isEdit, bankAccountsClass
             )
 
         }
@@ -1237,15 +1300,13 @@ fun BottomSheetContentPaymentMethodAddContent(
                         uiViewModel.errorStatusInBankAccountAdd.emit(true)
                     }
                     if (!bankName.isEmpty() && !bankAmount.isEmpty()) {
-                        if (isEdit)
-                            showConfirmationDialog = isEdit
-                        else
-                            scope.launch {
-                                bankAccountsViewModel.createObjectAndStoreIt(
-                                    bankAccountsClass.id, bankAmount, bankName, selectedColor
-                                )
-                                uiViewModel.paymentMethodBottomSheetStatus.emit(false)
-                            }
+                        if (isEdit) showConfirmationDialog = isEdit
+                        else scope.launch {
+                            bankAccountsViewModel.createObjectAndStoreIt(
+                                bankAccountsClass.id, bankAmount, bankName, selectedColor
+                            )
+                            uiViewModel.paymentMethodBottomSheetStatus.emit(false)
+                        }
                     }
                 }
             },
@@ -1348,8 +1409,7 @@ fun BottomSheetContentAddItemTest(sheetState: SheetState, closeBottomSheet: () -
             closeBottomSheet()
         },
         sheetState = sheetState,
-        modifier = Modifier
-            .fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         BottomSheetContentItemAddContentTest(modifier = Modifier)
     }
@@ -1426,7 +1486,8 @@ fun BottomSheetContentItemAddContentTest(
     }
     val budget by preferencesViewModel.getBudgetValue.collectAsState(1f)
     val oldAmount by transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
-    val newAmountTemp = if (expenseValue.text.isEmpty()) 0L else extractNumbers(expenseValue.text)
+    val newAmountTemp =
+        if (expenseValue.text.isEmpty()) 0L else extractNumbers(expenseValue.text)
     val newDailyBudget = oldAmount + newAmountTemp
     val amountInString = String.format("%.2f", newDailyBudget.toFloat())
     val percent = if (budget != 0f) {
@@ -1452,20 +1513,12 @@ fun BottomSheetContentItemAddContentTest(
     val windowSizeClass = LocalWindowSize.current
     val windowInsets = LocalWindowInsets.current
 
-    val keyboardAdditionalOffset = windowInsets
-        .calculateBottomPadding()
-        .minus(16.dp)
-        .coerceAtLeast(0.dp)
+    val keyboardAdditionalOffset =
+        windowInsets.calculateBottomPadding().minus(16.dp).coerceAtLeast(0.dp)
 
-    val internalKeyboardHeight = if (windowSizeClass == WindowWidthSizeClass.Compact) {
-        800f
-    } else {
-        800f / 2f
-    }
 
     Column(
-        modifier
-            .fillMaxWidth()
+        modifier.fillMaxWidth()
     ) {
         Column(
 
@@ -1506,7 +1559,7 @@ fun BottomSheetContentItemAddContentTest(
                         }
                         .height(56.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        val colorPalletBlue = toPalette(blueColor)
+
                         val image = rememberAsyncImagePainter(
                             if (typeToggle) IconStateForType.fromNumber(expenseType.iconNumber)
                             else IconStateForType.fromNumber(incomeType.iconNumber)
@@ -1527,7 +1580,9 @@ fun BottomSheetContentItemAddContentTest(
                         }
                     }
                 }
+
                 Spacer(Modifier.width(12.dp))
+
                 Box(
                     modifier = modifier.fillMaxWidth()
                 ) {
@@ -1580,6 +1635,48 @@ fun BottomSheetContentItemAddContentTest(
                         },
                     )
 
+                }
+
+                Spacer(Modifier.width(12.dp))
+
+                Box(contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .width(boxSize)
+                        .background(
+                            color = colorAnimate, shape = RoundedCornerShape(30.dp)
+                        )
+                        .clip(RoundedCornerShape(30.dp))
+                        .clickable {
+                            if (!expanded) {
+                                expanded = !expanded
+                            } else {
+                                typeToggle = !typeToggle
+                                categoryViewModel.getCorrespondingList(if (typeToggle) expenseType.type else incomeType.type)
+                                selectedCategory = firstSampleClass
+                            }
+                        }
+                        .height(56.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+
+                        val image = rememberAsyncImagePainter(
+                            if (typeToggle) IconStateForType.fromNumber(expenseType.iconNumber)
+                            else IconStateForType.fromNumber(incomeType.iconNumber)
+                        )
+                        Image(
+                            painter = image,
+                            contentDescription = "Test Image",
+                            modifier = Modifier.size(36.dp),
+                        )
+
+                        AnimatedVisibility(expanded) {
+                            Text(
+                                text = if (typeToggle) expenseType.type else incomeType.type,
+                                modifier = Modifier.padding(start = 8.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
                 }
             }
 
@@ -1653,7 +1750,7 @@ fun BottomSheetContentItemAddContentTest(
                             "Add a comment",
                             style = typography.bodyLarge,
                             modifier = Modifier.fillMaxWidth(),
-                            textAlign = TextAlign.Center,
+                            textAlign = TextAlign.Start,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
                         )
                     },
@@ -1665,7 +1762,7 @@ fun BottomSheetContentItemAddContentTest(
                         focusedContainerColor = Color.Transparent
                     ),
                     textStyle = typography.bodyLarge.copy(
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.Start,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
                     ),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
