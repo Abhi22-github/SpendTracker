@@ -3,8 +3,13 @@ package com.roaa.expensetracker.Composables.components
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -57,9 +62,11 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
+import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -73,6 +80,8 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
@@ -81,6 +90,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -1322,6 +1332,455 @@ private fun BottomSheetContentItemDetailsPreview() {
         Surface {
             // BottomSheetContentItemDetailsContent(Modifier, singleTransaction)
         }
+    }
+}
+
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun BottomSheetContentAddItemTest(sheetState: SheetState, closeBottomSheet: () -> Unit) {
+
+    LaunchedEffect(true) {
+        sheetState.show()
+    }
+    ModalBottomSheet(
+        onDismissRequest = {
+            closeBottomSheet()
+        },
+        sheetState = sheetState,
+        modifier = Modifier
+            .fillMaxWidth(),
+    ) {
+        BottomSheetContentItemAddContentTest(modifier = Modifier)
+    }
+}
+
+val LocalWindowInsets = compositionLocalOf { PaddingValues(0.dp) }
+val LocalWindowSize = compositionLocalOf { WindowWidthSizeClass.Compact }
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+fun BottomSheetContentItemAddContentTest(
+    modifier: Modifier,
+    categoryViewModel: CategoryViewModel = hiltViewModel(),
+    transactionsViewModel: TransactionsViewModel = hiltViewModel(),
+    uiViewModel: UiViewModel = hiltViewModel(),
+    animationViewModel: AnimationViewModel = hiltViewModel(),
+    preferencesViewModel: PreferencesViewModel = hiltViewModel()
+) {
+    val scope = rememberCoroutineScope()
+    var categoryMenuExpanded by remember { mutableStateOf(false) }
+    var expenseValue by remember { mutableStateOf(TextFieldValue("")) }
+    var comment by remember { mutableStateOf(TextFieldValue("")) }
+    var selectedDate by remember { mutableStateOf<Long?>(System.currentTimeMillis()) }
+    val categoryList by categoryViewModel.categoryList.collectAsState()
+    val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
+    val firstSampleClass = CategoryClass(
+        -1, "Select Category", 1, -99, EXPENSE
+    )
+    var selectedCategory by remember {
+        mutableStateOf(
+            firstSampleClass
+        )
+    }
+
+    val expenseType = TransactionTypeClass(1, EXPENSE)
+    val incomeType = TransactionTypeClass(2, INCOME)
+
+
+    val errorStatus by uiViewModel.errorStatusInAddBottomSheet.collectAsState(false)
+
+
+    //animations
+    var expanded by remember { mutableStateOf(false) }
+    var typeToggle by remember { mutableStateOf(true) }
+    val boxSize by animateDpAsState(
+        targetValue = if (expanded) 160.dp else 56.dp, animationSpec = tween(500)
+    )
+    val colorAnimate by animateColorAsState(
+        targetValue = if (typeToggle) orange.copy(alpha = .20f) else successColor.copy(
+            alpha = 0.20f
+        ), animationSpec = tween(500)
+    )
+
+    var selectedType by remember { mutableStateOf(expenseType.type) }
+    if (typeToggle) {
+        selectedType = expenseType.type
+    } else {
+        selectedType = incomeType.type
+    }
+
+    // Request focus once when the composable is first composed
+    LaunchedEffect(Unit) {
+        // Request focus for the TextField
+        categoryViewModel.getCorrespondingList(selectedType)
+        categoryViewModel.getOnlyExpenseCategoryNames()
+        categoryViewModel.getOnlyIncomeCategoryNames()
+    }
+
+    LaunchedEffect(expanded, typeToggle) {
+        if (expanded) {
+            delay(5000)
+            expanded = false
+        }
+    }
+    val budget by preferencesViewModel.getBudgetValue.collectAsState(1f)
+    val oldAmount by transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
+    val newAmountTemp = if (expenseValue.text.isEmpty()) 0L else extractNumbers(expenseValue.text)
+    val newDailyBudget = oldAmount + newAmountTemp
+    val amountInString = String.format("%.2f", newDailyBudget.toFloat())
+    val percent = if (budget != 0f) {
+        newDailyBudget / budget
+    } else {
+        0f
+    }
+    animationViewModel.method("₹$amountInString", percent)
+    Log.d("Hello", percent.toString())
+
+    LaunchedEffect(percent) {
+        scope.launch {
+            animationViewModel.newSpentPercentage.emit(percent)
+        }
+    }
+
+    val imeHeight = WindowInsets.ime.getBottom(Density(LocalContext.current))
+
+    // Check if the keyboard is open (i.e., imeHeight > 0)
+    val isKeyboardVisible = imeHeight > 0
+    //val isKeyboardVisible by remember { mutableStateOf(height != 0) }
+    val localDensity = LocalDensity.current
+    val windowSizeClass = LocalWindowSize.current
+    val windowInsets = LocalWindowInsets.current
+
+    val keyboardAdditionalOffset = windowInsets
+        .calculateBottomPadding()
+        .minus(16.dp)
+        .coerceAtLeast(0.dp)
+
+    val internalKeyboardHeight = if (windowSizeClass == WindowWidthSizeClass.Compact) {
+        800f
+    } else {
+        800f / 2f
+    }
+
+    Column(
+        modifier
+            .fillMaxWidth()
+    ) {
+        Column(
+
+        ) {
+            Text(
+                text = "Add Transaction",
+                modifier = modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                style = typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.height(16.dp))
+            AnimatedVisibility(showForecast) {
+                Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
+                    RestBudgetPill(LocalDate.now())
+                }
+            }
+            if (showForecast) {
+                Spacer(Modifier.height(16.dp))
+            }
+            Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
+
+                Box(contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .width(boxSize)
+                        .background(
+                            color = colorAnimate, shape = RoundedCornerShape(30.dp)
+                        )
+                        .clip(RoundedCornerShape(30.dp))
+                        .clickable {
+                            if (!expanded) {
+                                expanded = !expanded
+                            } else {
+                                typeToggle = !typeToggle
+                                categoryViewModel.getCorrespondingList(if (typeToggle) expenseType.type else incomeType.type)
+                                selectedCategory = firstSampleClass
+                            }
+                        }
+                        .height(56.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        val colorPalletBlue = toPalette(blueColor)
+                        val image = rememberAsyncImagePainter(
+                            if (typeToggle) IconStateForType.fromNumber(expenseType.iconNumber)
+                            else IconStateForType.fromNumber(incomeType.iconNumber)
+                        )
+                        Image(
+                            painter = image,
+                            contentDescription = "Test Image",
+                            modifier = Modifier.size(36.dp),
+                        )
+
+                        AnimatedVisibility(expanded) {
+                            Text(
+                                text = if (typeToggle) expenseType.type else incomeType.type,
+                                modifier = Modifier.padding(start = 8.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.width(12.dp))
+                Box(
+                    modifier = modifier.fillMaxWidth()
+                ) {
+                    val colorPalletGreen = toPalette(greenColor)
+                    Button(
+                        modifier = Modifier.padding(end = 5.dp),
+                        onClick = { categoryMenuExpanded = !categoryMenuExpanded },
+                        colors = ButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContentColor = MaterialTheme.colorScheme.onPrimary
+                        ),
+                        contentPadding = PaddingValues(
+                            start = 20.dp, end = 10.dp, top = 16.dp, bottom = 16.dp
+                        )
+                    ) {
+                        val image =
+                            rememberAsyncImagePainter(IconState.fromNumber(selectedCategory.categoryIconNumber))
+                        Image(
+                            painter = image,
+                            contentDescription = "Test Image",
+                            modifier = Modifier.size(24.dp),
+                        )
+
+                        Text(
+                            text = selectedCategory.categoryName,
+                            modifier = Modifier
+                                .weight(0.6f)
+                                .padding(start = 8.dp),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Icon(
+                            Icons.Filled.KeyboardArrowDown,
+                            "backIcon",
+                            modifier = Modifier.weight(0.2f)
+                        )
+                    }
+                    DropDownMenu(
+                        categoryMenuExpanded,
+                        colorPalletGreen,
+                        onDismiss = { categoryMenuExpanded = false },
+                        categoryList,
+                        selectedCategorySetter = {
+                            selectedCategory = it
+                            scope.launch {
+                                uiViewModel.errorStatusInAddBottomSheet.emit(false)
+                            }
+                        },
+                    )
+
+                }
+            }
+
+            Spacer(Modifier.height(50.dp))
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
+            ) {
+                TextField(
+                    value = expenseValue,
+                    onValueChange = { newValue ->
+                        expenseValue = TextFieldValue(
+                            extractNumbers(newValue.text).toString(),
+                            selection = TextRange(extractNumbers(newValue.text).toString().length)
+                        )
+                        scope.launch {
+                            uiViewModel.errorStatusInAddBottomSheet.emit(false)
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.Center),
+                    singleLine = true,
+
+                    placeholder = {
+                        Text(
+                            "₹0",
+                            style = typography.displayMedium,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.Center),
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
+                        )
+                    },
+                    shape = RoundedCornerShape(24.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent,
+                    ),
+                    textStyle = typography.displayMedium.copy(
+                        textAlign = TextAlign.Center, fontFamily = numberFont
+                    ),
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Number, imeAction = ImeAction.Next
+                    ),
+                )
+            }
+            Spacer(Modifier.height(0.dp))
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
+            ) {
+                TextField(
+                    value = comment,
+                    onValueChange = { newValue ->
+                        comment = newValue
+                        scope.launch {
+                            uiViewModel.errorStatusInAddBottomSheet.emit(false)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    placeholder = {
+                        Text(
+                            "Add a comment",
+                            style = typography.bodyLarge,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
+                        )
+                    },
+                    shape = RoundedCornerShape(24.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent
+                    ),
+                    textStyle = typography.bodyLarge.copy(
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
+                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                )
+            }
+
+
+            Spacer(Modifier.height(16.dp))
+            Row {
+                BottomRowTest(modifier, selectedDate, { selectedDate = it }, buttonClicked = {
+                    validateTransactionData(
+                        selectedType,
+                        selectedCategory,
+                        expenseValue.text.replace(",", ""),
+                        comment.text,
+                        selectedDate,
+                        scope,
+                        uiViewModel,
+                        transactionsViewModel,
+                    )
+                })
+            }
+
+
+            val height1 = animateDpAsState((400 - imeHeight).dp, tween(200))
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = !isKeyboardVisible,
+                enter = fadeIn(
+                    tween(
+                        durationMillis = 150,
+                        easing = LinearEasing,
+                    )
+                ) + slideInVertically(
+                    tween(
+                        durationMillis = 150,
+                        easing = LinearEasing,
+                    )
+                ) { with(localDensity) { 10.dp.toPx().toInt() } },
+                exit = fadeOut(
+                    tween(
+                        durationMillis = 150,
+                        easing = LinearEasing,
+                    )
+                ) + slideOutVertically(
+                    tween(
+                        durationMillis = 150,
+                        easing = LinearEasing,
+                    )
+                ) { with(localDensity) { 10.dp.toPx().toInt() } },
+            ) {
+
+                KeyBoard(
+                    modifier = Modifier
+                        .height(height1.value)
+                        .fillMaxWidth()
+                )
+
+            }
+
+            Spacer(Modifier.height(8.dp))
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BottomRowTest(
+    modifier: Modifier,
+    selectedDate: Long?,
+    selectedDateSetter: (Long?) -> Unit,
+    buttonClicked: () -> Unit
+) {
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState =
+        rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
+    ) {
+        Row(modifier = modifier.weight(1f)) {
+
+            FilledTonalButton(
+                onClick = {
+                    showDatePicker = !showDatePicker
+                    selectedDateSetter(selectedDate)
+                }, colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = secondaryAlphaForElements
+                    )
+                ), contentPadding = PaddingValues(start = 12.dp, end = 12.dp)
+            ) {
+                Icon(Icons.Rounded.DateRange, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text(text = if (selectedDate?.let { convertMillisToDateString(it) } == convertMillisToDateString(
+                        System.currentTimeMillis()
+                    )) {
+                    "Today"
+                } else {
+                    selectedDate?.let {
+                        convertMillisToDateString(it)
+                    } ?: "Date Error"
+                })
+
+            }
+
+
+        }
+    }
+    if (showDatePicker) {
+        DatePickerModal(datePickerState, onDateSelected = { date ->
+            selectedDateSetter(date)
+        }, onDismiss = { showDatePicker = !showDatePicker })
     }
 }
 

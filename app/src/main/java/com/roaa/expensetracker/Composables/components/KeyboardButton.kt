@@ -62,16 +62,12 @@ fun KeyboardButton(
         KeyboardButtonType.DEFAULT -> colorButton
         KeyboardButtonType.PRIMARY -> MaterialTheme.colorScheme.primaryContainer
         KeyboardButtonType.SECONDARY -> MaterialTheme.colorScheme.secondaryContainer
-//        KeyboardButtonType.TERTIARY -> MaterialTheme.colorScheme.tertiaryContainer
-//        KeyboardButtonType.DELETE -> MaterialTheme.colorScheme.errorContainer
     }
 
     val contentColor = when (type) {
         KeyboardButtonType.DEFAULT -> colorOnButton
         KeyboardButtonType.PRIMARY -> MaterialTheme.colorScheme.onPrimaryContainer
         KeyboardButtonType.SECONDARY -> MaterialTheme.colorScheme.onSecondaryContainer
-//        KeyboardButtonType.TERTIARY -> MaterialTheme.colorScheme.onTertiaryContainer
-//        KeyboardButtonType.DELETE -> MaterialTheme.colorScheme.onErrorContainer
     }
 
     Surface(
@@ -102,7 +98,7 @@ fun KeyboardButton(
 //                    calcMaxFont(minSizeFloat),
 //                    46.sp,
 //                )
-                val fontSize = 46.sp
+                val fontSize = 24.sp
 
                 Text(
                     text = text,
