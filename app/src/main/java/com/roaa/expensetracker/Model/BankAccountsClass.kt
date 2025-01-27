@@ -11,5 +11,6 @@ data class BankAccountsClass(
     val currentAmount: Long,
     val bankName: String,
     val cardColorNumber: Int,
+    val cardIconNumber: Int,
     val accountType: String,
 )

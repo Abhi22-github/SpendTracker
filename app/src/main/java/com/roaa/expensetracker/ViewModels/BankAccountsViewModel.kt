@@ -61,6 +61,7 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
             currentAmount = bankAmount.toLong(),
             bankName = bankName,
             cardColorNumber = selectedColor,
+            cardIconNumber = 25,
             accountType = PRIMARY
         )
         storeBankAccount(bankAccountObj)
