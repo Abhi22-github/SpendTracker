@@ -105,7 +105,7 @@ fun AddCategory(
     categoryViewModel: CategoryViewModel = hiltViewModel()
 ) {
     val category = CategoryClass(categoryId, categoryName, 1, categoryIcon, categoryType)
-    val showDeleteButton by remember { mutableStateOf(if (category.id == 0L) false else true) }
+    val showDeleteButton by remember { mutableStateOf(if (category.categoryId == 0L) false else true) }
     var showConfirmationDialog by remember { mutableStateOf(false) }
     var confirmationDialogType by remember { mutableIntStateOf(1) }
     val context = LocalContext.current
@@ -247,7 +247,7 @@ fun SharedTransitionScope.ScaffoldContent(
                         modifier = Modifier
                             .size(96.dp)
                             .sharedElement(
-                                state = rememberSharedContentState(key = "image/${categoryClass.id}"),
+                                state = rememberSharedContentState(key = "image/${categoryClass.categoryId}"),
                                 animatedVisibilityScope = animatedVisibilityScope,
                             ),
                     )
@@ -281,7 +281,7 @@ fun SharedTransitionScope.ScaffoldContent(
                 .fillMaxWidth()
                 .padding(30.dp, 8.dp)
                 .sharedElement(
-                    state = rememberSharedContentState(key = "text/${categoryClass.id}"),
+                    state = rememberSharedContentState(key = "text/${categoryClass.categoryId}"),
                     animatedVisibilityScope = animatedVisibilityScope,
                 ),
             placeholder = {
@@ -323,12 +323,12 @@ fun SharedTransitionScope.ScaffoldContent(
                         uiViewModel.errorStatusMessage.emit("Please select icon for Category")
                         return@launch
                     }
-                    if (categoryClass.id != 0L) {
+                    if (categoryClass.categoryId != 0L) {
                         showConfirmationDialog = true
                         return@launch
                     } else {
                         storeCategoryData(
-                            categoryClass.id,
+                            categoryClass.categoryId,
                             categoryName,
                             selectedIcon,
                             selectedIndex,
@@ -357,7 +357,7 @@ fun SharedTransitionScope.ScaffoldContent(
             onDismissRequest = { showConfirmationDialog = !showConfirmationDialog },
             onConfirmation = {
                 storeCategoryData(
-                    categoryClass.id,
+                    categoryClass.categoryId,
                     categoryName,
                     selectedIcon,
                     selectedIndex,

@@ -1128,7 +1128,7 @@ fun AddPaymentMethodBottomSheet(
     val bottomSheet by uiViewModel.paymentMethodBottomSheetStatus.collectAsState(false)
     val bankAccountsClass by remember { mutableStateOf(bankAccountsClass) }
     var isEdit by remember { mutableStateOf(false) }
-    if (bankAccountsClass.id != 0L) isEdit = true
+    if (bankAccountsClass.bankAccountId != 0L) isEdit = true
 
     if (bottomSheet) {
         ModalBottomSheet(onDismissRequest = {
@@ -1321,7 +1321,7 @@ fun BottomSheetContentPaymentMethodAddContent(
                         if (isEdit) showConfirmationDialog = isEdit
                         else scope.launch {
                             bankAccountsViewModel.createObjectAndStoreIt(
-                                bankAccountsClass.id, bankAmount, bankName, selectedColor
+                                bankAccountsClass.bankAccountId, bankAmount, bankName, selectedColor
                             )
                             uiViewModel.paymentMethodBottomSheetStatus.emit(false)
                         }
@@ -1337,7 +1337,7 @@ fun BottomSheetContentPaymentMethodAddContent(
                 onConfirmation = {
                     scope.launch {
                         bankAccountsViewModel.createObjectAndStoreIt(
-                            bankAccountsClass.id, bankAmount, bankName, selectedColor
+                            bankAccountsClass.bankAccountId, bankAmount, bankName, selectedColor
                         )
                         uiViewModel.paymentMethodBottomSheetStatus.emit(false)
                     }

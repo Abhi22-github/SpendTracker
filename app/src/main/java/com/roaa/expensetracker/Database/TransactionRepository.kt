@@ -1,6 +1,7 @@
 package com.roaa.expensetracker.Database
 
 import android.content.Context
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Model.TotalAmountClass
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Model.TransactionClass
@@ -10,7 +11,7 @@ import kotlinx.coroutines.flow.Flow
 class TransactionRepository(@ApplicationContext applicationContext: Context) {
 
     private val transactionDao: TransactionDao
-    val allTransactions: Flow<List<TransactionClass>>
+    val allTransactions: Flow<List<TransactionWithDetails>>
 
     init {
         val database = AppDatabase.getInstance(applicationContext)

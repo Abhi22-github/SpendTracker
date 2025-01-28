@@ -18,7 +18,7 @@ import java.io.OutputStream
 @Entity(tableName = "bank_accounts")
 data class BankAccountsClass(
     @PrimaryKey(autoGenerate = true)
-    val id: Long,
+    val bankAccountId: Long,
     val initialAmount: Long,
     val currentAmount: Long,
     val bankName: String,

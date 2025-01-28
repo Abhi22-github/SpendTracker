@@ -6,8 +6,6 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.roaa.expensetracker.Adapters.TransactionViewAdapter
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
 import com.roaa.expensetracker.Composables.Screens.FragmentDayScreen
 import com.roaa.expensetracker.Utilities.toLocalDate
@@ -15,7 +13,6 @@ import com.roaa.expensetracker.Utilities.toNormalString
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import com.roaa.expensetracker.databinding.FragmentDayBinding
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.onEach
 import java.time.LocalDate
 
 @AndroidEntryPoint
@@ -58,19 +55,19 @@ class DayFragment() : Fragment() {
     }
 
 
-    private fun setTransactionRecyclerView() {
-        binding.testRecyclerView.setLayoutManager(
-            LinearLayoutManager(
-                requireActivity()
-            )
-        )
-        viewModel.allTransactions.onEach {
-            val transactionViewAdapter = TransactionViewAdapter(
-                requireActivity(),
-                it
-            )
-            binding.testRecyclerView.adapter = transactionViewAdapter
-        }
-    }
+//    private fun setTransactionRecyclerView() {
+//        binding.testRecyclerView.setLayoutManager(
+//            LinearLayoutManager(
+//                requireActivity()
+//            )
+//        )
+//        viewModel.allTransactions.onEach {
+//            val transactionViewAdapter = TransactionViewAdapter(
+//                requireActivity(),
+//                it
+//            )
+//            binding.testRecyclerView.adapter = transactionViewAdapter
+//        }
+//    }
 
 }
