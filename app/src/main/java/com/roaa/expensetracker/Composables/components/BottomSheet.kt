@@ -115,6 +115,7 @@ import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Model.TransactionClass
 import com.roaa.expensetracker.Model.TransactionTypeClass
+import com.roaa.expensetracker.Model.emptyBank
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
@@ -129,6 +130,7 @@ import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import com.roaa.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -581,19 +583,20 @@ fun BottomRow(
         rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
     val bankAccountsList by bankAccountsViewModel.allBankAccountList.collectAsState()
 
-    val d = preferencesViewModel.getPrimaryAccountNumber.collectAsState(0L)
-
-    bankAccountsViewModel.getSingleBankAccount(d.value)
-
     val colorPalletBlue = toPalette(blueColor)
     val scope = rememberCoroutineScope()
 
-    val p = bankAccountsViewModel.singleBankAccount.collectAsState()
-
-    val selectedBankAccount by bankAccountsViewModel.selectedBankAccount.collectAsState()
-
-
-
+    val primaryBankAccount by preferencesViewModel.getPrimaryAccount.collectAsState(
+        emptyBank
+    )
+    var selectedBankAccount by remember {
+        mutableStateOf(emptyBank)
+    }
+    LaunchedEffect(primaryBankAccount) {
+        preferencesViewModel.getPrimaryAccount.take(1).collect { data ->
+            selectedBankAccount = data
+        }
+    }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -640,7 +643,7 @@ fun BottomRow(
                     ), contentPadding = PaddingValues(start = 12.dp, end = 12.dp)
                 ) {
                     val image = rememberAsyncImagePainter(
-                        IconState.fromNumber(selectedBankAccount?.cardIconNumber?:99)
+                        IconState.fromNumber(selectedBankAccount?.cardIconNumber ?: 99)
                     )
                     Image(
                         painter = image,
@@ -648,7 +651,7 @@ fun BottomRow(
                         modifier = Modifier.size(24.dp),
                     )
                     Spacer(Modifier.width(8.dp))
-                    Text(text = selectedBankAccount?.bankName?:"")
+                    Text(text = selectedBankAccount?.bankName ?: "")
                 }
 
                 DropDownMenuForBankAccounts(
@@ -657,9 +660,8 @@ fun BottomRow(
                     onDismiss = { bankAccountMenuExpanded = false },
                     bankAccountsList,
                     selectedBankAccountSetter = {
-                        // selectedBankAccount = it
+                        selectedBankAccount = it
                         scope.launch {
-                            bankAccountsViewModel.selectedBankAccount.emit(it)
                             uiViewModel.errorStatusInAddBottomSheet.emit(false)
                         }
                     }
