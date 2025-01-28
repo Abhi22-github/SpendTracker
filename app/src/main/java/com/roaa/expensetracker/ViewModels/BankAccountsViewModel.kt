@@ -26,19 +26,58 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
     private var _allBankAccountList = MutableStateFlow<MutableList<BankAccountsClass>>(
         mutableListOf()
     )
-    val allBankAccountList: MutableStateFlow<MutableList<BankAccountsClass>> =
+    val allBankAccountList: StateFlow<MutableList<BankAccountsClass>> =
         _allBankAccountList
 
     //flow to get all bank accounts except cash
     private var _allBankAccountListExceptCash = MutableStateFlow<MutableList<BankAccountsClass>>(
         mutableListOf()
     )
-    val allBankAccountListExceptCash: MutableStateFlow<MutableList<BankAccountsClass>> =
+    val allBankAccountListExceptCash: StateFlow<MutableList<BankAccountsClass>> =
         _allBankAccountListExceptCash
+
+    //flow to get singleBankAccount
+    private var _singleBankAccount = MutableStateFlow<BankAccountsClass>(
+        BankAccountsClass(
+            id = 0,
+            initialAmount = 0,
+            currentAmount = 0,
+            bankName = "",
+            cardColorNumber = 1,
+            cardIconNumber = 99,
+            accountType = "CASH"
+        )
+    )
+    val singleBankAccount: StateFlow<BankAccountsClass> =
+        _singleBankAccount
+
+    var selectedBankAccount = MutableStateFlow<BankAccountsClass>(
+        BankAccountsClass(
+            id = 0,
+            initialAmount = 0,
+            currentAmount = 0,
+            bankName = "",
+            cardColorNumber = 1,
+            cardIconNumber = 99,
+            accountType = "CASH"
+        )
+    )
 
     init {
         getAllBankAccounts()
         getAllBankAccountsExceptCash()
+        getSingleBankAccount(1)
+    }
+
+    fun getSingleBankAccount(id: Long) {
+        viewModelScope.launch {
+            loading()
+            bankAccountRepository.getSingleBankAccount(id).catch { error(it) }.collect {
+                _singleBankAccount.value = it
+                selectedBankAccount.value = it
+                completed()
+            }
+        }
     }
 
     fun getAllBankAccounts() {
@@ -79,7 +118,7 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
             currentAmount = bankAmount.toLong(),
             bankName = bankName,
             cardColorNumber = selectedColor,
-            cardIconNumber = 25,
+            cardIconNumber = 24,
             accountType = PRIMARY
         )
         storeBankAccount(bankAccountObj)
