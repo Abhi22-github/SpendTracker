@@ -1,10 +1,13 @@
 package com.roaa.expensetracker.Utilities.PreferenceManger
 
 import android.content.Context
+import androidx.datastore.dataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
 import com.roaa.expensetracker.Composables.ThemeMode
+import com.roaa.expensetracker.Model.BankAccountsClass
+import com.roaa.expensetracker.Model.BankAccountsSerializer
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -12,14 +15,33 @@ import javax.inject.Inject
 
 
 val Context.dataStore by preferencesDataStore(name = PREFERENCES_NAME)
+val Context.dataStoreBank by dataStore("my_file.json", serializer = BankAccountsSerializer)
 
 class PreferenceManager @Inject constructor(@ApplicationContext val context: Context) {
     private val dataStore = context.dataStore
+    private val dataStoreBank = context.dataStoreBank
 
     // Save float value
     suspend fun saveFloatValue(value: Float, key: Preferences.Key<Float>) {
         dataStore.edit { preferences ->
             preferences[key] = value
+        }
+    }
+
+     fun getPrimaryBankAccount(): Flow<BankAccountsClass> =
+        context.dataStoreBank.data
+
+    suspend fun setPrimaryBankAccount(bankAccountsClass: BankAccountsClass) {
+        context.dataStoreBank.updateData {
+            it.copy(
+                id = bankAccountsClass.id,
+                initialAmount = bankAccountsClass.initialAmount,
+                currentAmount = bankAccountsClass.currentAmount,
+                bankName = bankAccountsClass.bankName,
+                cardColorNumber = bankAccountsClass.cardColorNumber,
+                cardIconNumber = bankAccountsClass.cardIconNumber,
+                accountType = bankAccountsClass.accountType
+            )
         }
     }
 
