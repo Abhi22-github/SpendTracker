@@ -12,7 +12,7 @@ import androidx.room.PrimaryKey
 data class CategoryClass(
     @JvmField
     @PrimaryKey(autoGenerate = true)
-    var id: Long,
+    var categoryId: Long,
 
     @JvmField
     @ColumnInfo(name = "categoryName")

@@ -34,7 +34,7 @@ class PreferenceManager @Inject constructor(@ApplicationContext val context: Con
     suspend fun setPrimaryBankAccount(bankAccountsClass: BankAccountsClass) {
         context.dataStoreBank.updateData {
             it.copy(
-                id = bankAccountsClass.id,
+                bankAccountId = bankAccountsClass.bankAccountId,
                 initialAmount = bankAccountsClass.initialAmount,
                 currentAmount = bankAccountsClass.currentAmount,
                 bankName = bankAccountsClass.bankName,

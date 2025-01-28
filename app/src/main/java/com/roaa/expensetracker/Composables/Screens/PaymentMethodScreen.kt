@@ -105,7 +105,7 @@ fun PaymentMethodScreen(
 
     //empty bank account class
     val emptyBankAccountsClass = BankAccountsClass(
-        id = 0L,
+        bankAccountId = 0L,
         initialAmount = 0,
         currentAmount = 0,
         bankName = "",
@@ -123,7 +123,7 @@ fun PaymentMethodScreen(
 
     if (!bankAccountsList.isEmpty()) {
         bankAccountsList.forEachIndexed { index, it ->
-            if (it.id == primaryBankAccountNumber) {
+            if (it.bankAccountId == primaryBankAccountNumber) {
                 val temp = bankAccountsList.get(0)
                 bankAccountsList[0] = it
                 bankAccountsList[index] = temp
@@ -167,7 +167,7 @@ fun PaymentMethodScreen(
                             }
                         }
                     }
-                    items(bankAccountsList.take(1), key = { it.id }) {
+                    items(bankAccountsList.take(1), key = { it.bankAccountId }) {
                         PaymentCard(
                             Modifier.animateItem(),
                             it,
@@ -190,7 +190,7 @@ fun PaymentMethodScreen(
                                 )
                             }
                     }
-                    items(bankAccountsList.drop(1), key = { it.id }) {
+                    items(bankAccountsList.drop(1), key = { it.bankAccountId }) {
                         PaymentCard(
                             Modifier.animateItem(),
                             it,
@@ -390,7 +390,7 @@ fun PaymentCard(
                     colorPallet = colorPallet,
                     { showOptionMenu = false },
                     onPrimaryClicked = {
-                        scope.launch { preferencesViewModel.setPrimaryAccountNumber(bankAccountsClass.id) }
+                        scope.launch { preferencesViewModel.setPrimaryAccountNumber(bankAccountsClass.bankAccountId) }
                         scope.launch { preferencesViewModel.setPrimaryAccount(bankAccountsClass) }
                         showOptionMenu = false
                     },

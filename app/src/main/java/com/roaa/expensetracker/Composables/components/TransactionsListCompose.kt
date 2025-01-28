@@ -76,9 +76,10 @@ fun TransactionsListCompose(
     Column {
         if (!showSingleDateTransactions) {
 
-            val transactionList by viewModel.allTransactions.collectAsState(emptyList<TransactionClass>())
+            val transactionList by viewModel.allTransactions.collectAsState(emptyList())
             val transactionsMap =
-                transactionList.sortedByDescending { it.dateWithTime }.groupBy { it.date }
+                transactionList.sortedByDescending { it.transaction.dateWithTime }
+                    .groupBy { it.transaction.date }
                     .toSortedMap()
 
             val transactionConverterList = transactionsMap.map {
@@ -94,11 +95,12 @@ fun TransactionsListCompose(
                             SummaryCard(blueColor)
                     }
                     transactionConverterList.forEach { (date, transactionList) ->
-                        val date = getDateFromMillis(transactionList.get(0).dateWithTime)
+                        val date =
+                            getDateFromMillis(transactionList.get(0).transaction.dateWithTime)
                         item { Header(if (date == getDateFromMillis(System.currentTimeMillis())) "Today" else date) }
-                        items(transactionList, key = { it.id }) { item ->
-                            SingleTransaction(item, onSingleItemClick = {
-                                singleTransaction = (item)
+                        items(transactionList, key = { it.transaction.id }) { item ->
+                            SingleTransaction(item.transaction, onSingleItemClick = {
+                                singleTransaction = (item.transaction)
                                 scope.launch {
                                     uiViewModel.transactionDetailBottomSheetValue.emit(true)
                                 }
@@ -255,15 +257,15 @@ fun SingleTransactionNew(item: TransactionClass, onSingleItemClick: (Transaction
                     ),
                 ),
             ) {
-                SingleTransaction(
-                    item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L),
-                    {})
-                SingleTransaction(
-                    item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L),
-                    {})
-                SingleTransaction(
-                    item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L),
-                    {})
+//                SingleTransaction(
+//                    item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L,1L,1L),
+//                    {})
+//                SingleTransaction(
+//                    item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L),
+//                    {})
+//                SingleTransaction(
+//                    item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L),
+//                    {})
             }
 
         }
@@ -288,14 +290,14 @@ fun Header(date: String) {
 @Preview
 @Composable
 fun SingleTransactionPreview() {
-    SingleTransaction(item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L), {})
+    //  SingleTransaction(item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L), {})
 }
 
 
 @Preview
 @Composable
 fun SingleTransactionNewPreview() {
-    SingleTransactionNew(item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L)) {}
+    // SingleTransactionNew(item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L)) {}
 }
 
 @Preview

@@ -9,6 +9,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.material.chip.Chip
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Database.TransactionRepository
 import com.roaa.expensetracker.Events.EventMessage
 import com.roaa.expensetracker.Model.CategoryClass
@@ -211,7 +212,7 @@ class TransactionsViewModel @Inject constructor(
         this.selectedDate = date
     }
 
-    val allTransactions: Flow<List<TransactionClass>>
+    val allTransactions: Flow<List<TransactionWithDetails>>
         get() = transactionRepository.allTransactions
 
 
