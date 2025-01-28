@@ -3,7 +3,7 @@ package com.roaa.expensetracker.Model
 import com.roaa.expensetracker.Utilities.Constants.CASH
 
 val emptyBank = BankAccountsClass(
-    0L,
+    1L,
     0L,
     0L,
     "Cash",
