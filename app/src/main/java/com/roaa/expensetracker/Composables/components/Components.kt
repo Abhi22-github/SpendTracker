@@ -130,7 +130,7 @@ fun DropDownMenuForBankAccounts(
     colorPallet: HarmonizedColorPalette,
     onDismiss: () -> Unit,
     itemList: List<BankAccountsClass>,
-    selectedCategorySetter: (BankAccountsClass) -> Unit
+    selectedBankAccountSetter: (BankAccountsClass) -> Unit
 ) {
     DropdownMenu(
         expanded = menuExpanded,
@@ -141,18 +141,18 @@ fun DropDownMenuForBankAccounts(
 //        if (type == 1) {
         itemList.forEach { bankAccountClass ->
             val selectedIcon =
-                rememberAsyncImagePainter(IconState.fromNumber(24))
+                rememberAsyncImagePainter(IconState.fromNumber(bankAccountClass.cardIconNumber))
             DropdownMenuItem(
                 text = { Text(text = bankAccountClass.bankName) },
-                            leadingIcon = {
-                Image(
-                    painter = selectedIcon,
-                    contentDescription = "",
-                    modifier = Modifier.size(24.dp),
-                )
-            },
+                leadingIcon = {
+                    Image(
+                        painter = selectedIcon,
+                        contentDescription = "",
+                        modifier = Modifier.size(24.dp),
+                    )
+                },
                 onClick = {
-                    selectedCategorySetter(bankAccountClass)
+                    selectedBankAccountSetter(bankAccountClass)
                     onDismiss()
                 })
         }

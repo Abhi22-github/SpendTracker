@@ -25,6 +25,10 @@ class BankAccountRepository(@ApplicationContext applicationContext: Context) {
         bankAccountsDao.insert(bankAccountsClass)
     }
 
+    fun getSingleBankAccount(id: Long): Flow<BankAccountsClass> {
+        return bankAccountsDao.getSingleBankAccount(id)
+    }
+
     // creating a method to update data in database.
     suspend fun update(bankAccountsClass: BankAccountsClass) {
         bankAccountsDao.update(bankAccountsClass)

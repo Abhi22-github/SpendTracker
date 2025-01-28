@@ -573,12 +573,28 @@ fun BottomRow(
     selectedDateSetter: (Long?) -> Unit,
     buttonClicked: () -> Unit,
     uiViewModel: UiViewModel = hiltViewModel(),
-    categoryViewModel: CategoryViewModel = hiltViewModel(),
-    bankAccountsViewModel: BankAccountsViewModel = hiltViewModel()
+    bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
+    preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState =
         rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
+    val bankAccountsList by bankAccountsViewModel.allBankAccountList.collectAsState()
+
+    val d = preferencesViewModel.getPrimaryAccountNumber.collectAsState(0L)
+
+    bankAccountsViewModel.getSingleBankAccount(d.value)
+
+    val colorPalletBlue = toPalette(blueColor)
+    val scope = rememberCoroutineScope()
+
+    val p = bankAccountsViewModel.singleBankAccount.collectAsState()
+
+    val selectedBankAccount by bankAccountsViewModel.selectedBankAccount.collectAsState()
+
+
+
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
@@ -623,38 +639,27 @@ fun BottomRow(
                         )
                     ), contentPadding = PaddingValues(start = 12.dp, end = 12.dp)
                 ) {
-                    Icon(Icons.Rounded.DateRange, contentDescription = null)
-                    Spacer(Modifier.width(8.dp))
-                    Text(text = "Bank of Maharashtra")
-
-                }
-
-                val scope = rememberCoroutineScope()
-                val bankAccountsList by bankAccountsViewModel.allBankAccountListExceptCash.collectAsState()
-
-                val bankAccountsClass = BankAccountsClass(
-                    id = 0L,
-                    initialAmount = 0,
-                    currentAmount = 0,
-                    bankName = "Temp",
-                    cardColorNumber = 1,
-                    cardIconNumber = 25,
-                    accountType = "CASH"
-                )
-                var selectedBankAccount by remember {
-                    mutableStateOf(
-                        bankAccountsClass
+                    val image = rememberAsyncImagePainter(
+                        IconState.fromNumber(selectedBankAccount?.cardIconNumber?:99)
                     )
+                    Image(
+                        painter = image,
+                        contentDescription = "Test Image",
+                        modifier = Modifier.size(24.dp),
+                    )
+                    Spacer(Modifier.width(8.dp))
+                    Text(text = selectedBankAccount?.bankName?:"")
                 }
-                val colorPalletBlue = toPalette(blueColor)
+
                 DropDownMenuForBankAccounts(
                     bankAccountMenuExpanded,
                     colorPalletBlue,
                     onDismiss = { bankAccountMenuExpanded = false },
                     bankAccountsList,
-                    selectedCategorySetter = {
-                        selectedBankAccount = it
+                    selectedBankAccountSetter = {
+                        // selectedBankAccount = it
                         scope.launch {
+                            bankAccountsViewModel.selectedBankAccount.emit(it)
                             uiViewModel.errorStatusInAddBottomSheet.emit(false)
                         }
                     }
