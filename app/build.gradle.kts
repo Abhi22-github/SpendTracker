@@ -100,6 +100,8 @@ dependencies {
     kapt("com.google.dagger:hilt-android-compiler:2.51.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation("androidx.datastore:datastore-preferences:1.1.1")
+    implementation("androidx.datastore:datastore:1.1.2")
+
     implementation("com.airbnb.android:lottie-compose:6.0.0")
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("com.google.accompanist:accompanist-systemuicontroller:0.25.1")
@@ -109,6 +111,5 @@ dependencies {
     implementation(libs.ui)
     implementation("androidx.constraintlayout:constraintlayout-compose:1.1.0")
     implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
-
 
 }

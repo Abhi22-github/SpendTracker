@@ -390,7 +390,8 @@ fun PaymentCard(
                     colorPallet = colorPallet,
                     { showOptionMenu = false },
                     onPrimaryClicked = {
-                        scope.launch { preferencesViewModel.setPrimaryAccount(bankAccountsClass.id) }
+                        scope.launch { preferencesViewModel.setPrimaryAccountNumber(bankAccountsClass.id) }
+                        scope.launch { preferencesViewModel.setPrimaryAccount(bankAccountsClass) }
                         showOptionMenu = false
                     },
                     editClicked = {
