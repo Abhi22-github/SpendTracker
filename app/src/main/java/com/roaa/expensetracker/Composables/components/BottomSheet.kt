@@ -959,7 +959,7 @@ fun BottomSheetContentItemDetailsContent(
                                 modifier = Modifier.size(24.dp),
                             )
                             Text(
-                                text = "Bank",
+                                text = singleTransaction.paymentMethod,
                                 modifier = Modifier.padding(start = 8.dp),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
