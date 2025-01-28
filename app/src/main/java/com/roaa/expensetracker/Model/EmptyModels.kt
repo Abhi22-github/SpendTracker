@@ -1,6 +1,7 @@
 package com.roaa.expensetracker.Model
 
 import com.roaa.expensetracker.Utilities.Constants.CASH
+import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 
 val emptyBank = BankAccountsClass(
     1L,
@@ -10,4 +11,16 @@ val emptyBank = BankAccountsClass(
     1,
     99,
     CASH
+)
+val emptyCategoryClass = CategoryClass(
+    categoryId = 1L,
+    categoryName = "Default",
+    categoryColorNumber = 1,
+    categoryIconNumber = 99,
+    categoryType = EXPENSE
+)
+val emptyTransactionClass = TransactionClass()
+
+val firstSampleClass = CategoryClass(
+    -1, "Select Category", 1, -99, EXPENSE
 )

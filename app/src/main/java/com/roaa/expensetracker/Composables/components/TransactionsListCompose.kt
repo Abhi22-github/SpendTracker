@@ -49,7 +49,11 @@ import com.roaa.expensetracker.Composables.successColor
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Converters.TransactionConverter
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Model.TransactionClass
+import com.roaa.expensetracker.Model.emptyBank
+import com.roaa.expensetracker.Model.emptyCategoryClass
+import com.roaa.expensetracker.Model.emptyTransactionClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.convertLocalDateToLong
 import com.roaa.expensetracker.Utilities.getDateFromMillis
@@ -70,7 +74,15 @@ fun TransactionsListCompose(
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val bottomSheet by uiViewModel.transactionDetailBottomSheetValue.collectAsState()
-    var singleTransaction by remember { mutableStateOf(TransactionClass()) }
+    var singleTransaction by remember {
+        mutableStateOf(
+            TransactionWithDetails(
+                emptyTransactionClass,
+                emptyCategoryClass,
+                emptyBank
+            )
+        )
+    }
     val scope = rememberCoroutineScope()
     val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
     Column {
@@ -99,8 +111,8 @@ fun TransactionsListCompose(
                             getDateFromMillis(transactionList.get(0).transaction.dateWithTime)
                         item { Header(if (date == getDateFromMillis(System.currentTimeMillis())) "Today" else date) }
                         items(transactionList, key = { it.transaction.id }) { item ->
-                            SingleTransaction(item.transaction, onSingleItemClick = {
-                                singleTransaction = (item.transaction)
+                            SingleTransaction(item, onSingleItemClick = {
+                                singleTransaction = (item)
                                 scope.launch {
                                     uiViewModel.transactionDetailBottomSheetValue.emit(true)
                                 }
@@ -118,7 +130,7 @@ fun TransactionsListCompose(
                 if (!transactionList.isEmpty()) LazyColumn(
                     modifier = Modifier.fillMaxWidth(), state = lazyList
                 ) {
-                    items(transactionList, key = { it.id }) { item ->
+                    items(transactionList, key = { it.transaction.id }) { item ->
                         SingleTransaction(item, onSingleItemClick = {
                             singleTransaction = (item)
                             scope.launch {
@@ -138,7 +150,10 @@ fun TransactionsListCompose(
 }
 
 @Composable
-fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionClass) -> Unit) {
+fun SingleTransaction(
+    item: TransactionWithDetails,
+    onSingleItemClick: (TransactionWithDetails) -> Unit
+) {
     Card(
         shape = RoundedCornerShape(12.dp), modifier = Modifier
             .padding(16.dp, 4.dp)
@@ -160,9 +175,9 @@ fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionCla
                 .wrapContentHeight()
                 .padding(16.dp, 12.dp)
         ) {
-            var amount = item.amount.toString()
+            var amount = item.transaction.amount.toString()
             var amountColor = successColor
-            if (item.type.equals(EXPENSE)) {
+            if (item.category.categoryType.equals(EXPENSE)) {
                 amount = "-₹" + amount
                 amountColor = failureColor
             } else {
@@ -179,7 +194,8 @@ fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionCla
                 Box(
                     modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                 ) {
-                    val image = rememberAsyncImagePainter(IconState.fromNumber(item.categoryIcon))
+                    val image =
+                        rememberAsyncImagePainter(IconState.fromNumber(item.category.categoryIconNumber))
                     Image(
                         painter = image,
                         contentDescription = "Test Image",
@@ -197,13 +213,13 @@ fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionCla
 
             ) {
                 Text(
-                    text = item.note.replaceFirstChar { it.uppercase() },
+                    text = item.transaction.note.replaceFirstChar { it.uppercase() },
                     style = typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 if (true) {
                     Text(
-                        text = item.category,
+                        text = item.category.categoryName,
                         style = typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                     )

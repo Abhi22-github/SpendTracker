@@ -12,11 +12,8 @@ public class TransactionClass {
     private String type;
     private Long amount;
     private String note;
-    private String category;
-    private Integer categoryIcon;
     private Long dateWithTime;
-    private Long date;
-    private String paymentMethod;
+    private Long date;;
     private long categoryId;  // foreign key for category
     private long bankAccountId; // foreign key with bank
 
@@ -24,15 +21,12 @@ public class TransactionClass {
 
     }
 
-    public TransactionClass(String type, Long amount, String note, String category, Integer categoryIcon, Long dateWithTime, Long date, String paymentMethod, long categoryId, long bankAccountId) {
+    public TransactionClass(String type, Long amount, String note, Long dateWithTime, Long date, long categoryId, long bankAccountId) {
         this.type = type;
         this.amount = amount;
         this.note = note;
-        this.category = category;
-        this.categoryIcon = categoryIcon;
         this.dateWithTime = dateWithTime;
         this.date = date;
-        this.paymentMethod = paymentMethod;
         this.categoryId = categoryId;
         this.bankAccountId = bankAccountId;
     }
@@ -69,13 +63,6 @@ public class TransactionClass {
         this.note = note;
     }
 
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
 
     public Long getDateWithTime() {
         return dateWithTime;
@@ -91,22 +78,6 @@ public class TransactionClass {
 
     public void setDate(Long date) {
         this.date = date;
-    }
-
-    public Integer getCategoryIcon() {
-        return categoryIcon;
-    }
-
-    public void setCategoryIcon(Integer categoryIcon) {
-        this.categoryIcon = categoryIcon;
-    }
-
-    public String getPaymentMethod() {
-        return paymentMethod;
-    }
-
-    public void setPaymentMethod(String paymentMethod) {
-        this.paymentMethod = paymentMethod;
     }
 
     public long getCategoryId() {

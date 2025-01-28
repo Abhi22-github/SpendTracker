@@ -12,7 +12,6 @@ import com.google.android.material.chip.Chip
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Database.TransactionRepository
 import com.roaa.expensetracker.Events.EventMessage
-import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Model.TotalAmountClass
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Model.TransactionClass
@@ -61,8 +60,9 @@ class TransactionsViewModel @Inject constructor(
         _getTotalIncomeAmountForRangeFlow
 
     //flow to get all transactions for give date
-    private val _getAllTransactionsForDateFlow = MutableStateFlow<List<TransactionClass>>(listOf())
-    val getAllTransactionsForDateFlow: StateFlow<List<TransactionClass>> =
+    private val _getAllTransactionsForDateFlow =
+        MutableStateFlow<List<TransactionWithDetails>>(listOf())
+    val getAllTransactionsForDateFlow: StateFlow<List<TransactionWithDetails>> =
         _getAllTransactionsForDateFlow
 
     //flow to get list of TotalAmount
@@ -129,20 +129,19 @@ class TransactionsViewModel @Inject constructor(
 
     fun validateAndPrepareTransactionData(
         selectedType: String,
-        selectedCategory: CategoryClass,
+        selectedCategoryId: Long,
         expenseValue: String,
         comment: String,
         selectedDate: Long?,
-        selectedPaymentMethod: String
+        selectedBankAccountId: Long,
     ) {
         storeFormDataInDatabase(
             expense = selectedType,
             amount = expenseValue,
             note = comment,
-            category = selectedCategory.categoryName,
-            categoryIcon = selectedCategory.categoryIconNumber,
             dateWithTime = selectedDate ?: LocalDateToLong(LocalDate.now()),
-            selectedPaymentMethod = selectedPaymentMethod
+            selectedCategoryId,
+            selectedBankAccountId,
         )
     }
 
@@ -158,7 +157,12 @@ class TransactionsViewModel @Inject constructor(
                 //store the data
                 Toast.makeText(mContext, "success", Toast.LENGTH_SHORT).show()
                 storeFormDataInDatabase(
-                    transactionTypeFromViewModel, amount, note, category, 1, selectedDate, "Cash"
+                    transactionTypeFromViewModel,
+                    amount,
+                    note,
+                    selectedDate,
+                    1L,
+                    1L,
                 )
             }
         } else if (transactionTypeFromViewModel == Constants.INCOME) {
@@ -169,7 +173,12 @@ class TransactionsViewModel @Inject constructor(
                 //store the data
                 Toast.makeText(mContext, "success", Toast.LENGTH_SHORT).show()
                 storeFormDataInDatabase(
-                    transactionTypeFromViewModel, amount, note, category, 1, selectedDate, "Cash"
+                    transactionTypeFromViewModel,
+                    amount,
+                    note,
+                    selectedDate,
+                    1L,
+                    1L,
                 )
             }
         }
@@ -180,10 +189,9 @@ class TransactionsViewModel @Inject constructor(
         expense: String,
         amount: String,
         note: String,
-        category: String?,
-        categoryIcon: Int,
         dateWithTime: Long,
-        selectedPaymentMethod: String
+        selectedCategoryId: Long,
+        selectedBankAccountId: Long
     ) {
         // on below line we are creating
         // a variable for our modal class.
@@ -191,13 +199,12 @@ class TransactionsViewModel @Inject constructor(
         modal.amount = amount.trim { it <= ' ' }.replace(",", "").toLong()
         modal.type = expense.trim { it <= ' ' }
         modal.note = note.trim { it <= ' ' }
-        modal.category = category!!.trim { it <= ' ' }
-        modal.categoryIcon = categoryIcon
         modal.dateWithTime = dateWithTime
         val date = Instant.ofEpochMilli(dateWithTime).atZone(ZoneId.systemDefault()) // default zone
             .toLocalDate()
         modal.date = date.toString().replace("-", "").toLong()
-        modal.paymentMethod = selectedPaymentMethod
+        modal.bankAccountId = selectedBankAccountId;
+        modal.categoryId = selectedCategoryId;
 
 
         //   Log.d("date in local date" ,d.toString());
