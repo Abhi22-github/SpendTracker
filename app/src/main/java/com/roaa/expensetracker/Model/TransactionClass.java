@@ -17,12 +17,14 @@ public class TransactionClass {
     private Long dateWithTime;
     private Long date;
     private String paymentMethod;
+    private long categoryId;  // foreign key for category
+    private long bankAccountId; // foreign key with bank
 
     public TransactionClass() {
 
     }
 
-    public TransactionClass(String type, Long amount, String note, String category, Integer categoryIcon, Long dateWithTime, Long date, String paymentMethod) {
+    public TransactionClass(String type, Long amount, String note, String category, Integer categoryIcon, Long dateWithTime, Long date, String paymentMethod, long categoryId, long bankAccountId) {
         this.type = type;
         this.amount = amount;
         this.note = note;
@@ -31,6 +33,8 @@ public class TransactionClass {
         this.dateWithTime = dateWithTime;
         this.date = date;
         this.paymentMethod = paymentMethod;
+        this.categoryId = categoryId;
+        this.bankAccountId = bankAccountId;
     }
 
     public long getId() {
@@ -103,5 +107,21 @@ public class TransactionClass {
 
     public void setPaymentMethod(String paymentMethod) {
         this.paymentMethod = paymentMethod;
+    }
+
+    public long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public long getBankAccountId() {
+        return bankAccountId;
+    }
+
+    public void setBankAccountId(long bankAccountId) {
+        this.bankAccountId = bankAccountId;
     }
 }

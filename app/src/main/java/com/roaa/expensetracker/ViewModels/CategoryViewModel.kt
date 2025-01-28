@@ -122,7 +122,7 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
     }
 
     private fun storeCategoryInDatabase(categoryClass: CategoryClass) {
-        if (categoryClass.id == 0L) {
+        if (categoryClass.categoryId == 0L) {
             //new category insert
             viewModelScope.launch {
                 categoryRepository.insert(categoryClass)
@@ -157,7 +157,7 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
         categoryType: String
     ) {
         val categoryClass = CategoryClass(
-            id = categoryId,
+            categoryId = categoryId,
             categoryName = categoryName,
             categoryColorNumber = 1,
             categoryIconNumber = categoryIcon,

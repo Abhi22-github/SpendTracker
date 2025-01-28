@@ -181,7 +181,7 @@ fun SharedTransitionScope.ScaffoldContent(
                         ) {
                             navController.navigate(
                                 ScreenB(
-                                    it.id,
+                                    it.categoryId,
                                     it.categoryName,
                                     it.categoryIconNumber,
                                     it.categoryType
@@ -205,7 +205,7 @@ fun SharedTransitionScope.ScaffoldContent(
                         ) {
                             navController.navigate(
                                 ScreenB(
-                                    it.id,
+                                    it.categoryId,
                                     it.categoryName,
                                     it.categoryIconNumber,
                                     it.categoryType
@@ -253,7 +253,7 @@ fun SharedTransitionScope.ScaffoldContent(
                         ) {
                             navController.navigate(
                                 ScreenB(
-                                    it.id,
+                                    it.categoryId,
                                     it.categoryName,
                                     it.categoryIconNumber,
                                     it.categoryType
@@ -277,7 +277,7 @@ fun SharedTransitionScope.ScaffoldContent(
                         ) {
                             navController.navigate(
                                 ScreenB(
-                                    it.id,
+                                    it.categoryId,
                                     it.categoryName,
                                     it.categoryIconNumber,
                                     it.categoryType
@@ -354,7 +354,7 @@ fun SharedTransitionScope.SingleCategory(
                                 modifier = Modifier
                                     .size(24.dp)
                                     .sharedElement(
-                                        state = rememberSharedContentState(key = "image/${item.id}"),
+                                        state = rememberSharedContentState(key = "image/${item.categoryId}"),
                                         animatedVisibilityScope = animatedVisibilityScope,
                                     ),
                             )
@@ -377,7 +377,7 @@ fun SharedTransitionScope.SingleCategory(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.sharedElement(
-                                state = rememberSharedContentState(key = "text/${item.id}"),
+                                state = rememberSharedContentState(key = "text/${item.categoryId}"),
                                 animatedVisibilityScope = animatedVisibilityScope,
                             )
                         )

@@ -68,7 +68,7 @@ class ExpenseCategoryActivity : AppCompatActivity(), Actions {
 
     private fun openBottomSheetModel() {
         val categoryClass = CategoryClass(
-            id = 0,
+            categoryId = 0,
             categoryName = "",
             categoryColorNumber = 1,
             categoryIconNumber = 1,

@@ -39,7 +39,7 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
     //flow to get singleBankAccount
     private var _singleBankAccount = MutableStateFlow<BankAccountsClass>(
         BankAccountsClass(
-            id = 0,
+            bankAccountId = 0,
             initialAmount = 0,
             currentAmount = 0,
             bankName = "",
@@ -53,7 +53,7 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
 
     var selectedBankAccount = MutableStateFlow<BankAccountsClass>(
         BankAccountsClass(
-            id = 0,
+            bankAccountId = 0,
             initialAmount = 0,
             currentAmount = 0,
             bankName = "",
@@ -113,7 +113,7 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
         selectedColor: Int
     ) {
         val bankAccountObj = BankAccountsClass(
-            id = id,
+            bankAccountId = id,
             initialAmount = bankAmount.toLong(),
             currentAmount = bankAmount.toLong(),
             bankName = bankName,
@@ -125,7 +125,7 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
     }
 
     fun storeBankAccount(bankAccountsClass: BankAccountsClass) {
-        if (bankAccountsClass.id == 0L) {
+        if (bankAccountsClass.bankAccountId == 0L) {
             //adding new bank Accounts
             viewModelScope.launch {
                 bankAccountRepository.insert(bankAccountsClass)

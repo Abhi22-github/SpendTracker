@@ -7,14 +7,11 @@ import android.view.ViewGroup
 import androidx.compose.material3.Surface
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.recyclerview.widget.LinearLayoutManager
-import com.roaa.expensetracker.Adapters.TransactionViewAdapter
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
 import com.roaa.expensetracker.Composables.components.TransactionsListCompose
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import com.roaa.expensetracker.databinding.FragmentListViewBinding
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.flow.onEach
 import java.time.LocalDate
 
 
@@ -67,23 +64,23 @@ class ListViewFragment : Fragment() {
     }
 
     private fun setTransactionRecyclerView() {
-        binding.recyclerViewTransactionMainActivity.setLayoutManager(
-            LinearLayoutManager(
-                requireActivity()
-            )
-        )
-        viewModel.allTransactions.onEach {
-            if (it.size == 0) {
-                binding.linearLayoutEmptyScreenDialogListView.visibility = View.VISIBLE
-            } else {
-                binding.linearLayoutEmptyScreenDialogListView.visibility = View.GONE
-                val transactionViewAdapter = TransactionViewAdapter(
-                    requireActivity(),
-                    it
-                )
-                binding.recyclerViewTransactionMainActivity.adapter = transactionViewAdapter
-            }
-
-        }
+//        binding.recyclerViewTransactionMainActivity.setLayoutManager(
+//            LinearLayoutManager(
+//                requireActivity()
+//            )
+//        )
+//        viewModel.allTransactions.onEach {transactionWithDetails<TransactionWithDetails> ->
+//            if (it.size == 0) {
+//                binding.linearLayoutEmptyScreenDialogListView.visibility = View.VISIBLE
+//            } else {
+//                binding.linearLayoutEmptyScreenDialogListView.visibility = View.GONE
+//                val transactionViewAdapter = TransactionViewAdapter(
+//                    requireActivity(),
+//                    it.
+//                )
+//                binding.recyclerViewTransactionMainActivity.adapter = transactionViewAdapter
+//            }
+//
+//        }
     }
 }

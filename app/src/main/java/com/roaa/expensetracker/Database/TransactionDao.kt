@@ -5,6 +5,7 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Update
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Model.TotalAmountClass
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Model.TransactionClass
@@ -25,7 +26,7 @@ interface TransactionDao {
     suspend fun deleteAllTransaction()
 
     @get:Query("SELECT * FROM transaction_table ORDER BY dateWithTime DESC")
-    val allTransactions: Flow<List<TransactionClass>>
+    val allTransactions: Flow<List<TransactionWithDetails>>
 
     @Query("SELECT * FROM transaction_table where date == :date ORDER BY dateWithTime DESC")
     fun getAllTransactionsForDate(date: Long): Flow<List<TransactionClass>>
