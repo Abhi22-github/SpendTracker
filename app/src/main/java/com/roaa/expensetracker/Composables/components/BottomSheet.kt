@@ -169,6 +169,7 @@ fun BottomSheetContentItemAddContent(
     var expenseValue by remember { mutableStateOf(TextFieldValue("")) }
     var comment by remember { mutableStateOf(TextFieldValue("")) }
     var selectedDate by remember { mutableStateOf<Long?>(System.currentTimeMillis()) }
+    var selectedPaymentMethod by remember { mutableStateOf<String>("Cash") }
     val focusRequester = remember { FocusRequester() }
     val categoryList by categoryViewModel.categoryList.collectAsState()
     val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
@@ -493,18 +494,12 @@ fun BottomSheetContentItemAddContent(
 
         Spacer(Modifier.height(64.dp))
         Row {
-            BottomRow(modifier, selectedDate, { selectedDate = it }, buttonClicked = {
-                validateTransactionData(
-                    selectedType,
-                    selectedCategory,
-                    expenseValue.text.replace(",", ""),
-                    comment.text,
-                    selectedDate,
-                    scope,
-                    uiViewModel,
-                    transactionsViewModel,
-                )
-            })
+            BottomRow(
+                modifier,
+                selectedDate,
+                { selectedDate = it },
+                { selectedPaymentMethod = it },
+            )
         }
         Spacer(Modifier.height(8.dp))
         Row(
@@ -513,7 +508,19 @@ fun BottomSheetContentItemAddContent(
                 .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding),
         ) {
             FilledTonalButton(
-                onClick = { }, Modifier
+                onClick = {
+                    validateTransactionData(
+                        selectedType,
+                        selectedCategory,
+                        expenseValue.text.replace(",", ""),
+                        comment.text,
+                        selectedDate,
+                        selectedPaymentMethod,
+                        scope,
+                        uiViewModel,
+                        transactionsViewModel,
+                    )
+                }, Modifier
                     .fillMaxWidth()
                     .height(48.dp)
             ) {
@@ -531,6 +538,7 @@ fun validateTransactionData(
     amount: String,
     comment: String,
     selectedDate: Long?,
+    selectePaymentMethod: String,
     scope: CoroutineScope,
     uiViewModel: UiViewModel,
     transactionsViewModel: TransactionsViewModel
@@ -558,6 +566,7 @@ fun validateTransactionData(
             amount,
             comment,
             selectedDate,
+            selectePaymentMethod
         )
         transactionsViewModel.bottomSheetStatus.emit(
             false
@@ -573,7 +582,7 @@ fun BottomRow(
     modifier: Modifier,
     selectedDate: Long?,
     selectedDateSetter: (Long?) -> Unit,
-    buttonClicked: () -> Unit,
+    selectedPaymentMethodSetter: (String) -> Unit,
     uiViewModel: UiViewModel = hiltViewModel(),
     bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
     preferencesViewModel: PreferencesViewModel = hiltViewModel()
@@ -596,6 +605,7 @@ fun BottomRow(
         preferencesViewModel.getPrimaryAccount.take(1).collect { data ->
             selectedBankAccount = data
         }
+        selectedPaymentMethodSetter(selectedBankAccount.bankName)
     }
 
     Row(
@@ -636,6 +646,7 @@ fun BottomRow(
                 FilledTonalButton(
                     onClick = {
                         bankAccountMenuExpanded = true
+                        selectedPaymentMethodSetter(selectedBankAccount.bankName)
                     }, colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.onSurface.copy(
                             alpha = secondaryAlphaForElements
@@ -643,7 +654,7 @@ fun BottomRow(
                     ), contentPadding = PaddingValues(start = 12.dp, end = 12.dp)
                 ) {
                     val image = rememberAsyncImagePainter(
-                        IconState.fromNumber(selectedBankAccount?.cardIconNumber ?: 99)
+                        IconState.fromNumber(selectedBankAccount.cardIconNumber)
                     )
                     Image(
                         painter = image,
@@ -651,7 +662,7 @@ fun BottomRow(
                         modifier = Modifier.size(24.dp),
                     )
                     Spacer(Modifier.width(8.dp))
-                    Text(text = selectedBankAccount?.bankName ?: "")
+                    Text(text = selectedBankAccount.bankName)
                 }
 
                 DropDownMenuForBankAccounts(
@@ -1786,6 +1797,7 @@ fun BottomSheetContentItemAddContentTest(
                         expenseValue.text.replace(",", ""),
                         comment.text,
                         selectedDate,
+                        "Cash",
                         scope,
                         uiViewModel,
                         transactionsViewModel,

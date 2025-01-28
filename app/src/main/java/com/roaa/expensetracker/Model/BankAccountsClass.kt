@@ -4,6 +4,7 @@ import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import com.roaa.expensetracker.Utilities.Constants.CASH
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -30,7 +31,7 @@ data class BankAccountsClass(
 @OptIn(ExperimentalSerializationApi::class)
 object BankAccountsSerializer : Serializer<BankAccountsClass> {
 
-    override val defaultValue = BankAccountsClass(0, 0, 0, "", 1, 1, "")
+    override val defaultValue = BankAccountsClass(1, 0, 0, "Cash", 1, 25, CASH)
 
     override suspend fun readFrom(input: InputStream): BankAccountsClass {
         try {

@@ -71,10 +71,8 @@ class TransactionsViewModel @Inject constructor(
         _getListOfTotalAmountPerDayForRangeFlow
 
     //flow to get total amount for given date
-    private val _getTotalExpenseAmountForDateFlow =
-        MutableStateFlow<Long>(0L)
-    val getTotalExpenseAmountForDateFlow: StateFlow<Long> =
-        _getTotalExpenseAmountForDateFlow
+    private val _getTotalExpenseAmountForDateFlow = MutableStateFlow<Long>(0L)
+    val getTotalExpenseAmountForDateFlow: StateFlow<Long> = _getTotalExpenseAmountForDateFlow
 
 
     private val chipsName = arrayOf<String>()
@@ -133,7 +131,8 @@ class TransactionsViewModel @Inject constructor(
         selectedCategory: CategoryClass,
         expenseValue: String,
         comment: String,
-        selectedDate: Long?
+        selectedDate: Long?,
+        selectedPaymentMethod: String
     ) {
         storeFormDataInDatabase(
             expense = selectedType,
@@ -141,7 +140,8 @@ class TransactionsViewModel @Inject constructor(
             note = comment,
             category = selectedCategory.categoryName,
             categoryIcon = selectedCategory.categoryIconNumber,
-            dateWithTime = selectedDate ?: LocalDateToLong(LocalDate.now())
+            dateWithTime = selectedDate ?: LocalDateToLong(LocalDate.now()),
+            selectedPaymentMethod = selectedPaymentMethod
         )
     }
 
@@ -157,7 +157,7 @@ class TransactionsViewModel @Inject constructor(
                 //store the data
                 Toast.makeText(mContext, "success", Toast.LENGTH_SHORT).show()
                 storeFormDataInDatabase(
-                    transactionTypeFromViewModel, amount, note, category,1, selectedDate
+                    transactionTypeFromViewModel, amount, note, category, 1, selectedDate, "Cash"
                 )
             }
         } else if (transactionTypeFromViewModel == Constants.INCOME) {
@@ -168,7 +168,7 @@ class TransactionsViewModel @Inject constructor(
                 //store the data
                 Toast.makeText(mContext, "success", Toast.LENGTH_SHORT).show()
                 storeFormDataInDatabase(
-                    transactionTypeFromViewModel, amount, note, category, 1,selectedDate
+                    transactionTypeFromViewModel, amount, note, category, 1, selectedDate, "Cash"
                 )
             }
         }
@@ -181,7 +181,8 @@ class TransactionsViewModel @Inject constructor(
         note: String,
         category: String?,
         categoryIcon: Int,
-        dateWithTime: Long
+        dateWithTime: Long,
+        selectedPaymentMethod: String
     ) {
         // on below line we are creating
         // a variable for our modal class.
@@ -190,11 +191,12 @@ class TransactionsViewModel @Inject constructor(
         modal.type = expense.trim { it <= ' ' }
         modal.note = note.trim { it <= ' ' }
         modal.category = category!!.trim { it <= ' ' }
-        modal.categoryIcon =  categoryIcon
+        modal.categoryIcon = categoryIcon
         modal.dateWithTime = dateWithTime
         val date = Instant.ofEpochMilli(dateWithTime).atZone(ZoneId.systemDefault()) // default zone
             .toLocalDate()
         modal.date = date.toString().replace("-", "").toLong()
+        modal.paymentMethod = selectedPaymentMethod
 
 
         //   Log.d("date in local date" ,d.toString());
@@ -290,8 +292,7 @@ class TransactionsViewModel @Inject constructor(
                 it.catch {
                     error(it)
                 }.collect { amount ->
-                    if (amount != null)
-                        _getTotalExpenseAmountForDateFlow.value = amount
+                    if (amount != null) _getTotalExpenseAmountForDateFlow.value = amount
                     completed()
                 }
             }
