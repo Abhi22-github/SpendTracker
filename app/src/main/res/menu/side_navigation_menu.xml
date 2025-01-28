@@ -52,10 +52,12 @@
         <item
             android:id="@+id/item_test1_sideNavigation"
             android:icon="@drawable/bank_accounts_icon_selector"
-            android:title="Test 1" />
+            android:title="Test 1"
+            android:visible="false" />
         <item
             android:id="@+id/item_test2_sideNavigation"
             android:icon="@drawable/bank_accounts_icon_selector"
-            android:title="Test 2" />
+            android:title="Test 2"
+            android:visible="false" />
     </group>
 </menu>
