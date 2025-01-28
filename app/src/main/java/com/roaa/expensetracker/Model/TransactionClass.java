@@ -16,12 +16,13 @@ public class TransactionClass {
     private Integer categoryIcon;
     private Long dateWithTime;
     private Long date;
+    private String paymentMethod;
 
     public TransactionClass() {
 
     }
 
-    public TransactionClass(String type, Long amount, String note, String category, Integer categoryIcon, Long dateWithTime, Long date) {
+    public TransactionClass(String type, Long amount, String note, String category, Integer categoryIcon, Long dateWithTime, Long date, String paymentMethod) {
         this.type = type;
         this.amount = amount;
         this.note = note;
@@ -29,6 +30,7 @@ public class TransactionClass {
         this.categoryIcon = categoryIcon;
         this.dateWithTime = dateWithTime;
         this.date = date;
+        this.paymentMethod = paymentMethod;
     }
 
     public long getId() {
@@ -93,5 +95,13 @@ public class TransactionClass {
 
     public void setCategoryIcon(Integer categoryIcon) {
         this.categoryIcon = categoryIcon;
+    }
+
+    public String getPaymentMethod() {
+        return paymentMethod;
+    }
+
+    public void setPaymentMethod(String paymentMethod) {
+        this.paymentMethod = paymentMethod;
     }
 }
