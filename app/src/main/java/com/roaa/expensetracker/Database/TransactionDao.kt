@@ -29,7 +29,7 @@ interface TransactionDao {
     val allTransactions: Flow<List<TransactionWithDetails>>
 
     @Query("SELECT * FROM transaction_table where date == :date ORDER BY dateWithTime DESC")
-    fun getAllTransactionsForDate(date: Long): Flow<List<TransactionClass>>
+    fun getAllTransactionsForDate(date: Long): Flow<List<TransactionWithDetails>>
 
     @Query("SELECT SUM(amount) FROM transaction_table where date == :date and type == :type")
     fun getTotalAmountForDate(date: Long, type: String): Flow<Long?>

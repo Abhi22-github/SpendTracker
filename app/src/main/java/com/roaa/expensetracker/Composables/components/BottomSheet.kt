@@ -111,11 +111,12 @@ import com.roaa.expensetracker.Composables.utils.colorList
 import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.iconsList
 import com.roaa.expensetracker.Composables.utils.toPalette
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Model.CategoryClass
-import com.roaa.expensetracker.Model.TransactionClass
 import com.roaa.expensetracker.Model.TransactionTypeClass
 import com.roaa.expensetracker.Model.emptyBank
+import com.roaa.expensetracker.Model.firstSampleClass
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
@@ -169,13 +170,11 @@ fun BottomSheetContentItemAddContent(
     var expenseValue by remember { mutableStateOf(TextFieldValue("")) }
     var comment by remember { mutableStateOf(TextFieldValue("")) }
     var selectedDate by remember { mutableStateOf<Long?>(System.currentTimeMillis()) }
-    var selectedPaymentMethod by remember { mutableStateOf<String>("Cash") }
+    var selectedPaymentMethod by remember { mutableStateOf<BankAccountsClass>(emptyBank) }
     val focusRequester = remember { FocusRequester() }
     val categoryList by categoryViewModel.categoryList.collectAsState()
     val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
-    val firstSampleClass = CategoryClass(
-        -1, "Select Category", 1, -99, EXPENSE
-    )
+
     var selectedCategory by remember {
         mutableStateOf(
             firstSampleClass
@@ -234,7 +233,6 @@ fun BottomSheetContentItemAddContent(
         0f
     }
     animationViewModel.method("₹$amountInString", percent)
-    Log.d("Hello", percent.toString())
 
     LaunchedEffect(percent) {
         scope.launch {
@@ -538,7 +536,7 @@ fun validateTransactionData(
     amount: String,
     comment: String,
     selectedDate: Long?,
-    selectePaymentMethod: String,
+    selectedPaymentMethod: BankAccountsClass,
     scope: CoroutineScope,
     uiViewModel: UiViewModel,
     transactionsViewModel: TransactionsViewModel
@@ -562,11 +560,11 @@ fun validateTransactionData(
         }
         transactionsViewModel.validateAndPrepareTransactionData(
             type,
-            selectedCategory,
+            selectedCategory.categoryId,
             amount,
             comment,
             selectedDate,
-            selectePaymentMethod
+            selectedPaymentMethod.bankAccountId
         )
         transactionsViewModel.bottomSheetStatus.emit(
             false
@@ -582,7 +580,7 @@ fun BottomRow(
     modifier: Modifier,
     selectedDate: Long?,
     selectedDateSetter: (Long?) -> Unit,
-    selectedPaymentMethodSetter: (String) -> Unit,
+    selectedPaymentMethodSetter: (BankAccountsClass) -> Unit,
     uiViewModel: UiViewModel = hiltViewModel(),
     bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
     preferencesViewModel: PreferencesViewModel = hiltViewModel()
@@ -605,7 +603,7 @@ fun BottomRow(
         preferencesViewModel.getPrimaryAccount.take(1).collect { data ->
             selectedBankAccount = data
         }
-        selectedPaymentMethodSetter(selectedBankAccount.bankName)
+        selectedPaymentMethodSetter(selectedBankAccount)
     }
 
     Row(
@@ -646,7 +644,7 @@ fun BottomRow(
                 FilledTonalButton(
                     onClick = {
                         bankAccountMenuExpanded = true
-                        selectedPaymentMethodSetter(selectedBankAccount.bankName)
+                        selectedPaymentMethodSetter(selectedBankAccount)
                     }, colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.onSurface.copy(
                             alpha = secondaryAlphaForElements
@@ -714,7 +712,7 @@ fun AddBottomSheet(
 @OptIn(ExperimentalMaterial3Api::class)
 fun BottomSheetContentItemDetails(
     sheetState: SheetState,
-    singleTransaction: TransactionClass,
+    singleTransaction: TransactionWithDetails,
     uiViewModel: UiViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
@@ -743,7 +741,7 @@ val spaceHeightInDetail = 10.dp
 @Composable
 fun BottomSheetContentItemDetailsContent(
     modifier: Modifier,
-    singleTransaction: TransactionClass,
+    singleTransaction: TransactionWithDetails,
     uiViewModel: UiViewModel,
     transactionsViewModel: TransactionsViewModel = hiltViewModel()
 ) {
@@ -755,13 +753,13 @@ fun BottomSheetContentItemDetailsContent(
         modifier = Modifier.fillMaxWidth()
     ) {
         Text(
-            text = "₹" + parseAmount(singleTransaction.amount),
+            text = "₹" + parseAmount(singleTransaction.transaction.amount),
             style = typography.headlineLarge,
             fontFamily = numberFont
         )
 //        Spacer(Modifier.height(4.dp))
         Text(
-            text = singleTransaction.note,
+            text = singleTransaction.transaction.note,
             style = typography.bodyMedium.copy(
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
@@ -811,7 +809,7 @@ fun BottomSheetContentItemDetailsContent(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             val image = rememberAsyncImagePainter(
-                                if (singleTransaction.type == EXPENSE) R.drawable.icon_expense else R.drawable.icon_income
+                                if (singleTransaction.transaction.type == EXPENSE) R.drawable.icon_expense else R.drawable.icon_income
                             )
                             Image(
                                 painter = image,
@@ -819,7 +817,7 @@ fun BottomSheetContentItemDetailsContent(
                                 modifier = Modifier.size(24.dp),
                             )
                             Text(
-                                text = singleTransaction.type,
+                                text = singleTransaction.transaction.type,
                                 modifier = Modifier.padding(start = 8.dp),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -859,7 +857,7 @@ fun BottomSheetContentItemDetailsContent(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             val image = rememberAsyncImagePainter(
-                                IconState.fromNumber(singleTransaction.categoryIcon)
+                                IconState.fromNumber(singleTransaction.category.categoryIconNumber)
                             )
                             Image(
                                 painter = image,
@@ -867,7 +865,7 @@ fun BottomSheetContentItemDetailsContent(
                                 modifier = Modifier.size(24.dp),
                             )
                             Text(
-                                text = singleTransaction.category,
+                                text = singleTransaction.category.categoryName,
                                 modifier = Modifier.padding(start = 8.dp),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -913,7 +911,7 @@ fun BottomSheetContentItemDetailsContent(
                                 modifier = Modifier.size(24.dp),
                             )
                             Text(
-                                text = convertMillisToDateString(singleTransaction.dateWithTime),
+                                text = convertMillisToDateString(singleTransaction.transaction.dateWithTime),
                                 modifier = Modifier.padding(start = 8.dp),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -959,7 +957,7 @@ fun BottomSheetContentItemDetailsContent(
                                 modifier = Modifier.size(24.dp),
                             )
                             Text(
-                                text = singleTransaction.paymentMethod,
+                                text = singleTransaction.BankAccount.bankName,
                                 modifier = Modifier.padding(start = 8.dp),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -1033,7 +1031,7 @@ fun BottomSheetContentItemDetailsContent(
                 onDismissRequest = { showDeleteConfirmation = false },
                 onConfirmation = {
                     scope.launch {
-                        transactionsViewModel.deleteSingleTransaction(singleTransaction)
+                        transactionsViewModel.deleteSingleTransaction(singleTransaction.transaction)
                         showDeleteConfirmation = false
                         scope.launch {
                             uiViewModel.transactionDetailBottomSheetValue.emit(false)
@@ -1791,17 +1789,17 @@ fun BottomSheetContentItemAddContentTest(
             Spacer(Modifier.height(16.dp))
             Row {
                 BottomRowTest(modifier, selectedDate, { selectedDate = it }, buttonClicked = {
-                    validateTransactionData(
-                        selectedType,
-                        selectedCategory,
-                        expenseValue.text.replace(",", ""),
-                        comment.text,
-                        selectedDate,
-                        "Cash",
-                        scope,
-                        uiViewModel,
-                        transactionsViewModel,
-                    )
+//                    validateTransactionData(
+//                        selectedType,
+//                        selectedCategory,
+//                        expenseValue.text.replace(",", ""),
+//                        comment.text,
+//                        selectedDate,
+//                        selectedPaymentMethod = ,
+//                        scope,
+//                        uiViewModel,
+//                        transactionsViewModel,
+//                    )
                 })
             }
 
