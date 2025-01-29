@@ -112,4 +112,11 @@ dependencies {
     implementation("androidx.constraintlayout:constraintlayout-compose:1.1.0")
     implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
 
+
+//for Month view compose
+    implementation("androidx.compose.foundation:foundation:1.7.6")
+    implementation("com.google.accompanist:accompanist-pager:0.32.0") // For HorizontalPager
+    implementation("com.google.accompanist:accompanist-pager-indicators:0.32.0")
+
+
 }

@@ -24,6 +24,7 @@
             android:id="@+id/item_category_sideNavigation"
             android:icon="@drawable/add_category_icon_selector"
             android:title="Category" />
+
         <item
             android:id="@+id/item_expenseCategory_sideNavigation"
             android:icon="@drawable/add_category_icon_selector"
@@ -47,6 +48,10 @@
             android:id="@+id/item_settings_sideNavigation"
             android:icon="@drawable/settings_icon_selector"
             android:title="Settings" />
+        <item
+            android:id="@+id/item_monthViewCompose_sideNavigation"
+            android:icon="@drawable/home_icon_selector"
+            android:title="MonthCompose" />
 
         <item
             android:id="@+id/item_test1_sideNavigation"
