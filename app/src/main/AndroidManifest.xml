@@ -26,7 +26,9 @@
             android:exported="false" />
         <activity
             android:name=".Activity.ManageBankAccountActivity"
-            android:windowSoftInputMode="adjustResize"
+            android:exported="false" />
+        <activity
+            android:name=".Activity.MonthViewComposeActivity"
             android:exported="false" />
         <activity
             android:name=".Activity.ExpenseCategoryActivity"

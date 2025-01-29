@@ -274,6 +274,15 @@ class TransactionsViewModel @Inject constructor(
         }
     }
 
+    fun getListOfTotalAmountPerDayForRangeForCompose(
+        startDate: Long, endDate: Long
+    ): Flow<List<TotalExpenseIncomeClass>> {
+
+        return transactionRepository.getListOfTotalAmountPerDayForRange(startDate, endDate)
+
+
+    }
+
     fun deleteSingleTransaction(transactionClass: TransactionClass) {
         viewModelScope.launch {
             loading()

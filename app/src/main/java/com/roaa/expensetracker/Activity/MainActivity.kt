@@ -168,6 +168,8 @@ class MainActivity : AppCompatActivity() {
                 sendUserToAddActivity()
             } else if (menuID == R.id.item_test2_sideNavigation) {
                 sendUserToManageAccountsActivity()
+            }else if(menuID == R.id.item_monthViewCompose_sideNavigation){
+                sendUserToMonthComposeActivity()
             }
         }, 300)
         navigationView?.setCheckedItem(selectedItem)
@@ -229,6 +231,11 @@ class MainActivity : AppCompatActivity() {
 
     private fun sendUserToPaymentMethodsActivity() {
         val intent = Intent(context, PaymentMethodsComposeActivity::class.java)
+        startActivity(intent)
+    }
+
+    private fun sendUserToMonthComposeActivity() {
+        val intent = Intent(context, MonthViewComposeActivity::class.java)
         startActivity(intent)
     }
 
