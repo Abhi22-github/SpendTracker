@@ -49,13 +49,13 @@ class TransactionsViewModel @Inject constructor(
 
     //flow to get total Expense amount for range
     private val _getTotalExpenseAmountForRangeFlow =
-        MutableStateFlow<TotalAmountClass>(TotalAmountClass(0, 0))
+        MutableStateFlow<TotalAmountClass>(TotalAmountClass(0, 100))
     val getTotalExpenseAmountForRangeFlow: StateFlow<TotalAmountClass> =
         _getTotalExpenseAmountForRangeFlow
 
     //flow to get total Income amount for range
     private val _getTotalIncomeAmountForRangeFlow =
-        MutableStateFlow<TotalAmountClass>(TotalAmountClass(0, 0))
+        MutableStateFlow<TotalAmountClass>(TotalAmountClass(0, 100))
     val getTotalIncomeAmountForRangeFlow: StateFlow<TotalAmountClass> =
         _getTotalIncomeAmountForRangeFlow
 
@@ -232,6 +232,7 @@ class TransactionsViewModel @Inject constructor(
                 error(e)
             }.collect { totalAmount ->
                 _getTotalIncomeAmountForRangeFlow.value = totalAmount
+                Log.d("Hello", "getTotalIncomeForRange: $totalAmount")
                 completed()
             }
         }
@@ -244,13 +245,14 @@ class TransactionsViewModel @Inject constructor(
                 startDate, endDate, EXPENSE
             ).catch { error(it) }.collect { totalAmount ->
                 _getTotalExpenseAmountForRangeFlow.value = totalAmount
+                Log.d("Hello", "getTotalExpenseForRange: $totalAmount")
                 completed()
             }
         }
     }
 
 
-    suspend fun getTotalAmountByDateRangeAndCategoryType(
+    fun getTotalAmountByDateRangeAndCategoryType(
         startDate: Long, endDate: Long, categoryType: String
     ): Flow<TotalAmountClass> {
         return transactionRepository.getTotalAmountByDateRangeAndCategoryType(
