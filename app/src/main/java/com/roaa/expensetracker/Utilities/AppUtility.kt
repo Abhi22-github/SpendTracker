@@ -103,6 +103,49 @@ fun getPreviousAndNext10Days(date: LocalDate): List<String> {
     return allDates
 }
 
+fun getCalendarForMonthFromDate(localDate: LocalDate): List<LocalDate> {
+    // Get the first day of the month
+    val firstDayOfMonth = localDate.withDayOfMonth(1)
+    // Get the last day of the month
+    val lastDayOfMonth = firstDayOfMonth.withDayOfMonth(firstDayOfMonth.lengthOfMonth())
+
+    // Calculate the start day of the week for the first day of the month
+    val startDayOfWeek = firstDayOfMonth.dayOfWeek
+
+    // Number of days in the current month
+    val daysInCurrentMonth = firstDayOfMonth.lengthOfMonth()
+
+    // Prepare the list to hold the calendar grid
+    val calendarGrid = mutableListOf<LocalDate>()
+
+    // Step 1: Add dates from the previous month to fill the first row
+    val prevMonthLastDay = firstDayOfMonth.minusDays(1)
+    val prevMonthStartDate =
+        prevMonthLastDay.minusDays(startDayOfWeek.value.toLong()) // Corrected calculation
+    var prevMonthDate = prevMonthStartDate
+    for (i in 0 until startDayOfWeek.value) {
+        calendarGrid.add(prevMonthDate)
+        prevMonthDate = prevMonthDate.plusDays(1)
+    }
+
+    // Step 2: Add all the dates of the current month
+    var currentDate = firstDayOfMonth
+    while (calendarGrid.size < 42) {
+        calendarGrid.add(currentDate)
+        currentDate = currentDate.plusDays(1)
+    }
+
+    // Step 3: Add dates from the next month to fill the last row if necessary
+    val nextMonthDate = lastDayOfMonth.plusDays(1)
+    var nextDate = nextMonthDate
+    while (calendarGrid.size < 42) {
+        calendarGrid.add(nextDate)
+        nextDate = nextDate.plusDays(1)
+    }
+    return calendarGrid
+}
+
+
 fun getPreviousAndNextDays(date: LocalDate): MutableList<String> {
     val allDates = mutableListOf<String>()
 
