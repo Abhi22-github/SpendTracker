@@ -8,6 +8,8 @@ import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.lifecycle.LifecycleOwner
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager.widget.PagerAdapter
@@ -21,6 +23,7 @@ import com.roaa.expensetracker.Utilities.convertLocalDateToLong
 import com.roaa.expensetracker.Utilities.convertTotalExpenseIncomeClassToMap
 import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
+import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import java.time.LocalDate
 import java.time.YearMonth
@@ -31,7 +34,8 @@ import kotlin.math.abs
 
 class CalenderViewPagerAdapter(
     private val context: Context,
-    private val viewModel: TransactionsViewModel
+    private val viewModel: TransactionsViewModel,
+    val viewLifecycleOwner: LifecycleOwner
 ) : PagerAdapter() {
     private val layoutInflater: LayoutInflater
     private lateinit var viewContainer: ViewGroup
@@ -42,6 +46,7 @@ class CalenderViewPagerAdapter(
     private var map: HashMap<Long, Pair<Long, Long>>
 
     var dateTimeFormatter: DateTimeFormatter
+
 
     init {
         layoutInflater = LayoutInflater.from(context)
@@ -102,7 +107,7 @@ class CalenderViewPagerAdapter(
             map = convertTotalExpenseIncomeClassToMap(listValue)
             daysOfMonthAdapter.updateData(map)
             daysOfMonthAdapter.notifyDataSetChanged()
-        }
+        }.launchIn(viewLifecycleOwner.lifecycleScope)
 
         container.addView(
             recyclerView,

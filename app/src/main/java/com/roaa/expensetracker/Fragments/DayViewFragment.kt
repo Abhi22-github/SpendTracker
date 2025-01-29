@@ -1,7 +1,6 @@
 package com.roaa.expensetracker.Fragments
 
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -40,7 +39,6 @@ class DayViewFragment : Fragment() {
     }
 
     private fun setCalenderDayViewPager() {
-        val start = System.currentTimeMillis()
         val date = LocalDate.now()
         var dateList = getPreviousAndNextDays(date).toMutableList()
 
@@ -93,10 +91,6 @@ class DayViewFragment : Fragment() {
 
 
         binding.viewPager2CalenderDayFragment.setCurrentItem(dateList.size / 2, false)
-
-        val end = System.currentTimeMillis()
-        Log.d("frag", "total time for frag ${end - start}")
-
 
     }
 
