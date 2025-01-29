@@ -31,7 +31,7 @@ class TransactionRepository(@ApplicationContext applicationContext: Context) {
         transactionDao.delete(transactionClass)
     }
 
-    suspend fun getTotalAmountByDateRangeAndCategoryType(
+    fun getTotalAmountByDateRangeAndCategoryType(
         startDate: Long,
         endDate: Long,
         categoryType: String
