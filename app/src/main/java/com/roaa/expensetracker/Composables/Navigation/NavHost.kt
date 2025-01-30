@@ -4,6 +4,9 @@ import android.app.Activity
 import android.content.Context
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionLayout
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -14,6 +17,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.roaa.expensetracker.Composables.Screens.AddCategory
 import com.roaa.expensetracker.Composables.Screens.CategoryScreen
+import com.roaa.expensetracker.Composables.Screens.FragmentDayScreen
 import com.roaa.expensetracker.Composables.Screens.MonthViewScreen
 import com.roaa.expensetracker.Composables.Screens.PaymentMethodScreen
 import com.roaa.expensetracker.Composables.Screens.SettingsScreen
@@ -64,7 +68,7 @@ fun SetupNavigationGraph(navController: NavHostController, navigationManager: Na
             }
 
             composable<NavRoutes.DayScreen> {
-
+                FragmentDayScreen(navigationManager,false, LocalDate.now())
             }
 
             composable<NavRoutes.BankAccountScreen> {
@@ -80,6 +84,30 @@ fun SetupNavigationGraph(navController: NavHostController, navigationManager: Na
 
 }
 
+val enterTransition = {
+    slideInHorizontally(
+        initialOffsetX = { fullWidth -> fullWidth },
+        animationSpec = tween(durationMillis = 300)
+    )
+}
+val exitTransition = {
+    slideOutHorizontally(
+        targetOffsetX = { fullWidth -> -fullWidth },
+        animationSpec = tween(durationMillis = 300)
+    )
+}
+val popEnterTransition = {
+    slideInHorizontally(
+        initialOffsetX = { fullWidth -> -fullWidth },
+        animationSpec = tween(durationMillis = 300)
+    )
+}
+val popExitTransition = {
+    slideOutHorizontally(
+        targetOffsetX = { fullWidth -> fullWidth },
+        animationSpec = tween(durationMillis = 300)
+    )
+}
 
 fun NavController.popBackStackOrFinish(context: Context) {
     if (!popBackStack()) {

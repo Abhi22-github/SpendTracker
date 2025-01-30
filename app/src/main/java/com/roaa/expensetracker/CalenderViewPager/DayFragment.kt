@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
-import com.roaa.expensetracker.Composables.Screens.FragmentDayScreen
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toNormalString
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
@@ -49,7 +48,7 @@ class DayFragment() : Fragment() {
     fun setUpComposeRecyclerView() {
         binding.composeViewDayListSingleDayFragment.setContent {
             ExpenseTrackerTheme {
-                FragmentDayScreen(true, date)
+               // FragmentDayScreen(true, date)
             }
         }
     }
