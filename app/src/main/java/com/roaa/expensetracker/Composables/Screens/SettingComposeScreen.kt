@@ -37,7 +37,6 @@ import com.roaa.expensetracker.Composables.ThemeMode
 import com.roaa.expensetracker.Composables.components.BudgetBottomSheet
 import com.roaa.expensetracker.Composables.components.SingleItemRadioButton
 import com.roaa.expensetracker.Composables.components.SpendsBudgetCard
-import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.ViewModels.PreferencesViewModel
 import kotlinx.coroutines.launch
 
@@ -82,7 +81,7 @@ fun SettingsScreenContent(
 
 
     Column {
-        TopBar(title = "Settings",false,{sendUserBack()},{})
+//        TopBar(title = "Settings",false,{sendUserBack()},{})
         Column() {
             Spacer(Modifier.height(10.dp))
             Text(

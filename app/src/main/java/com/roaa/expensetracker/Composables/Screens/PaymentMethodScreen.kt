@@ -72,7 +72,6 @@ import com.roaa.expensetracker.Composables.components.AddPaymentMethodBottomShee
 import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.Composables.components.DropDownBankAccountOption
 import com.roaa.expensetracker.Composables.components.EmptyScreen
-import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.ColorState
 import com.roaa.expensetracker.Composables.utils.IconState
@@ -131,24 +130,26 @@ fun PaymentMethodScreen(
         }
     }
 
-    Scaffold(topBar = {
-        TopBar(title = "Bank Accounts",
-            showDelete = false,
-            sendUserBackToPreviousActivity = { sendUserBack() },
-            delete = {})
-    }, floatingActionButton = {
-        ExtendedFloatingActionButton(
-            onClick = {
-                scope.launch {
-                    uiViewModel.paymentMethodBottomSheetStatus.emit(true)
-                }
-            },
-            icon = { Icon(Icons.Filled.Add, "Localized description") },
-            text = { Text(text = "Add Payment Method") },
-        )
-    }) { paddingValue ->
+    Scaffold(
+//        topBar = {
+//        TopBar(title = "Bank Accounts",
+//            showDelete = false,
+//            sendUserBackToPreviousActivity = { sendUserBack() },
+//            delete = {})
+//    },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = {
+                    scope.launch {
+                        uiViewModel.paymentMethodBottomSheetStatus.emit(true)
+                    }
+                },
+                icon = { Icon(Icons.Filled.Add, "Localized description") },
+                text = { Text(text = "Add Payment Method") },
+            )
+        }) { paddingValue ->
         if (!bankAccountsList.isEmpty()) {
-            Column(Modifier.padding(paddingValues = paddingValue)) {
+            Column(Modifier) {
                 Spacer(Modifier.height(10.dp))
                 LazyColumn(state = lazyListState) {
                     item {
@@ -390,7 +391,11 @@ fun PaymentCard(
                     colorPallet = colorPallet,
                     { showOptionMenu = false },
                     onPrimaryClicked = {
-                        scope.launch { preferencesViewModel.setPrimaryAccountNumber(bankAccountsClass.bankAccountId) }
+                        scope.launch {
+                            preferencesViewModel.setPrimaryAccountNumber(
+                                bankAccountsClass.bankAccountId
+                            )
+                        }
                         scope.launch { preferencesViewModel.setPrimaryAccount(bankAccountsClass) }
                         showOptionMenu = false
                     },

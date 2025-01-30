@@ -1,5 +1,15 @@
 package com.roaa.expensetracker.Utilities
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Settings
+import com.roaa.expensetracker.Model.NavigationItems
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import okhttp3.internal.toLongOrDefault
 import java.text.DecimalFormat
@@ -178,3 +188,41 @@ fun convertMillisToDateString(millis: Long): String {
 fun extractNumbers(input: String): Long {
     return input.filter { it.isDigit() }.toLongOrDefault(0L)
 }
+
+
+val items = listOf(
+    NavigationItems(
+        title = "List",
+        selectedIcon = Icons.Filled.Home,
+        unselectedIcon = Icons.Outlined.Home
+    ),
+    NavigationItems(
+        title = "Month",
+        selectedIcon = Icons.Filled.Info,
+        unselectedIcon = Icons.Outlined.Info
+    ),
+    NavigationItems(
+        title = "Day",
+        selectedIcon = Icons.Filled.Edit,
+        unselectedIcon = Icons.Outlined.Edit,
+        badgeCount = 105
+    ),
+    NavigationItems(
+        title = "Category",
+        selectedIcon = Icons.Filled.Settings,
+        unselectedIcon = Icons.Outlined.Settings
+    ), NavigationItems(
+        title = "Bank Accounts",
+        selectedIcon = Icons.Filled.Settings,
+        unselectedIcon = Icons.Outlined.Settings
+    ), NavigationItems(
+        title = "Statistics",
+        selectedIcon = Icons.Filled.Settings,
+        unselectedIcon = Icons.Outlined.Settings
+    ), NavigationItems(
+        title = "Settings",
+        selectedIcon = Icons.Filled.Settings,
+        unselectedIcon = Icons.Outlined.Settings
+    )
+
+)
