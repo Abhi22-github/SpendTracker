@@ -39,7 +39,7 @@ class StatisticsActivity : ComponentActivity() {
                     Row {
                         RestBudgetPill(date = LocalDate.now(), transactionsViewModel = viewModel)
                     }
-                    TransactionsListCompose(false, LocalDate.now(),viewModel = viewModel)
+                    TransactionsListCompose(Modifier, false, LocalDate.now(),viewModel = viewModel)
                 }
 
             }

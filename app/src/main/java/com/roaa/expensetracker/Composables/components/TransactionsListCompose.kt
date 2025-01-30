@@ -66,6 +66,7 @@ import java.time.LocalDate
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionsListCompose(
+    modifier: Modifier,
     showSingleDateTransactions: Boolean,
     date: LocalDate,
     viewModel: TransactionsViewModel = hiltViewModel(),

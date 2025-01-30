@@ -8,7 +8,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -48,8 +47,6 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
 import com.roaa.expensetracker.Composables.Navigation.ScreenB
-import com.roaa.expensetracker.Composables.Navigation.popBackStackOrFinish
-import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.secondaryAlpha
@@ -71,12 +68,8 @@ fun CategoryScreen(
         val context = LocalContext.current
         Surface {
             Scaffold(
-                topBar = {
-                    TopBar("Category",false,{navController.popBackStackOrFinish(context)},{})
-                },
                 content = { paddingValues ->
                     ScaffoldContent(
-                        paddingValues,
                         navController,
                         sharedTransitionScope,
                         animatedVisibilityScope
@@ -99,7 +92,6 @@ fun CategoryScreen(
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SharedTransitionScope.ScaffoldContent(
-    paddingValues: PaddingValues,
     navController: NavHostController,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
@@ -112,7 +104,6 @@ fun SharedTransitionScope.ScaffoldContent(
     Column(
         Modifier
             .verticalScroll(scrollState)
-            .padding(paddingValues)
     ) {
 
         Spacer(Modifier.height(12.dp))
