@@ -23,7 +23,6 @@ import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -32,8 +31,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
 import com.roaa.expensetracker.Composables.Navigation.SetupNavigationGraph
 import com.roaa.expensetracker.Composables.Screens.MonthViewScreen
@@ -41,6 +40,7 @@ import com.roaa.expensetracker.Composables.Screens.PaymentMethodScreen
 import com.roaa.expensetracker.Composables.Screens.SettingsScreen
 import com.roaa.expensetracker.Composables.components.TransactionsListCompose
 import com.roaa.expensetracker.Utilities.items
+import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -63,9 +63,13 @@ class ComposeMainActivity : ComponentActivity() {
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun NavigationDrawer(modifier: Modifier) {
+fun NavigationDrawer(
+    modifier: Modifier,
+    transactionViewModel: TransactionsViewModel = hiltViewModel()
+) {
 
     val items = items
+
 
     //Remember Clicked index state
     var selectedItemIndex by rememberSaveable {
@@ -112,12 +116,13 @@ fun NavigationDrawer(modifier: Modifier) {
 
             }
         },
+
         gesturesEnabled = true
     ) {
         Scaffold(
             topBar = { //TopBar to show title
                 TopAppBar(
-                    colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Blue),
+                    // colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Blue),
                     title = {
                         Text(text = "Expense Tracker")
                     },
@@ -136,7 +141,7 @@ fun NavigationDrawer(modifier: Modifier) {
                         }
                     }
                 )
-            }
+            },
         ) { innerPadding ->
             Column(Modifier.padding(innerPadding)) {
                 when (selectedItemIndex) {
@@ -165,6 +170,8 @@ fun NavigationDrawer(modifier: Modifier) {
                     }
                 }
             }
+
+
         }
     }
 
