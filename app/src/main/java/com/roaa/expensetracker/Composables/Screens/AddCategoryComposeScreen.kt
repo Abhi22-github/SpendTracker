@@ -75,7 +75,6 @@ import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
 import com.roaa.expensetracker.Composables.components.BottomSheetIconPicker
 import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.Composables.components.ErrorRow
-import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.secondaryAlpha
@@ -112,14 +111,7 @@ fun AddCategory(
 
     with(sharedTransitionScope) {
         ExpenseTrackerTheme {
-            Scaffold(topBar = {
-                TopBar("Add Category", showDeleteButton, {
-                    navController.popBackStack()
-                }, {
-                    showConfirmationDialog = !showConfirmationDialog
-                    confirmationDialogType = 1
-                })
-            }) { paddingValues ->
+            Scaffold() { paddingValues ->
                 ScaffoldContent(
                     paddingValues,
                     category,

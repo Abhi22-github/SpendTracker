@@ -47,7 +47,7 @@ fun FragmentDayScreen(
             RestBudgetPill(date)
         }
 
-        TransactionsListCompose(true, date)
+        TransactionsListCompose(Modifier, true, date)
     }
 }
 
