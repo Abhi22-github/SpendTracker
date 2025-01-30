@@ -52,6 +52,12 @@
             android:name=".Activity.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.ExpenseTracker">
+<!--            -->
+        </activity>
+        <activity
+            android:name=".Activity.ComposeMainActivity"
+            android:exported="true"
+            android:theme="@style/Theme.ExpenseTracker">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
