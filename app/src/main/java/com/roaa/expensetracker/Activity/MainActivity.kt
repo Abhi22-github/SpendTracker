@@ -78,7 +78,7 @@ class MainActivity : AppCompatActivity() {
 
         binding.bottomSheetAddActivityMain.setContent {
             ExpenseTrackerTheme {
-                AddBottomSheet()
+                AddBottomSheet( {false})
             }
         }
         fabAddExpense!!.setOnClickListener { v: View? ->

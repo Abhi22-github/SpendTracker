@@ -1,5 +1,6 @@
 package com.roaa.expensetracker.Composables.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -19,11 +20,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -63,6 +69,7 @@ import com.roaa.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionsListCompose(
@@ -73,44 +80,75 @@ fun TransactionsListCompose(
     uiViewModel: UiViewModel = hiltViewModel(),
     preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val bottomSheet by uiViewModel.transactionDetailBottomSheetValue.collectAsState()
-    var singleTransaction by remember {
-        mutableStateOf(
-            TransactionWithDetails(
-                emptyTransactionClass,
-                emptyCategoryClass,
-                emptyBank
-            )
+    var showAddBottomSheet by remember { mutableStateOf(false) }
+    Scaffold(floatingActionButton = {
+        ExtendedFloatingActionButton(
+            onClick = {
+                showAddBottomSheet = !showAddBottomSheet
+            },
+            icon = { Icon(Icons.Filled.Add, "Localized description") },
+            text = { Text(text = "Add") },
         )
-    }
-    val scope = rememberCoroutineScope()
-    val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
-    Column {
-        if (!showSingleDateTransactions) {
+    }) {
 
-            val transactionList by viewModel.allTransactions.collectAsState(emptyList())
-            val transactionsMap =
-                transactionList.sortedByDescending { it.transaction.dateWithTime }
-                    .groupBy { it.transaction.date }
-                    .toSortedMap()
+        val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        val bottomSheet by uiViewModel.transactionDetailBottomSheetValue.collectAsState()
+        var singleTransaction by remember {
+            mutableStateOf(
+                TransactionWithDetails(
+                    emptyTransactionClass,
+                    emptyCategoryClass,
+                    emptyBank
+                )
+            )
+        }
+        val scope = rememberCoroutineScope()
+        val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
+        Column {
+            if (!showSingleDateTransactions) {
 
-            val transactionConverterList = transactionsMap.map {
-                TransactionConverter(it.key.toString(), it.value)
-            }.reversed()
-            val lazyList = rememberLazyListState()
-            Surface(color = MaterialTheme.colorScheme.surface) {
-                if (!transactionConverterList.isEmpty()) LazyColumn(
-                    modifier = Modifier.fillMaxWidth(), state = lazyList
-                ) {
-                    item {
-                        if (showForecast)
-                            SummaryCard(blueColor)
+                val transactionList by viewModel.allTransactions.collectAsState(emptyList())
+                val transactionsMap =
+                    transactionList.sortedByDescending { it.transaction.dateWithTime }
+                        .groupBy { it.transaction.date }
+                        .toSortedMap()
+
+                val transactionConverterList = transactionsMap.map {
+                    TransactionConverter(it.key.toString(), it.value)
+                }.reversed()
+                val lazyList = rememberLazyListState()
+                Surface(color = MaterialTheme.colorScheme.surface) {
+                    if (!transactionConverterList.isEmpty()) LazyColumn(
+                        modifier = Modifier.fillMaxWidth(), state = lazyList
+                    ) {
+                        item {
+                            if (showForecast)
+                                SummaryCard(blueColor)
+                        }
+                        transactionConverterList.forEach { (date, transactionList) ->
+                            val date =
+                                getDateFromMillis(transactionList.get(0).transaction.dateWithTime)
+                            item { Header(if (date == getDateFromMillis(System.currentTimeMillis())) "Today" else date) }
+                            items(transactionList, key = { it.transaction.id }) { item ->
+                                SingleTransaction(item, onSingleItemClick = {
+                                    singleTransaction = (item)
+                                    scope.launch {
+                                        uiViewModel.transactionDetailBottomSheetValue.emit(true)
+                                    }
+                                })
+                            }
+                        }
                     }
-                    transactionConverterList.forEach { (date, transactionList) ->
-                        val date =
-                            getDateFromMillis(transactionList.get(0).transaction.dateWithTime)
-                        item { Header(if (date == getDateFromMillis(System.currentTimeMillis())) "Today" else date) }
+                    else EmptyScreen()
+                }
+            } else {
+                viewModel.getAllTransactionsForDate(convertLocalDateToLong(date))
+                val transactionList by viewModel.getAllTransactionsForDateFlow.collectAsState()
+                val lazyList = rememberLazyListState()
+                Surface(color = MaterialTheme.colorScheme.surface) {
+                    if (!transactionList.isEmpty()) LazyColumn(
+                        modifier = Modifier.fillMaxWidth(), state = lazyList
+                    ) {
                         items(transactionList, key = { it.transaction.id }) { item ->
                             SingleTransaction(item, onSingleItemClick = {
                                 singleTransaction = (item)
@@ -120,32 +158,16 @@ fun TransactionsListCompose(
                             })
                         }
                     }
+                    else EmptyScreen()
                 }
-                else EmptyScreen()
             }
-        } else {
-            viewModel.getAllTransactionsForDate(convertLocalDateToLong(date))
-            val transactionList by viewModel.getAllTransactionsForDateFlow.collectAsState()
-            val lazyList = rememberLazyListState()
-            Surface(color = MaterialTheme.colorScheme.surface) {
-                if (!transactionList.isEmpty()) LazyColumn(
-                    modifier = Modifier.fillMaxWidth(), state = lazyList
-                ) {
-                    items(transactionList, key = { it.transaction.id }) { item ->
-                        SingleTransaction(item, onSingleItemClick = {
-                            singleTransaction = (item)
-                            scope.launch {
-                                uiViewModel.transactionDetailBottomSheetValue.emit(true)
-                            }
-                        })
-                    }
-                }
-                else EmptyScreen()
-            }
-        }
 
-        if (bottomSheet) {
-            BottomSheetContentItemDetails(bottomSheetState, singleTransaction)
+            if (bottomSheet) {
+                BottomSheetContentItemDetails(bottomSheetState, singleTransaction)
+            }
+            if (showAddBottomSheet) {
+                AddBottomSheet({ showAddBottomSheet = !showAddBottomSheet })
+            }
         }
     }
 }
