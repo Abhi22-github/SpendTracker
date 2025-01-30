@@ -691,20 +691,18 @@ fun BottomRow(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddBottomSheet(
-    transactionsViewModel: TransactionsViewModel = hiltViewModel()
+    closeBottomSheet: () -> Unit,
+    transactionsViewModel: TransactionsViewModel = hiltViewModel(),
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
-    val bottomSheet by transactionsViewModel.bottomSheetStatus.collectAsState(false)
-    if (bottomSheet) {
-        BottomSheetContentAddItem(bottomSheetState) {
-            scope.launch {
-                transactionsViewModel.bottomSheetStatus.emit(
-                    !bottomSheet
-                )
-            }
+
+    BottomSheetContentAddItem(bottomSheetState) {
+        scope.launch {
+            closeBottomSheet()
         }
     }
+
 }
 
 //bottom sheet to show item Details
