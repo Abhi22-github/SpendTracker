@@ -5,15 +5,12 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.compose.material3.Surface
-import androidx.compose.ui.Modifier
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
-import com.roaa.expensetracker.Composables.components.TransactionsListCompose
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import com.roaa.expensetracker.databinding.FragmentListViewBinding
 import dagger.hilt.android.AndroidEntryPoint
-import java.time.LocalDate
 
 
 @AndroidEntryPoint
@@ -42,7 +39,7 @@ class ListViewFragment : Fragment() {
         binding.composeViewTransactionsListFragment.setContent {
             ExpenseTrackerTheme {
                 Surface {
-                    TransactionsListCompose(Modifier,false, LocalDate.now())
+                 //   TransactionsListCompose(Modifier,false, LocalDate.now())
                 }
             }
 

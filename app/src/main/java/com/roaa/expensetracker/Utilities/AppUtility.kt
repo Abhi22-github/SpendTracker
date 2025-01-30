@@ -9,6 +9,7 @@ import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Settings
+import com.roaa.expensetracker.Composables.Navigation.NavRoutes
 import com.roaa.expensetracker.Model.NavigationItems
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import okhttp3.internal.toLongOrDefault
@@ -194,35 +195,42 @@ val items = listOf(
     NavigationItems(
         title = "List",
         selectedIcon = Icons.Filled.Home,
-        unselectedIcon = Icons.Outlined.Home
+        unselectedIcon = Icons.Outlined.Home,
+        route = NavRoutes.MainScreen,
     ),
     NavigationItems(
         title = "Month",
         selectedIcon = Icons.Filled.Info,
-        unselectedIcon = Icons.Outlined.Info
+        unselectedIcon = Icons.Outlined.Info,
+        route = NavRoutes.MonthScreen,
     ),
     NavigationItems(
         title = "Day",
         selectedIcon = Icons.Filled.Edit,
         unselectedIcon = Icons.Outlined.Edit,
-        badgeCount = 105
+        badgeCount = 105,
+        route = NavRoutes.MainScreen,
     ),
     NavigationItems(
         title = "Category",
         selectedIcon = Icons.Filled.Settings,
-        unselectedIcon = Icons.Outlined.Settings
+        unselectedIcon = Icons.Outlined.Settings,
+        route = NavRoutes.ScreenA,
     ), NavigationItems(
         title = "Bank Accounts",
         selectedIcon = Icons.Filled.Settings,
-        unselectedIcon = Icons.Outlined.Settings
+        unselectedIcon = Icons.Outlined.Settings,
+        route = NavRoutes.BankAccountScreen,
     ), NavigationItems(
         title = "Statistics",
         selectedIcon = Icons.Filled.Settings,
-        unselectedIcon = Icons.Outlined.Settings
+        unselectedIcon = Icons.Outlined.Settings,
+        route = NavRoutes.MainScreen,
     ), NavigationItems(
         title = "Settings",
         selectedIcon = Icons.Filled.Settings,
-        unselectedIcon = Icons.Outlined.Settings
+        unselectedIcon = Icons.Outlined.Settings,
+        route = NavRoutes.SettingScreen,
     )
 
 )

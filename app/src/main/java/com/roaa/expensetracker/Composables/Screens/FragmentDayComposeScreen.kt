@@ -11,7 +11,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.roaa.expensetracker.Composables.components.RestBudgetPill
-import com.roaa.expensetracker.Composables.components.TransactionsListCompose
 import com.roaa.expensetracker.Utilities.convertLocalDateToLong
 import com.roaa.expensetracker.ViewModels.AnimationViewModel
 import com.roaa.expensetracker.ViewModels.PreferencesViewModel
@@ -47,7 +46,7 @@ fun FragmentDayScreen(
             RestBudgetPill(date)
         }
 
-        TransactionsListCompose(Modifier, true, date)
+       // TransactionsListCompose(Modifier, true, date)
     }
 }
 
