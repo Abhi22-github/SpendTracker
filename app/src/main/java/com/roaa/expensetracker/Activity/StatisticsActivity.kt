@@ -15,7 +15,6 @@ import androidx.compose.ui.unit.dp
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
 import com.roaa.expensetracker.Composables.components.RestBudgetPill
 import com.roaa.expensetracker.Composables.components.SpendsBudgetCard
-import com.roaa.expensetracker.Composables.components.TransactionsListCompose
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.time.LocalDate
@@ -39,7 +38,7 @@ class StatisticsActivity : ComponentActivity() {
                     Row {
                         RestBudgetPill(date = LocalDate.now(), transactionsViewModel = viewModel)
                     }
-                    TransactionsListCompose(Modifier, false, LocalDate.now(),viewModel = viewModel)
+                 //   TransactionsListCompose(Modifier, false, LocalDate.now(),viewModel = viewModel)
                 }
 
             }

@@ -13,7 +13,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
-import com.roaa.expensetracker.Composables.Screens.SettingsScreen
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -33,7 +32,7 @@ class SettingComposeActivity : ComponentActivity() {
             ExpenseTrackerTheme {
                 Scaffold {
                     Surface(modifier = Modifier.statusBarsPadding()) {
-                        SettingsScreen({ sendUserBack() })
+                        //SettingsScreen({ sendUserBack() })
                     }
                 }
             }

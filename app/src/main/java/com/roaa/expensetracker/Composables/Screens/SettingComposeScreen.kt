@@ -33,6 +33,7 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.ThemeMode
 import com.roaa.expensetracker.Composables.components.BudgetBottomSheet
 import com.roaa.expensetracker.Composables.components.SingleItemRadioButton
@@ -52,6 +53,7 @@ val radioButtonColors
 
 @Composable
 fun SettingsScreen(
+    navController: NavigationManager,
     sendUserBack: () -> Unit,
     preferenceViewModel: PreferencesViewModel = hiltViewModel()
 ) {

@@ -27,33 +27,39 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.rememberNavController
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
+import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.SetupNavigationGraph
-import com.roaa.expensetracker.Composables.Screens.MonthViewScreen
-import com.roaa.expensetracker.Composables.Screens.PaymentMethodScreen
-import com.roaa.expensetracker.Composables.Screens.SettingsScreen
-import com.roaa.expensetracker.Composables.components.TransactionsListCompose
 import com.roaa.expensetracker.Utilities.items
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 @AndroidEntryPoint
 class ComposeMainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         setContent {
+            val navController = rememberNavController()
+            val navigationManager = remember { NavigationManager(navController) }
             ExpenseTrackerTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    NavigationDrawer(Modifier.padding(innerPadding))
+                    NavigationDrawer(
+                        navController,
+                        navigationManager,
+                        Modifier.padding(innerPadding)
+                    )
                 }
             }
         }
@@ -64,12 +70,13 @@ class ComposeMainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationDrawer(
+    navController: NavHostController,
+    navigationManager: NavigationManager,
     modifier: Modifier,
     transactionViewModel: TransactionsViewModel = hiltViewModel()
 ) {
 
     val items = items
-
 
     //Remember Clicked index state
     var selectedItemIndex by rememberSaveable {
@@ -89,10 +96,11 @@ fun NavigationDrawer(
                         label = { Text(text = item.title) },
                         selected = index == selectedItemIndex,
                         onClick = {
-                            //  navController.navigate(item.route)
-
                             selectedItemIndex = index
+                            navigationManager.navigateTo(item.route)
+
                             scope.launch {
+
                                 drawerState.close()
                             }
                         },
@@ -144,31 +152,7 @@ fun NavigationDrawer(
             },
         ) { innerPadding ->
             Column(Modifier.padding(innerPadding)) {
-                when (selectedItemIndex) {
-                    0 -> {
-                        TransactionsListCompose(
-                            modifier = Modifier.padding(innerPadding),
-                            showSingleDateTransactions = false,
-                            date = LocalDate.now(),
-                        )
-                    }
-
-                    1 -> {
-                        MonthViewScreen(modifier = Modifier.padding(innerPadding))
-                    }
-
-                    3 -> {
-                        SetupNavigationGraph()
-                    }
-
-                    4 -> {
-                        PaymentMethodScreen(Modifier, {})
-                    }
-
-                    6 -> {
-                        SettingsScreen({})
-                    }
-                }
+                SetupNavigationGraph(navController, navigationManager)
             }
 
 
