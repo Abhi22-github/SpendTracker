@@ -69,9 +69,9 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
+import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.components.BottomSheetIconPicker
 import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.Composables.components.ErrorRow
@@ -93,7 +93,7 @@ import kotlinx.coroutines.launch
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun AddCategory(
-    navController: NavController,
+    NavigationManager: NavigationManager,
     categoryId: Long,
     categoryName: String,
     categoryIcon: Int,
@@ -115,7 +115,7 @@ fun AddCategory(
                 ScaffoldContent(
                     paddingValues,
                     category,
-                    { navController.popBackStack() },
+                    { NavigationManager.navController.popBackStack() },
                     animatedVisibilityScope
                 )
             }
@@ -129,7 +129,7 @@ fun AddCategory(
                 onConfirmation = {
                     categoryViewModel.deleteCategoryFromDatabase(category)
                     showConfirmationDialog = !showConfirmationDialog
-                    navController.popBackStack()
+                    NavigationManager.navController.popBackStack()
 
                 },
                 dialogTitle = "Delete Category",
@@ -144,7 +144,7 @@ fun AddCategory(
                 onConfirmation = {
                     categoryViewModel.deleteCategoryFromDatabase(category)
                     showConfirmationDialog = !showConfirmationDialog
-                    navController.popBackStack()
+                    NavigationManager.navController.popBackStack()
                 },
                 dialogTitle = "Update Category",
                 dialogText = "Are you sure, you want to update the current category",

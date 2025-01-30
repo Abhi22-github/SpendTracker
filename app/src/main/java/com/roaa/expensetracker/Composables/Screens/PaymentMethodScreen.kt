@@ -68,6 +68,7 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
+import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.components.AddPaymentMethodBottomSheet
 import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.Composables.components.DropDownBankAccountOption
@@ -89,6 +90,7 @@ import kotlinx.coroutines.launch
 @Composable
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 fun PaymentMethodScreen(
+    navController: NavigationManager,
     modifier: Modifier = Modifier,
     sendUserBack: () -> Unit,
     uiViewModel: UiViewModel = hiltViewModel(),

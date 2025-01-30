@@ -43,10 +43,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
-import com.roaa.expensetracker.Composables.Navigation.ScreenB
+import com.roaa.expensetracker.Composables.Navigation.NavRoutes
+import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.secondaryAlpha
@@ -60,7 +60,7 @@ import com.roaa.expensetracker.ViewModels.CategoryViewModel
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun CategoryScreen(
-    navController: NavHostController,
+    navigationManager: NavigationManager,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
 ) {
@@ -70,14 +70,14 @@ fun CategoryScreen(
             Scaffold(
                 content = { paddingValues ->
                     ScaffoldContent(
-                        navController,
+                        navigationManager,
                         sharedTransitionScope,
                         animatedVisibilityScope
                     )
                 },
                 floatingActionButton = {
                     ExtendedFloatingActionButton(
-                        onClick = { navController.navigate(ScreenB(0L, "", 99, EXPENSE)) },
+                        onClick = { navigationManager.navController.navigate(NavRoutes.ScreenB(0L, "", 99, EXPENSE)) },
                         icon = { Icon(Icons.Filled.Add, "Localized description") },
                         text = { Text(text = "Add Category") },
                     )
@@ -92,7 +92,7 @@ fun CategoryScreen(
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SharedTransitionScope.ScaffoldContent(
-    navController: NavHostController,
+    navigationManager: NavigationManager,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
     categoryViewModel: CategoryViewModel = hiltViewModel()
@@ -170,8 +170,8 @@ fun SharedTransitionScope.ScaffoldContent(
                             it,
                             sharedTransitionScope, animatedVisibilityScope
                         ) {
-                            navController.navigate(
-                                ScreenB(
+                            navigationManager.navController.navigate(
+                                NavRoutes.ScreenB(
                                     it.categoryId,
                                     it.categoryName,
                                     it.categoryIconNumber,
@@ -194,8 +194,8 @@ fun SharedTransitionScope.ScaffoldContent(
                             it,
                             sharedTransitionScope, animatedVisibilityScope
                         ) {
-                            navController.navigate(
-                                ScreenB(
+                            navigationManager.navController.navigate(
+                                NavRoutes.ScreenB(
                                     it.categoryId,
                                     it.categoryName,
                                     it.categoryIconNumber,
@@ -242,8 +242,8 @@ fun SharedTransitionScope.ScaffoldContent(
                             it,
                             sharedTransitionScope, animatedVisibilityScope
                         ) {
-                            navController.navigate(
-                                ScreenB(
+                            navigationManager.navController.navigate(
+                                NavRoutes.ScreenB(
                                     it.categoryId,
                                     it.categoryName,
                                     it.categoryIconNumber,
@@ -266,8 +266,8 @@ fun SharedTransitionScope.ScaffoldContent(
                             it,
                             sharedTransitionScope, animatedVisibilityScope
                         ) {
-                            navController.navigate(
-                                ScreenB(
+                            navigationManager.navController.navigate(
+                                NavRoutes.ScreenB(
                                     it.categoryId,
                                     it.categoryName,
                                     it.categoryIconNumber,
