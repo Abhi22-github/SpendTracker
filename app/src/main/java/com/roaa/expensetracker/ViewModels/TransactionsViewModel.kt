@@ -302,6 +302,7 @@ class TransactionsViewModel @Inject constructor(
         }
     }
 
+
     fun getAllTransactionsForDateCompose(date: Long): Flow<List<TransactionWithDetails>> {
 
         return transactionRepository.getAllTransactionsForDate(date)

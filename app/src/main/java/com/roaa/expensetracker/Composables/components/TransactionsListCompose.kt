@@ -67,7 +67,6 @@ import com.roaa.expensetracker.Utilities.getDateFromMillis
 import com.roaa.expensetracker.ViewModels.PreferencesViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import com.roaa.expensetracker.ViewModels.UiViewModel
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -83,6 +82,7 @@ fun TransactionsListCompose(
     preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     var showAddBottomSheet by remember { mutableStateOf(false) }
+    var bottomSheet by remember { mutableStateOf(false) }
     Scaffold(floatingActionButton = {
         ExtendedFloatingActionButton(
             onClick = {
@@ -94,7 +94,6 @@ fun TransactionsListCompose(
     }) {
 
         val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-        val bottomSheet by uiViewModel.transactionDetailBottomSheetValue.collectAsState()
         var singleTransaction by remember {
             mutableStateOf(
                 TransactionWithDetails(
@@ -134,9 +133,8 @@ fun TransactionsListCompose(
                             items(transactionList, key = { it.transaction.id }) { item ->
                                 SingleTransaction(item, onSingleItemClick = {
                                     singleTransaction = (item)
-                                    scope.launch {
-                                        uiViewModel.transactionDetailBottomSheetValue.emit(true)
-                                    }
+                                    bottomSheet = true
+
                                 })
                             }
                         }
@@ -156,9 +154,8 @@ fun TransactionsListCompose(
                         items(transactionList, key = { it.transaction.id }) { item ->
                             SingleTransaction(item, onSingleItemClick = {
                                 singleTransaction = (item)
-                                scope.launch {
-                                    uiViewModel.transactionDetailBottomSheetValue.emit(true)
-                                }
+                                bottomSheet = true
+
                             })
                         }
                     }
@@ -167,7 +164,10 @@ fun TransactionsListCompose(
             }
 
             if (bottomSheet) {
-                BottomSheetContentItemDetails(bottomSheetState, singleTransaction)
+                BottomSheetContentItemDetails(
+                    bottomSheetState,
+                    singleTransaction,
+                    { bottomSheet = !bottomSheet })
             }
             if (showAddBottomSheet) {
                 AddBottomSheet({ showAddBottomSheet = !showAddBottomSheet })
