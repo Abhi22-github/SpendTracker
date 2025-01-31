@@ -146,7 +146,7 @@ fun BottomSheetContentAddItem(sheetState: SheetState, closeBottomSheet: () -> Un
             .imePadding()
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
-        BottomSheetContentItemAddContent(modifier = Modifier)
+        BottomSheetContentItemAddContent(modifier = Modifier, closeBottomSheet)
     }
 }
 
@@ -158,7 +158,7 @@ val bottomSheetTopBottomPadding = 0.dp
 @Composable
 fun BottomSheetContentItemAddContent(
     modifier: Modifier,
-
+    closeBottomSheet: () -> Unit,
     categoryViewModel: CategoryViewModel = hiltViewModel(),
     transactionsViewModel: TransactionsViewModel = hiltViewModel(),
     uiViewModel: UiViewModel = hiltViewModel(),
@@ -508,6 +508,7 @@ fun BottomSheetContentItemAddContent(
             FilledTonalButton(
                 onClick = {
                     validateTransactionData(
+                        closeBottomSheet = closeBottomSheet,
                         selectedType,
                         selectedCategory,
                         expenseValue.text.replace(",", ""),
@@ -531,6 +532,7 @@ fun BottomSheetContentItemAddContent(
 
 
 fun validateTransactionData(
+    closeBottomSheet: () -> Unit,
     type: String,
     selectedCategory: CategoryClass,
     amount: String,
@@ -566,9 +568,7 @@ fun validateTransactionData(
             selectedDate,
             selectedPaymentMethod.bankAccountId
         )
-        transactionsViewModel.bottomSheetStatus.emit(
-            false
-        )
+        closeBottomSheet()
 
     }
 }
@@ -711,12 +711,14 @@ fun AddBottomSheet(
 fun BottomSheetContentItemDetails(
     sheetState: SheetState,
     singleTransaction: TransactionWithDetails,
+    closeBottomSheet: () -> Unit,
     uiViewModel: UiViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
     ModalBottomSheet(onDismissRequest = {
         scope.launch {
             uiViewModel.transactionDetailBottomSheetValue.emit(false)
+            closeBottomSheet()
         }
     },
         sheetState = sheetState,
@@ -1902,7 +1904,7 @@ fun BottomRowTest(
 fun BottomSheetPreview() {
     ExpenseTrackerTheme {
         Surface {
-            BottomSheetContentItemAddContent(Modifier)
+            BottomSheetContentItemAddContent(Modifier,{})
         }
     }
 }
