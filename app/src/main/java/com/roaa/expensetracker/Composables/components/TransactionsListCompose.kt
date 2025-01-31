@@ -145,7 +145,9 @@ fun TransactionsListCompose(
                 }
             } else {
                 viewModel.getAllTransactionsForDate(convertLocalDateToLong(date))
-                val transactionList by viewModel.getAllTransactionsForDateFlow.collectAsState()
+                val transactionList by viewModel.getAllTransactionsForDateCompose(
+                    convertLocalDateToLong(date)
+                ).collectAsState(listOf())
                 val lazyList = rememberLazyListState()
                 Surface(color = MaterialTheme.colorScheme.surface) {
                     if (!transactionList.isEmpty()) LazyColumn(
