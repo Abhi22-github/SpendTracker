@@ -17,7 +17,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.roaa.expensetracker.Composables.Screens.AddCategory
 import com.roaa.expensetracker.Composables.Screens.CategoryScreen
-import com.roaa.expensetracker.Composables.Screens.FragmentDayScreen
+import com.roaa.expensetracker.Composables.Screens.DayViewScreen
 import com.roaa.expensetracker.Composables.Screens.MonthViewScreen
 import com.roaa.expensetracker.Composables.Screens.PaymentMethodScreen
 import com.roaa.expensetracker.Composables.Screens.SettingsScreen
@@ -62,13 +62,12 @@ fun SetupNavigationGraph(navController: NavHostController, navigationManager: Na
                     date = LocalDate.now(),
                 )
             }
-
             composable<NavRoutes.MonthScreen> {
                 MonthViewScreen(navigationManager, modifier = Modifier)
             }
 
             composable<NavRoutes.DayScreen> {
-                FragmentDayScreen(navigationManager,false, LocalDate.now())
+                DayViewScreen(navigationManager)
             }
 
             composable<NavRoutes.BankAccountScreen> {
