@@ -302,6 +302,11 @@ class TransactionsViewModel @Inject constructor(
         }
     }
 
+    fun getAllTransactionsForDateCompose(date: Long): Flow<List<TransactionWithDetails>> {
+
+        return transactionRepository.getAllTransactionsForDate(date)
+    }
+
     fun getTotalExpenseAmountForDate(date: Long) {
         viewModelScope.launch {
             loading()
