@@ -4,6 +4,7 @@ plugins {
     alias(libs.plugins.compose.compiler)
     id("kotlin-kapt")
     id("com.google.dagger.hilt.android")
+    id("com.google.gms.google-services")
     alias(libs.plugins.kotlin.serialization)
     // Apply Hilt plugin
 }
@@ -118,5 +119,8 @@ dependencies {
     implementation("com.google.accompanist:accompanist-pager:0.32.0") // For HorizontalPager
     implementation("com.google.accompanist:accompanist-pager-indicators:0.32.0")
 
+//firebase
+    implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
+    implementation("com.google.firebase:firebase-analytics")
 
 }
