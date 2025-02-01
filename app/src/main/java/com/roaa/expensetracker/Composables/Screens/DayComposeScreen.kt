@@ -90,10 +90,10 @@ fun DayScreen(
 
     Column {
         Row(modifier = Modifier.padding(12.dp, 16.dp)) {
-            RestBudgetPill(date.toLocalDate())
+            RestBudgetPill(date)
         }
 
-        TransactionsListCompose(navigationManager, Modifier, true, date.toLocalDate())
+        TransactionsListCompose(navigationManager, Modifier, true, date)
     }
 }
 
@@ -108,7 +108,7 @@ fun DayViewScreen(
     val pagerState = rememberPagerState(initialPage = 500 / 2, pageCount = { 500 })
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     val configuration = LocalConfiguration.current
-    val tabs = getPreviousAndNext500Days(LocalDate.now())
+    val tabs = getPreviousAndNext500Days(date.toLocalDate())
 
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -241,7 +241,7 @@ fun DayViewScreen(
         HorizontalPager(
             state = pagerState,
         ) { page ->
-            val currentDay = calculateCurrentPageDay(page, 250,date.toLocalDate())
+            val currentDay = calculateCurrentPageDay(page, 250, date.toLocalDate())
             DayScreen(navigationManager, false, currentDay.toLong())
         }
     }

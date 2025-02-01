@@ -123,6 +123,7 @@ import com.roaa.expensetracker.Utilities.Constants.INCOME
 import com.roaa.expensetracker.Utilities.convertMillisToDateString
 import com.roaa.expensetracker.Utilities.extractNumbers
 import com.roaa.expensetracker.Utilities.parseAmount
+import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.ViewModels.AnimationViewModel
 import com.roaa.expensetracker.ViewModels.BankAccountsViewModel
 import com.roaa.expensetracker.ViewModels.CategoryViewModel
@@ -256,7 +257,7 @@ fun BottomSheetContentItemAddContent(
             Spacer(Modifier.height(16.dp))
             AnimatedVisibility(showForecast) {
                 Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
-                    RestBudgetPill(LocalDate.now())
+                    RestBudgetPill(LocalDate.now().toLong())
                 }
             }
             if (showForecast) {
@@ -1549,7 +1550,7 @@ fun BottomSheetContentItemAddContentTest(
             Spacer(Modifier.height(16.dp))
             AnimatedVisibility(showForecast) {
                 Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
-                    RestBudgetPill(LocalDate.now())
+                    RestBudgetPill(LocalDate.now().toLong())
                 }
             }
             if (showForecast) {
@@ -1904,7 +1905,7 @@ fun BottomRowTest(
 fun BottomSheetPreview() {
     ExpenseTrackerTheme {
         Surface {
-            BottomSheetContentItemAddContent(Modifier,{})
+            BottomSheetContentItemAddContent(Modifier, {})
         }
     }
 }

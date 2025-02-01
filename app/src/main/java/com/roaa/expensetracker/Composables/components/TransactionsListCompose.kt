@@ -62,12 +62,10 @@ import com.roaa.expensetracker.Model.emptyBank
 import com.roaa.expensetracker.Model.emptyCategoryClass
 import com.roaa.expensetracker.Model.emptyTransactionClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
-import com.roaa.expensetracker.Utilities.convertLocalDateToLong
 import com.roaa.expensetracker.Utilities.getDateFromMillis
 import com.roaa.expensetracker.ViewModels.PreferencesViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import com.roaa.expensetracker.ViewModels.UiViewModel
-import java.time.LocalDate
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -76,7 +74,7 @@ fun TransactionsListCompose(
     navController: NavigationManager,
     modifier: Modifier,
     showSingleDateTransactions: Boolean,
-    date: LocalDate,
+    date: Long,
     viewModel: TransactionsViewModel = hiltViewModel(),
     uiViewModel: UiViewModel = hiltViewModel(),
     preferencesViewModel: PreferencesViewModel = hiltViewModel()
@@ -142,9 +140,9 @@ fun TransactionsListCompose(
                     else EmptyScreen()
                 }
             } else {
-                viewModel.getAllTransactionsForDate(convertLocalDateToLong(date))
+                viewModel.getAllTransactionsForDate(date)
                 val transactionList by viewModel.getAllTransactionsForDateCompose(
-                    convertLocalDateToLong(date)
+                    date
                 ).collectAsState(listOf())
                 val lazyList = rememberLazyListState()
                 Surface(color = MaterialTheme.colorScheme.surface) {
