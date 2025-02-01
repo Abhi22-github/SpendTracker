@@ -150,13 +150,7 @@ class MainActivity : AppCompatActivity() {
             } else if (menuID == R.id.item_category_sideNavigation) {
                 sendUserToCategoryActivity()
                 selectedItem = R.id.item_category_sideNavigation
-            } else if (menuID == R.id.item_expenseCategory_sideNavigation) {
-                sendUserToExpenseCategoryActivity()
-                selectedItem = R.id.item_listView_sideNavigation
-            } else if (menuID == R.id.item_incomeCategory_sideNavigation) {
-                sendUserToIncomeCategoryActivity()
-                selectedItem = R.id.item_listView_sideNavigation
-            } else if (menuID == R.id.item_settings_sideNavigation) {
+            }  else if (menuID == R.id.item_settings_sideNavigation) {
                 sendUserToSettingsActivity()
                 selectedItem = R.id.item_listView_sideNavigation
             } else if (menuID == R.id.item_analyze_sideNavigation) {
@@ -199,15 +193,6 @@ class MainActivity : AppCompatActivity() {
         startActivity(intent)
     }
 
-    private fun sendUserToExpenseCategoryActivity() {
-        val intent = Intent(context, ExpenseCategoryActivity::class.java)
-        startActivity(intent)
-    }
-
-    private fun sendUserToIncomeCategoryActivity() {
-        val intent = Intent(context, IncomeCategoryActivity::class.java)
-        startActivity(intent)
-    }
 
     private fun sendUserToSettingsActivity() {
         val intent = Intent(context, SettingComposeActivity::class.java)
