@@ -168,7 +168,7 @@ fun TransactionsListCompose(
                     { bottomSheet = !bottomSheet })
             }
             if (showAddBottomSheet) {
-                AddBottomSheet({ showAddBottomSheet = !showAddBottomSheet })
+                AddBottomSheet(date,{ showAddBottomSheet = !showAddBottomSheet })
             }
         }
     }

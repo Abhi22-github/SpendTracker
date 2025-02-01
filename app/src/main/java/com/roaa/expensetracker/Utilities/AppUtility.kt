@@ -15,7 +15,9 @@ import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import okhttp3.internal.toLongOrDefault
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
@@ -69,6 +71,24 @@ fun convertTotalExpenseIncomeClassToMap(totalExpenseIncomeClassList: List<TotalE
         map[it.date] = Pair(it.totalExpense, it.totalIncome)
     }
     return map
+}
+
+fun LocalDate.toLongMillis(): Long {
+    // Convert LocalDate to LocalDateTime at midnight (start of the day)
+    val localDateTime = this.atStartOfDay()
+
+    // Convert LocalDateTime to Instant (UTC time)
+    val instant = localDateTime.toInstant(ZoneOffset.UTC)
+
+    // Return the milliseconds from the epoch (1970-01-01T00:00:00Z)
+    return instant.toEpochMilli()
+}
+
+fun Long.LongMillisToNoralLong(): Long {
+    // Convert milliseconds to Instant
+    val instant = Instant.ofEpochMilli(this)
+    // Convert Instant to LocalDate (using UTC)
+    return instant.atZone(ZoneOffset.UTC).toLocalDate().toLong()
 }
 
 fun Float.clamp(min: Float, max: Float): Float =

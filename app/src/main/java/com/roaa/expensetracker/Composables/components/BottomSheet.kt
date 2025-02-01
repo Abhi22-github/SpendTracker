@@ -123,7 +123,9 @@ import com.roaa.expensetracker.Utilities.Constants.INCOME
 import com.roaa.expensetracker.Utilities.convertMillisToDateString
 import com.roaa.expensetracker.Utilities.extractNumbers
 import com.roaa.expensetracker.Utilities.parseAmount
+import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
+import com.roaa.expensetracker.Utilities.toLongMillis
 import com.roaa.expensetracker.ViewModels.AnimationViewModel
 import com.roaa.expensetracker.ViewModels.BankAccountsViewModel
 import com.roaa.expensetracker.ViewModels.CategoryViewModel
@@ -138,7 +140,7 @@ import java.time.LocalDate
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun BottomSheetContentAddItem(sheetState: SheetState, closeBottomSheet: () -> Unit) {
+fun BottomSheetContentAddItem(date: Long, sheetState: SheetState, closeBottomSheet: () -> Unit) {
     ModalBottomSheet(onDismissRequest = {
         closeBottomSheet()
     },
@@ -147,7 +149,7 @@ fun BottomSheetContentAddItem(sheetState: SheetState, closeBottomSheet: () -> Un
             .imePadding()
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
-        BottomSheetContentItemAddContent(modifier = Modifier, closeBottomSheet)
+        BottomSheetContentItemAddContent(modifier = Modifier, date, closeBottomSheet)
     }
 }
 
@@ -159,6 +161,7 @@ val bottomSheetTopBottomPadding = 0.dp
 @Composable
 fun BottomSheetContentItemAddContent(
     modifier: Modifier,
+    date: Long,
     closeBottomSheet: () -> Unit,
     categoryViewModel: CategoryViewModel = hiltViewModel(),
     transactionsViewModel: TransactionsViewModel = hiltViewModel(),
@@ -170,7 +173,7 @@ fun BottomSheetContentItemAddContent(
     var categoryMenuExpanded by remember { mutableStateOf(false) }
     var expenseValue by remember { mutableStateOf(TextFieldValue("")) }
     var comment by remember { mutableStateOf(TextFieldValue("")) }
-    var selectedDate by remember { mutableStateOf<Long?>(System.currentTimeMillis()) }
+    var selectedDate by remember { mutableStateOf<Long?>(date) }
     var selectedPaymentMethod by remember { mutableStateOf<BankAccountsClass>(emptyBank) }
     val focusRequester = remember { FocusRequester() }
     val categoryList by categoryViewModel.categoryList.collectAsState()
@@ -489,9 +492,9 @@ fun BottomSheetContentItemAddContent(
 
         }
 
+        Spacer(Modifier.height(54.dp))
         ErrorRow(errorStatus)
-
-        Spacer(Modifier.height(64.dp))
+        Spacer(Modifier.height(12.dp))
         Row {
             BottomRow(
                 modifier,
@@ -586,9 +589,15 @@ fun BottomRow(
     bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
     preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
+    Log.d("Test___1",System.currentTimeMillis().toString())
+    Log.d("Test___2",selectedDate.toString())
+    Log.d("Test___3",selectedDate?.toLocalDate().toString())
+    Log.d("Test___4",selectedDate?.toLocalDate()?.toLongMillis().toString())
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState =
-        rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
+        rememberDatePickerState(
+            initialSelectedDateMillis = selectedDate?.toLocalDate()?.toLongMillis()
+        )
     val bankAccountsList by bankAccountsViewModel.allBankAccountList.collectAsState()
 
     val colorPalletBlue = toPalette(blueColor)
@@ -627,13 +636,13 @@ fun BottomRow(
             ) {
                 Icon(Icons.Rounded.DateRange, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text(text = if (selectedDate?.let { convertMillisToDateString(it) } == convertMillisToDateString(
+                Text(text = if (selectedDate?.let { convertMillisToDateString(it.toLocalDate().toLongMillis()) } == convertMillisToDateString(
                         System.currentTimeMillis()
                     )) {
                     "Today"
                 } else {
                     selectedDate?.let {
-                        convertMillisToDateString(it)
+                        convertMillisToDateString(it.toLocalDate().toLongMillis())
                     } ?: "Date Error"
                 })
 
@@ -692,13 +701,14 @@ fun BottomRow(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddBottomSheet(
+    date: Long,
     closeBottomSheet: () -> Unit,
     transactionsViewModel: TransactionsViewModel = hiltViewModel(),
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
 
-    BottomSheetContentAddItem(bottomSheetState) {
+    BottomSheetContentAddItem(date, bottomSheetState) {
         scope.launch {
             closeBottomSheet()
         }
@@ -1883,7 +1893,7 @@ fun BottomRowTest(
                     "Today"
                 } else {
                     selectedDate?.let {
-                        convertMillisToDateString(it)
+                        "HEllo"
                     } ?: "Date Error"
                 })
 
@@ -1905,7 +1915,7 @@ fun BottomRowTest(
 fun BottomSheetPreview() {
     ExpenseTrackerTheme {
         Surface {
-            BottomSheetContentItemAddContent(Modifier, {})
+            BottomSheetContentItemAddContent(Modifier,0L, {})
         }
     }
 }
