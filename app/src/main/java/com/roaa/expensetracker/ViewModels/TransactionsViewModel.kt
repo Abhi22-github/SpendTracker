@@ -23,9 +23,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
-import java.time.Instant
 import java.time.LocalDate
-import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.ChronoUnit
 import java.util.Calendar
@@ -135,7 +133,7 @@ class TransactionsViewModel @Inject constructor(
             expense = selectedType,
             amount = expenseValue,
             note = comment,
-            dateWithTime = selectedDate ?: LocalDate.now().toLong(),
+            date = selectedDate ?: LocalDate.now().toLong(),
             selectedCategoryId,
             selectedBankAccountId,
         )
@@ -146,7 +144,7 @@ class TransactionsViewModel @Inject constructor(
         expense: String,
         amount: String,
         note: String,
-        dateWithTime: Long,
+        date: Long,
         selectedCategoryId: Long,
         selectedBankAccountId: Long
     ) {
@@ -156,10 +154,8 @@ class TransactionsViewModel @Inject constructor(
         modal.amount = amount.trim { it <= ' ' }.replace(",", "").toLong()
         modal.type = expense.trim { it <= ' ' }
         modal.note = note.trim { it <= ' ' }
-        modal.dateWithTime = dateWithTime
-        val date = Instant.ofEpochMilli(dateWithTime).atZone(ZoneId.systemDefault()) // default zone
-            .toLocalDate()
-        modal.date = date.toString().replace("-", "").toLong()
+        modal.dateWithTime = System.currentTimeMillis()
+        modal.date = date
         modal.bankAccountId = selectedBankAccountId;
         modal.categoryId = selectedCategoryId;
 

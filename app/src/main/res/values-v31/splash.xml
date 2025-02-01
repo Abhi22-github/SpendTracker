@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <style name="Theme.ExpenseTracker.Splash" parent="Theme.ExpenseTracker">
+        <item name="windowSplashScreenBackground">@color/md_theme_surface</item>
+        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_screen_animation</item>
+        <item name="android:windowSplashScreenAnimationDuration">2000</item>
+        <item name="postSplashScreenTheme">@style/Theme.ExpenseTracker</item>
+    </style>
+</resources>
