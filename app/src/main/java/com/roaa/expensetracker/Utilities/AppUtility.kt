@@ -34,8 +34,14 @@ fun getFirstAndLastDateOfGivenPeriod(prevMonth: LocalDate, nextMonth: LocalDate)
     return Pair(firstDate.format(formatter).toLong(), lastDate.format(formatter).toLong())
 }
 
-fun LocalDateToLong(localDate: LocalDate): Long {
-    return localDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")).toLong()
+fun LocalDate.toLong(): Long {
+    return this.format(DateTimeFormatter.ofPattern("yyyyMMdd")).toLong()
+}
+
+fun Long.toLocalDate(): LocalDate {
+    val dateString = this.toString()
+    val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+    return LocalDate.parse(dateString, formatter)
 }
 
 fun LocalDateToString(localDate: LocalDate): String {
@@ -209,7 +215,7 @@ val items = listOf(
         selectedIcon = Icons.Filled.Edit,
         unselectedIcon = Icons.Outlined.Edit,
         badgeCount = 105,
-        route = NavRoutes.DayScreen(LocalDateToLong(LocalDate.now())),
+        route = NavRoutes.DayScreen(LocalDate.now().toLong()),
     ),
     NavigationItems(
         title = "Category",
