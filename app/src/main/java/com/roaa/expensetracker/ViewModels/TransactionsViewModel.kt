@@ -1,9 +1,7 @@
 package com.roaa.expensetracker.ViewModels
 
-import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -11,7 +9,6 @@ import androidx.lifecycle.viewModelScope
 import com.google.android.material.chip.Chip
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Database.TransactionRepository
-import com.roaa.expensetracker.Events.EventMessage
 import com.roaa.expensetracker.Model.TotalAmountClass
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Model.TransactionClass
@@ -25,7 +22,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
-import org.greenrobot.eventbus.EventBus
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -145,45 +141,6 @@ class TransactionsViewModel @Inject constructor(
         )
     }
 
-    fun validateFormData(amount: String, note: String, mContext: Context?) {
-        //to get,separate and validate data from both expense and income
-        if (amount.isEmpty()) {
-            EventBus.getDefault().post(EventMessage(4, "Amount can't be zero"))
-        } else if (transactionTypeFromViewModel == EXPENSE) {
-            category = currentSelectedExpenseCategory
-            if (currentSelectedExpenseCategory.isEmpty()) {
-                EventBus.getDefault().post(EventMessage(5, "Please select a category"))
-            } else {
-                //store the data
-                Toast.makeText(mContext, "success", Toast.LENGTH_SHORT).show()
-                storeFormDataInDatabase(
-                    transactionTypeFromViewModel,
-                    amount,
-                    note,
-                    selectedDate,
-                    1L,
-                    1L,
-                )
-            }
-        } else if (transactionTypeFromViewModel == Constants.INCOME) {
-            category = currentSelectedIncomeCategory
-            if (currentSelectedIncomeCategory.isEmpty()) {
-                EventBus.getDefault().post(EventMessage(5, "Please select a category"))
-            } else {
-                //store the data
-                Toast.makeText(mContext, "success", Toast.LENGTH_SHORT).show()
-                storeFormDataInDatabase(
-                    transactionTypeFromViewModel,
-                    amount,
-                    note,
-                    selectedDate,
-                    1L,
-                    1L,
-                )
-            }
-        }
-    }
-
 
     private fun storeFormDataInDatabase(
         expense: String,
@@ -206,13 +163,7 @@ class TransactionsViewModel @Inject constructor(
         modal.bankAccountId = selectedBankAccountId;
         modal.categoryId = selectedCategoryId;
 
-
-        //   Log.d("date in local date" ,d.toString());
         viewModelScope.launch { transactionRepository.insert(modal) }
-
-        EventBus.getDefault().post(EventMessage(6, "success"))
-
-        //  liveData.postValue("something");
     }
 
     fun saveSelectedDate(date: Long) {
