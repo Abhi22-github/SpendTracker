@@ -47,13 +47,13 @@ fun parseAmount(amount: Long): String {
     return formatter.format(amount)
 }
 
-fun getDateFromMillis(milliSeconds: Long): String {
+fun Long.toDisplayDate(): String {
     // Create a DateFormatter object for displaying date in specified format.
     val formatter: SimpleDateFormat = SimpleDateFormat("MMM dd,yyyy")
 
     // Create a calendar object that will convert the date and time value in milliseconds to date.
     val calendar: Calendar = Calendar.getInstance()
-    calendar.setTimeInMillis(milliSeconds)
+    calendar.setTimeInMillis(this)
     return formatter.format(calendar.getTime())
 }
 
@@ -193,6 +193,8 @@ fun getPreviousAndNextDays(date: LocalDate): MutableList<String> {
 fun String.toLocalDate() = run { LocalDate.parse(this) }
 
 fun LocalDate.toNormalString() = run { this.format(DateTimeFormatter.ISO_LOCAL_DATE) }
+
+fun LocalDate.toDisplayDate() = run { this.format(DateTimeFormatter.ofPattern("MMM dd,YYYY")) }
 
 fun convertMillisToDateString(millis: Long): String {
     val format = SimpleDateFormat("dd MMM YYYY", Locale.getDefault())
