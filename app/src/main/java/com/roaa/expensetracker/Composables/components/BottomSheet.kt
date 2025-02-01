@@ -731,10 +731,7 @@ fun BottomSheetContentItemDetails(
 ) {
     val scope = rememberCoroutineScope()
     ModalBottomSheet(onDismissRequest = {
-        scope.launch {
-            uiViewModel.transactionDetailBottomSheetValue.emit(false)
-            closeBottomSheet()
-        }
+       closeBottomSheet()
     },
         sheetState = sheetState,
         modifier = Modifier
@@ -743,6 +740,7 @@ fun BottomSheetContentItemDetails(
         contentWindowInsets = { WindowInsets.ime }) {
         BottomSheetContentItemDetailsContent(
             modifier = Modifier,
+            closeBottomSheet,
             singleTransaction,
             uiViewModel
         )
@@ -756,6 +754,7 @@ val spaceHeightInDetail = 10.dp
 @Composable
 fun BottomSheetContentItemDetailsContent(
     modifier: Modifier,
+    closeBottomSheet: () -> Unit,
     singleTransaction: TransactionWithDetails,
     uiViewModel: UiViewModel,
     transactionsViewModel: TransactionsViewModel = hiltViewModel()
@@ -1048,9 +1047,7 @@ fun BottomSheetContentItemDetailsContent(
                     scope.launch {
                         transactionsViewModel.deleteSingleTransaction(singleTransaction.transaction)
                         showDeleteConfirmation = false
-                        scope.launch {
-                            uiViewModel.transactionDetailBottomSheetValue.emit(false)
-                        }
+                        closeBottomSheet()
                     }
                 },
                 dialogTitle = "Delete Transaction",
