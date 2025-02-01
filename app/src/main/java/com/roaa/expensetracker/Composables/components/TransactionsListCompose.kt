@@ -44,6 +44,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -62,7 +63,10 @@ import com.roaa.expensetracker.Model.emptyBank
 import com.roaa.expensetracker.Model.emptyCategoryClass
 import com.roaa.expensetracker.Model.emptyTransactionClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
-import com.roaa.expensetracker.Utilities.getDateFromMillis
+import com.roaa.expensetracker.Utilities.LongMillisToNoralLong
+import com.roaa.expensetracker.Utilities.parseAmount
+import com.roaa.expensetracker.Utilities.toDisplayDate
+import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.ViewModels.PreferencesViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import com.roaa.expensetracker.ViewModels.UiViewModel
@@ -108,7 +112,7 @@ fun TransactionsListCompose(
 
                 val transactionList by viewModel.allTransactions.collectAsState(emptyList())
                 val transactionsMap =
-                    transactionList.sortedByDescending { it.transaction.dateWithTime }
+                    transactionList.sortedByDescending { it.transaction.date }
                         .groupBy { it.transaction.date }
                         .toSortedMap()
 
@@ -125,9 +129,13 @@ fun TransactionsListCompose(
                                 SummaryCard(blueColor)
                         }
                         transactionConverterList.forEach { (date, transactionList) ->
-                            val date =
-                                getDateFromMillis(transactionList.get(0).transaction.dateWithTime)
-                            item { Header(if (date == getDateFromMillis(System.currentTimeMillis())) "Today" else date) }
+                            val date = transactionList.get(0).transaction.date
+                            item {
+                                Header(
+                                    if (date == System.currentTimeMillis().LongMillisToNoralLong()
+                                    ) "Today" else date.toLocalDate().toDisplayDate()
+                                )
+                            }
                             items(transactionList, key = { it.transaction.id }) { item ->
                                 SingleTransaction(item, onSingleItemClick = {
                                     singleTransaction = (item)
@@ -168,7 +176,7 @@ fun TransactionsListCompose(
                     { bottomSheet = !bottomSheet })
             }
             if (showAddBottomSheet) {
-                AddBottomSheet(date,{ showAddBottomSheet = !showAddBottomSheet })
+                AddBottomSheet(date, { showAddBottomSheet = !showAddBottomSheet })
             }
         }
     }
@@ -200,7 +208,7 @@ fun SingleTransaction(
                 .wrapContentHeight()
                 .padding(16.dp, 12.dp)
         ) {
-            var amount = item.transaction.amount.toString()
+            var amount = parseAmount(item.transaction.amount)
             var amountColor = successColor
             if (item.category.categoryType.equals(EXPENSE)) {
                 amount = "-₹" + amount
@@ -234,13 +242,15 @@ fun SingleTransaction(
             Column(
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
-                    .fillMaxWidth(0.70f)
+                    .fillMaxWidth(0.60f)
 
             ) {
                 Text(
                     text = item.transaction.note.replaceFirstChar { it.uppercase() },
                     style = typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
                 )
                 if (true) {
                     Text(
@@ -260,7 +270,9 @@ fun SingleTransaction(
                 style = typography.titleMedium,
                 fontFamily = CustomFonts.numberFont,
                 color = amountColor,
-                textAlign = TextAlign.End
+                textAlign = TextAlign.End,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
             )
 
         }
@@ -286,7 +298,7 @@ fun SingleTransactionNew(item: TransactionClass, onSingleItemClick: (Transaction
                 .padding(16.dp)
                 .fillMaxWidth()
         ) {
-            Text(text = getDateFromMillis(item.dateWithTime), style = typography.titleMedium)
+            Text(text = item.dateWithTime.toDisplayDate(), style = typography.titleMedium)
             Spacer(modifier = Modifier.height(16.dp))
             Card(
                 shape = RoundedCornerShape(22.dp),
