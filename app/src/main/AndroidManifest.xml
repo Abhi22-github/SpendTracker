@@ -20,7 +20,7 @@
         <activity
             android:name=".Activity.ComposeMainActivity"
             android:exported="true"
-            android:theme="@style/Theme.ExpenseTracker">
+            android:theme="@style/Theme.ExpenseTracker.Splash">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 

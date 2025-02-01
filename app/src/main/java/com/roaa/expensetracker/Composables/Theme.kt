@@ -395,7 +395,7 @@ fun SetStatusBarColor(isDarkTheme: Boolean) {
     val systemUiController = rememberSystemUiController()
     systemUiController.setStatusBarColor(
         color = Color.Transparent,
-       darkIcons = !isDarkTheme
+        darkIcons = !isDarkTheme
     )
 }
 
