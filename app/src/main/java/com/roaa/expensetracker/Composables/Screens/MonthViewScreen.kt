@@ -49,6 +49,7 @@ import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.toPalette
+import com.roaa.expensetracker.Utilities.Constants.MAX_PAGES
 import com.roaa.expensetracker.Utilities.convertTotalExpenseIncomeClassToMap
 import com.roaa.expensetracker.Utilities.getCalendarForMonthFromDate
 import com.roaa.expensetracker.Utilities.parseAmount
@@ -67,7 +68,7 @@ fun MonthViewScreen(
     modifier: Modifier = Modifier,
     transactionViewModel: TransactionsViewModel = hiltViewModel()
 ) {
-    val pagerState = rememberPagerState(initialPage = 500 / 2, pageCount = { 500 })
+    val pagerState = rememberPagerState(initialPage = MAX_PAGES / 2, pageCount = { MAX_PAGES })
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     val configuration = LocalConfiguration.current
     val firstDayOfWeek = WeekFields.of(configuration.locale).firstDayOfWeek
@@ -76,7 +77,7 @@ fun MonthViewScreen(
     HorizontalPager(
         state = pagerState,
     ) { page ->
-        val currentMonthStart = calculateMonthStartDate(page, 250)
+        val currentMonthStart = calculateMonthStartDate(page, MAX_PAGES / 2)
         val allDays = remember(currentMonthStart) {
             getCalendarForMonthFromDate(currentMonthStart)
         }
@@ -104,7 +105,7 @@ fun MonthViewScreen(
         if (sendUserToDayView && selectedDate != null) {
             navigationManager.navigateTo(
                 NavRoutes.DayScreen(
-                    selectedDate!!.toLong()!!
+                    selectedDate!!.toLong()
                 )
             )
         }

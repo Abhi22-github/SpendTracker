@@ -8,6 +8,5 @@ public class Constants {
     public final static String SECONDARY = "SECONDARY";
 
     public final static int MAX_PAGES = 500;
-    public final static int CURRENT_PAGE = 250;
 
 }
