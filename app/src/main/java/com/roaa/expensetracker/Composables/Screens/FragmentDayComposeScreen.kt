@@ -3,6 +3,7 @@ package com.roaa.expensetracker.Composables.Screens
 import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
@@ -14,12 +15,14 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Tab
 import androidx.compose.material3.TabPosition
@@ -38,12 +41,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -100,7 +103,7 @@ fun DayViewScreen(
     modifier: Modifier = Modifier,
     transactionViewModel: TransactionsViewModel = hiltViewModel()
 ) {
-    val pagerState = rememberPagerState(initialPage = 1000 / 2, pageCount = { 1000 })
+    val pagerState = rememberPagerState(initialPage = 500 / 2, pageCount = { 500 })
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     val configuration = LocalConfiguration.current
     val tabs = getPreviousAndNext500Days(LocalDate.now())
@@ -121,8 +124,8 @@ fun DayViewScreen(
 //           // scrollOffset = calculateCenteredScrollOffset(lazyListState, pagerState.currentPage)
 //        )
         lazyListState.scrollToItem(pagerState.currentPage)
-        val itemInfo = lazyListState.layoutInfo.visibleItemsInfo
-            .firstOrNull { it.index == pagerState.currentPage }
+        val itemInfo =
+            lazyListState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == pagerState.currentPage }
 
 //        val itemInfoList = lazyListState.layoutInfo.visibleItemsInfo.map { it.key }
 //        itemInfoList.forEach {
@@ -133,12 +136,10 @@ fun DayViewScreen(
 //        } else {
         if (itemInfo != null) {
             Log.d(
-                "****viewPortEndOffset",
-                lazyListState.layoutInfo.viewportEndOffset.toString()
+                "****viewPortEndOffset", lazyListState.layoutInfo.viewportEndOffset.toString()
             )
             Log.d("****itemInfo.size", itemInfo.size.toString())
-            var centerOffset =
-                ((itemInfo.size - lazyListState.layoutInfo.viewportEndOffset) / 2)
+            var centerOffset = ((itemInfo.size - lazyListState.layoutInfo.viewportEndOffset) / 2)
             Log.d("****centerOffset", centerOffset.toString())
             lazyListState.scrollToItem(pagerState.currentPage, centerOffset)
             // indicatorWidth = itemInfo.size.toFloat() / 2
@@ -199,35 +200,28 @@ fun DayViewScreen(
 //            }
         //       }
         Box(
-            modifier = Modifier
-                .fillMaxWidth()
+            modifier = Modifier.fillMaxWidth()
 
         ) {
             LazyRow(
                 state = lazyListState,
                 modifier = Modifier.fillMaxWidth(),
                 flingBehavior = rememberSnapFlingBehavior(
-                    lazyListState,
-                    snapPosition = SnapPosition.Center
+                    lazyListState, snapPosition = SnapPosition.Center
                 )
             ) {
                 itemsIndexed(tabs) { index, data ->
                     val isSelected = index == pagerState.currentPage
-                    TabItem(
-                        index = data,
-                        isSelected = isSelected,
-                        onClick = {
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(index)
-                            }
-                        },
-                        onTabMeasured = { offset, width ->
-                            if (isSelected) {
-                                indicatorOffset = offset
-                                indicatorWidth = width
-                            }
+                    TabItem(index = data, isSelected = isSelected, onClick = {
+                        coroutineScope.launch {
+                            pagerState.animateScrollToPage(index)
                         }
-                    )
+                    }, onTabMeasured = { offset, width ->
+                        if (isSelected) {
+                            indicatorOffset = offset
+                            indicatorWidth = width
+                        }
+                    })
                 }
             }
 
@@ -245,7 +239,7 @@ fun DayViewScreen(
         HorizontalPager(
             state = pagerState,
         ) { page ->
-            val currentDay = calculateCurrentPageDay(page, 500)
+            val currentDay = calculateCurrentPageDay(page, 250)
             FragmentDayScreen(navigationManager, false, currentDay)
         }
     }
@@ -256,10 +250,7 @@ fun DayViewScreen(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun LazyTabRow(
-    selectedTabIndex: Int,
-    tabs: List<Int>,
-    pagerState: PagerState,
-    onTabSelected: (Int) -> Unit
+    selectedTabIndex: Int, tabs: List<Int>, pagerState: PagerState, onTabSelected: (Int) -> Unit
 ) {
     val lazyListState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -280,12 +271,10 @@ fun LazyTabRow(
             flingBehavior = rememberSnapFlingBehavior(lazyListState)
         ) {
             itemsIndexed(tabs) { index, title ->
-                Tab(
-                    modifier = Modifier.height(56.dp),
+                Tab(modifier = Modifier.height(56.dp),
                     selected = selectedTabIndex == index,
                     onClick = { onTabSelected(index) },
-                    text = { Text(text = title.toString()) }
-                )
+                    text = { Text(text = title.toString()) })
             }
         }
 
@@ -319,37 +308,59 @@ fun TabItem(
 
     // Measure the tab's position and width
     LaunchedEffect(isSelected, tabRef.value) {
-        if (isSelected) {
-            tabRef.value?.let { coordinates ->
-                val offset = coordinates.localToWindow(Offset.Zero).x
-                val width = coordinates.size.width.toFloat()
-                onTabMeasured(offset, width)
-            }
-        }
+//        if (isSelected) {
+//            tabRef.value?.let { coordinates ->
+//                val offset = coordinates.localToWindow(Offset.Zero).x
+//                val width = coordinates.size.width.toFloat()
+//                onTabMeasured(offset, width)
+//            }
+//        }
     }
-    val color by animateColorAsState(MaterialTheme.colorScheme.primary)
+    val color by animateColorAsState(MaterialTheme.colorScheme.onPrimary)
     val colorGreen by animateColorAsState(Color.Green)
     val dataSplit = index.split(",")
 
-    Box(
-        modifier = Modifier
-            .padding(horizontal = 8.dp)
-            .clickable { onClick() }
-            .onGloballyPositioned { tabRef.value = it }
-    ) {
+    Box(modifier = Modifier
+        .padding(horizontal = 4.dp)
+        .width(48.dp)
+        .background(
+            if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = .60f) else MaterialTheme.colorScheme.surfaceContainer.copy(
+                alpha = .60f
+            ), RoundedCornerShape(12.dp)
+        )
+        .clickable { onClick() }
+        .onGloballyPositioned { tabRef.value = it }) {
         Column(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(7.dp, 12.dp)
+            modifier = Modifier
+                .fillMaxWidth()
         ) {
             Text(
                 text = dataSplit[0],
-                color = if (isSelected) color else Color.Gray,
+                color = if (isSelected) color else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                style = MaterialTheme.typography.bodySmall,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(1.dp, 1.dp)
             )
-            Text(
-                text = dataSplit[1],
-                color = if (isSelected) color else Color.Gray,
-            )
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .background(
+                        if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer,
+                        RoundedCornerShape(0.dp, 0.dp, 12.dp, 12.dp)
+                    ).padding(2.dp,2.dp)
+            ) {
+                Text(
+                    text = dataSplit[1],
+                    color = if (isSelected) color else MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = 0.38f
+                    ),
+                    style = MaterialTheme.typography.bodyMedium,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth().padding(0.dp,2.dp)
+                )
+            }
         }
     }
 }
@@ -374,19 +385,13 @@ fun TabItem(
 
 @Composable
 fun TabItem(
-    text: String,
-    isSelected: Boolean,
-    onClick: () -> Unit,
-    textColor: Color,
-    scale: Float
+    text: String, isSelected: Boolean, onClick: () -> Unit, textColor: Color, scale: Float
 ) {
-    Box(
-        modifier = Modifier
-            .clickable { onClick() }
-            .scale(scale)
-            .padding(vertical = 8.dp),
-        contentAlignment = Alignment.Center
-    ) {
+    Box(modifier = Modifier
+        .clickable { onClick() }
+        .scale(scale)
+        .padding(vertical = 8.dp),
+        contentAlignment = Alignment.Center) {
         Text(
             text = text,
             color = textColor,
@@ -398,8 +403,7 @@ fun TabItem(
 
 @OptIn(ExperimentalFoundationApi::class)
 fun Modifier.pagerTabIndicatorOffset(
-    pagerState: PagerState,
-    tabPositions: List<TabPosition>
+    pagerState: PagerState, tabPositions: List<TabPosition>
 ): Modifier = composed {
     val currentPage = pagerState.currentPage
     val currentPageOffset = pagerState.currentPageOffsetFraction
