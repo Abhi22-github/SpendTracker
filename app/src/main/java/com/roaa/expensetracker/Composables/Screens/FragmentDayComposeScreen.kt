@@ -102,6 +102,7 @@ fun FragmentDayScreen(
 @Composable
 fun DayViewScreen(
     navigationManager: NavigationManager,
+    date: Long,
     modifier: Modifier = Modifier,
     transactionViewModel: TransactionsViewModel = hiltViewModel()
 ) {

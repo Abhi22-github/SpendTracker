@@ -101,7 +101,6 @@ fun NavigationDrawer(
                             navigationManager.navigateTo(item.route)
 
                             scope.launch {
-
                                 drawerState.close()
                             }
                         },

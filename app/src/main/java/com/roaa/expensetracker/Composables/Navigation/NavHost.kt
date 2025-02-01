@@ -67,7 +67,8 @@ fun SetupNavigationGraph(navController: NavHostController, navigationManager: Na
             }
 
             composable<NavRoutes.DayScreen> {
-                DayViewScreen(navigationManager)
+                val args = it.toRoute<NavRoutes.DayScreen>()
+                DayViewScreen(navigationManager, args.date)
             }
 
             composable<NavRoutes.BankAccountScreen> {

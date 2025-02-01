@@ -24,6 +24,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -43,6 +44,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.roaa.expensetracker.Composables.Navigation.NavRoutes
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
@@ -61,7 +63,7 @@ import java.util.Locale
 
 @Composable
 fun MonthViewScreen(
-    navController: NavigationManager,
+    navigationManager: NavigationManager,
     modifier: Modifier = Modifier,
     transactionViewModel: TransactionsViewModel = hiltViewModel()
 ) {
@@ -69,6 +71,7 @@ fun MonthViewScreen(
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     val configuration = LocalConfiguration.current
     val firstDayOfWeek = WeekFields.of(configuration.locale).firstDayOfWeek
+    var sendUserToDayView by remember { mutableStateOf(false) }
 
     HorizontalPager(
         state = pagerState,
@@ -77,6 +80,7 @@ fun MonthViewScreen(
         val allDays = remember(currentMonthStart) {
             getCalendarForMonthFromDate(currentMonthStart)
         }
+
         val totalExpenseList by transactionViewModel.getListOfTotalAmountPerDayForRangeForCompose(
             LocalDateToLong(allDays[0]),
             LocalDateToLong(allDays[41])
@@ -87,11 +91,25 @@ fun MonthViewScreen(
         MonthView(
             monthStart = currentMonthStart,
             selectedDate = selectedDate,
-            onDateSelected = { selectedDate = it },
+            onDateSelected = {
+                selectedDate = it
+                sendUserToDayView = !sendUserToDayView
+            },
             firstDayOfWeek = firstDayOfWeek,
             allDays,
             totalValuesPerDayForMonthMap
         )
+    }
+    LaunchedEffect(sendUserToDayView, selectedDate) {
+        if (sendUserToDayView && selectedDate != null) {
+            navigationManager.navigateTo(
+                NavRoutes.DayScreen(
+                    LocalDateToLong(
+                        selectedDate!!
+                    )
+                )
+            )
+        }
     }
 }
 
