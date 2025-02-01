@@ -92,7 +92,6 @@ fun DayScreen(
         Row(modifier = Modifier.padding(12.dp, 16.dp)) {
             RestBudgetPill(date)
         }
-
         TransactionsListCompose(navigationManager, Modifier, true, date)
     }
 }
