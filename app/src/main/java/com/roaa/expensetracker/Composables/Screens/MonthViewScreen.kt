@@ -49,10 +49,10 @@ import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.toPalette
-import com.roaa.expensetracker.Utilities.LocalDateToLong
 import com.roaa.expensetracker.Utilities.convertTotalExpenseIncomeClassToMap
 import com.roaa.expensetracker.Utilities.getCalendarForMonthFromDate
 import com.roaa.expensetracker.Utilities.parseAmount
+import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -82,8 +82,8 @@ fun MonthViewScreen(
         }
 
         val totalExpenseList by transactionViewModel.getListOfTotalAmountPerDayForRangeForCompose(
-            LocalDateToLong(allDays[0]),
-            LocalDateToLong(allDays[41])
+            allDays[0].toLong(),
+            allDays[41].toLong()
         ).collectAsState(listOf())
         val totalValuesPerDayForMonthMap = remember(totalExpenseList) {
             convertTotalExpenseIncomeClassToMap(totalExpenseList)
@@ -104,9 +104,7 @@ fun MonthViewScreen(
         if (sendUserToDayView && selectedDate != null) {
             navigationManager.navigateTo(
                 NavRoutes.DayScreen(
-                    LocalDateToLong(
-                        selectedDate!!
-                    )
+                    selectedDate!!.toLong()!!
                 )
             )
         }
@@ -175,7 +173,7 @@ fun MonthView(
                             onDateSelected = onDateSelected,
                             singleCellHeight = itemHeight,
                             position = position,
-                            totalValuesPerDayForMonthMap[LocalDateToLong(date)]
+                            totalValuesPerDayForMonthMap[date.toLong()]
                         )
                     } else {
                         //empty

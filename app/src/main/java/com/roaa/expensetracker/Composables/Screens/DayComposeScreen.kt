@@ -55,8 +55,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.components.RestBudgetPill
 import com.roaa.expensetracker.Composables.components.TransactionsListCompose
-import com.roaa.expensetracker.Utilities.convertLocalDateToLong
 import com.roaa.expensetracker.Utilities.getPreviousAndNext500Days
+import com.roaa.expensetracker.Utilities.toLocalDate
+import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.ViewModels.AnimationViewModel
 import com.roaa.expensetracker.ViewModels.PreferencesViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
@@ -65,18 +66,16 @@ import java.time.LocalDate
 import kotlin.math.absoluteValue
 
 @Composable
-fun FragmentDayScreen(
+fun DayScreen(
     navigationManager: NavigationManager,
     showSingleDateTransactions: Boolean,
-    date: LocalDate,
+    date: Long,
     animationViewModel: AnimationViewModel = hiltViewModel(),
     transactionsViewModel: TransactionsViewModel = hiltViewModel(),
     preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
-
-    val longDate = convertLocalDateToLong(date)
     transactionsViewModel.getTotalExpenseForRange(
-        longDate, longDate
+        date, date
     )
     val budget by preferencesViewModel.getBudgetValue.collectAsState(1f)
     val newDailyBudget by transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
@@ -91,10 +90,10 @@ fun FragmentDayScreen(
 
     Column {
         Row(modifier = Modifier.padding(12.dp, 16.dp)) {
-            RestBudgetPill(date)
+            RestBudgetPill(date.toLocalDate())
         }
 
-        TransactionsListCompose(navigationManager, Modifier, true, date)
+        TransactionsListCompose(navigationManager, Modifier, true, date.toLocalDate())
     }
 }
 
@@ -242,8 +241,8 @@ fun DayViewScreen(
         HorizontalPager(
             state = pagerState,
         ) { page ->
-            val currentDay = calculateCurrentPageDay(page, 250)
-            FragmentDayScreen(navigationManager, false, currentDay)
+            val currentDay = calculateCurrentPageDay(page, 250,date.toLocalDate())
+            DayScreen(navigationManager, false, currentDay.toLong())
         }
     }
 }
@@ -336,7 +335,9 @@ fun TabItem(
         ) {
             Text(
                 text = dataSplit[0],
-                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
+                    alpha = 0.38f
+                ),
                 style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(1.dp, 1.dp)
@@ -426,10 +427,13 @@ fun Modifier.pagerTabIndicatorOffset(
     offset(x = 30.dp)
 }
 
-private fun calculateCurrentPageDay(page: Int, initialPage: Int): LocalDate {
-    val initialDate = LocalDate.now()
+private fun calculateCurrentPageDay(
+    page: Int,
+    initialPage: Int,
+    currentDate: LocalDate
+): LocalDate {
     val monthsOffset = (page - initialPage).toLong()
-    return initialDate.plusDays(monthsOffset)
+    return currentDate.plusDays(monthsOffset)
 }
 
 

@@ -14,8 +14,8 @@ import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Model.TransactionClass
 import com.roaa.expensetracker.Utilities.Constants
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
-import com.roaa.expensetracker.Utilities.LocalDateToLong
 import com.roaa.expensetracker.Utilities.UiState
+import com.roaa.expensetracker.Utilities.toLong
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -135,7 +135,7 @@ class TransactionsViewModel @Inject constructor(
             expense = selectedType,
             amount = expenseValue,
             note = comment,
-            dateWithTime = selectedDate ?: LocalDateToLong(LocalDate.now()),
+            dateWithTime = selectedDate ?: LocalDate.now().toLong(),
             selectedCategoryId,
             selectedBankAccountId,
         )
