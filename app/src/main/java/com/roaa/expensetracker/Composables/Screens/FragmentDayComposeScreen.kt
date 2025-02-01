@@ -11,10 +11,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -323,11 +325,6 @@ fun TabItem(
     Box(modifier = Modifier
         .padding(horizontal = 4.dp)
         .width(48.dp)
-        .background(
-            if (isSelected) MaterialTheme.colorScheme.primaryContainer.copy(alpha = .60f) else MaterialTheme.colorScheme.surfaceContainer.copy(
-                alpha = .60f
-            ), RoundedCornerShape(12.dp)
-        )
         .clickable { onClick() }
         .onGloballyPositioned { tabRef.value = it }) {
         Column(
@@ -338,18 +335,21 @@ fun TabItem(
         ) {
             Text(
                 text = dataSplit[0],
-                color = if (isSelected) color else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
                 style = MaterialTheme.typography.bodySmall,
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(1.dp, 1.dp)
             )
+            Spacer(Modifier.height(2.dp))
             Box(
                 Modifier
-                    .fillMaxWidth()
                     .background(
-                        if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surfaceContainer,
-                        RoundedCornerShape(0.dp, 0.dp, 12.dp, 12.dp)
-                    ).padding(2.dp,2.dp)
+                        if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+                        RoundedCornerShape(50)
+                    )
+                    .padding(2.dp, 2.dp)
+                    .size(30.dp)
+
             ) {
                 Text(
                     text = dataSplit[1],
@@ -358,7 +358,10 @@ fun TabItem(
                     ),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth().padding(0.dp,2.dp)
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(0.dp, 2.dp)
+                        .align(Alignment.Center)
                 )
             }
         }
