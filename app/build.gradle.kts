@@ -6,6 +6,7 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
     alias(libs.plugins.kotlin.serialization)
+    id("com.google.firebase.crashlytics")
     // Apply Hilt plugin
 }
 apply(plugin = "kotlin-kapt")
@@ -122,5 +123,6 @@ dependencies {
 //firebase
     implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
     implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-crashlytics")
 
 }
