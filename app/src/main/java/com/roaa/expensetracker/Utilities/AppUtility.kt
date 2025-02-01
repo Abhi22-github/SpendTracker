@@ -1,17 +1,9 @@
 package com.roaa.expensetracker.Utilities
 
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Home
-import androidx.compose.material.icons.outlined.Info
-import androidx.compose.material.icons.outlined.Settings
 import com.roaa.expensetracker.Composables.Navigation.NavRoutes
 import com.roaa.expensetracker.Model.NavigationItems
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
+import com.roaa.expensetracker.R
 import okhttp3.internal.toLongOrDefault
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
@@ -216,42 +208,42 @@ fun extractNumbers(input: String): Long {
 val items = listOf(
     NavigationItems(
         title = "List",
-        selectedIcon = Icons.Filled.Home,
-        unselectedIcon = Icons.Outlined.Home,
+        selectedIcon = R.drawable.list_view_checked,
+        unselectedIcon = R.drawable.list_view_unchecked,
         route = NavRoutes.MainScreen,
     ),
     NavigationItems(
         title = "Month",
-        selectedIcon = Icons.Filled.Info,
-        unselectedIcon = Icons.Outlined.Info,
+        selectedIcon = R.drawable.month_view,
+        unselectedIcon = R.drawable.month_view,
         route = NavRoutes.MonthScreen,
     ),
     NavigationItems(
         title = "Day",
-        selectedIcon = Icons.Filled.Edit,
-        unselectedIcon = Icons.Outlined.Edit,
+        selectedIcon = R.drawable.day_view_checked,
+        unselectedIcon = R.drawable.day_view_uncheckd,
         badgeCount = 105,
         route = NavRoutes.DayScreen(LocalDate.now().toLong()),
     ),
     NavigationItems(
         title = "Category",
-        selectedIcon = Icons.Filled.Settings,
-        unselectedIcon = Icons.Outlined.Settings,
+        selectedIcon = R.drawable.add_category_checked,
+        unselectedIcon = R.drawable.add_category_unchecked,
         route = NavRoutes.ScreenA,
     ), NavigationItems(
         title = "Bank Accounts",
-        selectedIcon = Icons.Filled.Settings,
-        unselectedIcon = Icons.Outlined.Settings,
+        selectedIcon = R.drawable.bank_account_checked,
+        unselectedIcon = R.drawable.bank_account_unchecked,
         route = NavRoutes.BankAccountScreen,
     ), NavigationItems(
         title = "Statistics",
-        selectedIcon = Icons.Filled.Settings,
-        unselectedIcon = Icons.Outlined.Settings,
+        selectedIcon = R.drawable.analysis_checked,
+        unselectedIcon = R.drawable.analysis_unchecked,
         route = NavRoutes.MainScreen,
     ), NavigationItems(
         title = "Settings",
-        selectedIcon = Icons.Filled.Settings,
-        unselectedIcon = Icons.Outlined.Settings,
+        selectedIcon = R.drawable.settings_checked,
+        unselectedIcon = R.drawable.settings_unchecked,
         route = NavRoutes.SettingScreen,
     )
 

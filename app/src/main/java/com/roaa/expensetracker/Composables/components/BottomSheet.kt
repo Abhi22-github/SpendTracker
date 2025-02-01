@@ -636,7 +636,11 @@ fun BottomRow(
             ) {
                 Icon(Icons.Rounded.DateRange, contentDescription = null)
                 Spacer(Modifier.width(8.dp))
-                Text(text = if (selectedDate?.let { convertMillisToDateString(it.toLocalDate().toLongMillis()) } == convertMillisToDateString(
+                Text(text = if (selectedDate?.let {
+                        convertMillisToDateString(
+                            it.toLocalDate().toLongMillis()
+                        )
+                    } == convertMillisToDateString(
                         System.currentTimeMillis()
                     )) {
                     "Today"
@@ -727,10 +731,7 @@ fun BottomSheetContentItemDetails(
 ) {
     val scope = rememberCoroutineScope()
     ModalBottomSheet(onDismissRequest = {
-        scope.launch {
-            uiViewModel.transactionDetailBottomSheetValue.emit(false)
-            closeBottomSheet()
-        }
+       closeBottomSheet()
     },
         sheetState = sheetState,
         modifier = Modifier
@@ -739,6 +740,7 @@ fun BottomSheetContentItemDetails(
         contentWindowInsets = { WindowInsets.ime }) {
         BottomSheetContentItemDetailsContent(
             modifier = Modifier,
+            closeBottomSheet,
             singleTransaction,
             uiViewModel
         )
@@ -752,6 +754,7 @@ val spaceHeightInDetail = 10.dp
 @Composable
 fun BottomSheetContentItemDetailsContent(
     modifier: Modifier,
+    closeBottomSheet: () -> Unit,
     singleTransaction: TransactionWithDetails,
     uiViewModel: UiViewModel,
     transactionsViewModel: TransactionsViewModel = hiltViewModel()
@@ -1044,9 +1047,7 @@ fun BottomSheetContentItemDetailsContent(
                     scope.launch {
                         transactionsViewModel.deleteSingleTransaction(singleTransaction.transaction)
                         showDeleteConfirmation = false
-                        scope.launch {
-                            uiViewModel.transactionDetailBottomSheetValue.emit(false)
-                        }
+                        closeBottomSheet()
                     }
                 },
                 dialogTitle = "Delete Transaction",
@@ -1799,7 +1800,7 @@ fun BottomSheetContentItemAddContentTest(
 
             Spacer(Modifier.height(16.dp))
             Row {
-                BottomRowTest(modifier, selectedDate, { selectedDate = it }, buttonClicked = {
+                //         BottomRowTest(modifier, selectedDate, { selectedDate = it }, buttonClicked = {
 //                    validateTransactionData(
 //                        selectedType,
 //                        selectedCategory,
@@ -1811,7 +1812,7 @@ fun BottomSheetContentItemAddContentTest(
 //                        uiViewModel,
 //                        transactionsViewModel,
 //                    )
-                })
+                //            })
             }
 
 
@@ -1856,58 +1857,58 @@ fun BottomSheetContentItemAddContentTest(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BottomRowTest(
-    modifier: Modifier,
-    selectedDate: Long?,
-    selectedDateSetter: (Long?) -> Unit,
-    buttonClicked: () -> Unit
-) {
-    var showDatePicker by remember { mutableStateOf(false) }
-    val datePickerState =
-        rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
-    ) {
-        Row(modifier = modifier.weight(1f)) {
-
-            FilledTonalButton(
-                onClick = {
-                    showDatePicker = !showDatePicker
-                    selectedDateSetter(selectedDate)
-                }, colors = ButtonDefaults.outlinedButtonColors(
-                    contentColor = MaterialTheme.colorScheme.onSurface.copy(
-                        alpha = secondaryAlphaForElements
-                    )
-                ), contentPadding = PaddingValues(start = 12.dp, end = 12.dp)
-            ) {
-                Icon(Icons.Rounded.DateRange, contentDescription = null)
-                Spacer(Modifier.width(8.dp))
-                Text(text = if (selectedDate?.let { convertMillisToDateString(it) } == convertMillisToDateString(
-                        System.currentTimeMillis()
-                    )) {
-                    "Today"
-                } else {
-                    selectedDate?.let {
-                        "HEllo"
-                    } ?: "Date Error"
-                })
-
-            }
-
-
-        }
-    }
-    if (showDatePicker) {
-        DatePickerModal(datePickerState, onDateSelected = { date ->
-            selectedDateSetter(date)
-        }, onDismiss = { showDatePicker = !showDatePicker })
-    }
-}
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun BottomRowTest(
+//    modifier: Modifier,
+//    selectedDate: Long?,
+//    selectedDateSetter: (Long?) -> Unit,
+//    buttonClicked: () -> Unit
+//) {
+//    var showDatePicker by remember { mutableStateOf(false) }
+//    val datePickerState =
+//        rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
+//    Row(
+//        verticalAlignment = Alignment.CenterVertically,
+//        modifier = Modifier
+//            .fillMaxWidth()
+//            .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
+//    ) {
+//        Row(modifier = modifier.weight(1f)) {
+//
+//            FilledTonalButton(
+//                onClick = {
+//                    showDatePicker = !showDatePicker
+//                    selectedDateSetter(selectedDate)
+//                }, colors = ButtonDefaults.outlinedButtonColors(
+//                    contentColor = MaterialTheme.colorScheme.onSurface.copy(
+//                        alpha = secondaryAlphaForElements
+//                    )
+//                ), contentPadding = PaddingValues(start = 12.dp, end = 12.dp)
+//            ) {
+//                Icon(Icons.Rounded.DateRange, contentDescription = null)
+//                Spacer(Modifier.width(8.dp))
+//                Text(text = if (selectedDate?.let { convertMillisToDateString(it) } == convertMillisToDateString(
+//                        System.currentTimeMillis()
+//                    )) {
+//                    "Today"
+//                } else {
+//                    selectedDate?.let {
+//                        "HEllo"
+//                    } ?: "Date Error"
+//                })
+//
+//            }
+//
+//
+//        }
+//    }
+//    if (showDatePicker) {
+//        DatePickerModal(datePickerState, onDateSelected = { date ->
+//            selectedDateSetter(date)
+//        }, onDismiss = { showDatePicker = !showDatePicker })
+//    }
+//}
 
 
 @Preview
@@ -1915,7 +1916,7 @@ fun BottomRowTest(
 fun BottomSheetPreview() {
     ExpenseTrackerTheme {
         Surface {
-            BottomSheetContentItemAddContent(Modifier,0L, {})
+            BottomSheetContentItemAddContent(Modifier, 0L, {})
         }
     }
 }
