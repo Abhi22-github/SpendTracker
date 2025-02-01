@@ -21,7 +21,7 @@ sealed class NavRoutes {
     data object MonthScreen : NavRoutes()
 
     @Serializable
-    data object DayScreen : NavRoutes()
+    data class DayScreen(val date: Long) : NavRoutes()
 
     @Serializable
     data object BankAccountScreen : NavRoutes()

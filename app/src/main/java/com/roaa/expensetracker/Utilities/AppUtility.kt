@@ -209,7 +209,7 @@ val items = listOf(
         selectedIcon = Icons.Filled.Edit,
         unselectedIcon = Icons.Outlined.Edit,
         badgeCount = 105,
-        route = NavRoutes.DayScreen,
+        route = NavRoutes.DayScreen(LocalDateToLong(LocalDate.now())),
     ),
     NavigationItems(
         title = "Category",
