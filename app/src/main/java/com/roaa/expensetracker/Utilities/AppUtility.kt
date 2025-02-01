@@ -126,36 +126,33 @@ fun getCalendarForMonthFromDate(localDate: LocalDate): List<LocalDate> {
     // Calculate the start day of the week for the first day of the month
     val startDayOfWeek = firstDayOfMonth.dayOfWeek
 
-    // Number of days in the current month
-    val daysInCurrentMonth = firstDayOfMonth.lengthOfMonth()
-
     // Prepare the list to hold the calendar grid
     val calendarGrid = mutableListOf<LocalDate>()
 
     // Step 1: Add dates from the previous month to fill the first row
     val prevMonthLastDay = firstDayOfMonth.minusDays(1)
-    val prevMonthStartDate =
-        prevMonthLastDay.minusDays(startDayOfWeek.value.toLong()) // Corrected calculation
+    val prevMonthStartDate = firstDayOfMonth.minusDays(startDayOfWeek.value.toLong())
     var prevMonthDate = prevMonthStartDate
-    for (i in 0 until startDayOfWeek.value) {
+    while (prevMonthDate.isBefore(firstDayOfMonth)) {
         calendarGrid.add(prevMonthDate)
         prevMonthDate = prevMonthDate.plusDays(1)
     }
 
     // Step 2: Add all the dates of the current month
     var currentDate = firstDayOfMonth
-    while (calendarGrid.size < 42) {
+    while (currentDate.isBefore(lastDayOfMonth.plusDays(1))) {
         calendarGrid.add(currentDate)
         currentDate = currentDate.plusDays(1)
     }
 
-    // Step 3: Add dates from the next month to fill the last row if necessary
+    // Step 3: Add dates from the next month to fill the grid to 42 dates
     val nextMonthDate = lastDayOfMonth.plusDays(1)
     var nextDate = nextMonthDate
-    while (calendarGrid.size < 42) {
+    while (calendarGrid.size < 42) { // Ensure the grid has exactly 42 dates
         calendarGrid.add(nextDate)
         nextDate = nextDate.plusDays(1)
     }
+
     return calendarGrid
 }
 

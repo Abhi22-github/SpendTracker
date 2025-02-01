@@ -77,9 +77,6 @@ fun MonthViewScreen(
         val allDays = remember(currentMonthStart) {
             getCalendarForMonthFromDate(currentMonthStart)
         }
-//        transactionViewModel.getListOfTotalAmountPerDayForRange(
-//            LocalDateToLong(allDays[0]), LocalDateToLong(allDays[41])
-//        )
         val totalExpenseList by transactionViewModel.getListOfTotalAmountPerDayForRangeForCompose(
             LocalDateToLong(allDays[0]),
             LocalDateToLong(allDays[41])
