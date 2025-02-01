@@ -100,7 +100,7 @@ fun getPreviousAndNext500Days(date: LocalDate): List<String> {
     val dayFormatter = DateTimeFormatter.ofPattern("EEE")
     val DateFormatter = DateTimeFormatter.ofPattern("dd")
 
-    for (i in 500 downTo 1) {
+    for (i in 250 downTo 1) {
         val previousDate = date.minusDays(i.toLong())  // Subtract days for previous dates
         val formattedPrevDate =
             "${previousDate.format(dayFormatter)},${previousDate.format(DateFormatter)}"
@@ -109,7 +109,7 @@ fun getPreviousAndNext500Days(date: LocalDate): List<String> {
 
     allDates.add("${date.format(dayFormatter)},${date.format(DateFormatter)}")
 
-    for (i in 1..500) {
+    for (i in 1..250) {
         val nextDate = date.plusDays(i.toLong())  // Add days for next dates
         val formattedNextDate = "${nextDate.format(dayFormatter)},${nextDate.format(DateFormatter)}"
         allDates.add(formattedNextDate)
