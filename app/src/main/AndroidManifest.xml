@@ -28,15 +28,6 @@
             android:name=".Activity.ManageBankAccountActivity"
             android:exported="false" />
         <activity
-            android:name=".Activity.MonthViewComposeActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Activity.ExpenseCategoryActivity"
-            android:exported="false" />
-        <activity
-            android:name=".Activity.IncomeCategoryActivity"
-            android:exported="false" />
-        <activity
             android:name=".Activity.AddCategoryActivity"
             android:exported="false" />
         <activity
