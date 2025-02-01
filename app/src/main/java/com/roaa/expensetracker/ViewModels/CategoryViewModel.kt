@@ -4,7 +4,6 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roaa.expensetracker.Database.CategoryRepository
-import com.roaa.expensetracker.Events.EventMessage
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
@@ -14,7 +13,6 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
-import org.greenrobot.eventbus.EventBus
 import javax.inject.Inject
 
 @HiltViewModel
@@ -99,19 +97,7 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
         }
     }
 
-    fun validateCategoryData(categoryClass: CategoryClass) {
-        if (categoryClass.categoryName!!.isEmpty()) {
-            // textInputLayoutName.setError("Name field can't be empty");
-            EventBus.getDefault().post(EventMessage(1, "Name field can't be empty"))
-        } else if (categoryClass.categoryName!!.length < 3) {
-            //textInputLayoutName.setError("Name must have at least 3 letters");
-            EventBus.getDefault().post(EventMessage(12, "Name must have at least 3 letters"))
-        } else if (categoryClass.categoryType!!.isEmpty()) {
-            EventBus.getDefault().post(EventMessage(2, "Please select a category type"))
-        } else {
-            storeCategoryInDatabase(categoryClass)
-        }
-    }
+
 
 
     //to delete categories from database
@@ -122,7 +108,7 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
     }
 
     private fun storeCategoryInDatabase(categoryClass: CategoryClass) {
-        if (categoryClass.id == 0L) {
+        if (categoryClass.categoryId == 0L) {
             //new category insert
             viewModelScope.launch {
                 categoryRepository.insert(categoryClass)
@@ -133,8 +119,6 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
                 categoryRepository.update(categoryClass)
             }
         }
-
-        EventBus.getDefault().post(EventMessage(3, "closing bottom sheet"))
     }
 
     fun loading() {
@@ -157,7 +141,7 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
         categoryType: String
     ) {
         val categoryClass = CategoryClass(
-            id = categoryId,
+            categoryId = categoryId,
             categoryName = categoryName,
             categoryColorNumber = 1,
             categoryIconNumber = categoryIcon,

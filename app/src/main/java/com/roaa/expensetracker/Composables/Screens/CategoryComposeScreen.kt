@@ -8,7 +8,6 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -44,12 +43,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
-import com.roaa.expensetracker.Composables.Navigation.ScreenB
-import com.roaa.expensetracker.Composables.Navigation.popBackStackOrFinish
-import com.roaa.expensetracker.Composables.components.TopBar
+import com.roaa.expensetracker.Composables.Navigation.NavRoutes
+import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.secondaryAlpha
@@ -63,7 +60,7 @@ import com.roaa.expensetracker.ViewModels.CategoryViewModel
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun CategoryScreen(
-    navController: NavHostController,
+    navigationManager: NavigationManager,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
 ) {
@@ -71,20 +68,16 @@ fun CategoryScreen(
         val context = LocalContext.current
         Surface {
             Scaffold(
-                topBar = {
-                    TopBar("Category",false,{navController.popBackStackOrFinish(context)},{})
-                },
                 content = { paddingValues ->
                     ScaffoldContent(
-                        paddingValues,
-                        navController,
+                        navigationManager,
                         sharedTransitionScope,
                         animatedVisibilityScope
                     )
                 },
                 floatingActionButton = {
                     ExtendedFloatingActionButton(
-                        onClick = { navController.navigate(ScreenB(0L, "", 99, EXPENSE)) },
+                        onClick = { navigationManager.navController.navigate(NavRoutes.ScreenB(0L, "", 99, EXPENSE)) },
                         icon = { Icon(Icons.Filled.Add, "Localized description") },
                         text = { Text(text = "Add Category") },
                     )
@@ -99,8 +92,7 @@ fun CategoryScreen(
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SharedTransitionScope.ScaffoldContent(
-    paddingValues: PaddingValues,
-    navController: NavHostController,
+    navigationManager: NavigationManager,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
     categoryViewModel: CategoryViewModel = hiltViewModel()
@@ -112,7 +104,6 @@ fun SharedTransitionScope.ScaffoldContent(
     Column(
         Modifier
             .verticalScroll(scrollState)
-            .padding(paddingValues)
     ) {
 
         Spacer(Modifier.height(12.dp))
@@ -179,9 +170,9 @@ fun SharedTransitionScope.ScaffoldContent(
                             it,
                             sharedTransitionScope, animatedVisibilityScope
                         ) {
-                            navController.navigate(
-                                ScreenB(
-                                    it.id,
+                            navigationManager.navController.navigate(
+                                NavRoutes.ScreenB(
+                                    it.categoryId,
                                     it.categoryName,
                                     it.categoryIconNumber,
                                     it.categoryType
@@ -203,9 +194,9 @@ fun SharedTransitionScope.ScaffoldContent(
                             it,
                             sharedTransitionScope, animatedVisibilityScope
                         ) {
-                            navController.navigate(
-                                ScreenB(
-                                    it.id,
+                            navigationManager.navController.navigate(
+                                NavRoutes.ScreenB(
+                                    it.categoryId,
                                     it.categoryName,
                                     it.categoryIconNumber,
                                     it.categoryType
@@ -251,9 +242,9 @@ fun SharedTransitionScope.ScaffoldContent(
                             it,
                             sharedTransitionScope, animatedVisibilityScope
                         ) {
-                            navController.navigate(
-                                ScreenB(
-                                    it.id,
+                            navigationManager.navController.navigate(
+                                NavRoutes.ScreenB(
+                                    it.categoryId,
                                     it.categoryName,
                                     it.categoryIconNumber,
                                     it.categoryType
@@ -275,9 +266,9 @@ fun SharedTransitionScope.ScaffoldContent(
                             it,
                             sharedTransitionScope, animatedVisibilityScope
                         ) {
-                            navController.navigate(
-                                ScreenB(
-                                    it.id,
+                            navigationManager.navController.navigate(
+                                NavRoutes.ScreenB(
+                                    it.categoryId,
                                     it.categoryName,
                                     it.categoryIconNumber,
                                     it.categoryType
@@ -354,7 +345,7 @@ fun SharedTransitionScope.SingleCategory(
                                 modifier = Modifier
                                     .size(24.dp)
                                     .sharedElement(
-                                        state = rememberSharedContentState(key = "image/${item.id}"),
+                                        state = rememberSharedContentState(key = "image/${item.categoryId}"),
                                         animatedVisibilityScope = animatedVisibilityScope,
                                     ),
                             )
@@ -377,7 +368,7 @@ fun SharedTransitionScope.SingleCategory(
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
                             modifier = Modifier.sharedElement(
-                                state = rememberSharedContentState(key = "text/${item.id}"),
+                                state = rememberSharedContentState(key = "text/${item.categoryId}"),
                                 animatedVisibilityScope = animatedVisibilityScope,
                             )
                         )

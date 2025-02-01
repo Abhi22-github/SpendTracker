@@ -39,21 +39,19 @@ import com.roaa.expensetracker.Composables.colorNotGood
 import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.harmonize
 import com.roaa.expensetracker.Composables.utils.toPalette
-import com.roaa.expensetracker.Utilities.convertLocalDateToLong
 import com.roaa.expensetracker.ViewModels.AnimationViewModel
 import com.roaa.expensetracker.ViewModels.PreferencesViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
-import java.time.LocalDate
 
 @Composable
 fun RowScope.RestBudgetPill(
-    date: LocalDate,
+    date: Long,
     transactionsViewModel: TransactionsViewModel = hiltViewModel(),
     preferenceViewModel: PreferencesViewModel = hiltViewModel(),
     animationViewModel: AnimationViewModel = hiltViewModel()
 ) {
     LaunchedEffect(Unit) {
-        transactionsViewModel.getTotalExpenseAmountForDate(convertLocalDateToLong(date))
+        transactionsViewModel.getTotalExpenseAmountForDate(date)
     }
 
     val budget by preferenceViewModel.getBudgetValue.collectAsState(1f)

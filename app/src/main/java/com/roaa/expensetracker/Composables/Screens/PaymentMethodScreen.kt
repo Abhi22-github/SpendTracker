@@ -16,12 +16,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Star
+import androidx.compose.material.icons.twotone.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -50,6 +55,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -60,78 +68,187 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
-import com.roaa.expensetracker.Composables.blueColor
+import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.components.AddPaymentMethodBottomSheet
-import com.roaa.expensetracker.Composables.components.TopBar
-import com.roaa.expensetracker.Composables.greenColor
+import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
+import com.roaa.expensetracker.Composables.components.DropDownBankAccountOption
+import com.roaa.expensetracker.Composables.components.EmptyScreen
 import com.roaa.expensetracker.Composables.orange
+import com.roaa.expensetracker.Composables.utils.ColorState
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
+import com.roaa.expensetracker.Composables.utils.toPalette
+import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.R
+import com.roaa.expensetracker.Utilities.Constants.CASH
 import com.roaa.expensetracker.Utilities.extractNumbers
+import com.roaa.expensetracker.ViewModels.BankAccountsViewModel
+import com.roaa.expensetracker.ViewModels.PreferencesViewModel
 import com.roaa.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.launch
 
 @Composable
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 fun PaymentMethodScreen(
+    navController: NavigationManager,
     modifier: Modifier = Modifier,
     sendUserBack: () -> Unit,
-    uiViewModel: UiViewModel = hiltViewModel()
+    uiViewModel: UiViewModel = hiltViewModel(),
+    bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
+    preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val showBottomSheet by uiViewModel.paymentMethodBottomSheetStatus.collectAsState()
+    val bankAccountsList by bankAccountsViewModel.allBankAccountListExceptCash.collectAsState()
+    val primaryBankAccountNumber by preferencesViewModel.getPrimaryAccountNumber.collectAsState(1L);
+
+    val lazyListState = rememberLazyListState()
     val scope = rememberCoroutineScope()
-    Scaffold(topBar = {
-        TopBar(title = "Payment Methods",
-            showDelete = false,
-            sendUserBackToPreviousActivity = { sendUserBack() },
-            delete = {})
-    }, floatingActionButton = {
-        ExtendedFloatingActionButton(
-            onClick = {
-                scope.launch {
-                    uiViewModel.paymentMethodBottomSheetStatus.emit(true)
-                }
-            },
-            icon = { Icon(Icons.Filled.Add, "Localized description") },
-            text = { Text(text = "Add Payment Method") },
+
+    //empty bank account class
+    val emptyBankAccountsClass = BankAccountsClass(
+        bankAccountId = 0L,
+        initialAmount = 0,
+        currentAmount = 0,
+        bankName = "",
+        cardColorNumber = 1,
+        cardIconNumber = 25,
+        accountType = CASH
+    )
+
+    var bankAccountsClass by remember {
+        mutableStateOf(
+            emptyBankAccountsClass
         )
-    }) {
-        Column(Modifier.padding(paddingValues = it)) {
-            Spacer(Modifier.height(24.dp))
-            Text(
-                text = "Primary Account",
-                modifier = Modifier.padding(18.dp, 4.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.60f)
-            )
-
-            PaymentCard(blueColor)
-
-            Spacer(Modifier.height(24.dp))
-            Text(
-                text = "Secondary Account",
-                modifier = Modifier.padding(18.dp, 4.dp),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.60f)
-            )
-
-            PaymentCard(greenColor)
-
-            // PaymentMethodCardOld()
-
-        }
-
     }
-    if (showBottomSheet) AddPaymentMethodBottomSheet()
+    val context = LocalContext.current
+
+    if (!bankAccountsList.isEmpty()) {
+        bankAccountsList.forEachIndexed { index, it ->
+            if (it.bankAccountId == primaryBankAccountNumber) {
+                val temp = bankAccountsList.get(0)
+                bankAccountsList[0] = it
+                bankAccountsList[index] = temp
+            }
+        }
+    }
+
+    Scaffold(
+//        topBar = {
+//        TopBar(title = "Bank Accounts",
+//            showDelete = false,
+//            sendUserBackToPreviousActivity = { sendUserBack() },
+//            delete = {})
+//    },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = {
+                    scope.launch {
+                        uiViewModel.paymentMethodBottomSheetStatus.emit(true)
+                    }
+                },
+                icon = { Icon(Icons.Filled.Add, "Localized description") },
+                text = { Text(text = "Add Payment Method") },
+            )
+        }) { paddingValue ->
+        if (!bankAccountsList.isEmpty()) {
+            Column(Modifier) {
+                Spacer(Modifier.height(10.dp))
+                LazyColumn(state = lazyListState) {
+                    item {
+                        if (!bankAccountsList.take(1).isEmpty()) {
+                            Column(Modifier.padding(18.dp, 4.dp)) {
+                                Text(
+                                    text = "Primary Account",
+                                    style = typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "This will be selected as your default account for payments",
+                                    style = typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                )
+                            }
+                        }
+                    }
+                    items(bankAccountsList.take(1), key = { it.bankAccountId }) {
+                        PaymentCard(
+                            Modifier.animateItem(),
+                            it,
+                            bankAccountsViewModel,
+                            { bankAccounts ->
+                                bankAccountsClass = bankAccounts
+                                scope.launch {
+                                    uiViewModel.paymentMethodBottomSheetStatus.emit(true)
+                                }
+                            })
+                    }
+                    item {
+                        if (!bankAccountsList.drop(1).isEmpty())
+                            Column {
+                                Text(
+                                    text = "Secondary Accounts",
+                                    modifier = Modifier.padding(18.dp, top = 24.dp, bottom = 4.dp),
+                                    style = typography.bodyLarge,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                            }
+                    }
+                    items(bankAccountsList.drop(1), key = { it.bankAccountId }) {
+                        PaymentCard(
+                            Modifier.animateItem(),
+                            it,
+                            bankAccountsViewModel,
+                            { bankAccounts ->
+                                bankAccountsClass = bankAccounts
+                                scope.launch {
+                                    uiViewModel.paymentMethodBottomSheetStatus.emit(true)
+                                }
+                            })
+                    }
+                    item {
+                        Spacer(Modifier.height(84.dp))
+                    }
+                }
+
+
+//            Spacer(Modifier.height(24.dp))
+//            Text(
+//                text = "Secondary Account",
+//                modifier = Modifier.padding(18.dp, 4.dp),
+//                style = MaterialTheme.typography.bodyMedium,
+//                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.60f)
+//            )
+            }
+        } else {
+            EmptyScreen("No Bank Account Found")
+        }
+    }
+    if (showBottomSheet) {
+        AddPaymentMethodBottomSheet(bankAccountsClass)
+        bankAccountsClass = emptyBankAccountsClass
+    }
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PaymentCard(color: Color) {
+fun PaymentCard(
+    modifier: Modifier,
+    bankAccountsClass: BankAccountsClass,
+    bankAccountsViewModel: BankAccountsViewModel,
+    editClicked: (bankAccountsClass: BankAccountsClass) -> Unit,
+    uiViewModel: UiViewModel = hiltViewModel(),
+    preferencesViewModel: PreferencesViewModel = hiltViewModel()
+) {
+    val color = ColorState.fromNumber(bankAccountsClass.cardColorNumber)!!
+    val scope = rememberCoroutineScope()
+    var showOptionMenu by remember { mutableStateOf(false) }
+    val showBottomSheet by uiViewModel.paymentMethodBottomSheetStatus.collectAsState()
+    var showConfirmationDeleteDialog by remember { mutableStateOf(false) }
+
     Card(
         shape = RoundedCornerShape(12.dp),
-        modifier = Modifier
+        modifier = modifier
             .padding(16.dp, 4.dp)
             .clip(RoundedCornerShape(12.dp))
             .clickable {
@@ -148,15 +265,15 @@ fun PaymentCard(color: Color) {
         ConstraintLayout(Modifier.fillMaxWidth()) {
             val (balanceText, balanceLabel, cardNumber, moreIcon, backgroundImage1, backgroundImage2, progress) = createRefs()
 
-            Text(text = "₹24,045",
-                style = MaterialTheme.typography.headlineMedium.copy(fontFamily = numberFont),
+            Text(text = "₹${bankAccountsClass.currentAmount}",
+                style = typography.headlineMedium.copy(fontFamily = numberFont),
                 modifier = Modifier.constrainAs(balanceText) {
                     top.linkTo(parent.top, margin = 24.dp)
                     start.linkTo(parent.start, margin = 24.dp)
                 })
 
             Text(text = "Amount",
-                style = MaterialTheme.typography.bodyMedium,
+                style = typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.60f),
                 modifier = Modifier.constrainAs(balanceLabel) {
                     top.linkTo(balanceText.bottom, margin = 4.dp)
@@ -203,7 +320,7 @@ fun PaymentCard(color: Color) {
                 ) {
                     if (true) {
                         Text(
-                            text = "Bank Of Maharshtra",
+                            text = bankAccountsClass.bankName,
                             style = typography.titleMedium.copy(fontWeight = FontWeight.Medium),
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
                         )
@@ -259,17 +376,52 @@ fun PaymentCard(color: Color) {
                 alpha = 0.1f,
                 colorFilter = ColorFilter.tint(color)
             )
-
-            IconButton(onClick = { }, modifier = Modifier.constrainAs(moreIcon) {
+            Box(Modifier.constrainAs(moreIcon) {
                 top.linkTo(parent.top, 18.dp)
                 end.linkTo(parent.end, 18.dp)
             }) {
-                Icon(
-                    Icons.Filled.MoreVert, contentDescription = null,
-                )
+                IconButton(
+                    onClick = { showOptionMenu = !showOptionMenu },
+                ) {
+                    Icon(
+                        Icons.Filled.MoreVert, contentDescription = null,
+                    )
+                }
+                val colorPallet =
+                    toPalette(ColorState.fromNumber(bankAccountsClass.cardColorNumber)!!)
+                if (showOptionMenu) DropDownBankAccountOption(menuExpanded = showOptionMenu,
+                    colorPallet = colorPallet,
+                    { showOptionMenu = false },
+                    onPrimaryClicked = {
+                        scope.launch {
+                            preferencesViewModel.setPrimaryAccountNumber(
+                                bankAccountsClass.bankAccountId
+                            )
+                        }
+                        scope.launch { preferencesViewModel.setPrimaryAccount(bankAccountsClass) }
+                        showOptionMenu = false
+                    },
+                    editClicked = {
+                        editClicked(bankAccountsClass)
+                    },
+                    deleteClicked = {
+                        showConfirmationDeleteDialog = !showConfirmationDeleteDialog
+                    })
             }
         }
     }
+
+    if (showConfirmationDeleteDialog) ConfirmationAlertDialog(
+        onDismissRequest = { showConfirmationDeleteDialog = !showConfirmationDeleteDialog },
+        onConfirmation = {
+            bankAccountsViewModel.deleteBankAccount(bankAccountsClass)
+            showConfirmationDeleteDialog = !showConfirmationDeleteDialog
+        },
+        dialogTitle = "Confirm Delete?",
+        dialogText = "Are you sure, that you want to delete this bank account?",
+        icon = ImageVector.vectorResource(R.drawable.icon_expense)
+    )
+
 }
 
 @Composable
@@ -361,18 +513,17 @@ fun PaymentMethodCardOld() {
 @Composable
 fun LivePaymentCard(
     color: Color,
+    bankAccountsClass: BankAccountsClass,
     sendBankAmount: (String) -> Unit,
     sendBankName: (String) -> Unit,
     uiViewModel: UiViewModel = hiltViewModel(),
 ) {
-    val liveBankName by uiViewModel.liveBankName.collectAsState()
-    val liveBankAmount by uiViewModel.liveBankAmount.collectAsState()
 
-    var bankAmount by remember { mutableStateOf(TextFieldValue("")) }
-    var bankName by remember { mutableStateOf(TextFieldValue("")) }
+    var bankAmount by remember { mutableStateOf(TextFieldValue(bankAccountsClass.currentAmount.toString())) }
+    var bankName by remember { mutableStateOf(TextFieldValue(bankAccountsClass.bankName)) }
+    var iconToggle by remember { mutableStateOf(false) }
 
-    val hintStyleAmount = MaterialTheme.typography.titleLarge.copy(fontFamily = numberFont)
-    val hintStyle = MaterialTheme.typography.bodyMedium
+    val hintStyleAmount = typography.titleLarge.copy(fontFamily = numberFont)
     val hintColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.60f)
 
     val newColor = combineColors(
@@ -401,12 +552,12 @@ fun LivePaymentCard(
             }, verticalAlignment = Alignment.CenterVertically) {
                 Text(
                     text = "₹",
-                    style = MaterialTheme.typography.headlineMedium.copy(
+                    style = typography.headlineMedium.copy(
                         fontFamily = numberFont,
                     ),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Box() {
+                Box {
                     BasicTextField(value = bankAmount,
                         onValueChange = {
                             bankAmount = TextFieldValue(
@@ -422,7 +573,7 @@ fun LivePaymentCard(
                                 color.copy(alpha = 0.2f), RoundedCornerShape(5.dp)
                             )
                             .padding(10.dp, 3.dp),
-                        textStyle = MaterialTheme.typography.titleLarge.copy(fontFamily = numberFont),
+                        textStyle = typography.titleLarge.copy(fontFamily = numberFont),
                         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
                         maxLines = 1,
                         decorationBox = { innerTextField ->
@@ -438,7 +589,7 @@ fun LivePaymentCard(
                 }
             }
             Text(text = "Amount",
-                style = MaterialTheme.typography.bodyMedium,
+                style = typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.60f),
                 modifier = Modifier.constrainAs(balanceLabel) {
                     top.linkTo(balanceText.bottom, margin = 4.dp)
@@ -496,7 +647,7 @@ fun LivePaymentCard(
                                 color.copy(alpha = 0.2f), RoundedCornerShape(5.dp)
                             )
                             .padding(10.dp, 3.dp),
-                        textStyle = MaterialTheme.typography.titleLarge.copy(fontFamily = numberFont),
+                        textStyle = typography.titleLarge.copy(fontFamily = numberFont),
                         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text)
                     ) { innerTextField ->
                         if (bankName.text.isEmpty()) {
@@ -545,13 +696,17 @@ fun LivePaymentCard(
                 alpha = 0.1f,
                 colorFilter = ColorFilter.tint(color)
             )
+            var icon = Icons.TwoTone.Star
+            if (iconToggle) icon = Icons.Filled.Star
+            else icon = Icons.TwoTone.Star
 
-            IconButton(onClick = { }, modifier = Modifier.constrainAs(moreIcon) {
-                top.linkTo(parent.top, 18.dp)
-                end.linkTo(parent.end, 18.dp)
-            }) {
+            IconButton(onClick = { iconToggle = !iconToggle },
+                modifier = Modifier.constrainAs(moreIcon) {
+                    top.linkTo(parent.top, 18.dp)
+                    end.linkTo(parent.end, 18.dp)
+                }) {
                 Icon(
-                    Icons.Filled.MoreVert, contentDescription = null,
+                    imageVector = icon, contentDescription = null, tint = color
                 )
             }
         }

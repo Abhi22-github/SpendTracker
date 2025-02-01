@@ -1,31 +1,27 @@
 package com.roaa.expensetracker.ViewModels
 
-import android.content.Context
 import android.content.SharedPreferences
 import android.util.Log
-import android.widget.Toast
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.google.android.material.chip.Chip
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Database.TransactionRepository
-import com.roaa.expensetracker.Events.EventMessage
-import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Model.TotalAmountClass
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Model.TransactionClass
 import com.roaa.expensetracker.Utilities.Constants
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
-import com.roaa.expensetracker.Utilities.LocalDateToLong
 import com.roaa.expensetracker.Utilities.UiState
+import com.roaa.expensetracker.Utilities.toLong
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
-import org.greenrobot.eventbus.EventBus
 import java.math.BigDecimal
 import java.time.Instant
 import java.time.LocalDate
@@ -49,19 +45,20 @@ class TransactionsViewModel @Inject constructor(
 
     //flow to get total Expense amount for range
     private val _getTotalExpenseAmountForRangeFlow =
-        MutableStateFlow<TotalAmountClass>(TotalAmountClass(0, 0))
+        MutableStateFlow<TotalAmountClass>(TotalAmountClass(0, 100))
     val getTotalExpenseAmountForRangeFlow: StateFlow<TotalAmountClass> =
         _getTotalExpenseAmountForRangeFlow
 
     //flow to get total Income amount for range
     private val _getTotalIncomeAmountForRangeFlow =
-        MutableStateFlow<TotalAmountClass>(TotalAmountClass(0, 0))
+        MutableStateFlow<TotalAmountClass>(TotalAmountClass(0, 100))
     val getTotalIncomeAmountForRangeFlow: StateFlow<TotalAmountClass> =
         _getTotalIncomeAmountForRangeFlow
 
     //flow to get all transactions for give date
-    private val _getAllTransactionsForDateFlow = MutableStateFlow<List<TransactionClass>>(listOf())
-    val getAllTransactionsForDateFlow: StateFlow<List<TransactionClass>> =
+    private val _getAllTransactionsForDateFlow =
+        MutableStateFlow<List<TransactionWithDetails>>(listOf())
+    val getAllTransactionsForDateFlow: StateFlow<List<TransactionWithDetails>> =
         _getAllTransactionsForDateFlow
 
     //flow to get list of TotalAmount
@@ -71,10 +68,8 @@ class TransactionsViewModel @Inject constructor(
         _getListOfTotalAmountPerDayForRangeFlow
 
     //flow to get total amount for given date
-    private val _getTotalExpenseAmountForDateFlow =
-        MutableStateFlow<Long>(0L)
-    val getTotalExpenseAmountForDateFlow: StateFlow<Long> =
-        _getTotalExpenseAmountForDateFlow
+    private val _getTotalExpenseAmountForDateFlow = MutableStateFlow<Long>(0L)
+    val getTotalExpenseAmountForDateFlow: StateFlow<Long> = _getTotalExpenseAmountForDateFlow
 
 
     private val chipsName = arrayOf<String>()
@@ -130,48 +125,20 @@ class TransactionsViewModel @Inject constructor(
 
     fun validateAndPrepareTransactionData(
         selectedType: String,
-        selectedCategory: CategoryClass,
+        selectedCategoryId: Long,
         expenseValue: String,
         comment: String,
-        selectedDate: Long?
+        selectedDate: Long?,
+        selectedBankAccountId: Long,
     ) {
         storeFormDataInDatabase(
             expense = selectedType,
             amount = expenseValue,
             note = comment,
-            category = selectedCategory.categoryName,
-            categoryIcon = selectedCategory.categoryIconNumber,
-            dateWithTime = selectedDate ?: LocalDateToLong(LocalDate.now())
+            dateWithTime = selectedDate ?: LocalDate.now().toLong(),
+            selectedCategoryId,
+            selectedBankAccountId,
         )
-    }
-
-    fun validateFormData(amount: String, note: String, mContext: Context?) {
-        //to get,separate and validate data from both expense and income
-        if (amount.isEmpty()) {
-            EventBus.getDefault().post(EventMessage(4, "Amount can't be zero"))
-        } else if (transactionTypeFromViewModel == EXPENSE) {
-            category = currentSelectedExpenseCategory
-            if (currentSelectedExpenseCategory.isEmpty()) {
-                EventBus.getDefault().post(EventMessage(5, "Please select a category"))
-            } else {
-                //store the data
-                Toast.makeText(mContext, "success", Toast.LENGTH_SHORT).show()
-                storeFormDataInDatabase(
-                    transactionTypeFromViewModel, amount, note, category,1, selectedDate
-                )
-            }
-        } else if (transactionTypeFromViewModel == Constants.INCOME) {
-            category = currentSelectedIncomeCategory
-            if (currentSelectedIncomeCategory.isEmpty()) {
-                EventBus.getDefault().post(EventMessage(5, "Please select a category"))
-            } else {
-                //store the data
-                Toast.makeText(mContext, "success", Toast.LENGTH_SHORT).show()
-                storeFormDataInDatabase(
-                    transactionTypeFromViewModel, amount, note, category, 1,selectedDate
-                )
-            }
-        }
     }
 
 
@@ -179,9 +146,9 @@ class TransactionsViewModel @Inject constructor(
         expense: String,
         amount: String,
         note: String,
-        category: String?,
-        categoryIcon: Int,
-        dateWithTime: Long
+        dateWithTime: Long,
+        selectedCategoryId: Long,
+        selectedBankAccountId: Long
     ) {
         // on below line we are creating
         // a variable for our modal class.
@@ -189,27 +156,21 @@ class TransactionsViewModel @Inject constructor(
         modal.amount = amount.trim { it <= ' ' }.replace(",", "").toLong()
         modal.type = expense.trim { it <= ' ' }
         modal.note = note.trim { it <= ' ' }
-        modal.category = category!!.trim { it <= ' ' }
-        modal.categoryIcon =  categoryIcon
         modal.dateWithTime = dateWithTime
         val date = Instant.ofEpochMilli(dateWithTime).atZone(ZoneId.systemDefault()) // default zone
             .toLocalDate()
         modal.date = date.toString().replace("-", "").toLong()
+        modal.bankAccountId = selectedBankAccountId;
+        modal.categoryId = selectedCategoryId;
 
-
-        //   Log.d("date in local date" ,d.toString());
         viewModelScope.launch { transactionRepository.insert(modal) }
-
-        EventBus.getDefault().post(EventMessage(6, "success"))
-
-        //  liveData.postValue("something");
     }
 
     fun saveSelectedDate(date: Long) {
         this.selectedDate = date
     }
 
-    val allTransactions: Flow<List<TransactionClass>>
+    val allTransactions: Flow<List<TransactionWithDetails>>
         get() = transactionRepository.allTransactions
 
 
@@ -222,6 +183,7 @@ class TransactionsViewModel @Inject constructor(
                 error(e)
             }.collect { totalAmount ->
                 _getTotalIncomeAmountForRangeFlow.value = totalAmount
+                Log.d("Hello", "getTotalIncomeForRange: $totalAmount")
                 completed()
             }
         }
@@ -234,13 +196,14 @@ class TransactionsViewModel @Inject constructor(
                 startDate, endDate, EXPENSE
             ).catch { error(it) }.collect { totalAmount ->
                 _getTotalExpenseAmountForRangeFlow.value = totalAmount
+                Log.d("Hello", "getTotalExpenseForRange: $totalAmount")
                 completed()
             }
         }
     }
 
 
-    suspend fun getTotalAmountByDateRangeAndCategoryType(
+    fun getTotalAmountByDateRangeAndCategoryType(
         startDate: Long, endDate: Long, categoryType: String
     ): Flow<TotalAmountClass> {
         return transactionRepository.getTotalAmountByDateRangeAndCategoryType(
@@ -262,6 +225,15 @@ class TransactionsViewModel @Inject constructor(
         }
     }
 
+    fun getListOfTotalAmountPerDayForRangeForCompose(
+        startDate: Long, endDate: Long
+    ): Flow<List<TotalExpenseIncomeClass>> {
+
+        return transactionRepository.getListOfTotalAmountPerDayForRange(startDate, endDate)
+
+
+    }
+
     fun deleteSingleTransaction(transactionClass: TransactionClass) {
         viewModelScope.launch {
             loading()
@@ -281,6 +253,12 @@ class TransactionsViewModel @Inject constructor(
         }
     }
 
+
+    fun getAllTransactionsForDateCompose(date: Long): Flow<List<TransactionWithDetails>> {
+
+        return transactionRepository.getAllTransactionsForDate(date)
+    }
+
     fun getTotalExpenseAmountForDate(date: Long) {
         viewModelScope.launch {
             loading()
@@ -290,8 +268,7 @@ class TransactionsViewModel @Inject constructor(
                 it.catch {
                     error(it)
                 }.collect { amount ->
-                    if (amount != null)
-                        _getTotalExpenseAmountForDateFlow.value = amount
+                    if (amount != null) _getTotalExpenseAmountForDateFlow.value = amount
                     completed()
                 }
             }

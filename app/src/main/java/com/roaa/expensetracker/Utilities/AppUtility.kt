@@ -1,10 +1,23 @@
 package com.roaa.expensetracker.Utilities
 
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Home
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.Settings
+import com.roaa.expensetracker.Composables.Navigation.NavRoutes
+import com.roaa.expensetracker.Model.NavigationItems
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import okhttp3.internal.toLongOrDefault
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
+import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.util.Calendar
 import java.util.Date
@@ -23,8 +36,14 @@ fun getFirstAndLastDateOfGivenPeriod(prevMonth: LocalDate, nextMonth: LocalDate)
     return Pair(firstDate.format(formatter).toLong(), lastDate.format(formatter).toLong())
 }
 
-fun LocalDateToLong(localDate: LocalDate): Long {
-    return localDate.format(DateTimeFormatter.ofPattern("yyyyMMdd")).toLong()
+fun LocalDate.toLong(): Long {
+    return this.format(DateTimeFormatter.ofPattern("yyyyMMdd")).toLong()
+}
+
+fun Long.toLocalDate(): LocalDate {
+    val dateString = this.toString()
+    val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
+    return LocalDate.parse(dateString, formatter)
 }
 
 fun LocalDateToString(localDate: LocalDate): String {
@@ -54,8 +73,22 @@ fun convertTotalExpenseIncomeClassToMap(totalExpenseIncomeClassList: List<TotalE
     return map
 }
 
-fun convertLocalDateToLong(date: LocalDate): Long {
-    return date.toString().replace("-", "").toLong()
+fun LocalDate.toLongMillis(): Long {
+    // Convert LocalDate to LocalDateTime at midnight (start of the day)
+    val localDateTime = this.atStartOfDay()
+
+    // Convert LocalDateTime to Instant (UTC time)
+    val instant = localDateTime.toInstant(ZoneOffset.UTC)
+
+    // Return the milliseconds from the epoch (1970-01-01T00:00:00Z)
+    return instant.toEpochMilli()
+}
+
+fun Long.LongMillisToNoralLong(): Long {
+    // Convert milliseconds to Instant
+    val instant = Instant.ofEpochMilli(this)
+    // Convert Instant to LocalDate (using UTC)
+    return instant.atZone(ZoneOffset.UTC).toLocalDate().toLong()
 }
 
 fun Float.clamp(min: Float, max: Float): Float =
@@ -84,24 +117,67 @@ fun getPrev10Dates(date: LocalDate): List<String> {
     return prev10Dates
 }
 
-fun getPreviousAndNext10Days(date: LocalDate): List<String> {
+fun getPreviousAndNext500Days(date: LocalDate): List<String> {
     val allDates = mutableListOf<String>()
+    val dayFormatter = DateTimeFormatter.ofPattern("EEE")
+    val DateFormatter = DateTimeFormatter.ofPattern("dd")
 
-    for (i in 5 downTo 1) {
+    for (i in 250 downTo 1) {
         val previousDate = date.minusDays(i.toLong())  // Subtract days for previous dates
-        val formattedPrevDate = previousDate.toNormalString()
+        val formattedPrevDate =
+            "${previousDate.format(dayFormatter)},${previousDate.format(DateFormatter)}"
         allDates.add(formattedPrevDate)
     }
 
-    allDates.add(date.toNormalString())
+    allDates.add("${date.format(dayFormatter)},${date.format(DateFormatter)}")
 
-    for (i in 1..5) {
+    for (i in 1..250) {
         val nextDate = date.plusDays(i.toLong())  // Add days for next dates
-        val formattedNextDate = nextDate.toNormalString()
+        val formattedNextDate = "${nextDate.format(dayFormatter)},${nextDate.format(DateFormatter)}"
         allDates.add(formattedNextDate)
     }
     return allDates
 }
+
+fun getCalendarForMonthFromDate(localDate: LocalDate): List<LocalDate> {
+    // Get the first day of the month
+    val firstDayOfMonth = localDate.withDayOfMonth(1)
+    // Get the last day of the month
+    val lastDayOfMonth = firstDayOfMonth.withDayOfMonth(firstDayOfMonth.lengthOfMonth())
+
+    // Calculate the start day of the week for the first day of the month
+    val startDayOfWeek = firstDayOfMonth.dayOfWeek
+
+    // Prepare the list to hold the calendar grid
+    val calendarGrid = mutableListOf<LocalDate>()
+
+    // Step 1: Add dates from the previous month to fill the first row
+    val prevMonthLastDay = firstDayOfMonth.minusDays(1)
+    val prevMonthStartDate = firstDayOfMonth.minusDays(startDayOfWeek.value.toLong())
+    var prevMonthDate = prevMonthStartDate
+    while (prevMonthDate.isBefore(firstDayOfMonth)) {
+        calendarGrid.add(prevMonthDate)
+        prevMonthDate = prevMonthDate.plusDays(1)
+    }
+
+    // Step 2: Add all the dates of the current month
+    var currentDate = firstDayOfMonth
+    while (currentDate.isBefore(lastDayOfMonth.plusDays(1))) {
+        calendarGrid.add(currentDate)
+        currentDate = currentDate.plusDays(1)
+    }
+
+    // Step 3: Add dates from the next month to fill the grid to 42 dates
+    val nextMonthDate = lastDayOfMonth.plusDays(1)
+    var nextDate = nextMonthDate
+    while (calendarGrid.size < 42) { // Ensure the grid has exactly 42 dates
+        calendarGrid.add(nextDate)
+        nextDate = nextDate.plusDays(1)
+    }
+
+    return calendarGrid
+}
+
 
 fun getPreviousAndNextDays(date: LocalDate): MutableList<String> {
     val allDates = mutableListOf<String>()
@@ -135,3 +211,48 @@ fun convertMillisToDateString(millis: Long): String {
 fun extractNumbers(input: String): Long {
     return input.filter { it.isDigit() }.toLongOrDefault(0L)
 }
+
+
+val items = listOf(
+    NavigationItems(
+        title = "List",
+        selectedIcon = Icons.Filled.Home,
+        unselectedIcon = Icons.Outlined.Home,
+        route = NavRoutes.MainScreen,
+    ),
+    NavigationItems(
+        title = "Month",
+        selectedIcon = Icons.Filled.Info,
+        unselectedIcon = Icons.Outlined.Info,
+        route = NavRoutes.MonthScreen,
+    ),
+    NavigationItems(
+        title = "Day",
+        selectedIcon = Icons.Filled.Edit,
+        unselectedIcon = Icons.Outlined.Edit,
+        badgeCount = 105,
+        route = NavRoutes.DayScreen(LocalDate.now().toLong()),
+    ),
+    NavigationItems(
+        title = "Category",
+        selectedIcon = Icons.Filled.Settings,
+        unselectedIcon = Icons.Outlined.Settings,
+        route = NavRoutes.ScreenA,
+    ), NavigationItems(
+        title = "Bank Accounts",
+        selectedIcon = Icons.Filled.Settings,
+        unselectedIcon = Icons.Outlined.Settings,
+        route = NavRoutes.BankAccountScreen,
+    ), NavigationItems(
+        title = "Statistics",
+        selectedIcon = Icons.Filled.Settings,
+        unselectedIcon = Icons.Outlined.Settings,
+        route = NavRoutes.MainScreen,
+    ), NavigationItems(
+        title = "Settings",
+        selectedIcon = Icons.Filled.Settings,
+        unselectedIcon = Icons.Outlined.Settings,
+        route = NavRoutes.SettingScreen,
+    )
+
+)

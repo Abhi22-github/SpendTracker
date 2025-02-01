@@ -1,5 +1,6 @@
 package com.roaa.expensetracker.Composables.components
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -19,11 +20,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -43,103 +49,136 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts
-import com.roaa.expensetracker.Composables.Screens.PaymentCard
+import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.blueColor
 import com.roaa.expensetracker.Composables.failureColor
 import com.roaa.expensetracker.Composables.successColor
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Converters.TransactionConverter
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Model.TransactionClass
+import com.roaa.expensetracker.Model.emptyBank
+import com.roaa.expensetracker.Model.emptyCategoryClass
+import com.roaa.expensetracker.Model.emptyTransactionClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
-import com.roaa.expensetracker.Utilities.convertLocalDateToLong
 import com.roaa.expensetracker.Utilities.getDateFromMillis
 import com.roaa.expensetracker.ViewModels.PreferencesViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import com.roaa.expensetracker.ViewModels.UiViewModel
-import kotlinx.coroutines.launch
-import java.time.LocalDate
 
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionsListCompose(
+    navController: NavigationManager,
+    modifier: Modifier,
     showSingleDateTransactions: Boolean,
-    date: LocalDate,
+    date: Long,
     viewModel: TransactionsViewModel = hiltViewModel(),
     uiViewModel: UiViewModel = hiltViewModel(),
     preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val bottomSheet by uiViewModel.transactionDetailBottomSheetValue.collectAsState()
-    var singleTransaction by remember { mutableStateOf(TransactionClass()) }
-    val scope = rememberCoroutineScope()
-    val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
-    Column {
-        if (!showSingleDateTransactions) {
+    var showAddBottomSheet by remember { mutableStateOf(false) }
+    var bottomSheet by remember { mutableStateOf(false) }
+    Scaffold(floatingActionButton = {
+        ExtendedFloatingActionButton(
+            onClick = {
+                showAddBottomSheet = !showAddBottomSheet
+            },
+            icon = { Icon(Icons.Filled.Add, "Localized description") },
+            text = { Text(text = "Add") },
+        )
+    }) {
 
-            val transactionList by viewModel.allTransactions.collectAsState(emptyList<TransactionClass>())
-            val transactionsMap =
-                transactionList.sortedByDescending { it.dateWithTime }.groupBy { it.date }
-                    .toSortedMap()
+        val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        var singleTransaction by remember {
+            mutableStateOf(
+                TransactionWithDetails(
+                    emptyTransactionClass,
+                    emptyCategoryClass,
+                    emptyBank
+                )
+            )
+        }
+        val scope = rememberCoroutineScope()
+        val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
+        Column {
+            if (!showSingleDateTransactions) {
 
-            val transactionConverterList = transactionsMap.map {
-                TransactionConverter(it.key.toString(), it.value)
-            }.reversed()
-            val lazyList = rememberLazyListState()
-            Surface(color = MaterialTheme.colorScheme.surface) {
-                if (!transactionConverterList.isEmpty()) LazyColumn(
-                    modifier = Modifier.fillMaxWidth(), state = lazyList
-                ) {
-                    item {
-                        if (showForecast)
-                            SummaryCard(blueColor)
-                        else
-                            PaymentCard(blueColor)
+                val transactionList by viewModel.allTransactions.collectAsState(emptyList())
+                val transactionsMap =
+                    transactionList.sortedByDescending { it.transaction.dateWithTime }
+                        .groupBy { it.transaction.date }
+                        .toSortedMap()
+
+                val transactionConverterList = transactionsMap.map {
+                    TransactionConverter(it.key.toString(), it.value)
+                }.reversed()
+                val lazyList = rememberLazyListState()
+                Surface(color = MaterialTheme.colorScheme.surface) {
+                    if (!transactionConverterList.isEmpty()) LazyColumn(
+                        modifier = Modifier.fillMaxWidth(), state = lazyList
+                    ) {
+                        item {
+                            if (showForecast)
+                                SummaryCard(blueColor)
+                        }
+                        transactionConverterList.forEach { (date, transactionList) ->
+                            val date =
+                                getDateFromMillis(transactionList.get(0).transaction.dateWithTime)
+                            item { Header(if (date == getDateFromMillis(System.currentTimeMillis())) "Today" else date) }
+                            items(transactionList, key = { it.transaction.id }) { item ->
+                                SingleTransaction(item, onSingleItemClick = {
+                                    singleTransaction = (item)
+                                    bottomSheet = true
+
+                                })
+                            }
+                        }
                     }
-                    transactionConverterList.forEach { (date, transactionList) ->
-                        val date = getDateFromMillis(transactionList.get(0).dateWithTime)
-                        item { Header(if (date == getDateFromMillis(System.currentTimeMillis())) "Today" else date) }
-                        items(transactionList, key = { it.id }) { item ->
+                    else EmptyScreen()
+                }
+            } else {
+                viewModel.getAllTransactionsForDate(date)
+                val transactionList by viewModel.getAllTransactionsForDateCompose(
+                    date
+                ).collectAsState(listOf())
+                val lazyList = rememberLazyListState()
+                Surface(color = MaterialTheme.colorScheme.surface) {
+                    if (!transactionList.isEmpty()) LazyColumn(
+                        modifier = Modifier.fillMaxWidth(), state = lazyList
+                    ) {
+                        items(transactionList, key = { it.transaction.id }) { item ->
                             SingleTransaction(item, onSingleItemClick = {
                                 singleTransaction = (item)
-                                scope.launch {
-                                    uiViewModel.transactionDetailBottomSheetValue.emit(true)
-                                }
+                                bottomSheet = true
+
                             })
                         }
                     }
+                    else EmptyScreen()
                 }
-                else EmptyScreen()
             }
-        } else {
-            viewModel.getAllTransactionsForDate(convertLocalDateToLong(date))
-            val transactionList by viewModel.getAllTransactionsForDateFlow.collectAsState()
-            val lazyList = rememberLazyListState()
-            Surface(color = MaterialTheme.colorScheme.surface) {
-                if (!transactionList.isEmpty()) LazyColumn(
-                    modifier = Modifier.fillMaxWidth(), state = lazyList
-                ) {
-                    items(transactionList, key = { it.id }) { item ->
-                        SingleTransaction(item, onSingleItemClick = {
-                            singleTransaction = (item)
-                            scope.launch {
-                                uiViewModel.transactionDetailBottomSheetValue.emit(true)
-                            }
-                        })
-                    }
-                }
-                else EmptyScreen()
-            }
-        }
 
-        if (bottomSheet) {
-            BottomSheetContentItemDetails(bottomSheetState, singleTransaction)
+            if (bottomSheet) {
+                BottomSheetContentItemDetails(
+                    bottomSheetState,
+                    singleTransaction,
+                    { bottomSheet = !bottomSheet })
+            }
+            if (showAddBottomSheet) {
+                AddBottomSheet(date,{ showAddBottomSheet = !showAddBottomSheet })
+            }
         }
     }
 }
 
 @Composable
-fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionClass) -> Unit) {
+fun SingleTransaction(
+    item: TransactionWithDetails,
+    onSingleItemClick: (TransactionWithDetails) -> Unit
+) {
     Card(
         shape = RoundedCornerShape(12.dp), modifier = Modifier
             .padding(16.dp, 4.dp)
@@ -161,9 +200,9 @@ fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionCla
                 .wrapContentHeight()
                 .padding(16.dp, 12.dp)
         ) {
-            var amount = item.amount.toString()
+            var amount = item.transaction.amount.toString()
             var amountColor = successColor
-            if (item.type.equals(EXPENSE)) {
+            if (item.category.categoryType.equals(EXPENSE)) {
                 amount = "-₹" + amount
                 amountColor = failureColor
             } else {
@@ -180,7 +219,8 @@ fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionCla
                 Box(
                     modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                 ) {
-                    val image = rememberAsyncImagePainter(IconState.fromNumber(item.categoryIcon))
+                    val image =
+                        rememberAsyncImagePainter(IconState.fromNumber(item.category.categoryIconNumber))
                     Image(
                         painter = image,
                         contentDescription = "Test Image",
@@ -198,13 +238,13 @@ fun SingleTransaction(item: TransactionClass, onSingleItemClick: (TransactionCla
 
             ) {
                 Text(
-                    text = item.note.replaceFirstChar { it.uppercase() },
+                    text = item.transaction.note.replaceFirstChar { it.uppercase() },
                     style = typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 if (true) {
                     Text(
-                        text = item.category,
+                        text = item.category.categoryName,
                         style = typography.labelMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
                     )
@@ -258,15 +298,15 @@ fun SingleTransactionNew(item: TransactionClass, onSingleItemClick: (Transaction
                     ),
                 ),
             ) {
-                SingleTransaction(
-                    item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L),
-                    {})
-                SingleTransaction(
-                    item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L),
-                    {})
-                SingleTransaction(
-                    item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L),
-                    {})
+//                SingleTransaction(
+//                    item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L,1L,1L),
+//                    {})
+//                SingleTransaction(
+//                    item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L),
+//                    {})
+//                SingleTransaction(
+//                    item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L),
+//                    {})
             }
 
         }
@@ -291,14 +331,14 @@ fun Header(date: String) {
 @Preview
 @Composable
 fun SingleTransactionPreview() {
-    SingleTransaction(item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L), {})
+    //  SingleTransaction(item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L), {})
 }
 
 
 @Preview
 @Composable
 fun SingleTransactionNewPreview() {
-    SingleTransactionNew(item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L)) {}
+    // SingleTransactionNew(item = TransactionClass("Expesne", 20L, "Hello", "", 99, 0L, 0L)) {}
 }
 
 @Preview

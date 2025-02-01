@@ -23,18 +23,78 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
     val uiState: StateFlow<UiState> = _uiState
 
     //flow to get all bank accounts
-    private var _allBankAccountsList = MutableStateFlow<List<BankAccountsClass>>(listOf())
-    val allBankAccountList: MutableStateFlow<List<BankAccountsClass>> = _allBankAccountsList
+    private var _allBankAccountList = MutableStateFlow<MutableList<BankAccountsClass>>(
+        mutableListOf()
+    )
+    val allBankAccountList: StateFlow<MutableList<BankAccountsClass>> =
+        _allBankAccountList
+
+    //flow to get all bank accounts except cash
+    private var _allBankAccountListExceptCash = MutableStateFlow<MutableList<BankAccountsClass>>(
+        mutableListOf()
+    )
+    val allBankAccountListExceptCash: StateFlow<MutableList<BankAccountsClass>> =
+        _allBankAccountListExceptCash
+
+    //flow to get singleBankAccount
+    private var _singleBankAccount = MutableStateFlow<BankAccountsClass>(
+        BankAccountsClass(
+            bankAccountId = 0,
+            initialAmount = 0,
+            currentAmount = 0,
+            bankName = "",
+            cardColorNumber = 1,
+            cardIconNumber = 99,
+            accountType = "CASH"
+        )
+    )
+    val singleBankAccount: StateFlow<BankAccountsClass> =
+        _singleBankAccount
+
+    var selectedBankAccount = MutableStateFlow<BankAccountsClass>(
+        BankAccountsClass(
+            bankAccountId = 0,
+            initialAmount = 0,
+            currentAmount = 0,
+            bankName = "",
+            cardColorNumber = 1,
+            cardIconNumber = 99,
+            accountType = "CASH"
+        )
+    )
 
     init {
         getAllBankAccounts()
+        getAllBankAccountsExceptCash()
+        getSingleBankAccount(1)
+    }
+
+    fun getSingleBankAccount(id: Long) {
+        viewModelScope.launch {
+            loading()
+            bankAccountRepository.getSingleBankAccount(id).catch { error(it) }.collect {
+                _singleBankAccount.value = it
+                selectedBankAccount.value = it
+                completed()
+            }
+        }
     }
 
     fun getAllBankAccounts() {
         viewModelScope.launch {
             loading()
             bankAccountRepository.allBankAccounts.catch { error(it) }.collect {
-                _allBankAccountsList.value = it
+                _allBankAccountList.value = it.toMutableList()
+                completed()
+            }
+        }
+    }
+
+    fun getAllBankAccountsExceptCash() {
+        viewModelScope.launch {
+            loading()
+            bankAccountRepository.allBankAccountsExceptCash.catch { error(it) }.collect {
+                _allBankAccountListExceptCash.value = it.toMutableList()
                 completed()
             }
         }
@@ -53,18 +113,19 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
         selectedColor: Int
     ) {
         val bankAccountObj = BankAccountsClass(
-            id = id,
+            bankAccountId = id,
             initialAmount = bankAmount.toLong(),
             currentAmount = bankAmount.toLong(),
             bankName = bankName,
             cardColorNumber = selectedColor,
+            cardIconNumber = 24,
             accountType = PRIMARY
         )
         storeBankAccount(bankAccountObj)
     }
 
     fun storeBankAccount(bankAccountsClass: BankAccountsClass) {
-        if (bankAccountsClass.id == 0L) {
+        if (bankAccountsClass.bankAccountId == 0L) {
             //adding new bank Accounts
             viewModelScope.launch {
                 bankAccountRepository.insert(bankAccountsClass)

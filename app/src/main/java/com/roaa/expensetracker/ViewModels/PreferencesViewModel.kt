@@ -3,7 +3,9 @@ package com.roaa.expensetracker.ViewModels
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roaa.expensetracker.Composables.changeThemeSystemWide
+import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Utilities.PreferenceManger.IS_BUDGET_SET
+import com.roaa.expensetracker.Utilities.PreferenceManger.PRIMARY_BANK_ACCOUNT
 import com.roaa.expensetracker.Utilities.PreferenceManger.PreferenceManager
 import com.roaa.expensetracker.Utilities.PreferenceManger.SHOW_FORECAST
 import com.roaa.expensetracker.Utilities.PreferenceManger.THEME_MODE
@@ -32,6 +34,22 @@ class PreferencesViewModel @Inject constructor(private val preferenceManager: Pr
     }
 
     val showForecastBar = preferenceManager.getBooleanValue(SHOW_FORECAST)
+
+    fun setPrimaryAccountNumber(position: Long) {
+        viewModelScope.launch {
+            preferenceManager.saveLongValue(position, PRIMARY_BANK_ACCOUNT)
+        }
+    }
+
+    val getPrimaryAccountNumber = preferenceManager.getLongValue(PRIMARY_BANK_ACCOUNT)
+
+    fun setPrimaryAccount(bankAccountsClass: BankAccountsClass) {
+        viewModelScope.launch {
+            preferenceManager.setPrimaryBankAccount(bankAccountsClass)
+        }
+    }
+
+    val getPrimaryAccount =  preferenceManager.getPrimaryBankAccount()
 
 
     fun saveBudget(budget: Float) {

@@ -12,23 +12,23 @@ public class TransactionClass {
     private String type;
     private Long amount;
     private String note;
-    private String category;
-    private Integer categoryIcon;
     private Long dateWithTime;
-    private Long date;
+    private Long date;;
+    private long categoryId;  // foreign key for category
+    private long bankAccountId; // foreign key with bank
 
     public TransactionClass() {
 
     }
 
-    public TransactionClass(String type, Long amount, String note, String category, Integer categoryIcon, Long dateWithTime, Long date) {
+    public TransactionClass(String type, Long amount, String note, Long dateWithTime, Long date, long categoryId, long bankAccountId) {
         this.type = type;
         this.amount = amount;
         this.note = note;
-        this.category = category;
-        this.categoryIcon = categoryIcon;
         this.dateWithTime = dateWithTime;
         this.date = date;
+        this.categoryId = categoryId;
+        this.bankAccountId = bankAccountId;
     }
 
     public long getId() {
@@ -63,13 +63,6 @@ public class TransactionClass {
         this.note = note;
     }
 
-    public String getCategory() {
-        return category;
-    }
-
-    public void setCategory(String category) {
-        this.category = category;
-    }
 
     public Long getDateWithTime() {
         return dateWithTime;
@@ -87,11 +80,19 @@ public class TransactionClass {
         this.date = date;
     }
 
-    public Integer getCategoryIcon() {
-        return categoryIcon;
+    public long getCategoryId() {
+        return categoryId;
     }
 
-    public void setCategoryIcon(Integer categoryIcon) {
-        this.categoryIcon = categoryIcon;
+    public void setCategoryId(long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    public long getBankAccountId() {
+        return bankAccountId;
+    }
+
+    public void setBankAccountId(long bankAccountId) {
+        this.bankAccountId = bankAccountId;
     }
 }

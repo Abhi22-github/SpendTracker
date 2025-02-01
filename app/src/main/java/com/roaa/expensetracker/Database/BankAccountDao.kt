@@ -20,9 +20,15 @@ interface BankAccountDao {
     @Update
     suspend fun update(bankAccountsClass: BankAccountsClass)
 
+    @Query("SELECT * FROM bank_accounts WHERE bankAccountId = :id")
+    fun getSingleBankAccount(id: Long): Flow<BankAccountsClass>
+
     @Query("DELETE FROM bank_accounts")
     suspend fun deleteAllBankAccounts()
 
     @get:Query("SELECT * FROM bank_accounts ")
     val allBankAccountsClass: Flow<List<BankAccountsClass>>
+
+    @get:Query("SELECT * FROM bank_accounts WHERE accountType != 'CASH'")
+    val allBankAccountsClassExceptCash: Flow<List<BankAccountsClass>>
 }
