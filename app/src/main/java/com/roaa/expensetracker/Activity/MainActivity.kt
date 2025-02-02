@@ -46,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -86,6 +87,7 @@ class ComposeMainActivity : ComponentActivity() {
                 isReady.value = true
             }
             val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
+            val deviceDensity = LocalDensity.current
 
             if (widthSizeClass == WindowWidthSizeClass.Compact) {
                 lockScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
@@ -131,6 +133,7 @@ fun NavigationDrawer(
 ) {
 
     val items = items
+    val deviceDensity = LocalDensity.current
 
     //Remember Clicked index state
     var selectedItemIndex by rememberSaveable {
@@ -143,75 +146,80 @@ fun NavigationDrawer(
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-            ModalDrawerSheet {
-                Spacer(modifier = Modifier.height(16.dp)) //space (margin) from top
-                items.forEachIndexed { index, item ->
-                    NavigationDrawerItem(
-                        label = { Text(text = item.title) },
-                        selected = index == selectedItemIndex,
-                        onClick = {
-                            selectedItemIndex = index
-                            navigationManager.navigateTo(item.route)
+            CompositionLocalProvider(
+            ) {
+                ModalDrawerSheet(
+                ) {
+                    Spacer(modifier = Modifier.height(16.dp)) //space (margin) from top
+                    items.forEachIndexed { index, item ->
+                        NavigationDrawerItem(
+                            label = { Text(text = item.title) },
+                            selected = index == selectedItemIndex,
+                            onClick = {
+                                selectedItemIndex = index
+                                navigationManager.navigateTo(item.route)
 
-                            scope.launch {
-                                drawerState.close()
-                            }
-                        },
-                        icon = {
-                            Icon(
-                                imageVector = if (index == selectedItemIndex) {
-                                    ImageVector.vectorResource(item.selectedIcon)
-                                } else ImageVector.vectorResource(item.unselectedIcon),
-                                contentDescription = item.title
-                            )
-                        },
-                        badge = {  // Show Badge
-                            item.badgeCount?.let {
-                                Text(text = item.badgeCount.toString())
-                            }
-                        },
-                        modifier = Modifier
-                            .padding(NavigationDrawerItemDefaults.ItemPadding) //padding between items
-                    )
-                    if (index == 2) {
-                        HorizontalDivider(Modifier.padding(5.dp))
+                                scope.launch {
+                                    drawerState.close()
+                                }
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = if (index == selectedItemIndex) {
+                                        ImageVector.vectorResource(item.selectedIcon)
+                                    } else ImageVector.vectorResource(item.unselectedIcon),
+                                    contentDescription = item.title
+                                )
+                            },
+                            badge = {  // Show Badge
+                                item.badgeCount?.let {
+                                    Text(text = item.badgeCount.toString())
+                                }
+                            },
+                            modifier = Modifier
+                                .padding(NavigationDrawerItemDefaults.ItemPadding) //padding between items
+                        )
+                        if (index == 2) {
+                            HorizontalDivider(Modifier.padding(5.dp))
+                        }
                     }
-                }
 
+                }
             }
         },
 
         gesturesEnabled = true
     ) {
-        Scaffold(
-            topBar = { //TopBar to show title
-                TopAppBar(
-                    // colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Blue),
-                    title = {
-                        Text(text = "Expense Tracker")
-                    },
-                    navigationIcon = {
-                        IconButton(onClick = {
-                            scope.launch {
-                                drawerState.apply {
-                                    if (isClosed) open() else close()
+        CompositionLocalProvider() {
+            Scaffold(
+                topBar = { //TopBar to show title
+                    TopAppBar(
+                        // colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Blue),
+                        title = {
+                            Text(text = "Expense Tracker")
+                        },
+                        navigationIcon = {
+                            IconButton(onClick = {
+                                scope.launch {
+                                    drawerState.apply {
+                                        if (isClosed) open() else close()
+                                    }
                                 }
+                            }) {
+                                Icon(  //Show Menu Icon on TopBar
+                                    imageVector = Icons.Default.Menu,
+                                    contentDescription = "Menu"
+                                )
                             }
-                        }) {
-                            Icon(  //Show Menu Icon on TopBar
-                                imageVector = Icons.Default.Menu,
-                                contentDescription = "Menu"
-                            )
                         }
-                    }
-                )
-            },
-        ) { innerPadding ->
-            Column(Modifier.padding(innerPadding)) {
-                SetupNavigationGraph(navController, navigationManager)
+                    )
+                },
+            ) { innerPadding ->
+                Column(Modifier.padding(innerPadding)) {
+                    SetupNavigationGraph(navController, navigationManager)
+                }
+
             }
-
-
         }
     }
 
