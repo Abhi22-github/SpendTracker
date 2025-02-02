@@ -84,7 +84,6 @@ dependencies {
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.core)
     implementation(libs.joda.time)
-    implementation(libs.eventbus)
     implementation(libs.commons.lang3)
     implementation(libs.lottie)
 
