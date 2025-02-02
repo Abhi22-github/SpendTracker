@@ -1,5 +1,9 @@
 package com.roaa.expensetracker.Utilities
 
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import com.roaa.expensetracker.Composables.Navigation.NavRoutes
 import com.roaa.expensetracker.Model.NavigationItems
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
@@ -42,7 +46,7 @@ fun LocalDateToString(localDate: LocalDate): String {
     return localDate.format(DateTimeFormatter.ofPattern("dd MMM")).toString()
 }
 
-fun parseAmount(amount: Long): String {
+fun parseAmount(amount: Double): String {
     val formatter = DecimalFormat("##,##,##,###")
     return formatter.format(amount)
 }
@@ -57,8 +61,8 @@ fun Long.toDisplayDate(): String {
     return formatter.format(calendar.getTime())
 }
 
-fun convertTotalExpenseIncomeClassToMap(totalExpenseIncomeClassList: List<TotalExpenseIncomeClass>): HashMap<Long, Pair<Long, Long>> {
-    val map = hashMapOf<Long, Pair<Long, Long>>()
+fun convertTotalExpenseIncomeClassToMap(totalExpenseIncomeClassList: List<TotalExpenseIncomeClass>): HashMap<Long, Pair<Double, Double>> {
+    val map = hashMapOf<Long, Pair<Double, Double>>()
     totalExpenseIncomeClassList.forEach { it ->
         map[it.date] = Pair(it.totalExpense, it.totalIncome)
     }
@@ -224,7 +228,6 @@ val items = listOf(
         title = "Day",
         selectedIcon = R.drawable.day_view_checked,
         unselectedIcon = R.drawable.day_view_uncheckd,
-        badgeCount = 105,
         route = NavRoutes.DayScreen(LocalDate.now().toLong()),
     ),
     NavigationItems(
@@ -250,3 +253,20 @@ val items = listOf(
     )
 
 )
+
+
+class DecimalFilterTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val inputText = text.text
+        val parts = inputText.split('.')
+        val formattedText = when (parts.size) {
+            1 -> parts[0].take(7) // Take max 7 digits before the decimal
+            2 -> parts[0].take(7) + "." + parts[1].take(2) // Take max 7 before and 2 after
+            else -> ""
+        }
+        return TransformedText(
+            AnnotatedString(formattedText),
+            OffsetMapping.Identity
+        )
+    }
+}

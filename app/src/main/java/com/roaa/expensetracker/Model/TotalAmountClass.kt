@@ -1,3 +1,3 @@
 package com.roaa.expensetracker.Model
 
-data class TotalAmountClass(val date:Long,val totalAmount:Long)
+data class TotalAmountClass(val date:Long,val totalAmount:Double)

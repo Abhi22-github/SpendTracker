@@ -5,15 +5,19 @@ import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.DrawerValue
@@ -21,6 +25,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
@@ -43,10 +48,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
@@ -58,6 +65,7 @@ import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.SetupNavigationGraph
 import com.roaa.expensetracker.Composables.syncTheme
+import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.items
 import com.roaa.expensetracker.Utilities.lockScreenOrientation
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
@@ -148,12 +156,37 @@ fun NavigationDrawer(
         drawerContent = {
             CompositionLocalProvider(
             ) {
-                ModalDrawerSheet(
-                ) {
+                ModalDrawerSheet(Modifier.width(320.dp))
+                {
                     Spacer(modifier = Modifier.height(16.dp)) //space (margin) from top
+                    Row(
+                        modifier = Modifier.padding(20.dp, 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.app_icon),
+                            contentDescription = "App icon",
+                            modifier = Modifier.size(24.dp)
+                        )
+
+                        Text(
+                            text = "Expense Tracker",
+                            modifier = Modifier.padding(12.dp, 0.dp),
+                            style = MaterialTheme.typography.titleMedium,
+                        )
+                    }
+
+                    Spacer(Modifier.height(24.dp))
                     items.forEachIndexed { index, item ->
                         NavigationDrawerItem(
-                            label = { Text(text = item.title) },
+                            label = {
+                                Text(
+                                    text = item.title,
+                                    modifier = Modifier.padding(12.dp, 0.dp),
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            },
                             selected = index == selectedItemIndex,
                             onClick = {
                                 selectedItemIndex = index
@@ -168,22 +201,25 @@ fun NavigationDrawer(
                                     imageVector = if (index == selectedItemIndex) {
                                         ImageVector.vectorResource(item.selectedIcon)
                                     } else ImageVector.vectorResource(item.unselectedIcon),
-                                    contentDescription = item.title
+                                    contentDescription = item.title,
+                                    modifier = Modifier.size(24.dp)
                                 )
                             },
                             badge = {  // Show Badge
                                 item.badgeCount?.let {
-                                    Text(text = item.badgeCount.toString())
+                                    Text(
+                                        text = item.badgeCount.toString(),
+                                        style = MaterialTheme.typography.labelLarge
+                                    )
                                 }
                             },
                             modifier = Modifier
                                 .padding(NavigationDrawerItemDefaults.ItemPadding) //padding between items
                         )
                         if (index == 2) {
-                            HorizontalDivider(Modifier.padding(5.dp))
+                            HorizontalDivider(Modifier.padding(5.dp), color = (MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 1f)))
                         }
                     }
-
                 }
             }
         },
