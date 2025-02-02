@@ -19,7 +19,7 @@ val emptyCategoryClass = CategoryClass(
     categoryIconNumber = 99,
     categoryType = EXPENSE
 )
-val emptyTransactionClass = TransactionClass(EXPENSE, 0L, "", 0L, 0L, 1L, 1L)
+val emptyTransactionClass = TransactionClass(EXPENSE, 0.00, "", 0L, 0L, 1L, 1L)
 
 val firstSampleClass = CategoryClass(
     -1, "Select Category", 1, -99, EXPENSE

@@ -120,6 +120,7 @@ import com.roaa.expensetracker.Model.firstSampleClass
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
+import com.roaa.expensetracker.Utilities.DecimalFilterTransformation
 import com.roaa.expensetracker.Utilities.convertMillisToDateString
 import com.roaa.expensetracker.Utilities.extractNumbers
 import com.roaa.expensetracker.Utilities.parseAmount
@@ -286,7 +287,6 @@ fun BottomSheetContentItemAddContent(
                         }
                         .height(56.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        val colorPalletBlue = toPalette(blueColor)
                         val image = rememberAsyncImagePainter(
                             if (typeToggle) IconStateForType.fromNumber(expenseType.iconNumber)
                             else IconStateForType.fromNumber(incomeType.iconNumber)
@@ -363,7 +363,7 @@ fun BottomSheetContentItemAddContent(
                 }
             }
 
-            Spacer(Modifier.height(64.dp))
+            Spacer(Modifier.height(48.dp))
             Box(
                 contentAlignment = Alignment.Center,
                 modifier = Modifier
@@ -373,10 +373,19 @@ fun BottomSheetContentItemAddContent(
                 TextField(
                     value = expenseValue,
                     onValueChange = { newValue ->
-                        expenseValue = TextFieldValue(
-                            extractNumbers(newValue.text).toString(),
-                            selection = TextRange(extractNumbers(newValue.text).toString().length)
-                        )
+                        val filteredText = newValue.text.filter { it.isDigit() || it == '.' }
+                        // Ensure only one decimal point is allowed
+                        if (filteredText.count { it == '.' } <= 1) {
+                            // Split into parts before and after the decimal
+                            val parts = filteredText.split('.')
+                            // Ensure max 7 digits before the decimal and max 2 after
+                            if (parts.size == 1 && parts[0].length <= 7 ||
+                                parts.size == 2 && parts[0].length <= 7 && parts[1].length <= 2
+                            ) {
+                                // Update the TextFieldValue with the filtered text
+                                expenseValue = newValue.copy(text = filteredText)
+                            }
+                        }
                         scope.launch {
                             uiViewModel.errorStatusInAddBottomSheet.emit(false)
                         }
@@ -398,6 +407,7 @@ fun BottomSheetContentItemAddContent(
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
                         )
                     },
+                    visualTransformation = DecimalFilterTransformation(),
                     shape = RoundedCornerShape(24.dp),
                     colors = TextFieldDefaults.colors(
                         focusedIndicatorColor = Color.Transparent,
@@ -422,7 +432,9 @@ fun BottomSheetContentItemAddContent(
                 TextField(
                     value = comment,
                     onValueChange = { newValue ->
-                        comment = newValue
+                        if (newValue.text.length <= 32) {
+                            comment = newValue
+                        }
                         scope.launch {
                             uiViewModel.errorStatusInAddBottomSheet.emit(false)
                         }
@@ -450,7 +462,8 @@ fun BottomSheetContentItemAddContent(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
                     ),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                )
+
+                    )
             }
 
 
@@ -492,9 +505,9 @@ fun BottomSheetContentItemAddContent(
 
         }
 
-        Spacer(Modifier.height(54.dp))
+        Spacer(Modifier.height(24.dp))
         ErrorRow(errorStatus)
-        Spacer(Modifier.height(12.dp))
+        Spacer(Modifier.height(8.dp))
         Row {
             BottomRow(
                 modifier,
@@ -589,10 +602,10 @@ fun BottomRow(
     bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
     preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
-    Log.d("Test___1",System.currentTimeMillis().toString())
-    Log.d("Test___2",selectedDate.toString())
-    Log.d("Test___3",selectedDate?.toLocalDate().toString())
-    Log.d("Test___4",selectedDate?.toLocalDate()?.toLongMillis().toString())
+    Log.d("Test___1", System.currentTimeMillis().toString())
+    Log.d("Test___2", selectedDate.toString())
+    Log.d("Test___3", selectedDate?.toLocalDate().toString())
+    Log.d("Test___4", selectedDate?.toLocalDate()?.toLongMillis().toString())
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState =
         rememberDatePickerState(
@@ -731,7 +744,7 @@ fun BottomSheetContentItemDetails(
 ) {
     val scope = rememberCoroutineScope()
     ModalBottomSheet(onDismissRequest = {
-       closeBottomSheet()
+        closeBottomSheet()
     },
         sheetState = sheetState,
         modifier = Modifier
