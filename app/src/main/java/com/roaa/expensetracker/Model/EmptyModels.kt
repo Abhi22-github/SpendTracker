@@ -21,7 +21,21 @@ val emptyCategoryClass = CategoryClass(
     categoryType = EXPENSE,
     isActive = true
 )
-val emptyTransactionClass = TransactionClass(EXPENSE, 0.00, "", 0L, 0L, 1L, 1L)
+
+val emptyBudgetClass = BudgetModelClass(
+    budgetId = 0L,
+    budgetAmountForMonth = 0f,
+    budgetAmountPerDay = 0f,
+    budgetTotalDays = 0L,
+    currentMonthName = "Month",
+    budgetMonthStartDate = 20250101,
+    budgetMonthEndDate = 20250131,
+    isActive = true
+)
+
+val emptyTotalExpenseIncomeClass = TotalExpenseIncomeClass(20250101L,0f,0f)
+
+val emptyTransactionClass = TransactionClass(EXPENSE, 0f, "", 0L, 0L, 1L, 1L)
 
 val firstSampleClass = CategoryClass(
     -1, "Select Category", 1, -99, EXPENSE, isActive = false

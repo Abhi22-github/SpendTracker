@@ -83,7 +83,7 @@ private fun darkFromCorePalette(color: Color): HarmonizedColorPalette {
     val ofPalette = CorePalette.of(color.toArgb())
 
     return HarmonizedColorPalette(
-        main = Color(ofPalette.a1.tone(40)),
+        main = Color(ofPalette.a1.tone(60)),
         onMain = Color(contentOfPalette.a1.tone(30)),
         container = Color(ofPalette.a1.tone(30)),
         onContainer = Color(contentOfPalette.a1.tone(90)),
