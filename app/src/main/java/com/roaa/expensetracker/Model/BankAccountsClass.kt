@@ -25,13 +25,14 @@ data class BankAccountsClass(
     val cardColorNumber: Int,
     val cardIconNumber: Int,
     val accountType: String,
+    val isActive: Boolean,
 )
 
 
 @OptIn(ExperimentalSerializationApi::class)
 object BankAccountsSerializer : Serializer<BankAccountsClass> {
 
-    override val defaultValue = BankAccountsClass(1, 0, 0, "Cash", 1, 25, CASH)
+    override val defaultValue = BankAccountsClass(1, 0, 0, "Cash", 1, 25, CASH,false)
 
     override suspend fun readFrom(input: InputStream): BankAccountsClass {
         try {

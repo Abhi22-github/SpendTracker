@@ -145,7 +145,8 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
             categoryName = categoryName,
             categoryColorNumber = 1,
             categoryIconNumber = categoryIcon,
-            categoryType = categoryType
+            categoryType = categoryType,
+            isActive = true
         )
         storeCategoryInDatabase(categoryClass)
     }
