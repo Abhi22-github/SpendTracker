@@ -38,8 +38,7 @@ import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.R
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
-import java.text.NumberFormat
-import java.util.Locale
+import java.math.RoundingMode
 
 @Composable
 fun SpendsBudgetCard(
@@ -48,15 +47,18 @@ fun SpendsBudgetCard(
     spend: Float,
 ) {
     val context = LocalContext.current
-    val percent = remember { 1.minus(spend.div(budget)) }
+    val percent = 1.minus(spend.div(budget))
 
-    val percentFormatted = remember {
-        val formatter = NumberFormat.getNumberInstance(Locale.getDefault())
-        formatter.maximumFractionDigits = 2
-        formatter.minimumFractionDigits = 0
+    val bigDecimal = BigDecimal((1 - percent.toDouble()) * 100).setScale(2, RoundingMode.HALF_UP)
+    val percentFormatted = bigDecimal.toFloat()
 
-        formatter.format(1.minus(percent).times(100))
-    }
+//    val percentFormatted =  remember{
+//        val formatter = NumberFormat.getNumberInstance(Locale.getDefault())
+//        formatter.maximumFractionDigits = 2
+//        formatter.minimumFractionDigits = 0
+//
+//        formatter.format(percent.times(100))
+//    }
 
     val shift = remember { Animatable(0f) }
     val coroutineScope = rememberCoroutineScope()
@@ -81,16 +83,18 @@ fun SpendsBudgetCard(
         animationSpec = TweenSpec(300),
     ).value
 
-    val harmonizedColor = toPalette(harmonize(
-        combineColors(
-            listOf(
-                colorBad,
-                colorNotGood,
-                colorGood,
-            ),
-            percentWithNewSpentAnimated.coerceIn(0f,1f).toFloat(),
+    val harmonizedColor = toPalette(
+        harmonize(
+            combineColors(
+                listOf(
+                    colorBad,
+                    colorNotGood,
+                    colorGood,
+                ),
+                percentWithNewSpentAnimated.coerceIn(0f, 1f).toFloat(),
+            )
         )
-    ))
+    )
 
     StatCard(
         modifier = modifier,
@@ -135,7 +139,7 @@ private fun Preview() {
         SpendsBudgetCard(
             modifier = Modifier.height(IntrinsicSize.Min),
             spend = 3740f,
-            budget =60000f,
+            budget = 60000f,
         )
     }
 }
