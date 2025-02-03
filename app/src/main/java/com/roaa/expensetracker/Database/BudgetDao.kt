@@ -23,7 +23,7 @@ interface BudgetDao {
     @Query("DELETE FROM budget_table")
     suspend fun deleteAllBudget()
 
-    @get:Query("SELECT * FROM budget_table WHERE budgetStatus = 1")
+    @get:Query("SELECT * FROM budget_table WHERE isActive = 1")
     val getCurrentBudget: Flow<BudgetModelClass>
 
     @get:Query("SELECT * FROM budget_table ORDER BY budgetId DESC")

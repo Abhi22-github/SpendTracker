@@ -103,7 +103,7 @@ fun AddCategory(
     uiViewModel: UiViewModel = hiltViewModel(),
     categoryViewModel: CategoryViewModel = hiltViewModel()
 ) {
-    val category = CategoryClass(categoryId, categoryName, 1, categoryIcon, categoryType)
+    val category = CategoryClass(categoryId, categoryName, 1, categoryIcon, categoryType,true)
     val showDeleteButton by remember { mutableStateOf(if (category.categoryId == 0L) false else true) }
     var showConfirmationDialog by remember { mutableStateOf(false) }
     var confirmationDialogType by remember { mutableIntStateOf(1) }
