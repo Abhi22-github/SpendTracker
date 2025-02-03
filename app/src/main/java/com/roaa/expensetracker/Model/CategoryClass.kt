@@ -28,5 +28,6 @@ data class CategoryClass(
     @ColumnInfo(name = "categoryType")
     var categoryType: String,
 
+    var isActive: Boolean
 
-    )
+)

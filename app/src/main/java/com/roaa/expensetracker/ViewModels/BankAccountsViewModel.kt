@@ -104,7 +104,8 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
             bankName = bankName,
             cardColorNumber = selectedColor,
             cardIconNumber = 24,
-            accountType = PRIMARY
+            accountType = PRIMARY,
+            isActive = true
         )
         storeBankAccount(bankAccountObj)
     }

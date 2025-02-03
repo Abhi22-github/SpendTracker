@@ -15,6 +15,6 @@ data class BudgetModelClass(
     val currentMonthName: String,
     val budgetMonthStartDate: Long,
     val budgetMonthEndDate: Long,
-    val budgetStatus: Boolean
+    val isActive: Boolean
 
 )
