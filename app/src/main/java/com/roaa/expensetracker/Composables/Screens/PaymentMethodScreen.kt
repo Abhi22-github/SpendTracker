@@ -112,7 +112,8 @@ fun PaymentMethodScreen(
         bankName = "",
         cardColorNumber = 1,
         cardIconNumber = 25,
-        accountType = CASH
+        accountType = CASH,
+        isActive = true
     )
 
     var bankAccountsClass by remember {
