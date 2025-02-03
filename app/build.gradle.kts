@@ -17,12 +17,12 @@ apply(plugin = "kotlin-android")
 
 android {
     namespace = "com.roaa.expensetracker"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.roaa.expensetracker"
         minSdk = 26
-        targetSdk = 34
+        targetSdk = 35
         versionCode = 3
         versionName = "0.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -69,61 +69,66 @@ dependencies {
     implementation(libs.androidx.palette.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     testImplementation(libs.junit)
-    implementation(libs.ui.tooling.preview)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    implementation(libs.parkdatetimepicker)
-    implementation(libs.flexbox)
     implementation(libs.androidx.room.runtime)
     implementation(libs.androidx.room.ktx)
     implementation(libs.kotlinx.coroutines.android)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    debugImplementation(libs.androidx.ui.test.manifest)
+
     //add below dependancy for using room.
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.core)
     implementation(libs.joda.time)
     implementation(libs.commons.lang3)
     implementation(libs.lottie)
-
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
-    debugImplementation(libs.androidx.ui.tooling)
-    implementation(libs.androidx.ui.tooling.preview)
-
-    implementation(libs.androidx.runtime)
-    implementation(libs.androidx.runtime.livedata)
-    //  implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk7:")
-    implementation("com.google.dagger:hilt-android:2.51.1")
-    kapt("com.google.dagger:hilt-android-compiler:2.51.1")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
-    implementation("androidx.datastore:datastore-preferences:1.1.1")
-    implementation("androidx.datastore:datastore:1.1.2")
-
-    implementation("com.airbnb.android:lottie-compose:6.0.0")
-    implementation("io.coil-kt:coil-compose:2.7.0")
-    implementation("com.google.accompanist:accompanist-systemuicontroller:0.25.1")
-
-    implementation(libs.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
-    implementation(libs.ui)
-    implementation("androidx.constraintlayout:constraintlayout-compose:1.1.0")
-    implementation("androidx.compose.material3:material3-window-size-class:1.2.1")
 
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation(libs.androidx.datastore.preferences)
+    implementation(libs.androidx.datastore)
 
-//for Month view compose
-    implementation("androidx.compose.foundation:foundation:1.7.6")
-    implementation("com.google.accompanist:accompanist-pager:0.32.0") // For HorizontalPager
-    implementation("com.google.accompanist:accompanist-pager-indicators:0.32.0")
+    implementation(libs.lottie.compose)
+    implementation(libs.coil.compose)
+    implementation(libs.accompanist.systemuicontroller)
+    implementation(libs.androidx.constraintlayout.compose)
+
 
 //firebase
-    implementation(platform("com.google.firebase:firebase-bom:33.8.0"))
-    implementation("com.google.firebase:firebase-analytics")
-    implementation("com.google.firebase:firebase-crashlytics")
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.crashlytics)
 
-    implementation("androidx.core:core-splashscreen:1.0.1")
+    implementation(libs.androidx.core.splashscreen)
+
+    //compose
+    val composeBom = platform("androidx.compose:compose-bom:2025.01.01")
+    implementation(composeBom)
+    androidTestImplementation(composeBom)
+
+    // or skip Material Design and build directly on top of foundational components
+    implementation(libs.foundation)
+    // or only import the main APIs for the underlying toolkit systems,
+    // such as input and measurement/layout
+    implementation(libs.androidx.ui)
+
+    // Android Studio Preview support
+    implementation(libs.androidx.ui.tooling.preview)
+    debugImplementation(libs.androidx.ui.tooling)
+
+    // Optional - Included automatically by material, only add when you need
+    // the icons but not the material library (e.g. when using Material3 or a
+    // custom design system based on Foundation)
+    implementation(libs.androidx.material.icons.core)
+    // Optional - Add full set of material icons
+    implementation(libs.androidx.material.icons.extended)
+    // Optional - Add window size utils
+    implementation(libs.androidx.adaptive)
+
+    // Optional - Integration with ViewModels
+    implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    implementation("androidx.compose.material3:material3-window-size-class:1.3.1")
 
 }
