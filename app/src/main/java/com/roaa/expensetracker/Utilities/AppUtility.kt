@@ -231,6 +231,12 @@ val items = listOf(
         route = NavRoutes.DayScreen(LocalDate.now().toLong()),
     ),
     NavigationItems(
+        title = "Budget",
+        selectedIcon = R.drawable.budget_checked,
+        unselectedIcon = R.drawable.budget_unchecked,
+        route = NavRoutes.BudgetScreen,
+    ),
+    NavigationItems(
         title = "Category",
         selectedIcon = R.drawable.add_category_checked,
         unselectedIcon = R.drawable.add_category_unchecked,

@@ -16,6 +16,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.toRoute
 import com.roaa.expensetracker.Composables.Screens.AddCategory
+import com.roaa.expensetracker.Composables.Screens.BudgetScreen
 import com.roaa.expensetracker.Composables.Screens.CategoryScreen
 import com.roaa.expensetracker.Composables.Screens.DayViewScreen
 import com.roaa.expensetracker.Composables.Screens.MonthViewScreen
@@ -32,8 +33,7 @@ fun SetupNavigationGraph(navController: NavHostController, navigationManager: Na
     SharedTransitionLayout {
         val context = LocalContext.current
         NavHost(
-            navController = navController,
-            startDestination = NavRoutes.MainScreen
+            navController = navController, startDestination = NavRoutes.MainScreen
         ) {
             composable<NavRoutes.ScreenA> {
                 CategoryScreen(
@@ -63,6 +63,9 @@ fun SetupNavigationGraph(navController: NavHostController, navigationManager: Na
                     date = LocalDate.now().toLong(),
                 )
             }
+            composable<NavRoutes.BudgetScreen> {
+                BudgetScreen(navigationManager, modifier = Modifier)
+            }
             composable<NavRoutes.MonthScreen> {
                 MonthViewScreen(navigationManager, modifier = Modifier)
             }
@@ -87,26 +90,22 @@ fun SetupNavigationGraph(navController: NavHostController, navigationManager: Na
 
 val enterTransition = {
     slideInHorizontally(
-        initialOffsetX = { fullWidth -> fullWidth },
-        animationSpec = tween(durationMillis = 300)
+        initialOffsetX = { fullWidth -> fullWidth }, animationSpec = tween(durationMillis = 300)
     )
 }
 val exitTransition = {
     slideOutHorizontally(
-        targetOffsetX = { fullWidth -> -fullWidth },
-        animationSpec = tween(durationMillis = 300)
+        targetOffsetX = { fullWidth -> -fullWidth }, animationSpec = tween(durationMillis = 300)
     )
 }
 val popEnterTransition = {
     slideInHorizontally(
-        initialOffsetX = { fullWidth -> -fullWidth },
-        animationSpec = tween(durationMillis = 300)
+        initialOffsetX = { fullWidth -> -fullWidth }, animationSpec = tween(durationMillis = 300)
     )
 }
 val popExitTransition = {
     slideOutHorizontally(
-        targetOffsetX = { fullWidth -> fullWidth },
-        animationSpec = tween(durationMillis = 300)
+        targetOffsetX = { fullWidth -> fullWidth }, animationSpec = tween(durationMillis = 300)
     )
 }
 
