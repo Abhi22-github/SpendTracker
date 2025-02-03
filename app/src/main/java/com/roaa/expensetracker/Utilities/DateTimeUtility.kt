@@ -39,7 +39,7 @@ fun LocalDateToString(localDate: LocalDate): String {
     return localDate.format(DateTimeFormatter.ofPattern("dd MMM")).toString()
 }
 
-fun parseAmount(amount: Double): String {
+fun parseAmount(amount: Float): String {
     val formatter = DecimalFormat("##,##,##,###")
     return formatter.format(amount)
 }
@@ -54,8 +54,8 @@ fun Long.toDisplayDate(): String {
     return formatter.format(calendar.getTime())
 }
 
-fun convertTotalExpenseIncomeClassToMap(totalExpenseIncomeClassList: List<TotalExpenseIncomeClass>): HashMap<Long, Pair<Double, Double>> {
-    val map = hashMapOf<Long, Pair<Double, Double>>()
+fun convertTotalExpenseIncomeClassToMap(totalExpenseIncomeClassList: List<TotalExpenseIncomeClass>): HashMap<Long, Pair<Float, Float>> {
+    val map = hashMapOf<Long, Pair<Float, Float>>()
     totalExpenseIncomeClassList.forEach { it ->
         map[it.date] = Pair(it.totalExpense, it.totalIncome)
     }
