@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roaa.expensetracker.Database.BankAccountRepository
 import com.roaa.expensetracker.Model.BankAccountsClass
+import com.roaa.expensetracker.Model.emptyBank
 import com.roaa.expensetracker.Utilities.Constants.PRIMARY
 import com.roaa.expensetracker.Utilities.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -38,29 +39,13 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
 
     //flow to get singleBankAccount
     private var _singleBankAccount = MutableStateFlow<BankAccountsClass>(
-        BankAccountsClass(
-            bankAccountId = 0,
-            initialAmount = 0,
-            currentAmount = 0,
-            bankName = "",
-            cardColorNumber = 1,
-            cardIconNumber = 99,
-            accountType = "CASH"
-        )
+        emptyBank
     )
     val singleBankAccount: StateFlow<BankAccountsClass> =
         _singleBankAccount
 
     var selectedBankAccount = MutableStateFlow<BankAccountsClass>(
-        BankAccountsClass(
-            bankAccountId = 0,
-            initialAmount = 0,
-            currentAmount = 0,
-            bankName = "",
-            cardColorNumber = 1,
-            cardIconNumber = 99,
-            accountType = "CASH"
-        )
+        emptyBank
     )
 
     init {
