@@ -20,6 +20,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun transactionDao(): TransactionDao
     abstract fun categoryDao(): CategoryDao
     abstract fun bankAccountsDao(): BankAccountDao
+    abstract fun budgetDao(): BudgetDao
 
 //    // we are creating an async task class to perform task in background.
 //    private class PopulateDbAsyncTask(instance: TransactionDatabase) :
