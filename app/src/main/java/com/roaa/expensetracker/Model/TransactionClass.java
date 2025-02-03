@@ -10,7 +10,7 @@ public class TransactionClass {
     @PrimaryKey(autoGenerate = true)
     private long id;
     private String type;
-    private Double amount;
+    private Float amount;
     private String note;
     private Long dateWithTime;
     private Long date;;
@@ -21,7 +21,7 @@ public class TransactionClass {
 
     }
 
-    public TransactionClass(String type, Double amount, String note, Long dateWithTime, Long date, long categoryId, long bankAccountId) {
+    public TransactionClass(String type, Float amount, String note, Long dateWithTime, Long date, long categoryId, long bankAccountId) {
         this.type = type;
         this.amount = amount;
         this.note = note;
@@ -47,11 +47,11 @@ public class TransactionClass {
         this.type = type;
     }
 
-    public Double getAmount() {
+    public Float getAmount() {
         return amount;
     }
 
-    public void setAmount(Double amount) {
+    public void setAmount(Float amount) {
         this.amount = amount;
     }
 
