@@ -9,7 +9,7 @@ import kotlinx.serialization.Serializable
 data class BudgetModelClass(
     @PrimaryKey(autoGenerate = true)
     val budgetId: Long,
-    val budgetAmountMonth: Float,
+    val budgetAmountForMonth: Float,
     val budgetAmountPerDay: Float,
     val budgetTotalDays: Long,
     val currentMonthName: String,

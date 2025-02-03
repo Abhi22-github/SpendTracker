@@ -126,7 +126,7 @@ fun MonthView(
     onDateSelected: (LocalDate) -> Unit,
     firstDayOfWeek: DayOfWeek,
     allDays: List<LocalDate>,
-    totalValuesPerDayForMonthMap: HashMap<Long, Pair<Double, Double>>,
+    totalValuesPerDayForMonthMap: HashMap<Long, Pair<Float, Float>>,
 ) {
     Column(modifier = Modifier) {
         // Month header
@@ -196,7 +196,7 @@ fun DayCell(
     onDateSelected: (LocalDate) -> Unit,
     singleCellHeight: Dp,
     position: Position,
-    pair: Pair<Double, Double>?
+    pair: Pair<Float, Float>?
 ) {
     val isToday = date == LocalDate.now()
     val textColor = when {
