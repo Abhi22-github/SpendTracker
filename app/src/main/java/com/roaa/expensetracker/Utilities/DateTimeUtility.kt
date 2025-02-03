@@ -8,6 +8,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
+import java.time.format.TextStyle
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
@@ -202,4 +203,15 @@ fun extractNumbers(input: String): Long {
     return input.filter { it.isDigit() }.toLongOrDefault(0L)
 }
 
-fun getCurrentMonth() = run { LocalDate.now().month }
+fun getCurrentMonthName() =
+    run { LocalDate.now().month.getDisplayName(TextStyle.FULL, Locale.getDefault()) }
+
+fun getRemainingDaysInCurrentMonth(): Long = run {
+    val currentDate = LocalDate.now()
+    val lastDayOfMonth = currentDate.withDayOfMonth(currentDate.lengthOfMonth())
+    return java.time.temporal.ChronoUnit.DAYS.between(currentDate, lastDayOfMonth)
+}
+
+fun getCurrentDate() = run { LocalDate.now().toLong() }
+fun getMonthEndDate() =
+    run { LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()).toLong() }
