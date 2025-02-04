@@ -24,6 +24,10 @@ class TransactionRepository(@ApplicationContext applicationContext: Context) {
         transactionDao.insert(transactionClass)
     }
 
+    suspend fun insertAndPropagateChanges(transactionClass: TransactionClass) {
+        transactionDao.addTransactionWithDayDetails(transactionClass)
+    }
+
     suspend fun update(transactionClass: TransactionClass) {
         transactionDao.update(transactionClass)
     }
