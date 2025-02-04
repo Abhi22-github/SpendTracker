@@ -1,6 +1,5 @@
 package com.roaa.expensetracker.Utilities
 
-import android.util.Log
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import okhttp3.internal.toLongOrDefault
 import java.text.DecimalFormat
@@ -264,9 +263,6 @@ fun datesListForMonth(
                 )
             )
         }
-    }
-    for (i in calendarGrid) {
-        Log.d("DateTimeUtility", i.toString())
     }
     calendarGrid
 }
