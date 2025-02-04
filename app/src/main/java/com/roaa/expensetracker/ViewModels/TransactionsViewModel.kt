@@ -160,7 +160,7 @@ class TransactionsViewModel @Inject constructor(
         modal.bankAccountId = selectedBankAccountId;
         modal.categoryId = selectedCategoryId;
 
-        viewModelScope.launch { transactionRepository.insert(modal) }
+        viewModelScope.launch { transactionRepository.insertAndPropagateChanges(modal) }
     }
 
     fun saveSelectedDate(date: Long) {
