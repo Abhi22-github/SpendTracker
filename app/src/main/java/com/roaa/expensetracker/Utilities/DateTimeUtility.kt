@@ -3,7 +3,6 @@ package com.roaa.expensetracker.Utilities
 import android.util.Log
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import okhttp3.internal.toLongOrDefault
-import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -230,9 +229,8 @@ fun datesListForMonth(
     localDate: LocalDate,
     budgetMonthStartDate: Long,
     budgetMonthEndDate: Long,
-    budgetAmountPerDay: Float,
-    totalAmountList: List<TotalExpenseIncomeClass>
-): List<CalenderDayState> = run {
+
+    ): List<CalenderDayState> = run {
     val firstDayOfMonth = localDate.withDayOfMonth(1)
     val lastDayOfMonth = firstDayOfMonth.withDayOfMonth(firstDayOfMonth.lengthOfMonth())
     val startDayOfWeek = firstDayOfMonth.dayOfWeek
@@ -243,51 +241,30 @@ fun datesListForMonth(
 
 
     for (i in 1..startDayOfWeek.value) {
-        calendarGrid.add(CalenderDayState(-1, false, DayState.NOT_STARTED))
-    }
-    val totalAmountMap: Map<Int, TotalExpenseIncomeClass> =
-        totalAmountList.associateBy { it.date.toString().takeLast(2).toInt() }
-
-    totalAmountMap.forEach { i, totalExpenseIncomeClass ->
-        Log.d("DateTimeUtility map", "$i $totalExpenseIncomeClass")
+        calendarGrid.add(CalenderDayState(-1, 0L, false, DayState.NOT_STARTED))
     }
 
     for (i in 1..lastDayOfMonth.dayOfMonth) {
         if (i in budgetStartDate..budgetEndDate) {
-            calendarGrid.add(CalenderDayState(i, true, DayState.IN_LIMIT))
+            calendarGrid.add(
+                CalenderDayState(
+                    i,
+                    firstDayOfMonth.plusDays(i.toLong() - 1).toLong(),
+                    true,
+                    DayState.IN_LIMIT
+                )
+            )
         } else {
-            calendarGrid.add(CalenderDayState(i, false, DayState.NOT_STARTED))
+            calendarGrid.add(
+                CalenderDayState(
+                    i,
+                    firstDayOfMonth.plusDays(i.toLong() - 1).toLong(),
+                    false,
+                    DayState.NOT_STARTED
+                )
+            )
         }
     }
-
-    for (i in 0 until calendarGrid.size) {
-        if (totalAmountMap.containsKey(calendarGrid[i].day)) {
-//            Log.d(
-//                "DateTimeUtility key present",
-//                "${totalAmountMap[calendarGrid[i].day]!!.totalExpense} : ${budgetAmountPerDay}"
-//            )
-            val a = BigDecimal(totalAmountMap[calendarGrid[i].day]!!.totalExpense.toDouble())
-            val b = BigDecimal(budgetAmountPerDay.toDouble())
-            if (a.compareTo(b) > 1) {
-                calendarGrid[calendarGrid[i].day].dayState = DayState.OVER_LIMIT
-                Log.d(
-                    "DateTimeUtility ----",
-                    "${calendarGrid[i].dayState} : ${totalAmountMap[calendarGrid[i].day]}"
-                )
-            } else if (a.compareTo(b) < 1) {
-                calendarGrid[calendarGrid[i].day].dayState = DayState.IN_LIMIT
-                Log.d(
-                    "DateTimeUtility+++++",
-                    "${calendarGrid[i].dayState} : ${totalAmountMap[calendarGrid[i].day]}"
-                )
-            }
-        } else {
-            Log.d("DateTimeUtility elsss", i.toString())
-            if (calendarGrid[i].day != -1) calendarGrid[calendarGrid[i].day].dayState =
-                DayState.NOT_STARTED
-        }
-    }
-
     for (i in calendarGrid) {
         Log.d("DateTimeUtility", i.toString())
     }

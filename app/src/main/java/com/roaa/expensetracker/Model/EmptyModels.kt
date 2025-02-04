@@ -30,10 +30,21 @@ val emptyBudgetClass = BudgetModelClass(
     currentMonthName = "Month",
     budgetMonthStartDate = 20250101,
     budgetMonthEndDate = 20250131,
-    isActive = true
+    isActive = false
 )
 
-val emptyTotalExpenseIncomeClass = TotalExpenseIncomeClass(20250101L,0f,0f)
+val emptyBudgetDayClass = BudgetDayModelClass(
+    budgetDayId = 0,
+    date = 0L,
+    budgetAmount = 0f,
+    totalExpense = 0f,
+    totalIncome = 0f,
+    totalExpenseTransactionCount = 0L,
+    totalIncomeTransactionCount = 0L,
+    budgetId = 0L
+)
+
+val emptyTotalExpenseIncomeClass = TotalExpenseIncomeClass(20250101L, 0f, 0f)
 
 val emptyTransactionClass = TransactionClass(EXPENSE, 0f, "", 0L, 0L, 1L, 1L)
 

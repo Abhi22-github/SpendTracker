@@ -4,6 +4,7 @@ import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roaa.expensetracker.Database.BudgetRepository
+import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import com.roaa.expensetracker.Model.BudgetModelClass
 import com.roaa.expensetracker.Utilities.UiState
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -29,9 +30,12 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState: StateFlow<UiState> = _uiState
 
-
     fun getCurrentBudget(): Flow<BudgetModelClass> {
         return budgetRepository.getCurrentBudget
+    }
+
+    fun getCurrentBudgetWithDetails(): Flow<BudgetWithDayDetails> {
+        return budgetRepository.getCurrentBudgetWithDays
     }
 
     fun getAllBudgets(): Flow<List<BudgetModelClass>> {
