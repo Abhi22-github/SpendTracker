@@ -7,6 +7,7 @@ import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Model.TransactionClass
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 
 class TransactionRepository(@ApplicationContext applicationContext: Context) {
 
@@ -43,8 +44,12 @@ class TransactionRepository(@ApplicationContext applicationContext: Context) {
         )
     }
 
-    fun getTotalAmountForDate(date: Long, type: String): Flow<Long?> {
-        return transactionDao.getTotalAmountForDate(date, type)
+    fun getTotalAmountForDate(date: Long, type: String): Flow<Float> {
+        return transactionDao.getTotalAmountForDate(date, type).map { it ?: 0f }
+    }
+
+    fun getTotalAmountForDateExcludingLast(date: Long, type: String): Flow<Float> {
+        return transactionDao.getTotalAmountForDate(date, type).map { it ?: 0f }
     }
 
     fun getListOfTotalAmountPerDayForRange(

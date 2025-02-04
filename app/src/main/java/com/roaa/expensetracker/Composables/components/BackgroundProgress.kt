@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -26,12 +25,9 @@ import androidx.compose.ui.graphics.PathEffect
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.times
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.roaa.expensetracker.Composables.WavyShape
 import com.roaa.expensetracker.Composables.utils.HarmonizedColorPalette
 import com.roaa.expensetracker.Utilities.clamp
-import com.roaa.expensetracker.ViewModels.AnimationViewModel
-import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import kotlinx.coroutines.launch
 import kotlin.math.ceil
 
@@ -39,20 +35,18 @@ import kotlin.math.ceil
 @Composable
 fun BackgroundProgress(
     harmonizedColor: HarmonizedColorPalette,
-    viewModel: TransactionsViewModel,
-    animationViewModel: AnimationViewModel = hiltViewModel()
+    oldPercent: Float,
+    percent: Float,
 ) {
-    val percentWithNewSpent by animationViewModel.newSpentPercentage.collectAsState()
-    val percentWithoutNewSpent by  animationViewModel.oldPercentage.collectAsState()
 
     val percentWithoutNewSpentAnimated by animateFloatAsState(
         label = "percentRealAnim",
-        targetValue = percentWithoutNewSpent,
+        targetValue = oldPercent,
         animationSpec = TweenSpec(250),
     )
     val percentWithNewSpentAnimated = animateFloatAsState(
         label = "percentWithNewSpentAnimated",
-        targetValue = percentWithNewSpent.toFloat(),
+        targetValue = percent,
         animationSpec = TweenSpec(300),
     ).value
 
@@ -76,7 +70,7 @@ fun BackgroundProgress(
 
     Box(Modifier.fillMaxSize()) {
         AnimatedVisibility(
-            visible = percentWithNewSpent != percentWithoutNewSpent,
+            visible = percent != 0.0f,
             enter = fadeIn(),
             exit = fadeOut(),
         ) {
@@ -86,7 +80,8 @@ fun BackgroundProgress(
                         drawPath(
                             path = Path().apply {
                                 val halfPeriod = 30.dp.toPx() / 2
-                                val amplitude = (percentWithNewSpentAnimated.clamp(0.96f, 1f) * 2.dp).toPx()
+                                val amplitude =
+                                    (percentWithNewSpentAnimated.clamp(0.96f, 1f) * 2.dp).toPx()
 
                                 moveTo(
                                     size.width - amplitude,

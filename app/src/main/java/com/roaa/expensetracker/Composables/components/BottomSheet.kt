@@ -68,6 +68,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -76,12 +77,16 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
@@ -123,12 +128,16 @@ import com.roaa.expensetracker.Utilities.Constants.INCOME
 import com.roaa.expensetracker.Utilities.DecimalFilterTransformation
 import com.roaa.expensetracker.Utilities.convertMillisToDateString
 import com.roaa.expensetracker.Utilities.extractNumbers
+import com.roaa.expensetracker.Utilities.getCurrentDate
+import com.roaa.expensetracker.Utilities.getCurrentMonthName
+import com.roaa.expensetracker.Utilities.getMonthEndDate
+import com.roaa.expensetracker.Utilities.getRemainingDaysInCurrentMonth
 import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toLocalDate
-import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.Utilities.toLongMillis
 import com.roaa.expensetracker.ViewModels.AnimationViewModel
 import com.roaa.expensetracker.ViewModels.BankAccountsViewModel
+import com.roaa.expensetracker.ViewModels.BudgetViewModel
 import com.roaa.expensetracker.ViewModels.CategoryViewModel
 import com.roaa.expensetracker.ViewModels.PreferencesViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
@@ -137,7 +146,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -227,7 +235,7 @@ fun BottomSheetContentItemAddContent(
             expanded = false
         }
     }
-    val budget by preferencesViewModel.getBudgetValue.collectAsState(1f)
+    val budget by preferencesViewModel.getTotalAmountPerDay.collectAsState(1f)
     val oldAmount by transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
     val newAmountTemp = if (expenseValue.text.isEmpty()) 0L else extractNumbers(expenseValue.text)
     val newDailyBudget = oldAmount + newAmountTemp
@@ -259,11 +267,11 @@ fun BottomSheetContentItemAddContent(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(16.dp))
-            AnimatedVisibility(showForecast) {
-                Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
-                    RestBudgetPill(LocalDate.now().toLong())
-                }
-            }
+//            AnimatedVisibility(showForecast) {
+//                Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
+//                    RestBudgetPill(LocalDate.now().toLong())
+//                }
+//            }
             if (showForecast) {
                 Spacer(Modifier.height(16.dp))
             }
@@ -379,9 +387,7 @@ fun BottomSheetContentItemAddContent(
                             // Split into parts before and after the decimal
                             val parts = filteredText.split('.')
                             // Ensure max 7 digits before the decimal and max 2 after
-                            if (parts.size == 1 && parts[0].length <= 7 ||
-                                parts.size == 2 && parts[0].length <= 7 && parts[1].length <= 2
-                            ) {
+                            if (parts.size == 1 && parts[0].length <= 7 || parts.size == 2 && parts[0].length <= 7 && parts[1].length <= 2) {
                                 // Update the TextFieldValue with the filtered text
                                 expenseValue = newValue.copy(text = filteredText)
                             }
@@ -607,10 +613,9 @@ fun BottomRow(
     Log.d("Test___3", selectedDate?.toLocalDate().toString())
     Log.d("Test___4", selectedDate?.toLocalDate()?.toLongMillis().toString())
     var showDatePicker by remember { mutableStateOf(false) }
-    val datePickerState =
-        rememberDatePickerState(
-            initialSelectedDateMillis = selectedDate?.toLocalDate()?.toLongMillis()
-        )
+    val datePickerState = rememberDatePickerState(
+        initialSelectedDateMillis = selectedDate?.toLocalDate()?.toLongMillis()
+    )
     val bankAccountsList by bankAccountsViewModel.allBankAccountList.collectAsState()
 
     val colorPalletBlue = toPalette(blueColor)
@@ -690,8 +695,7 @@ fun BottomRow(
                     Text(text = selectedBankAccount.bankName)
                 }
 
-                DropDownMenuForBankAccounts(
-                    bankAccountMenuExpanded,
+                DropDownMenuForBankAccounts(bankAccountMenuExpanded,
                     colorPalletBlue,
                     onDismiss = { bankAccountMenuExpanded = false },
                     bankAccountsList,
@@ -700,8 +704,7 @@ fun BottomRow(
                         scope.launch {
                             uiViewModel.errorStatusInAddBottomSheet.emit(false)
                         }
-                    }
-                )
+                    })
             }
         }
     }
@@ -752,10 +755,7 @@ fun BottomSheetContentItemDetails(
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
         BottomSheetContentItemDetailsContent(
-            modifier = Modifier,
-            closeBottomSheet,
-            singleTransaction,
-            uiViewModel
+            modifier = Modifier, closeBottomSheet, singleTransaction, uiViewModel
         )
     }
 }
@@ -776,8 +776,7 @@ fun BottomSheetContentItemDetailsContent(
     val labelAndValueStyle = typography.bodyMedium
     val scope = rememberCoroutineScope()
     Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier.fillMaxWidth()
+        horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()
     ) {
         Text(
             text = "₹" + parseAmount(singleTransaction.transaction.amount),
@@ -1476,9 +1475,7 @@ fun BottomSheetContentItemAddContentTest(
     var selectedDate by remember { mutableStateOf<Long?>(System.currentTimeMillis()) }
     val categoryList by categoryViewModel.categoryList.collectAsState()
     val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
-    val firstSampleClass = CategoryClass(
-        -1, "Select Category", 1, -99, EXPENSE
-    )
+    val firstSampleClass = firstSampleClass
     var selectedCategory by remember {
         mutableStateOf(
             firstSampleClass
@@ -1525,10 +1522,9 @@ fun BottomSheetContentItemAddContentTest(
             expanded = false
         }
     }
-    val budget by preferencesViewModel.getBudgetValue.collectAsState(1f)
+    val budget by preferencesViewModel.getTotalAmountPerDay.collectAsState(1f)
     val oldAmount by transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
-    val newAmountTemp =
-        if (expenseValue.text.isEmpty()) 0L else extractNumbers(expenseValue.text)
+    val newAmountTemp = if (expenseValue.text.isEmpty()) 0L else extractNumbers(expenseValue.text)
     val newDailyBudget = oldAmount + newAmountTemp
     val amountInString = String.format("%.2f", newDailyBudget.toFloat())
     val percent = if (budget != 0f) {
@@ -1572,11 +1568,11 @@ fun BottomSheetContentItemAddContentTest(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(16.dp))
-            AnimatedVisibility(showForecast) {
-                Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
-                    RestBudgetPill(LocalDate.now().toLong())
-                }
-            }
+//            AnimatedVisibility(showForecast) {
+//                Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
+//                    RestBudgetPill(LocalDate.now().toLong())
+//                }
+//            }
             if (showForecast) {
                 Spacer(Modifier.height(16.dp))
             }
@@ -1923,6 +1919,269 @@ fun BottomSheetContentItemAddContentTest(
 //    }
 //}
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BudgetBottomSheet(
+    sheetState: SheetState,
+    bottomSheetDismissed: () -> Unit,
+    amount: TextFieldValue,
+    isBudgetSet: Boolean,
+    budgetViewModel: BudgetViewModel = hiltViewModel(),
+) {
+    val modifier = Modifier.padding(16.dp, 0.dp)
+    var totalAmountText by remember { mutableStateOf(TextFieldValue("")) }
+    var totalAmountPerDay by remember { mutableFloatStateOf(0f) }
+    var totalDaysRemaining = remember {
+        getRemainingDaysInCurrentMonth()
+    }
+
+    var shouldShowConfirmation by remember { mutableStateOf(false) }
+
+    val keyboardController = LocalSoftwareKeyboardController.current
+    val focusManager = LocalFocusManager.current
+    ModalBottomSheet(onDismissRequest = { bottomSheetDismissed() }, sheetState = sheetState) {
+        BottomSheetBudgetContent(modifier, totalAmountText, amountTextValueChange = {
+            totalAmountText = it
+        }, totalAmountPerDay, { totalAmountPerDay = it }, totalDaysRemaining, {
+            if (isBudgetSet) {
+                shouldShowConfirmation = true
+            } else {
+                saveDateToDevice(
+                    budgetViewModel,
+                    totalAmountText.text,
+                    totalAmountPerDay,
+                    totalDaysRemaining,
+                    getCurrentMonthName(),
+                    getCurrentDate(),
+                    getMonthEndDate(),
+                    bottomSheetDismissed,
+                    keyboardController,
+                    focusManager
+                )
+            }
+        })
+    }
+    if (shouldShowConfirmation) {
+        ConfirmationAlertDialog(
+            { shouldShowConfirmation = false },
+            {
+                saveDateToDevice(
+                    budgetViewModel,
+                    totalAmountText.text,
+                    totalAmountPerDay,
+                    totalDaysRemaining,
+                    getCurrentMonthName(),
+                    getCurrentDate(),
+                    getMonthEndDate(),
+                    bottomSheetDismissed,
+                    keyboardController,
+                    focusManager
+                )
+            },
+            "Change Budget",
+            "Are you sure, you want to change the current budget?",
+            ImageVector.vectorResource(R.drawable.icon_expense)
+        )
+    }
+}
+
+fun saveDateToDevice(
+    budgetViewModel: BudgetViewModel,
+    totalAmountForMonth: String,
+    totalAmountPerDay: Float,
+    totalDaysRemaining: Long,
+    currentMonthName: String,
+    budgeMonthStartDate: Long,
+    budgetMonthEndDate: Long,
+    bottomSheetDismissed: () -> Unit,
+    keyboardController: SoftwareKeyboardController?,
+    focusManager: FocusManager,
+) {
+    budgetViewModel.createObjectAndStoreIt(
+        totalAmountForMonth.toFloat(),
+        totalAmountPerDay,
+        totalDaysRemaining,
+        currentMonthName,
+        budgeMonthStartDate,
+        budgetMonthEndDate
+    )
+    focusManager.clearFocus()
+    keyboardController?.hide()
+    bottomSheetDismissed()
+
+}
+
+
+@Composable
+fun BottomSheetBudgetContent(
+    modifier: Modifier,
+    dailySpendLimit: TextFieldValue,
+    amountTextValueChange: (TextFieldValue) -> Unit,
+    totalAmountPerDay: Float,
+    totalAmountPerDayValueChange: (Float) -> Unit,
+    totalDaysRemaining: Long,
+    saveDailySpendLimit: () -> Unit
+) {
+    val focusRequester = remember {
+        FocusRequester()
+    }
+
+    LaunchedEffect(dailySpendLimit) {
+        focusRequester.requestFocus()
+        if (dailySpendLimit.text.isNotEmpty() && dailySpendLimit.text.toFloat() != 0f) {
+            totalAmountPerDayValueChange(dailySpendLimit.text.toFloat() / totalDaysRemaining)
+        } else {
+            totalAmountPerDayValueChange(0f)
+        }
+    }
+    Column(modifier.fillMaxWidth()) {
+        Text(
+            text = "Set up a budget",
+            modifier = modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = MaterialTheme.typography.titleLarge
+        )
+        Spacer(Modifier.height(4.dp))
+        Text(
+            text = "Setup your budget for current month ",
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha),
+            modifier = Modifier.align(Alignment.CenterHorizontally)
+        )
+        Spacer(Modifier.height(32.dp))
+        Row {
+            TextField(
+                value = dailySpendLimit,
+                onValueChange = { newValue ->
+                    val filteredText = newValue.text.filter { it.isDigit() || it == '.' }
+                    // Ensure only one decimal point is allowed
+                    if (filteredText.count { it == '.' } <= 1) {
+                        // Split into parts before and after the decimal
+                        val parts = filteredText.split('.')
+                        // Ensure max 7 digits before the decimal and max 2 after
+                        if (parts.size == 1 && parts[0].length <= 7 || parts.size == 2 && parts[0].length <= 7 && parts[1].length <= 2) {
+                            // Update the TextFieldValue with the filtered text
+                            amountTextValueChange(newValue.copy(text = filteredText))
+                        }
+                    }
+//                scope.launch {
+//                    uiViewModel.errorStatusInAddBottomSheet.emit(false)
+//                }
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.CenterVertically)
+                    .focusRequester(focusRequester),
+                singleLine = true,
+
+                placeholder = {
+                    Text(
+                        "₹0",
+                        style = typography.displayMedium,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .align(Alignment.CenterVertically),
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
+                    )
+                },
+                visualTransformation = DecimalFilterTransformation(),
+                shape = RoundedCornerShape(24.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent,
+                    focusedContainerColor = Color.Transparent,
+                ),
+                textStyle = typography.displayMedium.copy(
+                    textAlign = TextAlign.Center, fontFamily = numberFont
+                ),
+                keyboardOptions = KeyboardOptions.Default.copy(
+                    keyboardType = KeyboardType.Number, imeAction = ImeAction.Next
+                ),
+            )
+        }
+        Spacer(Modifier.height(64.dp))
+        Row {
+            Text(
+                text = "Current Month",
+                modifier = modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                textAlign = TextAlign.Start,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = getCurrentMonthName(),
+                modifier = modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                textAlign = TextAlign.End,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        }
+
+        Spacer(Modifier.height(16.dp))
+        Row {
+            Text(
+                text = "Total Days ",
+                modifier = modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                textAlign = TextAlign.Start,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = "${totalDaysRemaining} Days remaining",
+                modifier = modifier
+                    .weight(1f)
+                    .fillMaxWidth(),
+                textAlign = TextAlign.End,
+                overflow = TextOverflow.Ellipsis,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        }
+        Spacer(Modifier.height(16.dp))
+        HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
+        Spacer(Modifier.height(16.dp))
+        Text(
+            text = "Total",
+            modifier = modifier.fillMaxWidth(),
+            textAlign = TextAlign.Start,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = "$totalAmountPerDay Per day",
+            modifier = modifier.fillMaxWidth(),
+            textAlign = TextAlign.Start,
+            style = MaterialTheme.typography.labelLarge,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+        )
+        Spacer(Modifier.height(16.dp))
+        FilledTonalButton(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { saveDailySpendLimit() },
+        ) {
+            Text(text = "Create Budget")
+        }
+    }
+}
+
+@Preview
+@Composable
+fun BottomSheetBudgetContentPreview() {
+    ExpenseTrackerTheme {
+        Surface {
+            // BottomSheetBudgetContent(Modifier, TextFieldValue("0"), {}, {})
+        }
+    }
+}
 
 @Preview
 @Composable

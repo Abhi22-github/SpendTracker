@@ -17,9 +17,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -31,7 +28,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.roaa.expensetracker.Composables.colorBad
 import com.roaa.expensetracker.Composables.colorEditor
 import com.roaa.expensetracker.Composables.colorGood
@@ -39,27 +35,15 @@ import com.roaa.expensetracker.Composables.colorNotGood
 import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.harmonize
 import com.roaa.expensetracker.Composables.utils.toPalette
-import com.roaa.expensetracker.ViewModels.AnimationViewModel
-import com.roaa.expensetracker.ViewModels.PreferencesViewModel
-import com.roaa.expensetracker.ViewModels.TransactionsViewModel
+import com.roaa.expensetracker.ViewModels.DaileBudgetState
 
 @Composable
 fun RowScope.RestBudgetPill(
-    date: Long,
-    transactionsViewModel: TransactionsViewModel = hiltViewModel(),
-    preferenceViewModel: PreferencesViewModel = hiltViewModel(),
-    animationViewModel: AnimationViewModel = hiltViewModel()
+    totalExpenseAmountForDate: Float,
+    totalAmountPerDay: Float,
+    oldPercent: Float,
+    percent: Float,
 ) {
-    LaunchedEffect(Unit) {
-        transactionsViewModel.getTotalExpenseAmountForDate(date)
-    }
-
-    val budget by preferenceViewModel.getBudgetValue.collectAsState(1f)
-
-    val percent by animationViewModel.newSpentPercentage.collectAsState()
-    val newDailyBudget by transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
-
-
     val percentWithNewSpentAnimated = animateFloatAsState(
         label = "percentWithNewSpentAnimated",
         targetValue = percent,
@@ -94,7 +78,7 @@ fun RowScope.RestBudgetPill(
                 .fillMaxHeight(),
             contentAlignment = Alignment.CenterEnd,
         ) {
-            BackgroundProgress(harmonizedColor = harmonizedColor, viewModel = transactionsViewModel)
+            BackgroundProgress(harmonizedColor = harmonizedColor, oldPercent, percent)
             Row(
                 modifier = Modifier
                     .fillMaxSize()
@@ -121,10 +105,10 @@ fun RowScope.RestBudgetPill(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Start,
             ) {
-                StatusLabel(harmonizedColor)
+                StatusLabel(harmonizedColor, budgetState = DaileBudgetState.END)
                 Spacer(modifier = Modifier.weight(1f))
                 AnimatedNumber(
-                    value = "₹" + newDailyBudget.toString(),
+                    value = "₹" + totalExpenseAmountForDate.toString(),
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontSize = MaterialTheme.typography.titleLarge.fontSize
                     ),

@@ -66,8 +66,8 @@ class TransactionsViewModel @Inject constructor(
         _getListOfTotalAmountPerDayForRangeFlow
 
     //flow to get total amount for given date
-    private val _getTotalExpenseAmountForDateFlow = MutableStateFlow<Long>(0L)
-    val getTotalExpenseAmountForDateFlow: StateFlow<Long> = _getTotalExpenseAmountForDateFlow
+    private val _getTotalExpenseAmountForDateFlow = MutableStateFlow<Float>(0f)
+    val getTotalExpenseAmountForDateFlow: StateFlow<Float> = _getTotalExpenseAmountForDateFlow
 
 
     private val chipsName = arrayOf<String>()
@@ -224,10 +224,7 @@ class TransactionsViewModel @Inject constructor(
     fun getListOfTotalAmountPerDayForRangeForCompose(
         startDate: Long, endDate: Long
     ): Flow<List<TotalExpenseIncomeClass>> {
-
         return transactionRepository.getListOfTotalAmountPerDayForRange(startDate, endDate)
-
-
     }
 
     fun deleteSingleTransaction(transactionClass: TransactionClass) {
@@ -270,6 +267,14 @@ class TransactionsViewModel @Inject constructor(
             }
 
         }
+    }
+
+    fun getTotalExpenseAmountForDateCompose(date: Long): Flow<Float> {
+        return transactionRepository.getTotalAmountForDate(date, EXPENSE)
+    }
+
+    fun getTotalExpenseAmountForDateExcludingLastCompose(date: Long): Flow<Float> {
+        return transactionRepository.getTotalAmountForDateExcludingLast(date, EXPENSE)
     }
 
     fun setCurrentSelectedDate(currentSelectedDate: LocalDate?) {

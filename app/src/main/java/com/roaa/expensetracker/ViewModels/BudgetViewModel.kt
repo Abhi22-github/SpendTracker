@@ -13,6 +13,14 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+
+enum class DaileBudgetState {
+    NORMAL,
+    MIDDLE,
+    END,
+    OVERSPEND
+}
+
 @HiltViewModel
 class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRepository) :
     ViewModel() {
@@ -21,15 +29,13 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState: StateFlow<UiState> = _uiState
 
-    fun getCurrentBudget(id: Long): Flow<BudgetModelClass> {
+    fun getCurrentBudget(): Flow<BudgetModelClass> {
         return budgetRepository.getCurrentBudget
     }
 
     fun getAllBudgets(): Flow<List<BudgetModelClass>> {
         return budgetRepository.allBudget
-
     }
-
 
     fun deleteBudget(budgetModelClass: BudgetModelClass) {
         viewModelScope.launch {
@@ -37,25 +43,28 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
         }
     }
 
-//    fun createObjectAndStoreIt(
-//        id: Long,
-//        bankAmount: String,
-//        bankName: String,
-//        selectedColor: Int
-//    ) {
-//        val bankAccountObj = BankAccountsClass(
-//            bankAccountId = id,
-//            initialAmount = bankAmount.toLong(),
-//            currentAmount = bankAmount.toLong(),
-//            bankName = bankName,
-//            cardColorNumber = selectedColor,
-//            cardIconNumber = 24,
-//            accountType = PRIMARY
-//        )
-//        storeBankAccount(bankAccountObj)
-//    }
+    fun createObjectAndStoreIt(
+        totalAMountForMonth: Float,
+        totalAmountPerDay: Float,
+        totalDaysRemaining: Long,
+        currentMonthName: String,
+        budgeMonthStartDate: Long,
+        budgetMonthEndDate: Long
+    ) {
+        val budgeObject = BudgetModelClass(
+            budgetId = 0L,
+            budgetAmountForMonth = totalAMountForMonth,
+            budgetAmountPerDay = totalAmountPerDay,
+            budgetTotalDays = totalDaysRemaining,
+            currentMonthName = currentMonthName,
+            budgetMonthStartDate = budgeMonthStartDate,
+            budgetMonthEndDate = budgetMonthEndDate,
+            isActive = true
+        )
+        saveBudget(budgeObject)
+    }
 
-    fun saveBudget(budgetModelClass: BudgetModelClass) {
+    private fun saveBudget(budgetModelClass: BudgetModelClass) {
         if (budgetModelClass.budgetId == 0L) {
             //adding new bank Accounts
             viewModelScope.launch {
@@ -67,7 +76,6 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
                 budgetRepository.update(budgetModelClass)
             }
         }
-
     }
 
 
@@ -83,6 +91,8 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
         _uiState.value = UiState.Error(error.toString())
         Log.d("Hello Error reason", error.toString())
     }
+
+
 
 
 }
