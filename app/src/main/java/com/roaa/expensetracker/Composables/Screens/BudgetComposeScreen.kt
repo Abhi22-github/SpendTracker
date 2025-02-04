@@ -1,6 +1,7 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -68,6 +69,7 @@ import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.ViewModels.BudgetViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import java.time.LocalDate
+import kotlin.math.roundToInt
 
 
 val horizontalPadding = 16.dp
@@ -295,8 +297,6 @@ fun SingleInfoBox(modifier: Modifier, label: String, value: String) {
 fun SpendCalender(
     modifier: Modifier = Modifier,
     getCurrentBudget: BudgetWithDayDetails,
-    budgetViewModel: BudgetViewModel = hiltViewModel(),
-    transactionsViewModel: TransactionsViewModel = hiltViewModel()
 ) {
     val color =
         toPalette(
@@ -342,11 +342,33 @@ fun SpendCalender(
                 }
             }
 
-            val chunkedList = datesListForMonth(
+            val budgetDayMap = getCurrentBudget.budgetAllDays.associateBy { it.date }
+
+            budgetDayMap.forEach { key, value ->
+                Log.d("BudgetComposeScreen", "$key $value")
+            }
+            val list = datesListForMonth(
                 LocalDate.now(),
                 getCurrentBudget.budgetSummary.budgetMonthStartDate,
                 getCurrentBudget.budgetSummary.budgetMonthEndDate,
-            ).chunked(7)
+            )
+
+            list.forEachIndexed { index, it ->
+                if (budgetDayMap.containsKey(it.dayDate)) {
+                    if (budgetDayMap[it.dayDate]!!.totalExpense.roundToInt() == budgetDayMap[it.dayDate]!!.budgetAmount.roundToInt()) {
+                        it.dayState = DayState.NOT_STARTED
+                    } else if (budgetDayMap[it.dayDate]!!.totalExpense > budgetDayMap[it.dayDate]!!.budgetAmount) {
+                        it.dayState = DayState.OVER_LIMIT
+                    } else if (budgetDayMap[it.dayDate]!!.totalExpense < budgetDayMap[it.dayDate]!!.budgetAmount) {
+                        it.dayState = DayState.IN_LIMIT
+                    }
+                } else {
+                    it
+                }
+            }
+
+            val chunkedList = list.chunked(7)
+
             chunkedList.forEachIndexed { index, weekList ->
                 Row(
                     Modifier
