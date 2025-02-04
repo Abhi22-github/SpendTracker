@@ -404,15 +404,25 @@ fun DayName(modifier: Modifier = Modifier, text: String) {
 fun DayBox(modifier: Modifier = Modifier, text: Int, inBudget: Boolean, dayState: DayState) {
     val greenColorPalette = toPalette(greenColor)
     val orangeColorPalette = toPalette(orange)
+
     val background =
         if (inBudget) {
             when (dayState) {
                 DayState.IN_LIMIT -> greenColorPalette.main.copy(alpha = 0.1f)
-                DayState.NOT_STARTED -> Color.Blue
+                DayState.NOT_STARTED -> MaterialTheme.colorScheme.surface
                 DayState.OVER_LIMIT -> orangeColorPalette.main.copy(alpha = 0.1f)
             }
 
         } else Color.Transparent
+
+    val textColor =
+        if (inBudget) {
+            when (dayState) {
+                DayState.IN_LIMIT -> greenColorPalette.main
+                DayState.NOT_STARTED -> MaterialTheme.colorScheme.onSurface
+                DayState.OVER_LIMIT -> orangeColorPalette.main
+            }
+        } else MaterialTheme.colorScheme.onSurface
     Box(
         modifier
             .clip(RoundedCornerShape(10.dp))
@@ -421,7 +431,7 @@ fun DayBox(modifier: Modifier = Modifier, text: Int, inBudget: Boolean, dayState
         Text(
             text = if (text != -1) text.toString() else "",
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
+            color = textColor,
             textAlign = TextAlign.Center,
             modifier = modifier
                 .fillMaxWidth()

@@ -231,7 +231,8 @@ class TransactionsViewModel @Inject constructor(
     fun deleteSingleTransaction(transactionClass: TransactionClass) {
         viewModelScope.launch {
             loading()
-            transactionRepository.delete(transactionClass)
+            //transactionRepository.delete(transactionClass)
+            transactionRepository.deleteAndPropagateChanges(transactionClass)
             completed()
         }
     }

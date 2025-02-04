@@ -73,14 +73,35 @@ interface TransactionDao {
 
     //Transactions
     @Transaction
-    suspend fun addTransactionWithDayDetails(transactionClass: TransactionClass) {
+    suspend fun addTransactionAndPropagateChanges(transactionClass: TransactionClass) {
         insert(transactionClass)
         val expense = getTotalAmountForDateWithoutFlow(transactionClass.date, EXPENSE)
         val income = getTotalAmountForDateWithoutFlow(transactionClass.date, EXPENSE)
 
         val currentBudget = getCurrentBudget
 
-        Log.d("TransactionDao","$expense $income ${currentBudget?.budgetId}")
+        Log.d("TransactionDao", "$expense $income ${currentBudget?.budgetId}")
+        currentBudget?.let {
+            if (transactionClass.date >= it.budgetMonthStartDate && transactionClass.date <= it.budgetMonthEndDate) {
+                var singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
+                singleDay?.let {
+                    it.totalExpense = expense ?: 0f
+                    it.totalIncome = income ?: 0f
+                }
+                singleDay?.let { updateSingleDay(it) }
+            }
+        }
+    }
+
+    @Transaction
+    suspend fun deleteTransactionAndPropagateChanges(transactionClass: TransactionClass) {
+        delete(transactionClass)
+        val expense = getTotalAmountForDateWithoutFlow(transactionClass.date, EXPENSE)
+        val income = getTotalAmountForDateWithoutFlow(transactionClass.date, EXPENSE)
+
+        val currentBudget = getCurrentBudget
+
+        Log.d("TransactionDao", "$expense $income ${currentBudget?.budgetId}")
         currentBudget?.let {
             if (transactionClass.date >= it.budgetMonthStartDate && transactionClass.date <= it.budgetMonthEndDate) {
                 var singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
