@@ -2,6 +2,7 @@ package com.roaa.expensetracker.Hilt
 
 import android.content.Context
 import com.roaa.expensetracker.Database.BankAccountRepository
+import com.roaa.expensetracker.Database.BudgetDayRepository
 import com.roaa.expensetracker.Database.BudgetRepository
 import com.roaa.expensetracker.Database.CategoryRepository
 import com.roaa.expensetracker.Database.TransactionRepository
@@ -32,5 +33,10 @@ class RepositoryModule() {
     @Provides
     fun provideBudgetRepository(@ApplicationContext applicationContext: Context): BudgetRepository {
         return BudgetRepository(applicationContext)
+    }
+
+    @Provides
+    fun provideBudgetDayRepository(@ApplicationContext applicationContext: Context): BudgetDayRepository {
+        return BudgetDayRepository(applicationContext)
     }
 }
