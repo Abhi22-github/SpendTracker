@@ -7,12 +7,13 @@ import androidx.room.RoomDatabase
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.roaa.expensetracker.Model.BankAccountsClass
+import com.roaa.expensetracker.Model.BudgetDayModelClass
 import com.roaa.expensetracker.Model.BudgetModelClass
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Model.TransactionClass
 
 @Database(
-    entities = [TransactionClass::class, CategoryClass::class, BankAccountsClass::class, BudgetModelClass::class],
+    entities = [TransactionClass::class, CategoryClass::class, BankAccountsClass::class, BudgetModelClass::class, BudgetDayModelClass::class],
     version = 1
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -22,6 +23,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun categoryDao(): CategoryDao
     abstract fun bankAccountsDao(): BankAccountDao
     abstract fun budgetDao(): BudgetDao
+    abstract fun budgetDayDao(): BudgetDayDao
 
 //    // we are creating an async task class to perform task in background.
 //    private class PopulateDbAsyncTask(instance: TransactionDatabase) :
@@ -54,14 +56,12 @@ abstract class AppDatabase : RoomDatabase() {
                         // we are creating a database builder and passing
                         // our database class with our database name.
                     databaseBuilder(
-                        context.applicationContext,
-                        AppDatabase::class.java, "database"
+                        context.applicationContext, AppDatabase::class.java, "database"
                     ) // below line is use to add fall back to
                         // destructive migration to our database.
                         .addMigrations(MIGRATION_1_2)// below line is to add callback
                         // to our database.
-                        .addCallback(prePopulateData)
-                        .allowMainThreadQueries() // below line is to
+                        .addCallback(prePopulateData).allowMainThreadQueries() // below line is to
                         // build our database.
                         .build()
             }
