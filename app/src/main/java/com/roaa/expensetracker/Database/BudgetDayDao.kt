@@ -28,4 +28,7 @@ interface BudgetDayDao {
 
     @get:Query("SELECT * FROM budget_day_table ORDER BY budgetId DESC")
     val allDays: Flow<List<BudgetDayModelClass>>
+
+    //Transaction Supporting
+    
 }

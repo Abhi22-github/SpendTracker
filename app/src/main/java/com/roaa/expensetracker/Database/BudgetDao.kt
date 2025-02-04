@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface BudgetDao {
+    //Normal
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insert(budgetModelClass: BudgetModelClass): Long
 
@@ -25,6 +26,29 @@ interface BudgetDao {
     @Update
     suspend fun update(budgetModelClass: BudgetModelClass)
 
+    @Query("SELECT SUM(amount) FROM transaction_table where date == :date and type == :type")
+    suspend fun getTotalAmountForDate(date: Long, type: String): Float?
+
+    @Query("DELETE FROM budget_table")
+    suspend fun deleteAllBudget()
+
+    @get:Query("SELECT * FROM budget_table WHERE isActive = 1")
+    val getCurrentBudget: Flow<BudgetModelClass>
+
+    @get:Query("SELECT * FROM budget_table ORDER BY budgetId DESC")
+    val allBudget: Flow<List<BudgetModelClass>>
+
+    //Relations
+
+    @get:Query("SELECT * FROM budget_table WHERE isActive = 1")
+    val getCurrentBudgetWithDays: Flow<BudgetWithDayDetails>
+
+
+    // Transaction Supporting
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertDays(budgetDayModelClass: BudgetDayModelClass): Long
+
+    //Transactions
     @Transaction
     suspend fun insertWithDayDetails(
         budgetModelClass: BudgetModelClass, validDatesListFromLong: List<Long>
@@ -45,22 +69,4 @@ interface BudgetDao {
         }
 
     }
-
-    @Query("SELECT SUM(amount) FROM transaction_table where date == :date and type == :type")
-    suspend fun getTotalAmountForDate(date: Long, type: String): Float?
-
-    @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insertDays(budgetDayModelClass: BudgetDayModelClass): Long
-
-    @Query("DELETE FROM budget_table")
-    suspend fun deleteAllBudget()
-
-    @get:Query("SELECT * FROM budget_table WHERE isActive = 1")
-    val getCurrentBudgetWithDays: Flow<BudgetWithDayDetails>
-
-    @get:Query("SELECT * FROM budget_table WHERE isActive = 1")
-    val getCurrentBudget: Flow<BudgetModelClass>
-
-    @get:Query("SELECT * FROM budget_table ORDER BY budgetId DESC")
-    val allBudget: Flow<List<BudgetModelClass>>
 }
