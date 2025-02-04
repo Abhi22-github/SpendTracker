@@ -268,13 +268,13 @@ fun datesListForMonth(
 //            )
             val a = BigDecimal(totalAmountMap[calendarGrid[i].day]!!.totalExpense.toDouble())
             val b = BigDecimal(budgetAmountPerDay.toDouble())
-            if (a.compareTo(b)>1) {
+            if (a.compareTo(b) > 1) {
                 calendarGrid[calendarGrid[i].day].dayState = DayState.OVER_LIMIT
                 Log.d(
                     "DateTimeUtility ----",
                     "${calendarGrid[i].dayState} : ${totalAmountMap[calendarGrid[i].day]}"
                 )
-            } else if (a.compareTo(b)<1) {
+            } else if (a.compareTo(b) < 1) {
                 calendarGrid[calendarGrid[i].day].dayState = DayState.IN_LIMIT
                 Log.d(
                     "DateTimeUtility+++++",
@@ -283,8 +283,8 @@ fun datesListForMonth(
             }
         } else {
             Log.d("DateTimeUtility elsss", i.toString())
-            if (calendarGrid[i].day != -1)
-                calendarGrid[calendarGrid[i].day].dayState = DayState.NOT_STARTED
+            if (calendarGrid[i].day != -1) calendarGrid[calendarGrid[i].day].dayState =
+                DayState.NOT_STARTED
         }
     }
 
@@ -329,6 +329,13 @@ fun getCalendarForMonthFromDateIncludingPrevMont(localDate: LocalDate): List<Loc
         calendarGrid.add(nextDate)
         nextDate = nextDate.plusDays(1)
     }
-
     return calendarGrid
+}
+
+fun getValidDatesListFromLong(startDate: Long, endDate: Long): List<Long> {
+    val dateList = mutableListOf<Long>()
+    for (i in 0..endDate - startDate) {
+        dateList.add(startDate.toLocalDate().plusDays(i).toLong())
+    }
+    return dateList
 }

@@ -14,6 +14,7 @@ import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Model.TransactionClass
 import com.roaa.expensetracker.Utilities.Constants
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
+import com.roaa.expensetracker.Utilities.Constants.INCOME
 import com.roaa.expensetracker.Utilities.UiState
 import com.roaa.expensetracker.Utilities.toLong
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -271,6 +272,10 @@ class TransactionsViewModel @Inject constructor(
 
     fun getTotalExpenseAmountForDateCompose(date: Long): Flow<Float> {
         return transactionRepository.getTotalAmountForDate(date, EXPENSE)
+    }
+
+    fun getTotalIncomeAmountForDateCompose(date: Long): Flow<Float> {
+        return transactionRepository.getTotalAmountForDate(date, INCOME)
     }
 
     fun getTotalExpenseAmountForDateExcludingLastCompose(date: Long): Flow<Float> {

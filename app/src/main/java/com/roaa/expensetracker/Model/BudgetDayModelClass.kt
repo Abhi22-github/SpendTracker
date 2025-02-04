@@ -7,7 +7,8 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Entity(tableName = "budget_day_table")
 data class BudgetDayModelClass(
-    @PrimaryKey(autoGenerate = false)
+    @PrimaryKey(autoGenerate = true)
+    val budgetDayId:Long,
     val date: Long,
     val budgetAmount: Float = 0f,
     val totalExpense: Float = 0f,
