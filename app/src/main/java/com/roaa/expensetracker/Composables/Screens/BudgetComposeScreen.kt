@@ -91,7 +91,9 @@ fun BudgetScreen(
     )
     var isBudgetSet by remember { mutableStateOf(false) }
     LaunchedEffect(getCurrentBudget) {
-        isBudgetSet = getCurrentBudget.budgetSummary.isActive
+        getCurrentBudget?.let {
+            isBudgetSet = it?.budgetSummary?.isActive ?: false
+        }
     }
     Scaffold(
         floatingActionButton = {
