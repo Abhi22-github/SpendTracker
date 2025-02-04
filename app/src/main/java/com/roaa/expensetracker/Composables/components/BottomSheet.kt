@@ -132,11 +132,13 @@ import com.roaa.expensetracker.Utilities.getCurrentDate
 import com.roaa.expensetracker.Utilities.getCurrentMonthName
 import com.roaa.expensetracker.Utilities.getMonthEndDate
 import com.roaa.expensetracker.Utilities.getRemainingDaysInCurrentMonth
+import com.roaa.expensetracker.Utilities.getValidDatesListFromLong
 import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLongMillis
 import com.roaa.expensetracker.ViewModels.AnimationViewModel
 import com.roaa.expensetracker.ViewModels.BankAccountsViewModel
+import com.roaa.expensetracker.ViewModels.BudgetDayViewModel
 import com.roaa.expensetracker.ViewModels.BudgetViewModel
 import com.roaa.expensetracker.ViewModels.CategoryViewModel
 import com.roaa.expensetracker.ViewModels.PreferencesViewModel
@@ -1927,6 +1929,8 @@ fun BudgetBottomSheet(
     amount: TextFieldValue,
     isBudgetSet: Boolean,
     budgetViewModel: BudgetViewModel = hiltViewModel(),
+    budgetDayViewModel: BudgetDayViewModel = hiltViewModel(),
+    transactionsViewModel: TransactionsViewModel = hiltViewModel()
 ) {
     val modifier = Modifier.padding(16.dp, 0.dp)
     var totalAmountText by remember { mutableStateOf(TextFieldValue("")) }
@@ -1946,7 +1950,9 @@ fun BudgetBottomSheet(
             if (isBudgetSet) {
                 shouldShowConfirmation = true
             } else {
-                saveDateToDevice(
+                SaveBudgetDetailsInDatabase(
+                    transactionsViewModel,
+                    budgetDayViewModel,
                     budgetViewModel,
                     totalAmountText.text,
                     totalAmountPerDay,
@@ -1965,7 +1971,9 @@ fun BudgetBottomSheet(
         ConfirmationAlertDialog(
             { shouldShowConfirmation = false },
             {
-                saveDateToDevice(
+                SaveBudgetDetailsInDatabase(
+                    transactionsViewModel,
+                    budgetDayViewModel,
                     budgetViewModel,
                     totalAmountText.text,
                     totalAmountPerDay,
@@ -1985,13 +1993,15 @@ fun BudgetBottomSheet(
     }
 }
 
-fun saveDateToDevice(
+fun SaveBudgetDetailsInDatabase(
+    transactionsViewModel: TransactionsViewModel,
+    budgetDayViewModel: BudgetDayViewModel,
     budgetViewModel: BudgetViewModel,
     totalAmountForMonth: String,
     totalAmountPerDay: Float,
     totalDaysRemaining: Long,
     currentMonthName: String,
-    budgeMonthStartDate: Long,
+    budgetMonthStartDate: Long,
     budgetMonthEndDate: Long,
     bottomSheetDismissed: () -> Unit,
     keyboardController: SoftwareKeyboardController?,
@@ -2002,9 +2012,11 @@ fun saveDateToDevice(
         totalAmountPerDay,
         totalDaysRemaining,
         currentMonthName,
-        budgeMonthStartDate,
-        budgetMonthEndDate
+        budgetMonthStartDate,
+        budgetMonthEndDate,
+        getValidDatesListFromLong(budgetMonthStartDate, budgetMonthEndDate)
     )
+
     focusManager.clearFocus()
     keyboardController?.hide()
     bottomSheetDismissed()

@@ -21,8 +21,15 @@ class BudgetRepository(@ApplicationContext applicationContext: Context) {
     }
 
     // creating a method to insert the data to our database.
-    suspend fun insert(budgetModelClass: BudgetModelClass) {
-        budgetDao.insert(budgetModelClass)
+    suspend fun insert(budgetModelClass: BudgetModelClass): Long {
+        return budgetDao.insert(budgetModelClass)
+    }
+
+    suspend fun insertWithDetails(
+        budgetModelClass: BudgetModelClass,
+        validDatesListFromLong: List<Long>
+    ) {
+         budgetDao.insertWithDayDetails(budgetModelClass,validDatesListFromLong)
     }
 
 

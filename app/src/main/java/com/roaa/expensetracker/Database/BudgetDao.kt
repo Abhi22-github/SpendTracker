@@ -5,20 +5,51 @@ import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.Transaction
 import androidx.room.Update
+import com.roaa.expensetracker.Model.BudgetDayModelClass
 import com.roaa.expensetracker.Model.BudgetModelClass
+import com.roaa.expensetracker.Utilities.Constants.EXPENSE
+import com.roaa.expensetracker.Utilities.Constants.INCOME
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface BudgetDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(budgetModelClass: BudgetModelClass)
+    suspend fun insert(budgetModelClass: BudgetModelClass): Long
 
     @Delete
     suspend fun delete(budgetModelClass: BudgetModelClass)
 
     @Update
     suspend fun update(budgetModelClass: BudgetModelClass)
+
+    @Transaction
+    suspend fun insertWithDayDetails(
+        budgetModelClass: BudgetModelClass, validDatesListFromLong: List<Long>
+    ) {
+        val transactionId = insert(budgetModelClass)
+        for (date in validDatesListFromLong) {
+            val budgetDayClass = BudgetDayModelClass(
+                budgetDayId = 0L,
+                date = date,
+                budgetAmount = budgetModelClass.budgetAmountPerDay,
+                totalExpense = getTotalAmountForDate(date, EXPENSE) ?: 0f,
+                totalIncome = getTotalAmountForDate(date, INCOME) ?: 0f,
+                totalExpenseTransactionCount = 0L,
+                totalIncomeTransactionCount = 0L,
+                budgetId = transactionId
+            )
+            insertDays(budgetDayClass)
+        }
+
+    }
+
+    @Query("SELECT SUM(amount) FROM transaction_table where date == :date and type == :type")
+    suspend fun getTotalAmountForDate(date: Long, type: String): Float?
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertDays(budgetDayModelClass: BudgetDayModelClass): Long
 
     @Query("DELETE FROM budget_table")
     suspend fun deleteAllBudget()
