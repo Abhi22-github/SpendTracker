@@ -29,6 +29,7 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState: StateFlow<UiState> = _uiState
 
+
     fun getCurrentBudget(): Flow<BudgetModelClass> {
         return budgetRepository.getCurrentBudget
     }
@@ -43,13 +44,15 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
         }
     }
 
+
     fun createObjectAndStoreIt(
         totalAMountForMonth: Float,
         totalAmountPerDay: Float,
         totalDaysRemaining: Long,
         currentMonthName: String,
         budgeMonthStartDate: Long,
-        budgetMonthEndDate: Long
+        budgetMonthEndDate: Long,
+        validDatesListFromLong: List<Long>
     ) {
         val budgeObject = BudgetModelClass(
             budgetId = 0L,
@@ -61,14 +64,14 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
             budgetMonthEndDate = budgetMonthEndDate,
             isActive = true
         )
-        saveBudget(budgeObject)
+        saveBudget(budgeObject, validDatesListFromLong)
     }
 
-    private fun saveBudget(budgetModelClass: BudgetModelClass) {
+    private fun saveBudget(budgetModelClass: BudgetModelClass, validDatesListFromLong: List<Long>) {
         if (budgetModelClass.budgetId == 0L) {
             //adding new bank Accounts
             viewModelScope.launch {
-                budgetRepository.insert(budgetModelClass)
+                budgetRepository.insertWithDetails(budgetModelClass,validDatesListFromLong)
             }
         } else {
             //updating existing account
@@ -91,8 +94,6 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
         _uiState.value = UiState.Error(error.toString())
         Log.d("Hello Error reason", error.toString())
     }
-
-
 
 
 }
