@@ -25,7 +25,11 @@ class TransactionRepository(@ApplicationContext applicationContext: Context) {
     }
 
     suspend fun insertAndPropagateChanges(transactionClass: TransactionClass) {
-        transactionDao.addTransactionWithDayDetails(transactionClass)
+        transactionDao.addTransactionAndPropagateChanges(transactionClass)
+    }
+
+    suspend fun deleteAndPropagateChanges(transactionClass: TransactionClass) {
+        transactionDao.deleteTransactionAndPropagateChanges(transactionClass)
     }
 
     suspend fun update(transactionClass: TransactionClass) {
