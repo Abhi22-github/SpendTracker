@@ -7,6 +7,7 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import com.roaa.expensetracker.Model.BudgetDayModelClass
 import com.roaa.expensetracker.Model.BudgetModelClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
@@ -53,6 +54,9 @@ interface BudgetDao {
 
     @Query("DELETE FROM budget_table")
     suspend fun deleteAllBudget()
+
+    @get:Query("SELECT * FROM budget_table WHERE isActive = 1")
+    val getCurrentBudgetWithDays: Flow<BudgetWithDayDetails>
 
     @get:Query("SELECT * FROM budget_table WHERE isActive = 1")
     val getCurrentBudget: Flow<BudgetModelClass>

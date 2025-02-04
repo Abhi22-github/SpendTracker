@@ -2,6 +2,7 @@ package com.roaa.expensetracker.Database
 
 import android.content.Context
 import com.roaa.expensetracker.Database.AppDatabase.Companion.getInstance
+import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import com.roaa.expensetracker.Model.BudgetModelClass
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -11,12 +12,14 @@ class BudgetRepository(@ApplicationContext applicationContext: Context) {
 
     // below method is to read all category from database.
     val getCurrentBudget: Flow<BudgetModelClass>
+    val getCurrentBudgetWithDays: Flow<BudgetWithDayDetails>
     val allBudget: Flow<List<BudgetModelClass>>
 
     init {
         val database = getInstance(applicationContext)
         budgetDao = database.budgetDao()
         getCurrentBudget = budgetDao.getCurrentBudget
+        getCurrentBudgetWithDays = budgetDao.getCurrentBudgetWithDays
         allBudget = budgetDao.allBudget
     }
 
