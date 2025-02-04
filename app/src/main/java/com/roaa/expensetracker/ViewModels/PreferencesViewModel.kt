@@ -4,12 +4,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roaa.expensetracker.Composables.changeThemeSystemWide
 import com.roaa.expensetracker.Model.BankAccountsClass
+import com.roaa.expensetracker.Utilities.PreferenceManger.CURRENT_BUDGET_DURATION
+import com.roaa.expensetracker.Utilities.PreferenceManger.CURRENT_BUDGET_END_DATE
+import com.roaa.expensetracker.Utilities.PreferenceManger.CURRENT_BUDGET_MONTH_NAME
+import com.roaa.expensetracker.Utilities.PreferenceManger.CURRENT_BUDGET_START_DATE
 import com.roaa.expensetracker.Utilities.PreferenceManger.IS_BUDGET_SET
 import com.roaa.expensetracker.Utilities.PreferenceManger.PRIMARY_BANK_ACCOUNT
 import com.roaa.expensetracker.Utilities.PreferenceManger.PreferenceManager
 import com.roaa.expensetracker.Utilities.PreferenceManger.SHOW_FORECAST
 import com.roaa.expensetracker.Utilities.PreferenceManger.THEME_MODE
-import com.roaa.expensetracker.Utilities.PreferenceManger.TOTAL_BUDGET
+import com.roaa.expensetracker.Utilities.PreferenceManger.TOTAL_BUDGET_FOR_MONTH
+import com.roaa.expensetracker.Utilities.PreferenceManger.TOTAL_BUDGET_PER_DAY
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -49,16 +54,28 @@ class PreferencesViewModel @Inject constructor(private val preferenceManager: Pr
         }
     }
 
-    val getPrimaryAccount =  preferenceManager.getPrimaryBankAccount()
+    val getPrimaryAccount = preferenceManager.getPrimaryBankAccount()
 
 
-    fun saveBudget(budget: Float) {
+    fun saveBudget(
+        totalAmountForMonth: Float,
+        totalAmountPerDay: Float,
+        totalDaysRemaining: Long,
+        currentMonthName: String,
+        budgeMonthStartDate: Long,
+        budgetMonthEndDate: Long
+    ) {
         viewModelScope.launch {
-            preferenceManager.saveFloatValue(budget, TOTAL_BUDGET)
+            preferenceManager.saveFloatValue(totalAmountForMonth, TOTAL_BUDGET_FOR_MONTH)
+            preferenceManager.saveFloatValue(totalAmountPerDay, TOTAL_BUDGET_PER_DAY)
+            preferenceManager.saveStringValue(currentMonthName, CURRENT_BUDGET_MONTH_NAME)
+            preferenceManager.saveLongValue(totalDaysRemaining, CURRENT_BUDGET_DURATION)
+            preferenceManager.saveLongValue(budgeMonthStartDate, CURRENT_BUDGET_START_DATE)
+            preferenceManager.saveLongValue(budgetMonthEndDate, CURRENT_BUDGET_END_DATE)
         }
     }
 
-    val getBudgetValue = preferenceManager.getFloatValue(TOTAL_BUDGET)
+    val getTotalAmountPerDay = preferenceManager.getFloatValue(TOTAL_BUDGET_PER_DAY)
 
     fun setBudgetState(budgetState: Boolean) {
         viewModelScope.launch {

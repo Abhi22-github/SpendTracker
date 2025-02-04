@@ -20,7 +20,6 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,10 +34,9 @@ import com.roaa.expensetracker.ViewModels.DaileBudgetState
 @Composable
 fun StatusLabel(
     harmonizedColor: HarmonizedColorPalette,
+    budgetState: DaileBudgetState,
     animationViewModel: AnimationViewModel = hiltViewModel()
 ) {
-    val budgetState by animationViewModel.state.collectAsState(DaileBudgetState.NORMAL)
-
     val textColor = LocalContentColor.current
 
     Box(contentAlignment = Alignment.CenterStart) {
@@ -54,12 +52,13 @@ fun StatusLabel(
 
             Spacer(modifier = Modifier.width(textStartOffset))
             Text(
-                text = when (budgetState) {
-                    DaileBudgetState.NORMAL -> "For Today"
-                    DaileBudgetState.MIDDLE -> "For Today"
-                    DaileBudgetState.END -> "New Daily"
-                    DaileBudgetState.OVERSPEND -> "Daily Budget Exhausted"
-                },
+//                text = when (budgetState) {
+//                    DaileBudgetState.NORMAL -> "You Spent"
+//                    DaileBudgetState.MIDDLE -> "You Spent"
+//                    DaileBudgetState.END -> "New Daily"
+//                    DaileBudgetState.OVERSPEND -> "Daily Budget Exhausted"
+//                },
+                text = "You Spent",
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontSize = MaterialTheme.typography.titleMedium.fontSize
                 ),

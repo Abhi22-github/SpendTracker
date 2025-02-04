@@ -32,7 +32,10 @@ interface TransactionDao {
     fun getAllTransactionsForDate(date: Long): Flow<List<TransactionWithDetails>>
 
     @Query("SELECT SUM(amount) FROM transaction_table where date == :date and type == :type")
-    fun getTotalAmountForDate(date: Long, type: String): Flow<Long?>
+    fun getTotalAmountForDate(date: Long, type: String): Flow<Float?>
+
+    @Query("SELECT COALESCE(SUM(amount),0) FROM transaction_table WHERE date = :date AND type = :type AND id NOT IN (SELECT id FROM transaction_table WHERE date = :date AND type = :type ORDER BY dateWithTime DESC LIMIT 1)")
+    fun getTotalAmountForDateExcludingLast(date: Long, type: String): Flow<Float?>
 
     @Query("SELECT date,SUM(amount) AS totalAmount FROM transaction_table where date >= :startDate and date <= :endDate and type == :type")
     fun getTotalAmountByDateRangeAndCategoryType(

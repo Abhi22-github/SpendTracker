@@ -1,7 +1,9 @@
 package com.roaa.expensetracker.Utilities
 
+import android.util.Log
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import okhttp3.internal.toLongOrDefault
+import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -35,8 +37,9 @@ fun Long.toLocalDate(): LocalDate {
     return LocalDate.parse(dateString, formatter)
 }
 
-fun LocalDateToString(localDate: LocalDate): String {
-    return localDate.format(DateTimeFormatter.ofPattern("dd MMM")).toString()
+
+fun LocalDate.toDisplayStringForMonth(): String {
+    return this.format(DateTimeFormatter.ofPattern("dd MMM")).toString()
 }
 
 fun parseAmount(amount: Float): String {
@@ -213,5 +216,119 @@ fun getRemainingDaysInCurrentMonth(): Long = run {
 }
 
 fun getCurrentDate() = run { LocalDate.now().toLong() }
+
 fun getMonthEndDate() =
     run { LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()).toLong() }
+
+fun getDaysRemaining(endDate: LocalDate): Long = run {
+    return Math.abs(java.time.temporal.ChronoUnit.DAYS.between(endDate, LocalDate.now()))
+}
+
+val dayNameList = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
+
+fun datesListForMonth(
+    localDate: LocalDate,
+    budgetMonthStartDate: Long,
+    budgetMonthEndDate: Long,
+    budgetAmountPerDay: Float,
+    totalAmountList: List<TotalExpenseIncomeClass>
+): List<CalenderDayState> = run {
+    val firstDayOfMonth = localDate.withDayOfMonth(1)
+    val lastDayOfMonth = firstDayOfMonth.withDayOfMonth(firstDayOfMonth.lengthOfMonth())
+    val startDayOfWeek = firstDayOfMonth.dayOfWeek
+
+    val budgetStartDate = budgetMonthStartDate.toString().takeLast(2).toInt()
+    val budgetEndDate = budgetMonthEndDate.toString().takeLast(2).toInt()
+    val calendarGrid = mutableListOf<CalenderDayState>()
+
+
+    for (i in 1..startDayOfWeek.value) {
+        calendarGrid.add(CalenderDayState(-1, false, DayState.NOT_STARTED))
+    }
+    val totalAmountMap: Map<Int, TotalExpenseIncomeClass> =
+        totalAmountList.associateBy { it.date.toString().takeLast(2).toInt() }
+
+    totalAmountMap.forEach { i, totalExpenseIncomeClass ->
+        Log.d("DateTimeUtility map", "$i $totalExpenseIncomeClass")
+    }
+
+    for (i in 1..lastDayOfMonth.dayOfMonth) {
+        if (i in budgetStartDate..budgetEndDate) {
+            calendarGrid.add(CalenderDayState(i, true, DayState.IN_LIMIT))
+        } else {
+            calendarGrid.add(CalenderDayState(i, false, DayState.NOT_STARTED))
+        }
+    }
+
+    for (i in 0 until calendarGrid.size) {
+        if (totalAmountMap.containsKey(calendarGrid[i].day)) {
+//            Log.d(
+//                "DateTimeUtility key present",
+//                "${totalAmountMap[calendarGrid[i].day]!!.totalExpense} : ${budgetAmountPerDay}"
+//            )
+            val a = BigDecimal(totalAmountMap[calendarGrid[i].day]!!.totalExpense.toDouble())
+            val b = BigDecimal(budgetAmountPerDay.toDouble())
+            if (a.compareTo(b)>1) {
+                calendarGrid[calendarGrid[i].day].dayState = DayState.OVER_LIMIT
+                Log.d(
+                    "DateTimeUtility ----",
+                    "${calendarGrid[i].dayState} : ${totalAmountMap[calendarGrid[i].day]}"
+                )
+            } else if (a.compareTo(b)<1) {
+                calendarGrid[calendarGrid[i].day].dayState = DayState.IN_LIMIT
+                Log.d(
+                    "DateTimeUtility+++++",
+                    "${calendarGrid[i].dayState} : ${totalAmountMap[calendarGrid[i].day]}"
+                )
+            }
+        } else {
+            Log.d("DateTimeUtility elsss", i.toString())
+            if (calendarGrid[i].day != -1)
+                calendarGrid[calendarGrid[i].day].dayState = DayState.NOT_STARTED
+        }
+    }
+
+    for (i in calendarGrid) {
+        Log.d("DateTimeUtility", i.toString())
+    }
+    calendarGrid
+}
+
+fun getCalendarForMonthFromDateIncludingPrevMont(localDate: LocalDate): List<LocalDate> {
+    // Get the first day of the month
+    val firstDayOfMonth = localDate.withDayOfMonth(1)
+    // Get the last day of the month
+    val lastDayOfMonth = firstDayOfMonth.withDayOfMonth(firstDayOfMonth.lengthOfMonth())
+
+    // Calculate the start day of the week for the first day of the month
+    val startDayOfWeek = firstDayOfMonth.dayOfWeek
+
+    // Prepare the list to hold the calendar grid
+    val calendarGrid = mutableListOf<LocalDate>()
+
+    // Step 1: Add dates from the previous month to fill the first row
+    val prevMonthLastDay = firstDayOfMonth.minusDays(1)
+    val prevMonthStartDate = firstDayOfMonth.minusDays(startDayOfWeek.value.toLong())
+    var prevMonthDate = prevMonthStartDate
+    while (prevMonthDate.isBefore(firstDayOfMonth)) {
+        calendarGrid.add(prevMonthDate)
+        prevMonthDate = prevMonthDate.plusDays(1)
+    }
+
+    // Step 2: Add all the dates of the current month
+    var currentDate = firstDayOfMonth
+    while (currentDate.isBefore(lastDayOfMonth.plusDays(1))) {
+        calendarGrid.add(currentDate)
+        currentDate = currentDate.plusDays(1)
+    }
+
+    // Step 3: Add dates from the next month to fill the grid to 42 dates
+    val nextMonthDate = lastDayOfMonth.plusDays(1)
+    var nextDate = nextMonthDate
+    while (calendarGrid.size < 42) { // Ensure the grid has exactly 42 dates
+        calendarGrid.add(nextDate)
+        nextDate = nextDate.plusDays(1)
+    }
+
+    return calendarGrid
+}
