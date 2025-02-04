@@ -10,12 +10,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 
-enum class DaileBudgetState {
-    NORMAL,
-    MIDDLE,
-    END,
-    OVERSPEND
-}
+
 
 @HiltViewModel
 class AnimationViewModel @Inject constructor(

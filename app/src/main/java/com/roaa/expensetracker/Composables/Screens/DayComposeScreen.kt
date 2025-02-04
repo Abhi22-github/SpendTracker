@@ -55,11 +55,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.components.RestBudgetPill
 import com.roaa.expensetracker.Composables.components.TransactionsListCompose
+import com.roaa.expensetracker.Model.emptyBudgetClass
 import com.roaa.expensetracker.Utilities.getPreviousAndNext500Days
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.ViewModels.AnimationViewModel
-import com.roaa.expensetracker.ViewModels.PreferencesViewModel
+import com.roaa.expensetracker.ViewModels.BudgetViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -70,27 +71,18 @@ fun DayScreen(
     navigationManager: NavigationManager,
     showSingleDateTransactions: Boolean,
     date: Long,
+    totalExpenseAmountForDate:Float,
+    budgetAmountPerDay:Float,
+    oldPercent: Float,
+    percent: Float,
     animationViewModel: AnimationViewModel = hiltViewModel(),
     transactionsViewModel: TransactionsViewModel = hiltViewModel(),
-    preferencesViewModel: PreferencesViewModel = hiltViewModel()
+    budgetViewModel: BudgetViewModel = hiltViewModel()
 ) {
-    transactionsViewModel.getTotalExpenseForRange(
-        date, date
-    )
-    val budget by preferencesViewModel.getBudgetValue.collectAsState(1f)
-    val newDailyBudget by transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
-
-    val amountInString = String.format("%.2f", newDailyBudget.toFloat())
-    val percent = if (budget != 0f) {
-        newDailyBudget / budget
-    } else {
-        0f
-    }
-    animationViewModel.method("₹$amountInString", percent)
 
     Column {
         Row(modifier = Modifier.padding(12.dp, 16.dp)) {
-            RestBudgetPill(date)
+            RestBudgetPill(totalExpenseAmountForDate,budgetAmountPerDay, oldPercent, percent)
         }
         TransactionsListCompose(navigationManager, Modifier, true, date)
     }
@@ -102,7 +94,8 @@ fun DayViewScreen(
     navigationManager: NavigationManager,
     date: Long,
     modifier: Modifier = Modifier,
-    transactionViewModel: TransactionsViewModel = hiltViewModel()
+    transactionViewModel: TransactionsViewModel = hiltViewModel(),
+    budgetViewModel: BudgetViewModel = hiltViewModel()
 ) {
     val pagerState = rememberPagerState(initialPage = 500 / 2, pageCount = { 500 })
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
@@ -237,11 +230,47 @@ fun DayViewScreen(
 //            )
         }
 
+
         HorizontalPager(
             state = pagerState,
         ) { page ->
             val currentDay = calculateCurrentPageDay(page, 250, date.toLocalDate())
-            DayScreen(navigationManager, false, currentDay.toLong())
+            val getCurrentBudget by budgetViewModel.getCurrentBudget()
+                .collectAsState(emptyBudgetClass)
+            val getTotalAmountForDate by transactionViewModel.getTotalExpenseAmountForDateCompose(
+                currentDay.toLong()
+            ).collectAsState(0f)
+            val getTotalAmountForDateExcludingLast by transactionViewModel.getTotalExpenseAmountForDateExcludingLastCompose(
+                currentDay.toLong()
+            ).collectAsState(0f)
+            val oldPercent = if (getCurrentBudget.budgetAmountPerDay != 0f) {
+                // Safe division: Handle division by zero and null values
+                getTotalAmountForDateExcludingLast / getCurrentBudget.budgetAmountPerDay
+            } else {
+                // Handle edge case (division by zero or null value)
+                0f  // or use another default value, depending on your requirements
+            }
+            val percent = if (getCurrentBudget.budgetAmountPerDay != 0f) {
+                // Safe division: Handle division by zero and null values
+                getTotalAmountForDate / getCurrentBudget.budgetAmountPerDay
+            } else {
+                // Handle edge case (division by zero or null value)
+                0f  // or use another default value, depending on your requirements
+            }
+
+            Log.d(
+                "DayComposeScreen---",
+                "${currentDay.toLong()} :$percent: $oldPercent: ${getCurrentBudget.budgetAmountPerDay}"
+            )
+            DayScreen(
+                navigationManager,
+                false,
+                currentDay.toLong(),
+                getTotalAmountForDate,
+                getCurrentBudget.budgetAmountPerDay,
+                1 - oldPercent,
+                1 - percent
+            )
         }
     }
 }

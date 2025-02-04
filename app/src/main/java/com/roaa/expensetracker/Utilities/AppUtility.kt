@@ -1,5 +1,6 @@
 package com.roaa.expensetracker.Utilities
 
+import android.util.Log
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
@@ -73,4 +74,15 @@ class DecimalFilterTransformation : VisualTransformation {
             OffsetMapping.Identity
         )
     }
+}
+
+fun getEffectivePercentageForPill(
+    budgetAmountPerDay: Float,
+    totalAmountForCurrentDate: Float
+): Float {
+    Log.d("DayComposeScreen","$budgetAmountPerDay : $totalAmountForCurrentDate")
+    if (budgetAmountPerDay != 0f && totalAmountForCurrentDate != 0f) {
+        return totalAmountForCurrentDate / budgetAmountPerDay
+    } else
+        return 0f
 }
