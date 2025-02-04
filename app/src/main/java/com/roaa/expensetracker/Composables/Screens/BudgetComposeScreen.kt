@@ -1,7 +1,6 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -69,7 +68,6 @@ import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.ViewModels.BudgetViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import java.time.LocalDate
-import kotlin.math.roundToInt
 
 
 val horizontalPadding = 16.dp
@@ -344,9 +342,6 @@ fun SpendCalender(
 
             val budgetDayMap = getCurrentBudget.budgetAllDays.associateBy { it.date }
 
-            budgetDayMap.forEach { key, value ->
-                Log.d("BudgetComposeScreen", "$key $value")
-            }
             val list = datesListForMonth(
                 LocalDate.now(),
                 getCurrentBudget.budgetSummary.budgetMonthStartDate,
@@ -355,7 +350,7 @@ fun SpendCalender(
 
             list.forEachIndexed { index, it ->
                 if (budgetDayMap.containsKey(it.dayDate)) {
-                    if (budgetDayMap[it.dayDate]!!.totalExpense.roundToInt() == budgetDayMap[it.dayDate]!!.budgetAmount.roundToInt()) {
+                    if (budgetDayMap[it.dayDate]!!.totalExpense == 0f) {
                         it.dayState = DayState.NOT_STARTED
                     } else if (budgetDayMap[it.dayDate]!!.totalExpense > budgetDayMap[it.dayDate]!!.budgetAmount) {
                         it.dayState = DayState.OVER_LIMIT
@@ -390,16 +385,6 @@ fun SpendCalender(
                     }
                 }
             }
-//            LazyVerticalGrid(
-//                columns = GridCells.Fixed(7),
-//                horizontalArrangement = Arrangement.spacedBy(12.dp),
-//                verticalArrangement = Arrangement.spacedBy(12.dp),
-//                modifier = Modifier.height(250.dp)
-//            ) {
-//                items(datesListForMonth(LocalDate.now())) {
-//                    DayBox(Modifier, it.toString())
-//                }
-//            }
         }
     }
 }
