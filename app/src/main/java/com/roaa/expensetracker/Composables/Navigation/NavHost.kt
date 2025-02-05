@@ -22,6 +22,7 @@ import com.roaa.expensetracker.Composables.Screens.DayViewScreen
 import com.roaa.expensetracker.Composables.Screens.MonthViewScreen
 import com.roaa.expensetracker.Composables.Screens.PaymentMethodScreen
 import com.roaa.expensetracker.Composables.Screens.SettingsScreen
+import com.roaa.expensetracker.Composables.Screens.TransactionDetailsScreen
 import com.roaa.expensetracker.Composables.components.TransactionsListCompose
 import com.roaa.expensetracker.Utilities.toLong
 import java.time.LocalDate
@@ -68,6 +69,10 @@ fun SetupNavigationGraph(navController: NavHostController, navigationManager: Na
             }
             composable<NavRoutes.MonthScreen> {
                 MonthViewScreen(navigationManager, modifier = Modifier)
+            }
+
+            composable<NavRoutes.DetailsScreen>{
+                TransactionDetailsScreen(navigationManager,modifier = Modifier)
             }
 
             composable<NavRoutes.DayScreen> {
