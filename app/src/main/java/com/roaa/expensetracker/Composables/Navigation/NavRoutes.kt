@@ -21,6 +21,9 @@ sealed class NavRoutes {
     data object BudgetScreen : NavRoutes()
 
     @Serializable
+    data object DetailsScreen : NavRoutes()
+
+    @Serializable
     data object MonthScreen : NavRoutes()
 
     @Serializable
