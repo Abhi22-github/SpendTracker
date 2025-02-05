@@ -15,10 +15,8 @@ import java.util.Locale
 
 fun getFirstAndLastDateOfGivenPeriod(prevMonth: LocalDate, nextMonth: LocalDate): Pair<Long, Long> {
 
-    // First date of the current month
     val firstDate = prevMonth.withDayOfMonth(1)
 
-    // Last date of the current month
     val lastDate = nextMonth.withDayOfMonth(nextMonth.lengthOfMonth())
 
     val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
