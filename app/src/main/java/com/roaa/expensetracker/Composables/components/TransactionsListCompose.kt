@@ -50,6 +50,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts
+import com.roaa.expensetracker.Composables.Navigation.NavRoutes
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.blueColor
 import com.roaa.expensetracker.Composables.failureColor
@@ -170,10 +171,11 @@ fun TransactionsListCompose(
             }
 
             if (bottomSheet) {
-                BottomSheetContentItemDetails(
-                    bottomSheetState,
-                    singleTransaction,
-                    { bottomSheet = !bottomSheet })
+//                BottomSheetContentItemDetails(
+//                    bottomSheetState,
+//                    singleTransaction,
+//                    { bottomSheet = !bottomSheet })
+                navController.navigateTo(NavRoutes.DetailsScreen)
             }
             if (showAddBottomSheet) {
                 AddBottomSheet(date, { showAddBottomSheet = !showAddBottomSheet })
