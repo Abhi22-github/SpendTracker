@@ -83,7 +83,6 @@ fun KeyboardButton(
         Box(
             modifier = Modifier
                 .background(color = color)
-                .fillMaxSize()
                 .clip(RoundedCornerShape(radius.value))
                 .combinedClickable(
                     interactionSource = interactionSource,
