@@ -86,6 +86,7 @@ fun TransactionsListCompose(
 ) {
     var showAddBottomSheet by remember { mutableStateOf(false) }
     var bottomSheet by remember { mutableStateOf(false) }
+    val showNewLayouts by preferencesViewModel.showForecastBar.collectAsState(false)
     Scaffold(floatingActionButton = {
         ExtendedFloatingActionButton(
             onClick = {
@@ -139,7 +140,11 @@ fun TransactionsListCompose(
                             }
                             items(transactionList, key = { it.transaction.id }) { item ->
                                 SingleTransaction(item, onSingleItemClick = {
+
                                     singleTransaction = (item)
+                                    if(showNewLayouts)
+                                        navController.navigateTo(NavRoutes.DetailsScreen)
+                                    else
                                     bottomSheet = true
 
                                 })
@@ -161,8 +166,10 @@ fun TransactionsListCompose(
                         items(transactionList, key = { it.transaction.id }) { item ->
                             SingleTransaction(item, onSingleItemClick = {
                                 singleTransaction = (item)
-                                bottomSheet = true
-
+                                if(showNewLayouts)
+                                    navController.navigateTo(NavRoutes.DetailsScreen)
+                                else
+                                    bottomSheet = true
                             })
                         }
                     }
@@ -171,11 +178,10 @@ fun TransactionsListCompose(
             }
 
             if (bottomSheet) {
-//                BottomSheetContentItemDetails(
-//                    bottomSheetState,
-//                    singleTransaction,
-//                    { bottomSheet = !bottomSheet })
-                navController.navigateTo(NavRoutes.DetailsScreen)
+                BottomSheetContentItemDetails(
+                    bottomSheetState,
+                    singleTransaction,
+                    { bottomSheet = !bottomSheet })
             }
             if (showAddBottomSheet) {
                 AddBottomSheet(date, { showAddBottomSheet = !showAddBottomSheet })
