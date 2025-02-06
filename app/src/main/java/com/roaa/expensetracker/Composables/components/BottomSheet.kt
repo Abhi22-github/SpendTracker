@@ -726,15 +726,23 @@ fun AddBottomSheet(
     date: Long,
     closeBottomSheet: () -> Unit,
     transactionsViewModel: TransactionsViewModel = hiltViewModel(),
+    preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
+    val showNewLayout by preferencesViewModel.showForecastBar.collectAsState(false)
 
-    BottomSheetContentAddItem(date, bottomSheetState) {
-        scope.launch {
-            closeBottomSheet()
+    if (!showNewLayout)
+        BottomSheetContentAddItem(date, bottomSheetState) {
+            scope.launch {
+                closeBottomSheet()
+            }
+        } else
+        BottomSheetContentAddItemTest(bottomSheetState) {
+            scope.launch {
+                closeBottomSheet()
+            }
         }
-    }
 
 }
 
@@ -1575,9 +1583,9 @@ fun BottomSheetContentItemAddContentTest(
 //                    RestBudgetPill(LocalDate.now().toLong())
 //                }
 //            }
-            if (showForecast) {
-                Spacer(Modifier.height(16.dp))
-            }
+//            if (showForecast) {
+//                Spacer(Modifier.height(16.dp))
+//            }
             Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
 
                 Box(contentAlignment = Alignment.Center,
@@ -1811,19 +1819,19 @@ fun BottomSheetContentItemAddContentTest(
 
             Spacer(Modifier.height(16.dp))
             Row {
-                //         BottomRowTest(modifier, selectedDate, { selectedDate = it }, buttonClicked = {
+                BottomRowTest(modifier, selectedDate, { selectedDate = it }, buttonClicked = {
 //                    validateTransactionData(
 //                        selectedType,
 //                        selectedCategory,
 //                        expenseValue.text.replace(",", ""),
 //                        comment.text,
 //                        selectedDate,
-//                        selectedPaymentMethod = ,
+//                        selectedPaymentMethod =,
 //                        scope,
 //                        uiViewModel,
 //                        transactionsViewModel,
 //                    )
-                //            })
+                })
             }
 
 
@@ -1868,58 +1876,58 @@ fun BottomSheetContentItemAddContentTest(
     }
 }
 
-//@OptIn(ExperimentalMaterial3Api::class)
-//@Composable
-//fun BottomRowTest(
-//    modifier: Modifier,
-//    selectedDate: Long?,
-//    selectedDateSetter: (Long?) -> Unit,
-//    buttonClicked: () -> Unit
-//) {
-//    var showDatePicker by remember { mutableStateOf(false) }
-//    val datePickerState =
-//        rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
-//    Row(
-//        verticalAlignment = Alignment.CenterVertically,
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
-//    ) {
-//        Row(modifier = modifier.weight(1f)) {
-//
-//            FilledTonalButton(
-//                onClick = {
-//                    showDatePicker = !showDatePicker
-//                    selectedDateSetter(selectedDate)
-//                }, colors = ButtonDefaults.outlinedButtonColors(
-//                    contentColor = MaterialTheme.colorScheme.onSurface.copy(
-//                        alpha = secondaryAlphaForElements
-//                    )
-//                ), contentPadding = PaddingValues(start = 12.dp, end = 12.dp)
-//            ) {
-//                Icon(Icons.Rounded.DateRange, contentDescription = null)
-//                Spacer(Modifier.width(8.dp))
-//                Text(text = if (selectedDate?.let { convertMillisToDateString(it) } == convertMillisToDateString(
-//                        System.currentTimeMillis()
-//                    )) {
-//                    "Today"
-//                } else {
-//                    selectedDate?.let {
-//                        "HEllo"
-//                    } ?: "Date Error"
-//                })
-//
-//            }
-//
-//
-//        }
-//    }
-//    if (showDatePicker) {
-//        DatePickerModal(datePickerState, onDateSelected = { date ->
-//            selectedDateSetter(date)
-//        }, onDismiss = { showDatePicker = !showDatePicker })
-//    }
-//}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BottomRowTest(
+    modifier: Modifier,
+    selectedDate: Long?,
+    selectedDateSetter: (Long?) -> Unit,
+    buttonClicked: () -> Unit
+) {
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState =
+        rememberDatePickerState(initialSelectedDateMillis = System.currentTimeMillis())
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
+    ) {
+        Row(modifier = modifier.weight(1f)) {
+
+            FilledTonalButton(
+                onClick = {
+                    showDatePicker = !showDatePicker
+                    selectedDateSetter(selectedDate)
+                }, colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = secondaryAlphaForElements
+                    )
+                ), contentPadding = PaddingValues(start = 12.dp, end = 12.dp)
+            ) {
+                Icon(Icons.Rounded.DateRange, contentDescription = null)
+                Spacer(Modifier.width(8.dp))
+                Text(text = if (selectedDate?.let { convertMillisToDateString(it) } == convertMillisToDateString(
+                        System.currentTimeMillis()
+                    )) {
+                    "Today"
+                } else {
+                    selectedDate?.let {
+                        "HEllo"
+                    } ?: "Date Error"
+                })
+
+            }
+
+
+        }
+    }
+    if (showDatePicker) {
+        DatePickerModal(datePickerState, onDateSelected = { date ->
+            selectedDateSetter(date)
+        }, onDismiss = { showDatePicker = !showDatePicker })
+    }
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
