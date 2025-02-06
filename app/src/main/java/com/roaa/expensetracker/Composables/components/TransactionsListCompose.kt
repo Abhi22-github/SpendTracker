@@ -52,7 +52,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts
 import com.roaa.expensetracker.Composables.Navigation.NavRoutes
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
-import com.roaa.expensetracker.Composables.blueColor
 import com.roaa.expensetracker.Composables.failureColor
 import com.roaa.expensetracker.Composables.successColor
 import com.roaa.expensetracker.Composables.utils.IconState
@@ -126,10 +125,6 @@ fun TransactionsListCompose(
                     if (!transactionConverterList.isEmpty()) LazyColumn(
                         modifier = Modifier.fillMaxWidth(), state = lazyList
                     ) {
-                        item {
-                            if (showForecast)
-                                SummaryCard(blueColor)
-                        }
                         transactionConverterList.forEach { (date, transactionList) ->
                             val date = transactionList.get(0).transaction.date
                             item {

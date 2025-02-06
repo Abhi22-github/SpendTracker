@@ -16,12 +16,14 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -38,6 +40,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -434,7 +437,7 @@ fun BottomSheetContentItemAddContent(
             Spacer(Modifier.height(0.dp))
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
+                    .align(Alignment.Start)
                     .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
             ) {
                 TextField(
@@ -447,7 +450,7 @@ fun BottomSheetContentItemAddContent(
                             uiViewModel.errorStatusInAddBottomSheet.emit(false)
                         }
                     },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier,
                     singleLine = true,
                     placeholder = {
                         Text(
@@ -472,6 +475,22 @@ fun BottomSheetContentItemAddContent(
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
 
                     )
+            }
+
+            TextButton(
+                onClick = {
+
+                },
+                Modifier
+                    .height(48.dp)
+                    .align(Alignment.Start),
+                colors = ButtonDefaults.textButtonColors(
+//                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+//                    contentColor = MaterialTheme.colorScheme.onSurface
+                )
+            ) {
+                Icon(Icons.Filled.Add, contentDescription = null)
+                Text("Add Tag")
             }
 
 
@@ -610,10 +629,6 @@ fun BottomRow(
     bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
     preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
-    Log.d("Test___1", System.currentTimeMillis().toString())
-    Log.d("Test___2", selectedDate.toString())
-    Log.d("Test___3", selectedDate?.toLocalDate().toString())
-    Log.d("Test___4", selectedDate?.toLocalDate()?.toLongMillis().toString())
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = selectedDate?.toLocalDate()?.toLongMillis()
@@ -728,22 +743,49 @@ fun AddBottomSheet(
     transactionsViewModel: TransactionsViewModel = hiltViewModel(),
     preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val scope = rememberCoroutineScope()
-    val showNewLayout by preferencesViewModel.showForecastBar.collectAsState(false)
+    BoxWithConstraints {
+        val contentHeight = constraints.maxHeight.toFloat()
+        val contentWidth = constraints.maxWidth.toFloat()
+        val windowSizeClass = LocalWindowSize.current
+        val localDensity = LocalDensity.current
+        val systemKeyboardHeight = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
+        val isShowSystemKeyboard =
+            systemKeyboardHeight != 0.dp && true
+//        val isRequestedShowSystemKeyboard =
+//            systemKeyboardHeight != 0.dp || appViewModel.showSystemKeyboard.value
+        val internalKeyboardHeight = if (windowSizeClass == WindowWidthSizeClass.Compact) {
+            contentWidth
+        } else {
+            contentWidth / 2f
+        }.coerceAtMost(with(localDensity) { 500.dp.toPx() }).coerceAtMost(contentHeight / 2)
 
-    if (!showNewLayout)
-        BottomSheetContentAddItem(date, bottomSheetState) {
-            scope.launch {
-                closeBottomSheet()
-            }
-        } else
-        BottomSheetContentAddItemTest(bottomSheetState) {
-            scope.launch {
-                closeBottomSheet()
-            }
+        val currentKeyboardHeight = if (isShowSystemKeyboard) {
+            with(localDensity) { systemKeyboardHeight.toPx() }
+        } else {
+            internalKeyboardHeight
         }
 
+        val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        val bottomSheetStateTest = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        val scope = rememberCoroutineScope()
+        val showNewLayout by preferencesViewModel.showForecastBar.collectAsState(false)
+
+        if (true)
+            BottomSheetContentAddItem(date, bottomSheetState) {
+                scope.launch {
+                    closeBottomSheet()
+                }
+            } else
+            BottomSheetContentAddItemTest(
+                bottomSheetStateTest,
+                localDensity,
+                internalKeyboardHeight,
+            ) {
+                scope.launch {
+                    closeBottomSheet()
+                }
+            }
+    }
 }
 
 //bottom sheet to show item Details
@@ -1449,7 +1491,12 @@ private fun BottomSheetContentItemDetailsPreview() {
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun BottomSheetContentAddItemTest(sheetState: SheetState, closeBottomSheet: () -> Unit) {
+fun BottomSheetContentAddItemTest(
+    sheetState: SheetState,
+    localDensity: Density,
+    keyboardHeight: Float,
+    closeBottomSheet: () -> Unit
+) {
 
     LaunchedEffect(true) {
         sheetState.show()
@@ -1461,7 +1508,7 @@ fun BottomSheetContentAddItemTest(sheetState: SheetState, closeBottomSheet: () -
         sheetState = sheetState,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        BottomSheetContentItemAddContentTest(modifier = Modifier)
+        BottomSheetContentItemAddContentTest(modifier = Modifier, localDensity, keyboardHeight)
     }
 }
 
@@ -1472,6 +1519,8 @@ val LocalWindowSize = compositionLocalOf { WindowWidthSizeClass.Compact }
 @Composable
 fun BottomSheetContentItemAddContentTest(
     modifier: Modifier,
+    localDensity: Density,
+    keyboardHeight: Float,
     categoryViewModel: CategoryViewModel = hiltViewModel(),
     transactionsViewModel: TransactionsViewModel = hiltViewModel(),
     uiViewModel: UiViewModel = hiltViewModel(),
@@ -1776,7 +1825,7 @@ fun BottomSheetContentItemAddContentTest(
                     ),
                 )
             }
-            Spacer(Modifier.height(0.dp))
+            Spacer(Modifier.height(12.dp))
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -1795,6 +1844,44 @@ fun BottomSheetContentItemAddContentTest(
                     placeholder = {
                         Text(
                             "Add a comment",
+                            style = typography.bodyLarge,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Start,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
+                        )
+                    },
+                    shape = RoundedCornerShape(24.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent
+                    ),
+                    textStyle = typography.bodyLarge.copy(
+                        textAlign = TextAlign.Start,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
+                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottomSheetStartEndPadding, 0.dp)
+            ) {
+                TextField(
+                    value = comment,
+                    onValueChange = { newValue ->
+                        comment = newValue
+                        scope.launch {
+                            uiViewModel.errorStatusInAddBottomSheet.emit(false)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    placeholder = {
+                        Text(
+                            "Add Tags",
                             style = typography.bodyLarge,
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = TextAlign.Start,
@@ -1834,9 +1921,6 @@ fun BottomSheetContentItemAddContentTest(
                 })
             }
 
-
-            val height1 = animateDpAsState((400 - imeHeight).dp, tween(200))
-
             androidx.compose.animation.AnimatedVisibility(
                 visible = !isKeyboardVisible,
                 enter = fadeIn(
@@ -1865,7 +1949,7 @@ fun BottomSheetContentItemAddContentTest(
 
                 KeyBoard(
                     modifier = Modifier
-                        .height(height1.value)
+                        .height(with(localDensity) { keyboardHeight.toDp() + 50.dp })
                         .fillMaxWidth()
                 )
 
