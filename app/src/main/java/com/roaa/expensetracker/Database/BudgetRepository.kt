@@ -12,7 +12,7 @@ class BudgetRepository(@ApplicationContext applicationContext: Context) {
 
     // below method is to read all category from database.
     val getCurrentBudget: Flow<BudgetModelClass>
-    val getCurrentBudgetWithDays: Flow<BudgetWithDayDetails>
+    val getCurrentBudgetWithDays: Flow<BudgetWithDayDetails?>
     val allBudget: Flow<List<BudgetModelClass>>
 
     init {
@@ -32,7 +32,7 @@ class BudgetRepository(@ApplicationContext applicationContext: Context) {
         budgetModelClass: BudgetModelClass,
         validDatesListFromLong: List<Long>
     ) {
-         budgetDao.insertWithDayDetails(budgetModelClass,validDatesListFromLong)
+        budgetDao.insertWithDayDetails(budgetModelClass, validDatesListFromLong)
     }
 
 
