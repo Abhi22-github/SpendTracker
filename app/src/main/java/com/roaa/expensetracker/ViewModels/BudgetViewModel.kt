@@ -34,7 +34,7 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
         return budgetRepository.getCurrentBudget
     }
 
-    fun getCurrentBudgetWithDetails(): Flow<BudgetWithDayDetails> {
+    fun getCurrentBudgetWithDetails(): Flow<BudgetWithDayDetails?> {
         return budgetRepository.getCurrentBudgetWithDays
     }
 
