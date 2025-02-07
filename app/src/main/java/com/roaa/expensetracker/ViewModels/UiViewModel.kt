@@ -11,6 +11,7 @@ class UiViewModel @Inject constructor() : ViewModel() {
     var errorStatusInAddBottomSheet = MutableStateFlow<Boolean>(false)
     var errorStatusInAddCategory = MutableStateFlow<Boolean>(false)
     var errorStatusInBankAccountAdd = MutableStateFlow<Boolean>(false)
+    var errorStatusInBudgetAdd = MutableStateFlow<Boolean>(false)
     var errorStatusMessage = MutableStateFlow<String>("")
 
     var selectedIconFromBottomSheet = MutableStateFlow<Int>(99)
@@ -18,8 +19,6 @@ class UiViewModel @Inject constructor() : ViewModel() {
 
     var paymentMethodBottomSheetStatus = MutableStateFlow(false)
 
-    var liveBankAmount = MutableStateFlow("")
-    var liveBankNumber = MutableStateFlow("")
-    var liveBankName = MutableStateFlow("Bank Name")
+
 
 }
