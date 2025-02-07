@@ -247,7 +247,7 @@ fun DayViewScreen(
                 )
             var getCurrentBudget by remember {
                 mutableStateOf(
-                    getCurrentBudgetFromRoom ?: BudgetWithDayDetails(
+                     BudgetWithDayDetails(
                         emptyBudgetClass, listOf(emptyBudgetDayClass)
                     )
                 )
@@ -259,10 +259,13 @@ fun DayViewScreen(
                 currentDay.toLong()
             ).collectAsState(0f)
             var isBudgetSet by remember { mutableStateOf(false) }
-            LaunchedEffect(getCurrentBudget) {
-                getCurrentBudget?.let {
+            LaunchedEffect(getCurrentBudgetFromRoom) {
+                getCurrentBudgetFromRoom?.let {
                     isBudgetSet = it?.budgetSummary?.isActive ?: false
                 }
+                getCurrentBudget = getCurrentBudgetFromRoom ?: BudgetWithDayDetails(
+                    emptyBudgetClass, listOf(emptyBudgetDayClass)
+                )
             }
             val oldPercent = if (getCurrentBudget.budgetSummary.budgetAmountPerDay != 0f) {
                 // Safe division: Handle division by zero and null values

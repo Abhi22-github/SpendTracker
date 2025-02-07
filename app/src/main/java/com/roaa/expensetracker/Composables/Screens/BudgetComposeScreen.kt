@@ -1,6 +1,7 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -89,18 +90,24 @@ fun BudgetScreen(
             emptyBudgetClass, listOf(emptyBudgetDayClass)
         )
     )
-    val getCurrentBudget by remember {
+    var getCurrentBudget by remember {
         mutableStateOf(
-            getCurrentBudgetFromRoom ?: BudgetWithDayDetails(
+            BudgetWithDayDetails(
                 emptyBudgetClass, listOf(emptyBudgetDayClass)
             )
         )
     }
+    Log.d("BudgetComposeScreen room", " $getCurrentBudgetFromRoom")
+    Log.d("BudgetComposeScreen var ", "$getCurrentBudget ")
+
     var isBudgetSet by remember { mutableStateOf(false) }
-    LaunchedEffect(getCurrentBudget) {
+    LaunchedEffect(getCurrentBudgetFromRoom) {
         getCurrentBudgetFromRoom?.let {
             isBudgetSet = it?.budgetSummary?.isActive ?: false
         }
+        getCurrentBudget = getCurrentBudgetFromRoom ?: BudgetWithDayDetails(
+            emptyBudgetClass, listOf(emptyBudgetDayClass)
+        )
     }
     Scaffold(
         floatingActionButton = {
