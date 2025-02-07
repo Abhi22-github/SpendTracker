@@ -2022,7 +2022,8 @@ fun BudgetBottomSheet(
     isBudgetSet: Boolean,
     budgetViewModel: BudgetViewModel = hiltViewModel(),
     budgetDayViewModel: BudgetDayViewModel = hiltViewModel(),
-    transactionsViewModel: TransactionsViewModel = hiltViewModel()
+    transactionsViewModel: TransactionsViewModel = hiltViewModel(),
+    uiViewModel: UiViewModel = hiltViewModel(),
 ) {
     val modifier = Modifier.padding(16.dp, 0.dp)
     var totalAmountText by remember { mutableStateOf(TextFieldValue("")) }
@@ -2031,7 +2032,9 @@ fun BudgetBottomSheet(
         getRemainingDaysInCurrentMonth()
     }
 
+
     var shouldShowConfirmation by remember { mutableStateOf(false) }
+    val errorStatus by uiViewModel.errorStatusInBudgetAdd.collectAsState()
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
@@ -2057,7 +2060,7 @@ fun BudgetBottomSheet(
                     focusManager
                 )
             }
-        })
+        }, errorStatus, uiViewModel)
     }
     if (shouldShowConfirmation) {
         ConfirmationAlertDialog(
@@ -2124,8 +2127,11 @@ fun BottomSheetBudgetContent(
     totalAmountPerDay: Float,
     totalAmountPerDayValueChange: (Float) -> Unit,
     totalDaysRemaining: Long,
-    saveDailySpendLimit: () -> Unit
+    saveDailySpendLimit: () -> Unit,
+    errorStatus: Boolean,
+    uiViewModel: UiViewModel
 ) {
+    val scope = rememberCoroutineScope()
     val focusRequester = remember {
         FocusRequester()
     }
@@ -2152,6 +2158,8 @@ fun BottomSheetBudgetContent(
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha),
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
+        Spacer(Modifier.height(12.dp))
+        ErrorRow(errorStatus)
         Spacer(Modifier.height(32.dp))
         Row {
             TextField(
@@ -2168,9 +2176,9 @@ fun BottomSheetBudgetContent(
                             amountTextValueChange(newValue.copy(text = filteredText))
                         }
                     }
-//                scope.launch {
-//                    uiViewModel.errorStatusInAddBottomSheet.emit(false)
-//                }
+                    scope.launch {
+                        uiViewModel.errorStatusInBudgetAdd.emit(false)
+                    }
                 },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -2270,7 +2278,29 @@ fun BottomSheetBudgetContent(
         Spacer(Modifier.height(16.dp))
         FilledTonalButton(
             modifier = Modifier.fillMaxWidth(),
-            onClick = { saveDailySpendLimit() },
+            onClick = {
+                if (dailySpendLimit.text.isEmpty()) {
+                    scope.launch {
+                        uiViewModel.errorStatusMessage.emit(
+                            "Please enter amount"
+                        )
+                        uiViewModel.errorStatusInBudgetAdd.emit(
+                            true
+                        )
+                    }
+                } else if (dailySpendLimit.text.toFloat() == 0f) {
+                    scope.launch {
+                        uiViewModel.errorStatusMessage.emit(
+                            "Please enter amount"
+                        )
+                        uiViewModel.errorStatusInBudgetAdd.emit(
+                            true
+                        )
+                    }
+                } else {
+                    saveDailySpendLimit()
+                }
+            },
         ) {
             Text(text = "Create Budget")
         }
