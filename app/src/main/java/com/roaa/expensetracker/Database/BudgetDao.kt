@@ -41,7 +41,7 @@ interface BudgetDao {
     //Relations
 
     @get:Query("SELECT * FROM budget_table WHERE isActive = 1")
-    val getCurrentBudgetWithDays: Flow<BudgetWithDayDetails>
+    val getCurrentBudgetWithDays: Flow<BudgetWithDayDetails?>
 
 
     // Transaction Supporting

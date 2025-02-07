@@ -84,14 +84,21 @@ fun BudgetScreen(
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     var bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val getCurrentBudget by budgetViewModel.getCurrentBudgetWithDetails().collectAsState(
+    val getCurrentBudgetFromRoom by budgetViewModel.getCurrentBudgetWithDetails().collectAsState(
         BudgetWithDayDetails(
             emptyBudgetClass, listOf(emptyBudgetDayClass)
         )
     )
+    val getCurrentBudget by remember {
+        mutableStateOf(
+            getCurrentBudgetFromRoom ?: BudgetWithDayDetails(
+                emptyBudgetClass, listOf(emptyBudgetDayClass)
+            )
+        )
+    }
     var isBudgetSet by remember { mutableStateOf(false) }
     LaunchedEffect(getCurrentBudget) {
-        getCurrentBudget?.let {
+        getCurrentBudgetFromRoom?.let {
             isBudgetSet = it?.budgetSummary?.isActive ?: false
         }
     }
