@@ -1,6 +1,7 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -45,8 +46,9 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
-import com.roaa.expensetracker.Composables.Navigation.NavRoutes
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
+import com.roaa.expensetracker.Composables.Navigation.RootScreen
+import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.secondaryAlpha
@@ -66,10 +68,31 @@ fun CategoryScreen(
 ) {
     with(sharedTransitionScope) {
         val context = LocalContext.current
+        fun handleBackNavigation() {
+            if (navigationManager.navController.previousBackStackEntry != null) {
+                navigationManager.navController.popBackStack() // Pop one screen if there is a back stack
+            } else {
+                navigationManager.navController.navigate(RootScreen.MainScreen) {
+                    popUpTo(RootScreen.MainScreen) { inclusive = true }
+                }
+            }
+        }
+        BackHandler {
+            handleBackNavigation()
+        }
         Surface {
             Scaffold(
+                topBar = {
+                    TopBar(
+                        title = "Category",
+                        showDelete = false,
+                        sendUserBackToPreviousActivity = { handleBackNavigation() },
+                        delete = {}
+                    )
+                },
                 content = { paddingValues ->
                     ScaffoldContent(
+                        Modifier.padding(paddingValues),
                         navigationManager,
                         sharedTransitionScope,
                         animatedVisibilityScope
@@ -77,7 +100,16 @@ fun CategoryScreen(
                 },
                 floatingActionButton = {
                     ExtendedFloatingActionButton(
-                        onClick = { navigationManager.navController.navigate(NavRoutes.ScreenB(0L, "", 99, EXPENSE)) },
+                        onClick = {
+                            navigationManager.navController.navigate(
+                                RootScreen.CategoryDetailsScreen(
+                                    0L,
+                                    "",
+                                    99,
+                                    EXPENSE
+                                )
+                            )
+                        },
                         icon = { Icon(Icons.Filled.Add, "Localized description") },
                         text = { Text(text = "Add Category") },
                     )
@@ -92,6 +124,7 @@ fun CategoryScreen(
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
 fun SharedTransitionScope.ScaffoldContent(
+    modifier: Modifier = Modifier,
     navigationManager: NavigationManager,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
@@ -102,7 +135,7 @@ fun SharedTransitionScope.ScaffoldContent(
     val scrollState = rememberScrollState()
 
     Column(
-        Modifier
+        modifier
             .verticalScroll(scrollState)
     ) {
 
@@ -171,7 +204,7 @@ fun SharedTransitionScope.ScaffoldContent(
                             sharedTransitionScope, animatedVisibilityScope
                         ) {
                             navigationManager.navController.navigate(
-                                NavRoutes.ScreenB(
+                                RootScreen.CategoryDetailsScreen(
                                     it.categoryId,
                                     it.categoryName,
                                     it.categoryIconNumber,
@@ -195,7 +228,7 @@ fun SharedTransitionScope.ScaffoldContent(
                             sharedTransitionScope, animatedVisibilityScope
                         ) {
                             navigationManager.navController.navigate(
-                                NavRoutes.ScreenB(
+                                RootScreen.CategoryDetailsScreen(
                                     it.categoryId,
                                     it.categoryName,
                                     it.categoryIconNumber,
@@ -243,7 +276,7 @@ fun SharedTransitionScope.ScaffoldContent(
                             sharedTransitionScope, animatedVisibilityScope
                         ) {
                             navigationManager.navController.navigate(
-                                NavRoutes.ScreenB(
+                                RootScreen.CategoryDetailsScreen(
                                     it.categoryId,
                                     it.categoryName,
                                     it.categoryIconNumber,
@@ -267,7 +300,7 @@ fun SharedTransitionScope.ScaffoldContent(
                             sharedTransitionScope, animatedVisibilityScope
                         ) {
                             navigationManager.navController.navigate(
-                                NavRoutes.ScreenB(
+                                RootScreen.CategoryDetailsScreen(
                                     it.categoryId,
                                     it.categoryName,
                                     it.categoryIconNumber,

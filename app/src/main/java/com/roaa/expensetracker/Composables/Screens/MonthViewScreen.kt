@@ -44,8 +44,9 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import com.roaa.expensetracker.Composables.Navigation.NavRoutes
+import androidx.navigation.NavController
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
+import com.roaa.expensetracker.Composables.Navigation.SectionScreenNavRoutes
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.toPalette
@@ -64,6 +65,7 @@ import java.util.Locale
 
 @Composable
 fun MonthViewScreen(
+    navController: NavController,
     navigationManager: NavigationManager,
     modifier: Modifier = Modifier,
     transactionViewModel: TransactionsViewModel = hiltViewModel()
@@ -104,7 +106,7 @@ fun MonthViewScreen(
     LaunchedEffect(sendUserToDayView, selectedDate) {
         if (sendUserToDayView && selectedDate != null) {
             navigationManager.navigateTo(
-                NavRoutes.DayScreen(
+                SectionScreenNavRoutes.DayScreen(
                     selectedDate!!.toLong()
                 )
             )

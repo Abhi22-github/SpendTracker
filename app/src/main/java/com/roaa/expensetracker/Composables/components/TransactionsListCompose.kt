@@ -50,8 +50,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts
-import com.roaa.expensetracker.Composables.Navigation.NavRoutes
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
+import com.roaa.expensetracker.Composables.Navigation.RootScreen
 import com.roaa.expensetracker.Composables.failureColor
 import com.roaa.expensetracker.Composables.successColor
 import com.roaa.expensetracker.Composables.utils.IconState
@@ -138,7 +138,7 @@ fun TransactionsListCompose(
 
                                     singleTransaction = (item)
                                     if(showNewLayouts)
-                                        navController.navigateTo(NavRoutes.DetailsScreen)
+                                        navController.navigateTo(RootScreen.DetailsScreen)
                                     else
                                     bottomSheet = true
 
@@ -162,7 +162,7 @@ fun TransactionsListCompose(
                             SingleTransaction(item, onSingleItemClick = {
                                 singleTransaction = (item)
                                 if(showNewLayouts)
-                                    navController.navigateTo(NavRoutes.DetailsScreen)
+                                    navController.navigateTo(RootScreen.DetailsScreen)
                                 else
                                     bottomSheet = true
                             })

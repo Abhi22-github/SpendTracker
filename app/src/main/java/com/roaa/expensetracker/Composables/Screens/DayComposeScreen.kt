@@ -52,6 +52,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.components.RestBudgetPill
 import com.roaa.expensetracker.Composables.components.TransactionsListCompose
@@ -95,6 +96,7 @@ fun DayScreen(
 
 @Composable
 fun DayViewScreen(
+    navController: NavController,
     navigationManager: NavigationManager,
     date: Long,
     modifier: Modifier = Modifier,
