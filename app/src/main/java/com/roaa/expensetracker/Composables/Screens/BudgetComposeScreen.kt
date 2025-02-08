@@ -2,6 +2,7 @@ package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
@@ -47,9 +48,11 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
+import com.roaa.expensetracker.Composables.Navigation.RootScreen
 import com.roaa.expensetracker.Composables.blueColor
 import com.roaa.expensetracker.Composables.components.BudgetBottomSheet
 import com.roaa.expensetracker.Composables.components.SpendsBudgetCard
+import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.HarmonizedColorPalette
@@ -109,7 +112,27 @@ fun BudgetScreen(
             emptyBudgetClass, listOf(emptyBudgetDayClass)
         )
     }
+    fun handleBackNavigation() {
+        if (navigationManager.navController.previousBackStackEntry != null) {
+            navigationManager.navController.popBackStack() // Pop one screen if there is a back stack
+        } else {
+            navigationManager.navController.navigate(RootScreen.MainScreen) {
+                popUpTo(RootScreen.MainScreen) { inclusive = true }
+            }
+        }
+    }
+    BackHandler {
+        handleBackNavigation()
+    }
     Scaffold(
+        topBar = {
+            TopBar(
+                title = "Budget",
+                showDelete = false,
+                sendUserBackToPreviousActivity = { handleBackNavigation() },
+                delete = {}
+            )
+        },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = {
@@ -120,130 +143,132 @@ fun BudgetScreen(
             )
         },
     ) {
-        if (isBudgetSet) {
-            val getTotalAmountForRange by transactionsViewModel.getTotalExpenseAmountForRangeFlow.collectAsState()
-            var currentBudgetLocal by remember { mutableStateOf(1f) }
-            var currentExpenseLocal by remember { mutableStateOf(1f) }
-            var remainingDaysPercentage by remember { mutableStateOf(1f) }
+        Column(modifier = Modifier.padding(it)) {
+            if (isBudgetSet) {
+                val getTotalAmountForRange by transactionsViewModel.getTotalExpenseAmountForRangeFlow.collectAsState()
+                var currentBudgetLocal by remember { mutableStateOf(1f) }
+                var currentExpenseLocal by remember { mutableStateOf(1f) }
+                var remainingDaysPercentage by remember { mutableStateOf(1f) }
 
-            LaunchedEffect(getCurrentBudget, getTotalAmountForRange) {
-                transactionsViewModel.getTotalExpenseForRange(
-                    getCurrentBudget.budgetSummary.budgetMonthStartDate,
-                    getCurrentBudget.budgetSummary.budgetMonthEndDate
-                )
-                if (getCurrentBudget.budgetSummary.budgetAmountForMonth == 0f || getTotalAmountForRange.totalAmount == 0f) {
-
-                } else {
-                    currentBudgetLocal = getCurrentBudget.budgetSummary.budgetAmountForMonth
-                    currentExpenseLocal = getTotalAmountForRange.totalAmount
-                }
-            }
-
-            LaunchedEffect(getCurrentBudget) {
-                if (getCurrentBudget.budgetSummary.budgetTotalDays != 0L) {
-                    remainingDaysPercentage =
-                        (getDaysRemaining(getCurrentBudget.budgetSummary.budgetMonthEndDate.toLocalDate()).toFloat()
-                            .div(getCurrentBudget.budgetSummary.budgetTotalDays.toFloat()))
-                } else {
-                    remainingDaysPercentage = 1f
-                }
-            }
-
-            val normalColor = toPalette(blueColor)
-
-            Column(Modifier.verticalScroll(rememberScrollState())) {
-
-                Spacer(Modifier.height(32.dp))
-                Box(
-                    Modifier
-                        .wrapContentHeight()
-                        .fillMaxWidth(), contentAlignment = Alignment.Center
-                ) {
-                    IndeterminateCircularIndicator(
-                        Modifier.size(160.dp),
-                        remainingDaysPercentage,
-                        normalColor
+                LaunchedEffect(getCurrentBudget, getTotalAmountForRange) {
+                    transactionsViewModel.getTotalExpenseForRange(
+                        getCurrentBudget.budgetSummary.budgetMonthStartDate,
+                        getCurrentBudget.budgetSummary.budgetMonthEndDate
                     )
-                    Text(
-                        text = "${getDaysRemaining(getCurrentBudget.budgetSummary.budgetMonthEndDate.toLocalDate())} Days Left",
-                        style = MaterialTheme.typography.bodyMedium,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.width(130.dp)
-                    )
-                    // IndeterminateCircularIndicator(Modifier.size(200.dp), f2, harmonizedColor)
+                    if (getCurrentBudget.budgetSummary.budgetAmountForMonth == 0f || getTotalAmountForRange.totalAmount == 0f) {
 
-                }
-                Spacer(Modifier.height(12.dp))
-                Box(
-                    Modifier
-                        .wrapContentHeight()
-                        .fillMaxWidth(), contentAlignment = Alignment.Center
-                ) {
-                    Column(
-                        Modifier
-                            .fillMaxWidth()
-                            .padding(12.dp)
-                    ) {
-
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-
-                        ) {
-                            SingleInfoBox(
-                                Modifier.weight(1f),
-                                "Budget Amount",
-                                "₹${getCurrentBudget.budgetSummary.budgetAmountForMonth}"
-                            )
-                            Spacer(Modifier.width(12.dp))
-                            SingleInfoBox(
-                                Modifier.weight(1f),
-                                "BudgetMonth",
-                                "${getCurrentBudget.budgetSummary.currentMonthName}"
-                            )
-                        }
-                        Spacer(Modifier.height(12.dp))
-                        Row(
-                            Modifier
-                                .fillMaxWidth()
-                        ) {
-                            SingleInfoBox(
-                                Modifier.weight(1f),
-                                "Start-End Date",
-                                "${
-                                    getCurrentBudget.budgetSummary.budgetMonthStartDate.toLocalDate()
-                                        .toDisplayStringForMonth()
-                                } - ${
-                                    getCurrentBudget.budgetSummary.budgetMonthEndDate.toLocalDate()
-                                        .toDisplayStringForMonth()
-                                }"
-                            )
-                            Spacer(Modifier.width(12.dp))
-                            SingleInfoBox(
-                                Modifier.weight(1f),
-                                "Total Amount",
-                                "₹${getCurrentBudget.budgetSummary.budgetAmountPerDay}/day"
-                            )
-                        }
+                    } else {
+                        currentBudgetLocal = getCurrentBudget.budgetSummary.budgetAmountForMonth
+                        currentExpenseLocal = getTotalAmountForRange.totalAmount
                     }
+                }
 
+                LaunchedEffect(getCurrentBudget) {
+                    if (getCurrentBudget.budgetSummary.budgetTotalDays != 0L) {
+                        remainingDaysPercentage =
+                            (getDaysRemaining(getCurrentBudget.budgetSummary.budgetMonthEndDate.toLocalDate()).toFloat()
+                                .div(getCurrentBudget.budgetSummary.budgetTotalDays.toFloat()))
+                    } else {
+                        remainingDaysPercentage = 1f
+                    }
                 }
-                Spacer(Modifier.height(24.dp))
-                Row(
-                    Modifier
-                        .height(200.dp)
-                        .padding(horizontalPadding, verticalPadding)
-                ) {
-                    SpendsBudgetCard(
-                        Modifier,
-                        currentBudgetLocal,
-                        currentExpenseLocal
-                    )
+
+                val normalColor = toPalette(blueColor)
+
+                Column(Modifier.verticalScroll(rememberScrollState())) {
+
+                    Spacer(Modifier.height(32.dp))
+                    Box(
+                        Modifier
+                            .wrapContentHeight()
+                            .fillMaxWidth(), contentAlignment = Alignment.Center
+                    ) {
+                        IndeterminateCircularIndicator(
+                            Modifier.size(160.dp),
+                            remainingDaysPercentage,
+                            normalColor
+                        )
+                        Text(
+                            text = "${getDaysRemaining(getCurrentBudget.budgetSummary.budgetMonthEndDate.toLocalDate())} Days Left",
+                            style = MaterialTheme.typography.bodyMedium,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.width(130.dp)
+                        )
+                        // IndeterminateCircularIndicator(Modifier.size(200.dp), f2, harmonizedColor)
+
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    Box(
+                        Modifier
+                            .wrapContentHeight()
+                            .fillMaxWidth(), contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(12.dp)
+                        ) {
+
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+
+                            ) {
+                                SingleInfoBox(
+                                    Modifier.weight(1f),
+                                    "Budget Amount",
+                                    "₹${getCurrentBudget.budgetSummary.budgetAmountForMonth}"
+                                )
+                                Spacer(Modifier.width(12.dp))
+                                SingleInfoBox(
+                                    Modifier.weight(1f),
+                                    "BudgetMonth",
+                                    "${getCurrentBudget.budgetSummary.currentMonthName}"
+                                )
+                            }
+                            Spacer(Modifier.height(12.dp))
+                            Row(
+                                Modifier
+                                    .fillMaxWidth()
+                            ) {
+                                SingleInfoBox(
+                                    Modifier.weight(1f),
+                                    "Start-End Date",
+                                    "${
+                                        getCurrentBudget.budgetSummary.budgetMonthStartDate.toLocalDate()
+                                            .toDisplayStringForMonth()
+                                    } - ${
+                                        getCurrentBudget.budgetSummary.budgetMonthEndDate.toLocalDate()
+                                            .toDisplayStringForMonth()
+                                    }"
+                                )
+                                Spacer(Modifier.width(12.dp))
+                                SingleInfoBox(
+                                    Modifier.weight(1f),
+                                    "Total Amount",
+                                    "₹${getCurrentBudget.budgetSummary.budgetAmountPerDay}/day"
+                                )
+                            }
+                        }
+
+                    }
+                    Spacer(Modifier.height(24.dp))
+                    Row(
+                        Modifier
+                            .height(200.dp)
+                            .padding(horizontalPadding, verticalPadding)
+                    ) {
+                        SpendsBudgetCard(
+                            Modifier,
+                            currentBudgetLocal,
+                            currentExpenseLocal
+                        )
+                    }
+                    SpendCalender(Modifier, getCurrentBudget)
                 }
-                SpendCalender(Modifier, getCurrentBudget)
             }
+            Spacer(Modifier.height(36.dp))
         }
-        Spacer(Modifier.height(36.dp))
     }
     AnimatedVisibility(showBottomSheet) {
 

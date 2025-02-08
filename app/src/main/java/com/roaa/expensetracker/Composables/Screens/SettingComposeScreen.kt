@@ -1,5 +1,6 @@
 package com.roaa.expensetracker.Composables.Screens
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButtonColors
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -27,8 +29,10 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
+import com.roaa.expensetracker.Composables.Navigation.RootScreen
 import com.roaa.expensetracker.Composables.ThemeMode
 import com.roaa.expensetracker.Composables.components.SingleItemRadioButton
+import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.ViewModels.PreferencesViewModel
 import kotlinx.coroutines.launch
 
@@ -44,12 +48,34 @@ val radioButtonColors
 
 @Composable
 fun SettingsScreen(
-    navController: NavigationManager,
+    navigationManager: NavigationManager,
     sendUserBack: () -> Unit,
     preferenceViewModel: PreferencesViewModel = hiltViewModel()
 ) {
+    // Function to handle back navigation logic
+    fun handleBackNavigation() {
+        if (navigationManager.navController.previousBackStackEntry != null) {
+            navigationManager.navController.popBackStack() // Pop one screen if there is a back stack
+        } else {
+            navigationManager.navController.navigate(RootScreen.MainScreen) {
+                popUpTo(RootScreen.MainScreen) { inclusive = true }
+            }
+        }
+    }
 
-    SettingsScreenContent(sendUserBack)
+    BackHandler() {
+       handleBackNavigation()
+    }
+    Scaffold(
+        topBar = {
+            TopBar(title = "Settings",
+                showDelete = false,
+                sendUserBackToPreviousActivity = { handleBackNavigation()},
+                delete = {})
+        },
+    ) {
+        SettingsScreenContent(Modifier.padding(it))
+    }
 }
 
 val startEndPadding = 16.dp
@@ -58,7 +84,7 @@ val topBottomPadding = 0.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreenContent(
-    sendUserBack: () -> Unit,
+    modifier: Modifier = Modifier,
     preferenceViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val themeSelected by preferenceViewModel.getThemeMode.collectAsState(ThemeMode.SYSTEM.toString())
@@ -70,7 +96,7 @@ fun SettingsScreenContent(
     val scope = rememberCoroutineScope()
 
 
-    Column {
+    Column(modifier) {
 //        TopBar(title = "Settings",false,{sendUserBack()},{})
         Column() {
             Spacer(Modifier.height(10.dp))
@@ -133,7 +159,7 @@ fun SettingsScreenContent(
 @Preview
 fun SettingsScreenManagePreview() {
     Surface {
-        SettingsScreenContent({}, )
+        SettingsScreenContent()
     }
 }
 
@@ -141,7 +167,7 @@ fun SettingsScreenManagePreview() {
 @Preview
 fun SettingsScreenCreatePreview() {
     Surface {
-        SettingsScreenContent({}, )
+        SettingsScreenContent()
     }
 }
 

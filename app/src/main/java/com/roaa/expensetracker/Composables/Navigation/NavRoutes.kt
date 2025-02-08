@@ -2,40 +2,77 @@ package com.roaa.expensetracker.Composables.Navigation
 
 import kotlinx.serialization.Serializable
 
-sealed class NavRoutes {
-    @Serializable
-    data object ScreenA : NavRoutes()
+
+sealed class RootScreen() {
 
     @Serializable
-    data class ScreenB(
+    data object MainScreen : RootScreen()
+
+    @Serializable
+    data object BudgetScreen : RootScreen()
+
+    @Serializable
+    data object CategoryScreen : RootScreen()
+
+    @Serializable
+    data class CategoryDetailsScreen(
         val categoryId: Long,
         val categoryName: String,
         val categoryIconNumber: Int,
         val categoryType: String
-    ) : NavRoutes()
+    ) : RootScreen()
 
     @Serializable
-    data object MainScreen : NavRoutes()
+    data object BankAccountScreen : RootScreen()
 
     @Serializable
-    data object BudgetScreen : NavRoutes()
+    data object SettingScreen : RootScreen()
 
     @Serializable
-    data object DetailsScreen : NavRoutes()
+    data object DetailsScreen : RootScreen()
 
-    @Serializable
-    data object MonthScreen : NavRoutes()
-
-    @Serializable
-    data class DayScreen(val date: Long) : NavRoutes()
-
-    @Serializable
-    data object BankAccountScreen : NavRoutes()
-
-    @Serializable
-    data object SettingScreen : NavRoutes()
 }
 
+sealed class SectionScreenNavRoutes() {
 
+    @Serializable
+    data object ListScreen : SectionScreenNavRoutes()
 
+    @Serializable
+    data object MonthScreen : SectionScreenNavRoutes()
+
+    @Serializable
+    data class DayScreen(val date: Long) : SectionScreenNavRoutes()
+
+}
+//
+//@Serializable
+//sealed class FullScreenNavRoutes() {
+//
+//    @Serializable
+//    data object BudgetScreen : FullScreenNavRoutes()
+//
+//    @Serializable
+//    data object CategoryScreen : FullScreenNavRoutes()
+//
+//    @Serializable
+//    data class CategoryDetailsScreen(
+//        val categoryId: Long,
+//        val categoryName: String,
+//        val categoryIconNumber: Int,
+//        val categoryType: String
+//    ) : FullScreenNavRoutes()
+//
+//    @Serializable
+//    data object BankAccountScreen : FullScreenNavRoutes()
+//
+//    @Serializable
+//    data object SettingScreen : FullScreenNavRoutes()
+//
+//    @Serializable
+//    data object DetailsScreen : FullScreenNavRoutes()
+//}
+//
+//
+//
 

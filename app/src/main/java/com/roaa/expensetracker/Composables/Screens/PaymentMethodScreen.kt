@@ -1,6 +1,7 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -69,10 +70,12 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
+import com.roaa.expensetracker.Composables.Navigation.RootScreen
 import com.roaa.expensetracker.Composables.components.AddPaymentMethodBottomSheet
 import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.Composables.components.DropDownBankAccountOption
 import com.roaa.expensetracker.Composables.components.EmptyScreen
+import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.ColorState
 import com.roaa.expensetracker.Composables.utils.IconState
@@ -90,7 +93,7 @@ import kotlinx.coroutines.launch
 @Composable
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 fun PaymentMethodScreen(
-    navController: NavigationManager,
+    navigationManager: NavigationManager,
     modifier: Modifier = Modifier,
     sendUserBack: () -> Unit,
     uiViewModel: UiViewModel = hiltViewModel(),
@@ -132,14 +135,28 @@ fun PaymentMethodScreen(
             }
         }
     }
+    // Function to handle back navigation logic
+    fun handleBackNavigation() {
+        if (navigationManager.navController.previousBackStackEntry != null) {
+            navigationManager.navController.popBackStack() // Pop one screen if there is a back stack
+        } else {
+            navigationManager.navController.navigate(RootScreen.MainScreen) {
+                popUpTo(RootScreen.MainScreen) { inclusive = true }
+            }
+        }
+    }
+
+    BackHandler {
+        handleBackNavigation()
+    }
 
     Scaffold(
-//        topBar = {
-//        TopBar(title = "Bank Accounts",
-//            showDelete = false,
-//            sendUserBackToPreviousActivity = { sendUserBack() },
-//            delete = {})
-//    },
+        topBar = {
+            TopBar(title = "Bank Accounts",
+                showDelete = false,
+                sendUserBackToPreviousActivity = { handleBackNavigation() },
+                delete = {})
+        },
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = {
