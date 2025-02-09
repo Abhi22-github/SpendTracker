@@ -52,6 +52,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
@@ -63,6 +64,7 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
+import com.roaa.expensetracker.Composables.components.TopBarForTransactionDetailsScreen
 import com.roaa.expensetracker.Composables.components.bottomSheetStartEndPadding
 import com.roaa.expensetracker.Composables.components.bottomSheetTopBottomPadding
 import com.roaa.expensetracker.Composables.components.spaceHeightInDetail
@@ -88,7 +90,7 @@ fun TransactionDetailsScreen(
     modifier: Modifier = Modifier,
     categoryViewModel: CategoryViewModel = hiltViewModel()
 ) {
-    Scaffold() {
+    Scaffold(topBar = { TopBarForTransactionDetailsScreen( "", false, {}, {}) }) {
         Surface {
             val scroll = rememberScrollState()
             val orangePalette = toPalette(orange)
@@ -117,14 +119,15 @@ fun TransactionDetailsScreen(
                 Spacer(Modifier.height(128.dp))
                 Card(
                     shape = RoundedCornerShape(50),
-                    modifier = Modifier.size(96.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
+                    modifier = Modifier.size(128.dp),
+                    colors = CardDefaults.cardColors(containerColor = orangePalette.main.copy(alpha = 0.3f))
                 ) {
                     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                         Image(
-                            painter = painterResource(R.drawable.icon_expense),
-                            modifier = Modifier.size(96.dp),
-                            contentDescription = null
+                            painter = painterResource(R.drawable.expense_icon_new),
+                            modifier = Modifier.size(64.dp),
+                            contentDescription = null,
+                            colorFilter = ColorFilter.tint(orangePalette.main)
                         )
                     }
                 }
