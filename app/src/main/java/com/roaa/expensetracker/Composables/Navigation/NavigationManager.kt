@@ -6,7 +6,7 @@ import androidx.navigation.NavOptions
 class NavigationManager(val navController: NavController) {
     fun navigateTo(screen: RootScreen) {
         val navOptions = NavOptions.Builder()
-            .setPopUpTo(RootScreen.MainScreen, inclusive = false) // Pop up to MainScreen
+            //.setPopUpTo(RootScreen.MainScreen, inclusive = false) // Pop up to MainScreen
             .build()
 
         navController.navigate(screen, navOptions)

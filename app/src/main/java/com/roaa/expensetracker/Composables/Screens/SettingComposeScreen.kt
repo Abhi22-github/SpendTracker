@@ -28,6 +28,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.RootScreen
 import com.roaa.expensetracker.Composables.ThemeMode
@@ -48,6 +49,7 @@ val radioButtonColors
 
 @Composable
 fun SettingsScreen(
+    rootNavController: NavHostController,
     navigationManager: NavigationManager,
     sendUserBack: () -> Unit,
     preferenceViewModel: PreferencesViewModel = hiltViewModel()
@@ -64,13 +66,13 @@ fun SettingsScreen(
     }
 
     BackHandler() {
-       handleBackNavigation()
+        handleBackNavigation()
     }
     Scaffold(
         topBar = {
             TopBar(title = "Settings",
                 showDelete = false,
-                sendUserBackToPreviousActivity = { handleBackNavigation()},
+                sendUserBackToPreviousActivity = { handleBackNavigation() },
                 delete = {})
         },
     ) {

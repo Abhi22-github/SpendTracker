@@ -47,6 +47,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.RootScreen
 import com.roaa.expensetracker.Composables.blueColor
@@ -81,6 +82,7 @@ val verticalPadding = 8.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BudgetScreen(
+    rootNavController:NavHostController,
     navigationManager: NavigationManager,
     modifier: Modifier = Modifier,
     budgetViewModel: BudgetViewModel = hiltViewModel(),

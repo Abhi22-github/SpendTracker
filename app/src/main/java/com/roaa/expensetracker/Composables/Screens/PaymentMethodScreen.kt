@@ -67,6 +67,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
@@ -93,6 +94,7 @@ import kotlinx.coroutines.launch
 @Composable
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 fun PaymentMethodScreen(
+    rootNavController: NavHostController,
     navigationManager: NavigationManager,
     modifier: Modifier = Modifier,
     sendUserBack: () -> Unit,

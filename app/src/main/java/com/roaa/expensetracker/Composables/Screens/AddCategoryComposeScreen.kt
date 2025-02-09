@@ -68,6 +68,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
@@ -93,7 +94,8 @@ import kotlinx.coroutines.launch
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun AddCategory(
-    NavigationManager: NavigationManager,
+    rootNavController: NavHostController,
+    navigationManager: NavigationManager,
     categoryId: Long,
     categoryName: String,
     categoryIcon: Int,
@@ -115,7 +117,7 @@ fun AddCategory(
                 ScaffoldContentDetails(
                     Modifier.padding(paddingValues),
                     category,
-                    { NavigationManager.navController.onBackPressed() },
+                    { rootNavController.onBackPressed() },
                     animatedVisibilityScope
                 )
             }
@@ -129,7 +131,7 @@ fun AddCategory(
                 onConfirmation = {
                     categoryViewModel.deleteCategoryFromDatabase(category)
                     showConfirmationDialog = !showConfirmationDialog
-                    NavigationManager.navController.onBackPressed()
+                 rootNavController.onBackPressed()
 
                 },
                 dialogTitle = "Delete Category",
@@ -144,7 +146,7 @@ fun AddCategory(
                 onConfirmation = {
                     categoryViewModel.deleteCategoryFromDatabase(category)
                     showConfirmationDialog = !showConfirmationDialog
-                    NavigationManager.navController.onBackPressed()
+                    rootNavController.onBackPressed()
                 },
                 dialogTitle = "Update Category",
                 dialogText = "Are you sure, you want to update the current category",
