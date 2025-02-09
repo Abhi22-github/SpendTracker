@@ -57,7 +57,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
@@ -70,7 +69,6 @@ import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.lockScreenOrientation
 import com.roaa.expensetracker.Utilities.section1Items
 import com.roaa.expensetracker.Utilities.section2Items
-import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -90,6 +88,7 @@ class ComposeMainActivity : ComponentActivity() {
         setContent {
             val localContext = LocalContext.current
             val rootNavController = rememberNavController()
+            val section1NavController = rememberNavController()
             val navigationManager = remember { NavigationManager(rootNavController) }
             LaunchedEffect(Unit) {
                 syncTheme(localContext)
@@ -120,7 +119,7 @@ class ComposeMainActivity : ComponentActivity() {
 //                                navigationManager,
 //                                Modifier.padding(0.dp)
 //                            )
-                        RootNavGraph(rootNavController, navigationManager)
+                        RootNavGraph(rootNavController,section1NavController, navigationManager)
 
                         LaunchedEffect(Unit) {
                             // App rendered and splash screen can be hidden
@@ -139,17 +138,15 @@ class ComposeMainActivity : ComponentActivity() {
 @Composable
 fun NavigationDrawer(
     rootNavController: NavHostController,
+    navController: NavHostController,
     navigationManager: NavigationManager,
     modifier: Modifier,
-    transactionViewModel: TransactionsViewModel = hiltViewModel()
 ) {
 
     val section1 = section1Items
     val section2 = section2Items
     val deviceDensity = LocalDensity.current
 
-    val section1NavController = rememberNavController()
-  //  val section2NavController = rememberNavController()
     var selectedFullScreenRoute by remember { mutableStateOf<RootScreen?>(null) }
 
     //Remember Clicked index state
@@ -202,8 +199,7 @@ fun NavigationDrawer(
                                 scope.launch {
                                     drawerState.close()
                                 }
-                                section1NavController.navigate(item.route)
-
+                                rootNavController.navigate(item.route)
                             },
                             icon = {
                                 Icon(
@@ -281,11 +277,6 @@ fun NavigationDrawer(
 //        val currentBackStackEntry by navController.currentBackStackEntryAsState()
 //        val currentRoute = currentBackStackEntry?.destination?.route
         CompositionLocalProvider() {
-         //   RootNavGraph(rootNavController, navigationManager)
-//            if (selectedFullScreenRoute != null) {
-//                // Full-Screen Mode
-//                FullNavigation(section2NavController, navigationManager)
-//            } else {
             Scaffold(
                 topBar = { //TopBar to show title
                     if (selectedItemIndex in 0..2)
@@ -312,11 +303,10 @@ fun NavigationDrawer(
                 },
             ) { innerPadding ->
                 Column(Modifier.padding(innerPadding)) {
-                    SectionNavigation(section1NavController, navigationManager)
+                    SectionNavigation(navController, navigationManager)
 //                     SetupNavigationGraph(navController, navigationManager)
                 }
 
-                //               }
             }
         }
     }
