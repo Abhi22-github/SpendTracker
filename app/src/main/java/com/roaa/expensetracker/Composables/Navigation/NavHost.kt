@@ -29,19 +29,24 @@ import java.time.LocalDate
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun RootNavGraph(navController: NavHostController, navigationManager: NavigationManager) {
+fun RootNavGraph(
+    rooNavController: NavHostController,
+    navController: NavHostController,
+    navigationManager: NavigationManager
+) {
     SharedTransitionLayout {
         val context = LocalContext.current
         NavHost(
-            navController = navController,
+            navController = rooNavController,
             startDestination = RootScreen.MainScreen,
         ) {
             // Main Navigation (Contains the Drawer & HomeNavGraph)
             composable<RootScreen.MainScreen> {
-                NavigationDrawer(navController, navigationManager, Modifier)
+                NavigationDrawer(rooNavController, navController, navigationManager, Modifier)
             }
             composable<RootScreen.CategoryScreen>() {
                 CategoryScreen(
+                    rooNavController,
                     navigationManager,
                     sharedTransitionScope = this@SharedTransitionLayout,
                     animatedVisibilityScope = this
@@ -50,6 +55,7 @@ fun RootNavGraph(navController: NavHostController, navigationManager: Navigation
             composable<RootScreen.CategoryDetailsScreen> {
                 val args = it.toRoute<RootScreen.CategoryDetailsScreen>()
                 AddCategory(
+                    rooNavController,
                     navigationManager,
                     args.categoryId,
                     args.categoryName,
@@ -62,18 +68,30 @@ fun RootNavGraph(navController: NavHostController, navigationManager: Navigation
 
 
             composable<RootScreen.BudgetScreen>() {
-                BudgetScreen(navigationManager, modifier = Modifier)
+                BudgetScreen(
+                    rooNavController,
+                    navigationManager,
+                    modifier = Modifier
+                )
             }
 
             composable<RootScreen.DetailsScreen> {
-                TransactionDetailsScreen(navigationManager, modifier = Modifier)
+                TransactionDetailsScreen(
+                    rooNavController,
+                    navigationManager,
+                    modifier = Modifier
+                )
             }
 
             composable<RootScreen.BankAccountScreen>() {
-                PaymentMethodScreen(navigationManager, Modifier, {})
+                PaymentMethodScreen(
+                    rooNavController,
+                    navigationManager,
+                    Modifier,
+                    {})
             }
             composable<RootScreen.SettingScreen>() {
-                SettingsScreen(navigationManager, {})
+                SettingsScreen(rooNavController, navigationManager, {})
             }
         }
 

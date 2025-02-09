@@ -105,7 +105,7 @@ fun MonthViewScreen(
     }
     LaunchedEffect(sendUserToDayView, selectedDate) {
         if (sendUserToDayView && selectedDate != null) {
-            navigationManager.navigateTo(
+          navController.navigate(
                 SectionScreenNavRoutes.DayScreen(
                     selectedDate!!.toLong()
                 )

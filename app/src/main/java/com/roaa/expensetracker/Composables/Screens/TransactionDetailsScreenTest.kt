@@ -59,6 +59,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
@@ -82,6 +83,7 @@ import com.roaa.expensetracker.ViewModels.CategoryViewModel
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TransactionDetailsScreen(
+    rootNavController: NavHostController,
     navigationManager: NavigationManager,
     modifier: Modifier = Modifier,
     categoryViewModel: CategoryViewModel = hiltViewModel()
@@ -206,26 +208,26 @@ fun TransactionDetailsScreen(
 
                 }
 
-if(false)
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(
-                        5.dp,
-                        Alignment.CenterHorizontally
-                    ),
-                    verticalArrangement = Arrangement.spacedBy(0.dp),
-                    modifier = Modifier
-                        .wrapContentHeight()
-                        .fillMaxWidth()
-                        .padding(top = 12.dp)
+                if (false)
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(
+                            5.dp,
+                            Alignment.CenterHorizontally
+                        ),
+                        verticalArrangement = Arrangement.spacedBy(0.dp),
+                        modifier = Modifier
+                            .wrapContentHeight()
+                            .fillMaxWidth()
+                            .padding(top = 12.dp)
 
-                ) {
-                    TagChip("Morning")
-                    TagChip("Akurdi")
-                    TagChip("Money")
-                    TagChip("Hello Tag")
-                    TagChip("Paid by Hrishi")
-                    TagChip("Pune")
-                }
+                    ) {
+                        TagChip("Morning")
+                        TagChip("Akurdi")
+                        TagChip("Money")
+                        TagChip("Hello Tag")
+                        TagChip("Paid by Hrishi")
+                        TagChip("Pune")
+                    }
                 Spacer(Modifier.height(48.dp))
                 Spacer(Modifier.height(20.dp))
                 Row(
@@ -294,59 +296,61 @@ if(false)
                     }
                 }
                 Spacer(Modifier.height(20.dp))
-                if(false)
-                Row(
-                    Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
-                ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .weight(1f)
-                            .background(
-                                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
-                                shape = RoundedCornerShape(20.dp)
-                            )
-                            .padding(16.dp),
+                if (false)
+                    Row(
+                        Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
                     ) {
-                        Spacer(Modifier.width(12.dp))
-                        Column {
-                            ValueLabelList(
-                                Modifier,
-                                labelAndValueStyle,
-                                "Type",
-                                "Expense",
-                                23,
-                                Icons.Outlined.Cable
-                            )
-                            Spacer(Modifier.height(spaceHeightInDetail))
-                            HorizontalDivider(
-                                color = MaterialTheme.colorScheme.surfaceContainer, thickness = 1.dp
-                            )
-                            Spacer(Modifier.height(spaceHeightInDetail))
-                            ValueLabelList(
-                                Modifier,
-                                labelAndValueStyle,
-                                "Category",
-                                "Food & Expense",
-                                23,
-                                Icons.Outlined.Category
-                            )
-                            Spacer(Modifier.height(spaceHeightInDetail))
-                            HorizontalDivider(
-                                color = MaterialTheme.colorScheme.surfaceContainer, thickness = 1.dp
-                            )
-                            Spacer(Modifier.height(spaceHeightInDetail))
-                            ValueLabelList(
-                                Modifier,
-                                labelAndValueStyle,
-                                "Date",
-                                "12th Aug 2024",
-                                23,
-                                Icons.Outlined.DateRange
-                            )
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                                    shape = RoundedCornerShape(20.dp)
+                                )
+                                .padding(16.dp),
+                        ) {
+                            Spacer(Modifier.width(12.dp))
+                            Column {
+                                ValueLabelList(
+                                    Modifier,
+                                    labelAndValueStyle,
+                                    "Type",
+                                    "Expense",
+                                    23,
+                                    Icons.Outlined.Cable
+                                )
+                                Spacer(Modifier.height(spaceHeightInDetail))
+                                HorizontalDivider(
+                                    color = MaterialTheme.colorScheme.surfaceContainer,
+                                    thickness = 1.dp
+                                )
+                                Spacer(Modifier.height(spaceHeightInDetail))
+                                ValueLabelList(
+                                    Modifier,
+                                    labelAndValueStyle,
+                                    "Category",
+                                    "Food & Expense",
+                                    23,
+                                    Icons.Outlined.Category
+                                )
+                                Spacer(Modifier.height(spaceHeightInDetail))
+                                HorizontalDivider(
+                                    color = MaterialTheme.colorScheme.surfaceContainer,
+                                    thickness = 1.dp
+                                )
+                                Spacer(Modifier.height(spaceHeightInDetail))
+                                ValueLabelList(
+                                    Modifier,
+                                    labelAndValueStyle,
+                                    "Date",
+                                    "12th Aug 2024",
+                                    23,
+                                    Icons.Outlined.DateRange
+                                )
+                            }
                         }
                     }
-                }
 
 //
 //                Box(
