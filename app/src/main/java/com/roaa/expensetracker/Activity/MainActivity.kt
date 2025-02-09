@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -63,11 +62,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
-import com.roaa.expensetracker.Composables.Navigation.SetupNavigationGraph
+import com.roaa.expensetracker.Composables.Navigation.RootNavGraph
+import com.roaa.expensetracker.Composables.Navigation.RootScreen
+import com.roaa.expensetracker.Composables.Navigation.SectionNavigation
 import com.roaa.expensetracker.Composables.syncTheme
 import com.roaa.expensetracker.R
-import com.roaa.expensetracker.Utilities.items
 import com.roaa.expensetracker.Utilities.lockScreenOrientation
+import com.roaa.expensetracker.Utilities.section1Items
+import com.roaa.expensetracker.Utilities.section2Items
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -87,8 +89,8 @@ class ComposeMainActivity : ComponentActivity() {
         installSplashScreen().setKeepOnScreenCondition { !isDone.value }
         setContent {
             val localContext = LocalContext.current
-            val navController = rememberNavController()
-            val navigationManager = remember { NavigationManager(navController) }
+            val rootNavController = rememberNavController()
+            val navigationManager = remember { NavigationManager(rootNavController) }
             LaunchedEffect(Unit) {
                 syncTheme(localContext)
                 // App ready for work
@@ -112,17 +114,19 @@ class ComposeMainActivity : ComponentActivity() {
                         LocalWindowSize provides widthSizeClass,
                         LocalWindowInsets provides windowInsets,
                     ) {
-                        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                            NavigationDrawer(
-                                navController,
-                                navigationManager,
-                                Modifier.padding(innerPadding)
-                            )
-                            LaunchedEffect(Unit) {
-                                // App rendered and splash screen can be hidden
-                                isDone.value = true
-                            }
+//                        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+//                            NavigationDrawer(
+//                                rootNavController,
+//                                navigationManager,
+//                                Modifier.padding(0.dp)
+//                            )
+                        RootNavGraph(rootNavController, navigationManager)
+
+                        LaunchedEffect(Unit) {
+                            // App rendered and splash screen can be hidden
+                            isDone.value = true
                         }
+//                        }
                     }
                 }
             }
@@ -134,14 +138,19 @@ class ComposeMainActivity : ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun NavigationDrawer(
-    navController: NavHostController,
+    rootNavController: NavHostController,
     navigationManager: NavigationManager,
     modifier: Modifier,
     transactionViewModel: TransactionsViewModel = hiltViewModel()
 ) {
 
-    val items = items
+    val section1 = section1Items
+    val section2 = section2Items
     val deviceDensity = LocalDensity.current
+
+    val section1NavController = rememberNavController()
+  //  val section2NavController = rememberNavController()
+    var selectedFullScreenRoute by remember { mutableStateOf<RootScreen?>(null) }
 
     //Remember Clicked index state
     var selectedItemIndex by rememberSaveable {
@@ -178,7 +187,7 @@ fun NavigationDrawer(
                     }
 
                     Spacer(Modifier.height(24.dp))
-                    items.forEachIndexed { index, item ->
+                    section1.forEachIndexed { index, item ->
                         NavigationDrawerItem(
                             label = {
                                 Text(
@@ -190,11 +199,11 @@ fun NavigationDrawer(
                             selected = index == selectedItemIndex,
                             onClick = {
                                 selectedItemIndex = index
-                                navigationManager.navigateTo(item.route)
-
                                 scope.launch {
                                     drawerState.close()
                                 }
+                                section1NavController.navigate(item.route)
+
                             },
                             icon = {
                                 Icon(
@@ -216,47 +225,100 @@ fun NavigationDrawer(
                             modifier = Modifier
                                 .padding(NavigationDrawerItemDefaults.ItemPadding) //padding between items
                         )
-                        if (index == 2) {
-                            HorizontalDivider(Modifier.padding(5.dp), color = (MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 1f)))
-                        }
                     }
+
+                    HorizontalDivider(
+                        Modifier.padding(5.dp),
+                        color = (MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 1f))
+                    )
+
+                    section2.forEachIndexed { index, item ->
+                        NavigationDrawerItem(
+                            label = {
+                                Text(
+                                    text = item.title,
+                                    modifier = Modifier.padding(12.dp, 0.dp),
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            },
+                            selected = false,
+                            onClick = {
+                                scope.launch {
+                                    drawerState.close()
+                                }
+                                selectedFullScreenRoute = item.route
+                                rootNavController.navigate(item.route)
+
+                            },
+                            icon = {
+                                Icon(
+                                    imageVector = if (index == selectedItemIndex) {
+                                        ImageVector.vectorResource(item.selectedIcon)
+                                    } else ImageVector.vectorResource(item.unselectedIcon),
+                                    contentDescription = item.title,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                            },
+                            badge = {  // Show Badge
+                                item.badgeCount?.let {
+                                    Text(
+                                        text = item.badgeCount.toString(),
+                                        style = MaterialTheme.typography.labelLarge
+                                    )
+                                }
+                            },
+                            modifier = Modifier
+                                .padding(NavigationDrawerItemDefaults.ItemPadding) //padding between items
+                        )
+                    }
+
                 }
             }
         },
 
         gesturesEnabled = true
     ) {
+//        val currentBackStackEntry by navController.currentBackStackEntryAsState()
+//        val currentRoute = currentBackStackEntry?.destination?.route
         CompositionLocalProvider() {
+         //   RootNavGraph(rootNavController, navigationManager)
+//            if (selectedFullScreenRoute != null) {
+//                // Full-Screen Mode
+//                FullNavigation(section2NavController, navigationManager)
+//            } else {
             Scaffold(
                 topBar = { //TopBar to show title
-                    TopAppBar(
-                        // colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Blue),
-                        title = {
-                            Text(text = "Expense Tracker")
-                        },
-                        navigationIcon = {
-                            IconButton(onClick = {
-                                scope.launch {
-                                    drawerState.apply {
-                                        if (isClosed) open() else close()
+                    if (selectedItemIndex in 0..2)
+                        TopAppBar(
+                            // colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Blue),
+                            title = {
+                                Text(text = "Expense Tracker")
+                            },
+                            navigationIcon = {
+                                IconButton(onClick = {
+                                    scope.launch {
+                                        drawerState.apply {
+                                            if (isClosed) open() else close()
+                                        }
                                     }
+                                }) {
+                                    Icon(  //Show Menu Icon on TopBar
+                                        imageVector = Icons.Default.Menu,
+                                        contentDescription = "Menu"
+                                    )
                                 }
-                            }) {
-                                Icon(  //Show Menu Icon on TopBar
-                                    imageVector = Icons.Default.Menu,
-                                    contentDescription = "Menu"
-                                )
                             }
-                        }
-                    )
+                        )
                 },
             ) { innerPadding ->
                 Column(Modifier.padding(innerPadding)) {
-                    SetupNavigationGraph(navController, navigationManager)
+                    SectionNavigation(section1NavController, navigationManager)
+//                     SetupNavigationGraph(navController, navigationManager)
                 }
 
+                //               }
             }
         }
     }
-
 }
+

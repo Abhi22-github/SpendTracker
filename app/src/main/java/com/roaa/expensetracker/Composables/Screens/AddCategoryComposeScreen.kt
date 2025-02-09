@@ -15,7 +15,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -72,6 +71,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
+import com.roaa.expensetracker.Composables.Navigation.onBackPressed
 import com.roaa.expensetracker.Composables.components.BottomSheetIconPicker
 import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.Composables.components.ErrorRow
@@ -112,10 +112,10 @@ fun AddCategory(
     with(sharedTransitionScope) {
         ExpenseTrackerTheme {
             Scaffold() { paddingValues ->
-                ScaffoldContent(
-                    paddingValues,
+                ScaffoldContentDetails(
+                    Modifier.padding(paddingValues),
                     category,
-                    { NavigationManager.navController.popBackStack() },
+                    { NavigationManager.navController.onBackPressed() },
                     animatedVisibilityScope
                 )
             }
@@ -129,7 +129,7 @@ fun AddCategory(
                 onConfirmation = {
                     categoryViewModel.deleteCategoryFromDatabase(category)
                     showConfirmationDialog = !showConfirmationDialog
-                    NavigationManager.navController.popBackStack()
+                    NavigationManager.navController.onBackPressed()
 
                 },
                 dialogTitle = "Delete Category",
@@ -144,7 +144,7 @@ fun AddCategory(
                 onConfirmation = {
                     categoryViewModel.deleteCategoryFromDatabase(category)
                     showConfirmationDialog = !showConfirmationDialog
-                    NavigationManager.navController.popBackStack()
+                    NavigationManager.navController.onBackPressed()
                 },
                 dialogTitle = "Update Category",
                 dialogText = "Are you sure, you want to update the current category",
@@ -156,8 +156,8 @@ fun AddCategory(
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
-fun SharedTransitionScope.ScaffoldContent(
-    paddingValues: PaddingValues,
+fun SharedTransitionScope.ScaffoldContentDetails(
+    modifier: Modifier = Modifier,
     categoryClass: CategoryClass,
     backButtonClick: () -> Unit,
     animatedVisibilityScope: AnimatedContentScope,
@@ -191,8 +191,7 @@ fun SharedTransitionScope.ScaffoldContent(
     }
 
     Column(
-        Modifier
-            .padding(paddingValues)
+        modifier
             .padding(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {

@@ -26,6 +26,7 @@ android {
         versionCode = 3
         versionName = "0.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        signingConfig = signingConfigs.getByName("debug")
     }
 
 
