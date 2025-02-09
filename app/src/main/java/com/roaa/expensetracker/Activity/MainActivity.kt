@@ -119,7 +119,7 @@ class ComposeMainActivity : ComponentActivity() {
 //                                navigationManager,
 //                                Modifier.padding(0.dp)
 //                            )
-                        RootNavGraph(rootNavController,section1NavController, navigationManager)
+                        RootNavGraph(rootNavController, section1NavController, navigationManager)
 
                         LaunchedEffect(Unit) {
                             // App rendered and splash screen can be hidden
@@ -199,7 +199,7 @@ fun NavigationDrawer(
                                 scope.launch {
                                     drawerState.close()
                                 }
-                                rootNavController.navigate(item.route)
+                                navController.navigate(item.route)
                             },
                             icon = {
                                 Icon(
