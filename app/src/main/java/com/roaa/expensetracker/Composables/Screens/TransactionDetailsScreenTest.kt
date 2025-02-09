@@ -85,12 +85,14 @@ import com.roaa.expensetracker.ViewModels.CategoryViewModel
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun TransactionDetailsScreen(
+    modifier: Modifier = Modifier,
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
-    modifier: Modifier = Modifier,
+    amount: Float,
+    categoryName1: String,
     categoryViewModel: CategoryViewModel = hiltViewModel()
 ) {
-    Scaffold(topBar = { TopBarForTransactionDetailsScreen( "", false, {}, {}) }) {
+    Scaffold(topBar = { TopBarForTransactionDetailsScreen("", false, {}, {}) }) {
         Surface {
             val scroll = rememberScrollState()
             val orangePalette = toPalette(orange)
@@ -133,7 +135,7 @@ fun TransactionDetailsScreen(
                 }
                 Spacer(Modifier.height(24.dp))
                 Text(
-                    text = "₹ 3,892.00",
+                    text = "₹ $amount",
                     style = MaterialTheme.typography.displayMedium.copy(fontFamily = numberFont),
                     color = orangePalette.main
                 )

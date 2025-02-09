@@ -4,6 +4,7 @@ import androidx.room.Entity;
 import androidx.room.PrimaryKey;
 
 
+
 @Entity(tableName = "transaction_table")
 public class TransactionClass {
 
