@@ -93,6 +93,7 @@ fun DateInputChip(
 //type 2 -> expense/Income
 @Composable
 fun DropDownMenu(
+    modifier: Modifier = Modifier,
     menuExpanded: Boolean,
     colorPallet: HarmonizedColorPalette,
     onDismiss: () -> Unit,
@@ -100,6 +101,7 @@ fun DropDownMenu(
     selectedCategorySetter: (CategoryClass) -> Unit
 ) {
     DropdownMenu(
+        modifier =  modifier,
         expanded = menuExpanded,
         onDismissRequest = { onDismiss() },
         containerColor = colorPallet.surfaceVariant,

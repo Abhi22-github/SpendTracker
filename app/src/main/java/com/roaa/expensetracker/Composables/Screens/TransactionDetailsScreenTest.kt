@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -18,35 +19,58 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
+import com.roaa.expensetracker.Composables.components.DropDownMenu
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
+import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.toPalette
+import com.roaa.expensetracker.Model.firstSampleClass
 import com.roaa.expensetracker.R
+import com.roaa.expensetracker.ViewModels.CategoryViewModel
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun TransactionDetailsScreen(navigationManager: NavigationManager, modifier: Modifier = Modifier) {
+fun TransactionDetailsScreen(
+    navigationManager: NavigationManager,
+    modifier: Modifier = Modifier,
+    categoryViewModel: CategoryViewModel = hiltViewModel()
+) {
     val scroll = rememberScrollState()
-    val gradient = Brush.verticalGradient(listOf(orange.copy(alpha = 0.1f),Color(0xFFF3F3F3),Color.White))
+    val gradient =
+        Brush.verticalGradient(listOf(orange.copy(alpha = 0.1f), Color(0xFFF3F3F3), Color.White))
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center,
@@ -84,6 +108,72 @@ fun TransactionDetailsScreen(navigationManager: NavigationManager, modifier: Mod
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
         )
         Spacer(Modifier.height(24.dp))
+
+        var categoryMenuExpanded by remember { mutableStateOf(false) }
+        val categoryList by categoryViewModel.allCategoryList.collectAsState()
+        var selectedCategory by remember {
+            mutableStateOf(
+                firstSampleClass
+            )
+        }
+
+        Box(
+           modifier = modifier.wrapContentWidth()
+        ) {
+            val colorPalletGreen = toPalette(greenColor)
+            Button(
+                modifier = Modifier.padding(end = 0.dp),
+                onClick = { categoryMenuExpanded = !categoryMenuExpanded },
+                colors = ButtonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHighest,
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                contentPadding = PaddingValues(
+                    start = 20.dp, end = 20.dp, top = 16.dp, bottom = 16.dp
+                )
+            ) {
+                val image =
+                    rememberAsyncImagePainter(IconState.fromNumber(selectedCategory.categoryIconNumber))
+                Image(
+                    painter = image,
+                    contentDescription = "Test Image",
+                    modifier = Modifier.size(24.dp),
+                )
+
+                Text(
+                    text = selectedCategory.categoryName,
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(start = 8.dp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Icon(
+                    Icons.Filled.KeyboardArrowDown,
+                    "backIcon",
+                    modifier = Modifier
+                )
+            }
+            Log.d("TransactionDetailsScreen","$categoryMenuExpanded $categoryList")
+            DropDownMenu(
+                Modifier,
+                categoryMenuExpanded,
+                colorPalletGreen,
+                onDismiss = { categoryMenuExpanded = false },
+                categoryList,
+                selectedCategorySetter = {
+                    selectedCategory = it
+//                    scope.launch {
+//                        uiViewModel.errorStatusInAddBottomSheet.emit(false)
+//                    }
+                },
+            )
+
+        }
+
+
         FlowRow(
             horizontalArrangement = Arrangement.spacedBy(5.dp, Alignment.CenterHorizontally),
             verticalArrangement = Arrangement.spacedBy(0.dp),

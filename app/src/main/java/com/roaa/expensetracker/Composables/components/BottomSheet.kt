@@ -361,6 +361,7 @@ fun BottomSheetContentItemAddContent(
                         )
                     }
                     DropDownMenu(
+                        Modifier,
                         categoryMenuExpanded,
                         colorPalletGreen,
                         onDismiss = { categoryMenuExpanded = false },
@@ -1719,6 +1720,7 @@ fun BottomSheetContentItemAddContentTest(
                         )
                     }
                     DropDownMenu(
+                        Modifier,
                         categoryMenuExpanded,
                         colorPalletGreen,
                         onDismiss = { categoryMenuExpanded = false },
