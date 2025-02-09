@@ -137,10 +137,15 @@ fun TransactionsListCompose(
                                 SingleTransaction(item, onSingleItemClick = {
 
                                     singleTransaction = (item)
-                                    if(showNewLayouts)
-                                        navController.navigateTo(RootScreen.DetailsScreen)
+                                    if (showNewLayouts)
+                                        navController.navigateTo(
+                                            RootScreen.DetailsScreen(
+                                                it.transaction.amount,
+                                                it.category.categoryName
+                                            )
+                                        )
                                     else
-                                    bottomSheet = true
+                                        bottomSheet = true
 
                                 })
                             }
@@ -161,8 +166,13 @@ fun TransactionsListCompose(
                         items(transactionList, key = { it.transaction.id }) { item ->
                             SingleTransaction(item, onSingleItemClick = {
                                 singleTransaction = (item)
-                                if(showNewLayouts)
-                                    navController.navigateTo(RootScreen.DetailsScreen)
+                                if (showNewLayouts)
+                                    navController.navigateTo(
+                                        RootScreen.DetailsScreen(
+                                            it.transaction.amount,
+                                            it.category.categoryName
+                                        )
+                                    )
                                 else
                                     bottomSheet = true
                             })

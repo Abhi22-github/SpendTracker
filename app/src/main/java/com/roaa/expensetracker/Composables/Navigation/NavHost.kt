@@ -76,10 +76,13 @@ fun RootNavGraph(
             }
 
             composable<RootScreen.DetailsScreen> {
+                val args = it.toRoute<RootScreen.DetailsScreen>()
                 TransactionDetailsScreen(
+                    modifier = Modifier,
                     rooNavController,
                     navigationManager,
-                    modifier = Modifier
+                    args.amount,
+                    args.categoryName
                 )
             }
 
@@ -91,6 +94,7 @@ fun RootNavGraph(
                     {})
             }
             composable<RootScreen.SettingScreen>() {
+
                 SettingsScreen(rooNavController, navigationManager, {})
             }
         }

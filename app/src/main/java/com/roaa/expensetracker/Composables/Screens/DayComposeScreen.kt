@@ -249,7 +249,7 @@ fun DayViewScreen(
                 )
             var getCurrentBudget by remember {
                 mutableStateOf(
-                     BudgetWithDayDetails(
+                    BudgetWithDayDetails(
                         emptyBudgetClass, listOf(emptyBudgetDayClass)
                     )
                 )
