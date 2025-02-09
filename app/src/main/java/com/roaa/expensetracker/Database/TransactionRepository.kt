@@ -28,6 +28,10 @@ class TransactionRepository(@ApplicationContext applicationContext: Context) {
         transactionDao.addTransactionAndPropagateChanges(transactionClass)
     }
 
+    suspend fun updateAndPropagateChanges(transactionClass: TransactionClass) {
+        transactionDao.updateTransactionAndPropagateChanges(transactionClass)
+    }
+
     suspend fun deleteAndPropagateChanges(transactionClass: TransactionClass) {
         transactionDao.deleteTransactionAndPropagateChanges(transactionClass)
     }
