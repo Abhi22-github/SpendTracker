@@ -6,6 +6,7 @@ import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Model.TransactionClass
 
+
 data class TransactionWithDetails(
     @Embedded val transaction: TransactionClass,
     @Relation(

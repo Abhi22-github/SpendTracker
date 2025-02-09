@@ -29,7 +29,7 @@ sealed class RootScreen() {
     data object SettingScreen : RootScreen()
 
     @Serializable
-    data object DetailsScreen : RootScreen()
+    data class DetailsScreen(val amount: Float, val categoryName: String) : RootScreen()
 
 }
 

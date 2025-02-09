@@ -33,6 +33,7 @@ import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -44,6 +45,9 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.Cable
+import androidx.compose.material.icons.outlined.DateRange
+import androidx.compose.material.icons.outlined.Payment
 import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -83,6 +87,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -106,6 +111,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
 import com.roaa.expensetracker.Composables.Screens.LivePaymentCard
+import com.roaa.expensetracker.Composables.Screens.ValueLabelList
 import com.roaa.expensetracker.Composables.blueColor
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
@@ -116,7 +122,6 @@ import com.roaa.expensetracker.Composables.utils.ColorState
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.IconStateForType
 import com.roaa.expensetracker.Composables.utils.colorList
-import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.iconsList
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
@@ -828,6 +833,14 @@ fun BottomSheetContentItemDetailsContent(
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     val labelAndValueStyle = typography.bodyMedium
     val scope = rememberCoroutineScope()
+    val orangePalette = toPalette(orange)
+    val gradient = Brush.verticalGradient(
+        listOf(
+            orangePalette.main.copy(alpha = 0.5f),
+            MaterialTheme.colorScheme.surface.copy(alpha = 0.35f),
+            MaterialTheme.colorScheme.surface
+        )
+    )
     Column(
         horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()
     ) {
@@ -845,6 +858,41 @@ fun BottomSheetContentItemDetailsContent(
             ),
         )
         Spacer(Modifier.height(20.dp))
+        Box(
+            modifier = modifier.wrapContentWidth()
+        ) {
+            Button(
+                modifier = Modifier.padding(end = 0.dp),
+                onClick = { },
+                colors = ButtonColors(
+                    containerColor = orangePalette.container.copy(alpha = 0.5f),
+                    contentColor = MaterialTheme.colorScheme.onSurface,
+                    disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
+                    disabledContentColor = MaterialTheme.colorScheme.onPrimary
+                ),
+                contentPadding = PaddingValues(
+                    start = 20.dp, end = 20.dp, top = 16.dp, bottom = 16.dp
+                )
+            ) {
+                val image =
+                    rememberAsyncImagePainter(IconState.fromNumber(singleTransaction.category.categoryIconNumber))
+                Image(
+                    painter = image,
+                    contentDescription = "Test Image",
+                    modifier = Modifier.size(24.dp),
+                )
+
+                Text(
+                    text = singleTransaction.category.categoryName,
+                    modifier = Modifier
+                        .wrapContentWidth()
+                        .padding(start = 8.dp),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+        Spacer(Modifier.height(20.dp))
         Row(
             Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
         ) {
@@ -853,197 +901,48 @@ fun BottomSheetContentItemDetailsContent(
                 modifier = Modifier
                     .weight(1f)
                     .background(
-                        color = combineColors(
-                            MaterialTheme.colorScheme.surface,
-                            MaterialTheme.colorScheme.surfaceVariant,
-                            angle = 0.8f,
-                        ), shape = RoundedCornerShape(20.dp)
+                        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                        shape = RoundedCornerShape(20.dp)
                     )
                     .padding(16.dp),
             ) {
                 Spacer(Modifier.width(12.dp))
                 Column {
-                    Row(
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            Modifier.weight(1f),
-                            horizontalArrangement = Arrangement.Start,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = "Type",
-                                modifier = Modifier.padding(start = 8.dp),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha),
-                                style = labelAndValueStyle
-                            )
-                        }
-                        Row(
-                            Modifier.weight(1f),
-                            horizontalArrangement = valueArrangement,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            val image = rememberAsyncImagePainter(
-                                if (singleTransaction.transaction.type == EXPENSE) R.drawable.icon_expense else R.drawable.icon_income
-                            )
-                            Image(
-                                painter = image,
-                                contentDescription = "Test Image",
-                                modifier = Modifier.size(24.dp),
-                            )
-                            Text(
-                                text = singleTransaction.transaction.type,
-                                modifier = Modifier.padding(start = 8.dp),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                style = labelAndValueStyle
-                            )
-                        }
-                    }
-
+                    ValueLabelList(
+                        modifier = Modifier,
+                        labelAndValueStyle = labelAndValueStyle,
+                        labelName = "Transaction Type",
+                        labelValue = singleTransaction.transaction.type,
+                        iconNumber = 12,
+                        image = Icons.Outlined.Cable,
+                    )
                     Spacer(Modifier.height(spaceHeightInDetail))
                     HorizontalDivider(
                         color = MaterialTheme.colorScheme.surfaceContainer, thickness = 1.dp
                     )
                     Spacer(Modifier.height(spaceHeightInDetail))
 
-                    Row(
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            Modifier.weight(1f),
-                            horizontalArrangement = Arrangement.Start,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = "Category",
-                                modifier = Modifier.padding(start = 8.dp),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha),
-                                style = labelAndValueStyle
-                            )
-                        }
-                        Row(
-                            Modifier.weight(1f),
-                            horizontalArrangement = valueArrangement,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            val image = rememberAsyncImagePainter(
-                                IconState.fromNumber(singleTransaction.category.categoryIconNumber)
-                            )
-                            Image(
-                                painter = image,
-                                contentDescription = "Test Image",
-                                modifier = Modifier.size(24.dp),
-                            )
-                            Text(
-                                text = singleTransaction.category.categoryName,
-                                modifier = Modifier.padding(start = 8.dp),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                style = labelAndValueStyle
-                            )
-                        }
-                    }
+                    ValueLabelList(
+                        modifier = Modifier,
+                        labelAndValueStyle = labelAndValueStyle,
+                        labelName = "Date",
+                        labelValue = convertMillisToDateString(singleTransaction.transaction.dateWithTime),
+                        iconNumber = 12,
+                        image = Icons.Outlined.DateRange,
+                    )
                     Spacer(Modifier.height(spaceHeightInDetail))
                     HorizontalDivider(
                         color = MaterialTheme.colorScheme.surfaceContainer, thickness = 1.dp
                     )
                     Spacer(Modifier.height(spaceHeightInDetail))
-                    Row(
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            Modifier.weight(1f),
-                            horizontalArrangement = Arrangement.Start,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = "Date",
-                                modifier = Modifier.padding(start = 8.dp),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha),
-                                style = labelAndValueStyle
-                            )
-                        }
-                        Row(
-                            Modifier.weight(1f),
-                            horizontalArrangement = valueArrangement,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            val image = rememberAsyncImagePainter(
-                                R.drawable.ic_category_10
-                            )
-                            Image(
-                                painter = image,
-                                contentDescription = "Test Image",
-                                modifier = Modifier.size(24.dp),
-                            )
-                            Text(
-                                text = convertMillisToDateString(singleTransaction.transaction.dateWithTime),
-                                modifier = Modifier.padding(start = 8.dp),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                style = labelAndValueStyle
-                            )
-                        }
-                    }
-                    Spacer(Modifier.height(spaceHeightInDetail))
-                    HorizontalDivider(
-                        color = MaterialTheme.colorScheme.surfaceContainer, thickness = 1.dp
+                    ValueLabelList(
+                        modifier = Modifier,
+                        labelAndValueStyle = labelAndValueStyle,
+                        labelName = "Payment Method",
+                        labelValue = singleTransaction.BankAccount.bankName,
+                        iconNumber = 12,
+                        image = Icons.Outlined.Payment,
                     )
-                    Spacer(Modifier.height(spaceHeightInDetail))
-                    Row(
-                        horizontalArrangement = Arrangement.Start,
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row(
-                            Modifier.weight(1f),
-                            horizontalArrangement = Arrangement.Start,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            Text(
-                                text = "Paid by",
-                                modifier = Modifier.padding(start = 8.dp),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha),
-                                style = labelAndValueStyle
-                            )
-                        }
-                        Row(
-                            Modifier.weight(1f),
-                            horizontalArrangement = valueArrangement,
-                            verticalAlignment = Alignment.CenterVertically,
-                        ) {
-                            val image = rememberAsyncImagePainter(
-                                R.drawable.ic_category_9
-                            )
-                            Image(
-                                painter = image,
-                                contentDescription = "Test Image",
-                                modifier = Modifier.size(24.dp),
-                            )
-                            Text(
-                                text = singleTransaction.BankAccount.bankName,
-                                modifier = Modifier.padding(start = 8.dp),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis,
-                                style = labelAndValueStyle
-                            )
-                        }
-                    }
                 }
             }
         }
@@ -2151,12 +2050,12 @@ fun BottomSheetBudgetContent(
             text = "Set up a budget",
             modifier = modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
-            style = MaterialTheme.typography.titleLarge
+            style = typography.titleLarge
         )
         Spacer(Modifier.height(4.dp))
         Text(
             text = "Setup your budget for current month ",
-            style = MaterialTheme.typography.labelLarge,
+            style = typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha),
             modifier = Modifier.align(Alignment.CenterHorizontally)
         )
@@ -2223,7 +2122,7 @@ fun BottomSheetBudgetContent(
                     .weight(1f)
                     .fillMaxWidth(),
                 textAlign = TextAlign.Start,
-                style = MaterialTheme.typography.labelLarge,
+                style = typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
@@ -2233,7 +2132,7 @@ fun BottomSheetBudgetContent(
                     .fillMaxWidth(),
                 textAlign = TextAlign.End,
                 overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.labelLarge,
+                style = typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
         }
@@ -2246,7 +2145,7 @@ fun BottomSheetBudgetContent(
                     .weight(1f)
                     .fillMaxWidth(),
                 textAlign = TextAlign.Start,
-                style = MaterialTheme.typography.labelLarge,
+                style = typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
@@ -2256,7 +2155,7 @@ fun BottomSheetBudgetContent(
                     .fillMaxWidth(),
                 textAlign = TextAlign.End,
                 overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.labelLarge,
+                style = typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
         }
@@ -2267,14 +2166,14 @@ fun BottomSheetBudgetContent(
             text = "Total",
             modifier = modifier.fillMaxWidth(),
             textAlign = TextAlign.Start,
-            style = MaterialTheme.typography.labelLarge,
+            style = typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurface
         )
         Text(
             text = "$totalAmountPerDay Per day",
             modifier = modifier.fillMaxWidth(),
             textAlign = TextAlign.Start,
-            style = MaterialTheme.typography.labelLarge,
+            style = typography.labelLarge,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
         )
         Spacer(Modifier.height(16.dp))
