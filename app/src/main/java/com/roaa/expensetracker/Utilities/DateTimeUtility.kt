@@ -37,6 +37,9 @@ fun Long.toLocalDate(): LocalDate {
 fun LocalDate.toDisplayStringForMonth(): String {
     return this.format(DateTimeFormatter.ofPattern("dd MMM")).toString()
 }
+fun LocalDate.toDisplayStringForMonthWithYear(): String {
+    return this.format(DateTimeFormatter.ofPattern("dd MMM,yyyy")).toString()
+}
 
 fun parseAmount(amount: Float): String {
     val formatter = DecimalFormat("##,##,##,###")

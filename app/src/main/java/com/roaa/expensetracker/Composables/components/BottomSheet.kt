@@ -41,7 +41,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.KeyboardArrowDown
@@ -129,10 +128,14 @@ import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Model.TransactionTypeClass
 import com.roaa.expensetracker.Model.emptyBank
+import com.roaa.expensetracker.Model.emptyCategoryClass
+import com.roaa.expensetracker.Model.emptyTransactionClass
 import com.roaa.expensetracker.Model.firstSampleClass
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
+import com.roaa.expensetracker.Utilities.Constants.INSERT
+import com.roaa.expensetracker.Utilities.Constants.UPDATE
 import com.roaa.expensetracker.Utilities.DecimalFilterTransformation
 import com.roaa.expensetracker.Utilities.convertMillisToDateString
 import com.roaa.expensetracker.Utilities.extractNumbers
@@ -142,6 +145,7 @@ import com.roaa.expensetracker.Utilities.getMonthEndDate
 import com.roaa.expensetracker.Utilities.getRemainingDaysInCurrentMonth
 import com.roaa.expensetracker.Utilities.getValidDatesListFromLong
 import com.roaa.expensetracker.Utilities.parseAmount
+import com.roaa.expensetracker.Utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLongMillis
 import com.roaa.expensetracker.ViewModels.AnimationViewModel
@@ -159,7 +163,11 @@ import kotlinx.coroutines.launch
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun BottomSheetContentAddItem(date: Long, sheetState: SheetState, closeBottomSheet: () -> Unit) {
+fun BottomSheetContentAddItem(
+    date: Long,
+    sheetState: SheetState,
+    closeBottomSheet: () -> Unit
+) {
     ModalBottomSheet(onDismissRequest = {
         closeBottomSheet()
     },
@@ -169,6 +177,25 @@ fun BottomSheetContentAddItem(date: Long, sheetState: SheetState, closeBottomShe
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
         BottomSheetContentItemAddContent(modifier = Modifier, date, closeBottomSheet)
+    }
+}
+
+@Composable
+@OptIn(ExperimentalMaterial3Api::class)
+fun BottomSheetContentEdit(
+    singleTransaction: TransactionWithDetails,
+    sheetState: SheetState,
+    closeBottomSheet: () -> Unit
+) {
+    ModalBottomSheet(onDismissRequest = {
+        closeBottomSheet()
+    },
+        sheetState = sheetState,
+        modifier = Modifier
+            .imePadding()
+            .fillMaxWidth(),
+        contentWindowInsets = { WindowInsets.ime }) {
+        BottomSheetContentItemEditContent(modifier = Modifier, singleTransaction, closeBottomSheet)
     }
 }
 
@@ -443,7 +470,7 @@ fun BottomSheetContentItemAddContent(
             Spacer(Modifier.height(0.dp))
             Box(
                 modifier = Modifier
-                    .align(Alignment.Start)
+                    .align(Alignment.CenterHorizontally)
                     .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
             ) {
                 TextField(
@@ -456,7 +483,7 @@ fun BottomSheetContentItemAddContent(
                             uiViewModel.errorStatusInAddBottomSheet.emit(false)
                         }
                     },
-                    modifier = Modifier,
+                    modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     placeholder = {
                         Text(
@@ -479,25 +506,24 @@ fun BottomSheetContentItemAddContent(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
                     ),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-
-                    )
-            }
-
-            TextButton(
-                onClick = {
-
-                },
-                Modifier
-                    .height(48.dp)
-                    .align(Alignment.Start),
-                colors = ButtonDefaults.textButtonColors(
-//                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
-//                    contentColor = MaterialTheme.colorScheme.onSurface
                 )
-            ) {
-                Icon(Icons.Filled.Add, contentDescription = null)
-                Text("Add Tag")
             }
+
+//            TextButton(
+//                onClick = {
+//
+//                },
+//                Modifier
+//                    .height(48.dp)
+//                    .align(Alignment.Start),
+//                colors = ButtonDefaults.textButtonColors(
+////                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+////                    contentColor = MaterialTheme.colorScheme.onSurface
+//                )
+//            ) {
+//                Icon(Icons.Filled.Add, contentDescription = null)
+//                Text("Add Tag")
+//            }
 
 
 //                Box(
@@ -558,6 +584,420 @@ fun BottomSheetContentItemAddContent(
             FilledTonalButton(
                 onClick = {
                     validateTransactionData(
+                        TransactionWithDetails(
+                            emptyTransactionClass,
+                            emptyCategoryClass,
+                            emptyBank
+                        ),
+                        INSERT,
+                        closeBottomSheet = closeBottomSheet,
+                        selectedType,
+                        selectedCategory,
+                        expenseValue.text.replace(",", ""),
+                        comment.text,
+                        selectedDate,
+                        selectedPaymentMethod,
+                        scope,
+                        uiViewModel,
+                        transactionsViewModel,
+                    )
+                }, Modifier
+                    .fillMaxWidth()
+                    .height(48.dp)
+            ) {
+                Text("Save")
+            }
+        }
+        Spacer(Modifier.height(24.dp))
+    }
+}
+
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
+@Composable
+fun BottomSheetContentItemEditContent(
+    modifier: Modifier,
+    singleTransaction: TransactionWithDetails,
+    closeBottomSheet: () -> Unit,
+    categoryViewModel: CategoryViewModel = hiltViewModel(),
+    transactionsViewModel: TransactionsViewModel = hiltViewModel(),
+    uiViewModel: UiViewModel = hiltViewModel(),
+    animationViewModel: AnimationViewModel = hiltViewModel(),
+    preferencesViewModel: PreferencesViewModel = hiltViewModel()
+) {
+    val scope = rememberCoroutineScope()
+    var categoryMenuExpanded by remember { mutableStateOf(false) }
+    var expenseValue by remember { mutableStateOf(TextFieldValue(singleTransaction.transaction.amount.toString())) }
+    var comment by remember { mutableStateOf(TextFieldValue(singleTransaction.transaction.note)) }
+    var selectedDate by remember { mutableStateOf<Long?>(singleTransaction.transaction.date) }
+    var selectedPaymentMethod by remember { mutableStateOf<BankAccountsClass>(singleTransaction.BankAccount) }
+    val focusRequester = remember { FocusRequester() }
+    val categoryList by categoryViewModel.categoryList.collectAsState()
+    val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
+
+    var selectedCategory by remember {
+        mutableStateOf(
+            singleTransaction.category
+        )
+    }
+
+    val expenseType = TransactionTypeClass(1, EXPENSE)
+    val incomeType = TransactionTypeClass(2, INCOME)
+
+
+    val errorStatus by uiViewModel.errorStatusInAddBottomSheet.collectAsState(false)
+
+
+    //animations
+    var expanded by remember { mutableStateOf(false) }
+    var typeToggle by remember { mutableStateOf(if (singleTransaction.transaction.type == EXPENSE) true else false) }
+    val boxSize by animateDpAsState(
+        targetValue = if (expanded) 160.dp else 56.dp, animationSpec = tween(500)
+    )
+    val colorAnimate by animateColorAsState(
+        targetValue = if (typeToggle) orange.copy(alpha = .20f) else successColor.copy(
+            alpha = 0.20f
+        ), animationSpec = tween(500)
+    )
+
+
+    var selectedType by remember { mutableStateOf(singleTransaction.transaction.type) }
+
+    if (typeToggle) {
+        selectedType = expenseType.type
+    } else {
+        selectedType = incomeType.type
+    }
+
+    // Request focus once when the composable is first composed
+    LaunchedEffect(Unit) {
+        // Request focus for the TextField
+        focusRequester.requestFocus()
+        categoryViewModel.getCorrespondingList(selectedType)
+        categoryViewModel.getOnlyExpenseCategoryNames()
+        categoryViewModel.getOnlyIncomeCategoryNames()
+    }
+
+    LaunchedEffect(expanded, typeToggle) {
+        if (expanded) {
+            delay(5000)
+            expanded = false
+        }
+    }
+    val budget by preferencesViewModel.getTotalAmountPerDay.collectAsState(1f)
+    val oldAmount by transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
+    val newAmountTemp = if (expenseValue.text.isEmpty()) 0L else extractNumbers(expenseValue.text)
+    val newDailyBudget = oldAmount + newAmountTemp
+    val amountInString = String.format("%.2f", newDailyBudget.toFloat())
+    val percent = if (budget != 0f) {
+        newDailyBudget / budget
+    } else {
+        0f
+    }
+    animationViewModel.method("₹$amountInString", percent)
+
+    LaunchedEffect(percent) {
+        scope.launch {
+            animationViewModel.newSpentPercentage.emit(percent)
+        }
+    }
+
+    Column(
+        modifier
+            .fillMaxWidth()
+            .imePadding()
+    ) {
+        Column() {
+            Text(
+                text = "Edit Transaction",
+                modifier = modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                style = typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.height(16.dp))
+//            AnimatedVisibility(showForecast) {
+//                Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
+//                    RestBudgetPill(LocalDate.now().toLong())
+//                }
+//            }
+            if (showForecast) {
+                Spacer(Modifier.height(16.dp))
+            }
+            Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
+
+                Box(contentAlignment = Alignment.Center,
+                    modifier = Modifier
+                        .width(boxSize)
+                        .background(
+                            color = colorAnimate, shape = RoundedCornerShape(30.dp)
+                        )
+                        .clip(RoundedCornerShape(30.dp))
+                        .clickable {
+                            if (!expanded) {
+                                expanded = !expanded
+                            } else {
+                                typeToggle = !typeToggle
+                                categoryViewModel.getCorrespondingList(if (typeToggle) expenseType.type else incomeType.type)
+                                selectedCategory = firstSampleClass
+                            }
+                        }
+                        .height(56.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        val image = rememberAsyncImagePainter(
+                            if (typeToggle) IconStateForType.fromNumber(expenseType.iconNumber)
+                            else IconStateForType.fromNumber(incomeType.iconNumber)
+                        )
+                        Image(
+                            painter = image,
+                            contentDescription = "Test Image",
+                            modifier = Modifier.size(36.dp),
+                        )
+
+                        AnimatedVisibility(expanded) {
+                            Text(
+                                text = if (typeToggle) expenseType.type else incomeType.type,
+                                modifier = Modifier.padding(start = 8.dp),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                }
+                Spacer(Modifier.width(12.dp))
+                Box(
+                    modifier = modifier.fillMaxWidth()
+                ) {
+                    val colorPalletGreen = toPalette(greenColor)
+                    Button(
+                        modifier = Modifier.padding(end = 5.dp),
+                        onClick = { categoryMenuExpanded = !categoryMenuExpanded },
+                        colors = ButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            contentColor = MaterialTheme.colorScheme.onSurface,
+                            disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
+                            disabledContentColor = MaterialTheme.colorScheme.onPrimary
+                        ),
+                        contentPadding = PaddingValues(
+                            start = 20.dp, end = 10.dp, top = 16.dp, bottom = 16.dp
+                        )
+                    ) {
+                        val image =
+                            rememberAsyncImagePainter(IconState.fromNumber(selectedCategory.categoryIconNumber))
+                        Image(
+                            painter = image,
+                            contentDescription = "Test Image",
+                            modifier = Modifier.size(24.dp),
+                        )
+
+                        Text(
+                            text = selectedCategory.categoryName,
+                            modifier = Modifier
+                                .weight(0.6f)
+                                .padding(start = 8.dp),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                        Icon(
+                            Icons.Filled.KeyboardArrowDown,
+                            "backIcon",
+                            modifier = Modifier.weight(0.2f)
+                        )
+                    }
+                    DropDownMenu(
+                        Modifier,
+                        categoryMenuExpanded,
+                        colorPalletGreen,
+                        onDismiss = { categoryMenuExpanded = false },
+                        categoryList,
+                        selectedCategorySetter = {
+                            selectedCategory = it
+                            scope.launch {
+                                uiViewModel.errorStatusInAddBottomSheet.emit(false)
+                            }
+                        },
+                    )
+
+                }
+            }
+
+            Spacer(Modifier.height(48.dp))
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
+            ) {
+                TextField(
+                    value = expenseValue,
+                    onValueChange = { newValue ->
+                        val filteredText = newValue.text.filter { it.isDigit() || it == '.' }
+                        // Ensure only one decimal point is allowed
+                        if (filteredText.count { it == '.' } <= 1) {
+                            // Split into parts before and after the decimal
+                            val parts = filteredText.split('.')
+                            // Ensure max 7 digits before the decimal and max 2 after
+                            if (parts.size == 1 && parts[0].length <= 7 || parts.size == 2 && parts[0].length <= 7 && parts[1].length <= 2) {
+                                // Update the TextFieldValue with the filtered text
+                                expenseValue = newValue.copy(text = filteredText)
+                            }
+                        }
+                        scope.launch {
+                            uiViewModel.errorStatusInAddBottomSheet.emit(false)
+                        }
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.Center)
+                        .focusRequester(focusRequester),
+                    singleLine = true,
+
+                    placeholder = {
+                        Text(
+                            "₹0",
+                            style = typography.displayMedium,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .align(Alignment.Center),
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
+                        )
+                    },
+                    visualTransformation = DecimalFilterTransformation(),
+                    shape = RoundedCornerShape(24.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent,
+                    ),
+                    textStyle = typography.displayMedium.copy(
+                        textAlign = TextAlign.Center, fontFamily = numberFont
+                    ),
+                    keyboardOptions = KeyboardOptions.Default.copy(
+                        keyboardType = KeyboardType.Number, imeAction = ImeAction.Next
+                    ),
+                )
+            }
+            Spacer(Modifier.height(0.dp))
+            Box(
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
+            ) {
+                TextField(
+                    value = comment,
+                    onValueChange = { newValue ->
+                        if (newValue.text.length <= 32) {
+                            comment = newValue
+                        }
+                        scope.launch {
+                            uiViewModel.errorStatusInAddBottomSheet.emit(false)
+                        }
+                    },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    placeholder = {
+                        Text(
+                            "Add a comment",
+                            style = typography.bodyLarge,
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = TextAlign.Center,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
+                        )
+                    },
+                    shape = RoundedCornerShape(24.dp),
+                    colors = TextFieldDefaults.colors(
+                        focusedIndicatorColor = Color.Transparent,
+                        unfocusedIndicatorColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent,
+                        focusedContainerColor = Color.Transparent
+                    ),
+                    textStyle = typography.bodyLarge.copy(
+                        textAlign = TextAlign.Center,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
+                    ),
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                )
+            }
+//            TextButton(
+//                onClick = {
+//
+//                },
+//                Modifier
+//                    .height(48.dp)
+//                    .align(Alignment.Start),
+//                colors = ButtonDefaults.textButtonColors(
+////                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+////                    contentColor = MaterialTheme.colorScheme.onSurface
+//                )
+//            ) {
+//                Icon(Icons.Filled.Add, contentDescription = null)
+//                Text("Add Tag")
+//            }
+
+
+//                Box(
+//                    modifier = Modifier
+//                        .fillMaxWidth()
+//                        .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
+//                ) {
+//                    TextField(
+//                        value = expenseValue,
+//                        onValueChange = { newValue ->
+//                            expenseValue = newValue
+//                        },
+//                        modifier = Modifier
+//                            .wrapContentWidth(),
+//
+//                        singleLine = true,
+//                        placeholder = {
+//                            Text(
+//                                "Description",
+//                                style = typography.bodyMedium,
+//                                modifier = Modifier
+//                                    .wrapContentWidth(),
+//                                textAlign = TextAlign.Center,
+//                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
+//                            )
+//                        },
+//                        shape = RoundedCornerShape(24.dp),
+//                        colors = TextFieldDefaults.colors(
+//                            focusedIndicatorColor = Color.Transparent,
+//                            unfocusedIndicatorColor = Color.Transparent,
+//                            unfocusedContainerColor = Color.Transparent,
+//                            focusedContainerColor = Color.Transparent
+//                        ),
+//                        textStyle = typography.bodyMedium,
+//                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+//                    )
+//                }
+
+        }
+
+        Spacer(Modifier.height(24.dp))
+        ErrorRow(errorStatus)
+        Spacer(Modifier.height(8.dp))
+        Row {
+            BottomRow(
+                modifier,
+                selectedDate,
+                { selectedDate = it },
+                { selectedPaymentMethod = it },
+            )
+        }
+        Log.d("vpd 22", "$selectedPaymentMethod")
+        Spacer(Modifier.height(8.dp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding),
+        ) {
+            FilledTonalButton(
+                onClick = {
+                    validateTransactionData(
+                        singleTransaction,
+                        UPDATE,
                         closeBottomSheet = closeBottomSheet,
                         selectedType,
                         selectedCategory,
@@ -582,6 +1022,8 @@ fun BottomSheetContentItemAddContent(
 
 
 fun validateTransactionData(
+    singleTransaction: TransactionWithDetails,
+    actionType: String,
     closeBottomSheet: () -> Unit,
     type: String,
     selectedCategory: CategoryClass,
@@ -610,14 +1052,23 @@ fun validateTransactionData(
             uiViewModel.errorStatusMessage.emit("Please provide some comment")
             return@launch
         }
-        transactionsViewModel.validateAndPrepareTransactionData(
-            type,
-            selectedCategory.categoryId,
-            amount,
-            comment,
-            selectedDate,
-            selectedPaymentMethod.bankAccountId
-        )
+        if (actionType == INSERT)
+            transactionsViewModel.validateAndPrepareTransactionData(
+                type,
+                selectedCategory.categoryId,
+                amount,
+                comment,
+                selectedDate,
+                selectedPaymentMethod.bankAccountId
+            ) else
+            transactionsViewModel.updateFormDataInDatabase(singleTransaction.transaction.also {
+                it.type = type
+                it.date = selectedDate
+                it.amount = amount.toFloat()
+                it.note = comment
+                it.categoryId = selectedCategory.categoryId
+                it.bankAccountId = selectedPaymentMethod.bankAccountId
+            })
         closeBottomSheet()
 
     }
@@ -698,8 +1149,8 @@ fun BottomRow(
             Box() {
                 FilledTonalButton(
                     onClick = {
+                        // selectedPaymentMethodSetter(selectedBankAccount)
                         bankAccountMenuExpanded = true
-                        selectedPaymentMethodSetter(selectedBankAccount)
                     }, colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.onSurface.copy(
                             alpha = secondaryAlphaForElements
@@ -724,6 +1175,7 @@ fun BottomRow(
                     bankAccountsList,
                     selectedBankAccountSetter = {
                         selectedBankAccount = it
+                        selectedPaymentMethodSetter(selectedBankAccount)
                         scope.launch {
                             uiViewModel.errorStatusInAddBottomSheet.emit(false)
                         }
@@ -740,7 +1192,6 @@ fun BottomRow(
 }
 
 
-//delete this after properly integrating with compose
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddBottomSheet(
@@ -794,6 +1245,24 @@ fun AddBottomSheet(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun EditBottomSheet(
+    singleTransaction: TransactionWithDetails,
+    closeBottomSheet: () -> Unit,
+) {
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val scope = rememberCoroutineScope()
+
+    BottomSheetContentEdit(singleTransaction, bottomSheetState) {
+        scope.launch {
+            closeBottomSheet()
+        }
+    }
+
+}
+
+
 //bottom sheet to show item Details
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -813,7 +1282,7 @@ fun BottomSheetContentItemDetails(
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
         BottomSheetContentItemDetailsContent(
-            modifier = Modifier, closeBottomSheet, singleTransaction, uiViewModel
+            modifier = Modifier, sheetState, closeBottomSheet, singleTransaction, uiViewModel
         )
     }
 }
@@ -822,15 +1291,18 @@ val valueArrangement = Arrangement.End
 val spaceHeightInDetail = 10.dp
 
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSheetContentItemDetailsContent(
     modifier: Modifier,
+    sheetState: SheetState,
     closeBottomSheet: () -> Unit,
     singleTransaction: TransactionWithDetails,
     uiViewModel: UiViewModel,
     transactionsViewModel: TransactionsViewModel = hiltViewModel()
 ) {
     var showDeleteConfirmation by remember { mutableStateOf(false) }
+    var showEdit by remember { mutableStateOf(false) }
     val labelAndValueStyle = typography.bodyMedium
     val scope = rememberCoroutineScope()
     val orangePalette = toPalette(orange)
@@ -926,7 +1398,8 @@ fun BottomSheetContentItemDetailsContent(
                         modifier = Modifier,
                         labelAndValueStyle = labelAndValueStyle,
                         labelName = "Date",
-                        labelValue = convertMillisToDateString(singleTransaction.transaction.dateWithTime),
+                        labelValue = singleTransaction.transaction.date.toLocalDate()
+                            .toDisplayStringForMonthWithYear(),
                         iconNumber = 12,
                         image = Icons.Outlined.DateRange,
                     )
@@ -968,7 +1441,7 @@ fun BottomSheetContentItemDetailsContent(
                             horizontalArrangement = Arrangement.Start,
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
-                            TextButton(onClick = { }) {
+                            TextButton(onClick = { showEdit = !showEdit }) {
                                 Icon(
                                     Icons.Filled.Edit,
                                     contentDescription = "edit",
@@ -1019,7 +1492,19 @@ fun BottomSheetContentItemDetailsContent(
                 icon = ImageVector.vectorResource(R.drawable.icon_expense)
             )
         }
+        AnimatedVisibility(showEdit) {
+
+            EditBottomSheet(
+                singleTransaction,
+                closeBottomSheet = {
+                    showEdit = !showEdit
+                    closeBottomSheet()
+                },
+            )
+
+        }
     }
+
 }
 
 
@@ -2223,7 +2708,7 @@ fun BottomSheetBudgetContentPreview() {
 fun BottomSheetPreview() {
     ExpenseTrackerTheme {
         Surface {
-            BottomSheetContentItemAddContent(Modifier, 0L, {})
+            //  BottomSheetContentItemAddContent(Modifier, 0L, {})
         }
     }
 }
