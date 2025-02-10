@@ -163,6 +163,10 @@ class TransactionsViewModel @Inject constructor(
         viewModelScope.launch { transactionRepository.insertAndPropagateChanges(modal) }
     }
 
+     fun updateFormDataInDatabase(transactionClass: TransactionClass){
+        viewModelScope.launch { transactionRepository.updateAndPropagateChanges(transactionClass) }
+    }
+
     fun saveSelectedDate(date: Long) {
         this.selectedDate = date
     }
