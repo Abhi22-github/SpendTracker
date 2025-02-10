@@ -171,7 +171,7 @@ fun PaymentMethodScreen(
             )
         }) { paddingValue ->
         if (!bankAccountsList.isEmpty()) {
-            Column(Modifier) {
+            Column(Modifier.padding(paddingValue)) {
                 Spacer(Modifier.height(10.dp))
                 LazyColumn(state = lazyListState) {
                     item {
