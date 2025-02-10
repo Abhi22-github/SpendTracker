@@ -1305,10 +1305,11 @@ fun BottomSheetContentItemDetailsContent(
     var showEdit by remember { mutableStateOf(false) }
     val labelAndValueStyle = typography.bodyMedium
     val scope = rememberCoroutineScope()
-    val orangePalette = toPalette(orange)
+    val colorPalette =
+        toPalette(if (singleTransaction.transaction.type == EXPENSE) orange else greenColor)
     val gradient = Brush.verticalGradient(
         listOf(
-            orangePalette.main.copy(alpha = 0.5f),
+            colorPalette.main.copy(alpha = 0.5f),
             MaterialTheme.colorScheme.surface.copy(alpha = 0.35f),
             MaterialTheme.colorScheme.surface
         )
@@ -1337,7 +1338,7 @@ fun BottomSheetContentItemDetailsContent(
                 modifier = Modifier.padding(end = 0.dp),
                 onClick = { },
                 colors = ButtonColors(
-                    containerColor = orangePalette.container.copy(alpha = 0.5f),
+                    containerColor = colorPalette.container.copy(alpha = 0.5f),
                     contentColor = MaterialTheme.colorScheme.onSurface,
                     disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
                     disabledContentColor = MaterialTheme.colorScheme.onPrimary
