@@ -1,6 +1,10 @@
 package com.roaa.expensetracker.ViewModels
 
 import androidx.lifecycle.ViewModel
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
+import com.roaa.expensetracker.Model.emptyBank
+import com.roaa.expensetracker.Model.emptyCategoryClass
+import com.roaa.expensetracker.Model.emptyTransactionClass
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
@@ -19,6 +23,11 @@ class UiViewModel @Inject constructor() : ViewModel() {
 
     var paymentMethodBottomSheetStatus = MutableStateFlow(false)
 
-
+    //data Related
+    var transactionDetailsWithViewModelFlow = MutableStateFlow(
+        TransactionWithDetails(
+            emptyTransactionClass, emptyCategoryClass, emptyBank
+        )
+    )
 
 }

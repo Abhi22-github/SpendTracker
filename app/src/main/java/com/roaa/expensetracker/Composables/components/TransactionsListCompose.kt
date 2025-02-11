@@ -70,6 +70,7 @@ import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.ViewModels.PreferencesViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import com.roaa.expensetracker.ViewModels.UiViewModel
+import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -137,6 +138,11 @@ fun TransactionsListCompose(
                                 SingleTransaction(item, onSingleItemClick = {
 
                                     singleTransaction = (item)
+                                    scope.launch {
+                                        uiViewModel.transactionDetailsWithViewModelFlow.emit(
+                                            singleTransaction
+                                        )
+                                    }
                                     if (showNewLayouts)
                                         navController.navigateTo(
                                             RootScreen.DetailsScreen(
@@ -166,6 +172,11 @@ fun TransactionsListCompose(
                         items(transactionList, key = { it.transaction.id }) { item ->
                             SingleTransaction(item, onSingleItemClick = {
                                 singleTransaction = (item)
+                                scope.launch {
+                                    uiViewModel.transactionDetailsWithViewModelFlow.emit(
+                                        singleTransaction
+                                    )
+                                }
                                 if (showNewLayouts)
                                     navController.navigateTo(
                                         RootScreen.DetailsScreen(

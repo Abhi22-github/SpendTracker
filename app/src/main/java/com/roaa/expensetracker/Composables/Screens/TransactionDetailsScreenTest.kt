@@ -73,13 +73,11 @@ import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.secondaryAlpha
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.toPalette
-import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
-import com.roaa.expensetracker.Model.emptyBank
-import com.roaa.expensetracker.Model.emptyCategoryClass
-import com.roaa.expensetracker.Model.emptyTransactionClass
-import com.roaa.expensetracker.Model.firstSampleClass
 import com.roaa.expensetracker.R
+import com.roaa.expensetracker.Utilities.toDisplayStringForMonthWithYear
+import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.ViewModels.CategoryViewModel
+import com.roaa.expensetracker.ViewModels.UiViewModel
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalLayoutApi::class)
@@ -90,6 +88,7 @@ fun TransactionDetailsScreen(
     navigationManager: NavigationManager,
     amount: Float,
     categoryName1: String,
+    uiViewModel: UiViewModel = hiltViewModel(),
     categoryViewModel: CategoryViewModel = hiltViewModel()
 ) {
     Scaffold(topBar = { TopBarForTransactionDetailsScreen("", false, {}, {}) }) {
@@ -97,10 +96,7 @@ fun TransactionDetailsScreen(
             val scroll = rememberScrollState()
             val orangePalette = toPalette(orange)
             val labelAndValueStyle = typography.bodyMedium
-            val singleTransaction = TransactionWithDetails(
-                emptyTransactionClass, emptyCategoryClass,
-                emptyBank
-            )
+            val singleTransaction by uiViewModel.transactionDetailsWithViewModelFlow.collectAsState()
 
             val gradient =
                 Brush.verticalGradient(
@@ -135,14 +131,14 @@ fun TransactionDetailsScreen(
                 }
                 Spacer(Modifier.height(24.dp))
                 Text(
-                    text = "₹ $amount",
+                    text = "₹ ${singleTransaction.transaction.amount}",
                     style = MaterialTheme.typography.displayMedium.copy(fontFamily = numberFont),
                     color = orangePalette.main
                 )
 //        Text(text = "Food & Drink", style = MaterialTheme.typography.titleMedium)
                 Spacer(Modifier.height(0.dp))
                 Text(
-                    text = "Sharma World and Sun cafe Coffee",
+                    text = singleTransaction.transaction.note,
                     style = MaterialTheme.typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                 )
@@ -150,14 +146,14 @@ fun TransactionDetailsScreen(
 
                 var categoryMenuExpanded by remember { mutableStateOf(false) }
                 val categoryList by categoryViewModel.allCategoryList.collectAsState()
-                var selectedCategory by remember {
-                    mutableStateOf(
-                        firstSampleClass.apply {
-                            categoryName = "Food & Expense"
-                            categoryIconNumber = 1
-                        }
-                    )
-                }
+//                var selectedCategory by remember {
+//                    mutableStateOf(
+//                        firstSampleClass.apply {
+//                            categoryName = "Food & Expense"
+//                            categoryIconNumber = 1
+//                        }
+//                    )
+//                }
 
                 Box(
                     modifier = modifier.wrapContentWidth()
@@ -176,7 +172,7 @@ fun TransactionDetailsScreen(
                         )
                     ) {
                         val image =
-                            rememberAsyncImagePainter(IconState.fromNumber(selectedCategory.categoryIconNumber))
+                            rememberAsyncImagePainter(IconState.fromNumber(singleTransaction.category.categoryIconNumber))
                         Image(
                             painter = image,
                             contentDescription = "Test Image",
@@ -184,7 +180,7 @@ fun TransactionDetailsScreen(
                         )
 
                         Text(
-                            text = selectedCategory.categoryName,
+                            text = singleTransaction.category.categoryName,
                             modifier = Modifier
                                 .wrapContentWidth()
                                 .padding(start = 8.dp),
@@ -254,7 +250,7 @@ fun TransactionDetailsScreen(
                                 Modifier,
                                 labelAndValueStyle,
                                 "Type",
-                                "Expense",
+                                singleTransaction.transaction.type,
                                 23,
                                 Icons.Outlined.Cable
                             )
@@ -267,7 +263,7 @@ fun TransactionDetailsScreen(
                                 Modifier,
                                 labelAndValueStyle,
                                 "Category",
-                                "Food & Expense",
+                                singleTransaction.category.categoryName,
                                 23,
                                 Icons.Outlined.Category
                             )
@@ -280,7 +276,8 @@ fun TransactionDetailsScreen(
                                 Modifier,
                                 labelAndValueStyle,
                                 "Date",
-                                "12th Aug 2024",
+                                singleTransaction.transaction.date.toLocalDate()
+                                    .toDisplayStringForMonthWithYear(),
                                 23,
                                 Icons.Outlined.DateRange
                             )
@@ -293,7 +290,7 @@ fun TransactionDetailsScreen(
                                 Modifier,
                                 labelAndValueStyle,
                                 "Payment Method",
-                                "HDFC Bank",
+                                singleTransaction.BankAccount.bankName,
                                 23,
                                 Icons.Outlined.Payment
                             )
