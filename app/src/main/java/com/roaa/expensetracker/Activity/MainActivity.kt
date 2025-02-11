@@ -155,6 +155,7 @@ fun NavigationDrawer(
     }
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
+    val innerNavController = rememberNavController()
     val scope = rememberCoroutineScope()
 
     ModalNavigationDrawer(
