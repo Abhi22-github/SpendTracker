@@ -45,8 +45,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
-import com.roaa.expensetracker.Composables.Navigation.SectionScreenNavRoutes
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.toPalette
@@ -106,7 +106,7 @@ fun MonthViewScreen(
     LaunchedEffect(sendUserToDayView, selectedDate) {
         if (sendUserToDayView && selectedDate != null) {
           navController.navigate(
-                SectionScreenNavRoutes.DayScreen(
+                Destinations.DayScreen(
                     selectedDate!!.toLong()
                 )
             )

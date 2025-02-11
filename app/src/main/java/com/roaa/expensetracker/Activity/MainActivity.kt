@@ -42,6 +42,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -58,12 +59,14 @@ import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
 import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
+import com.roaa.expensetracker.Composables.Navigation.AppNavGraph
+import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.RootNavGraph
-import com.roaa.expensetracker.Composables.Navigation.RootScreen
-import com.roaa.expensetracker.Composables.Navigation.SectionNavigation
+import com.roaa.expensetracker.Composables.Navigation.navigateToWithSingleTop
 import com.roaa.expensetracker.Composables.syncTheme
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.lockScreenOrientation
@@ -88,7 +91,6 @@ class ComposeMainActivity : ComponentActivity() {
         setContent {
             val localContext = LocalContext.current
             val rootNavController = rememberNavController()
-            val section1NavController = rememberNavController()
             val navigationManager = remember { NavigationManager(rootNavController) }
             LaunchedEffect(Unit) {
                 syncTheme(localContext)
@@ -113,19 +115,11 @@ class ComposeMainActivity : ComponentActivity() {
                         LocalWindowSize provides widthSizeClass,
                         LocalWindowInsets provides windowInsets,
                     ) {
-//                        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//                            NavigationDrawer(
-//                                rootNavController,
-//                                navigationManager,
-//                                Modifier.padding(0.dp)
-//                            )
-                        RootNavGraph(rootNavController, section1NavController, navigationManager)
-
+                        NavigationDrawer(rootNavController, navigationManager, Modifier)
                         LaunchedEffect(Unit) {
                             // App rendered and splash screen can be hidden
                             isDone.value = true
                         }
-//                        }
                     }
                 }
             }
@@ -138,7 +132,6 @@ class ComposeMainActivity : ComponentActivity() {
 @Composable
 fun NavigationDrawer(
     rootNavController: NavHostController,
-    navController: NavHostController,
     navigationManager: NavigationManager,
     modifier: Modifier,
 ) {
@@ -147,15 +140,28 @@ fun NavigationDrawer(
     val section2 = section2Items
     val deviceDensity = LocalDensity.current
 
-    var selectedFullScreenRoute by remember { mutableStateOf<RootScreen?>(null) }
+    val currentBackStackEntry by rootNavController.currentBackStackEntryAsState()
+    val currentRoute = currentBackStackEntry?.destination?.route?.substringBefore("/")
 
     //Remember Clicked index state
     var selectedItemIndex by rememberSaveable {
-        mutableStateOf(0)
+        mutableIntStateOf(0)
     }
+    selectedItemIndex = when (currentRoute) {
+        Destinations.ListScreen.javaClass.canonicalName -> 0
+        Destinations.MonthScreen.javaClass.canonicalName -> 1
+        Destinations.DayScreen::class.java.canonicalName -> 2
+        else -> 0
+    }
+    val showAppBar = if (currentRoute in listOf(
+            Destinations.ListScreen.javaClass.canonicalName,
+            Destinations.MonthScreen.javaClass.canonicalName,
+            Destinations.DayScreen::class.java.canonicalName
+        )
+    ) true else false
+
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
-    val innerNavController = rememberNavController()
     val scope = rememberCoroutineScope()
 
     ModalNavigationDrawer(
@@ -200,7 +206,7 @@ fun NavigationDrawer(
                                 scope.launch {
                                     drawerState.close()
                                 }
-                                navController.navigate(item.route)
+                                rootNavController.navigateToWithSingleTop(item.route)
                             },
                             icon = {
                                 Icon(
@@ -243,8 +249,7 @@ fun NavigationDrawer(
                                 scope.launch {
                                     drawerState.close()
                                 }
-                                selectedFullScreenRoute = item.route
-                                rootNavController.navigate(item.route)
+                                rootNavController.navigateToWithSingleTop(item.route)
 
                             },
                             icon = {
@@ -275,12 +280,12 @@ fun NavigationDrawer(
 
         gesturesEnabled = true
     ) {
-//        val currentBackStackEntry by navController.currentBackStackEntryAsState()
-//        val currentRoute = currentBackStackEntry?.destination?.route
         CompositionLocalProvider() {
-            Scaffold(
-                topBar = { //TopBar to show title
-                    if (selectedItemIndex in 0..2)
+            if (!showAppBar) {
+                AppNavGraph(rootNavController, navigationManager)
+            } else {
+                Scaffold(
+                    topBar = { //TopBar to show title
                         TopAppBar(
                             // colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Blue),
                             title = {
@@ -301,13 +306,13 @@ fun NavigationDrawer(
                                 }
                             }
                         )
-                },
-            ) { innerPadding ->
-                Column(Modifier.padding(innerPadding)) {
-                    SectionNavigation(navController, navigationManager)
-//                     SetupNavigationGraph(navController, navigationManager)
-                }
+                    },
+                ) { innerPadding ->
+                    Column(Modifier.padding(innerPadding)) {
+                        RootNavGraph(rootNavController, navigationManager)
+                    }
 
+                }
             }
         }
     }

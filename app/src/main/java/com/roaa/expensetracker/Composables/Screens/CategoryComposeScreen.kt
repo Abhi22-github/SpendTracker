@@ -47,8 +47,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
+import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
-import com.roaa.expensetracker.Composables.Navigation.RootScreen
 import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
@@ -74,8 +74,8 @@ fun CategoryScreen(
             if (navigationManager.navController.previousBackStackEntry != null) {
                 navigationManager.navController.popBackStack() // Pop one screen if there is a back stack
             } else {
-                navigationManager.navController.navigate(RootScreen.MainScreen) {
-                    popUpTo(RootScreen.MainScreen) { inclusive = true }
+                navigationManager.navController.navigate(Destinations.ListScreen) {
+                    popUpTo(Destinations.ListScreen) { inclusive = true }
                 }
             }
         }
@@ -104,7 +104,7 @@ fun CategoryScreen(
                     ExtendedFloatingActionButton(
                         onClick = {
                             navigationManager.navController.navigate(
-                                RootScreen.CategoryDetailsScreen(
+                                Destinations.CategoryDetailsScreen(
                                     0L,
                                     "",
                                     99,
@@ -206,7 +206,7 @@ fun SharedTransitionScope.ScaffoldContent(
                             sharedTransitionScope, animatedVisibilityScope
                         ) {
                             navigationManager.navController.navigate(
-                                RootScreen.CategoryDetailsScreen(
+                                Destinations.CategoryDetailsScreen(
                                     it.categoryId,
                                     it.categoryName,
                                     it.categoryIconNumber,
@@ -230,7 +230,7 @@ fun SharedTransitionScope.ScaffoldContent(
                             sharedTransitionScope, animatedVisibilityScope
                         ) {
                             navigationManager.navController.navigate(
-                                RootScreen.CategoryDetailsScreen(
+                                Destinations.CategoryDetailsScreen(
                                     it.categoryId,
                                     it.categoryName,
                                     it.categoryIconNumber,
@@ -278,7 +278,7 @@ fun SharedTransitionScope.ScaffoldContent(
                             sharedTransitionScope, animatedVisibilityScope
                         ) {
                             navigationManager.navController.navigate(
-                                RootScreen.CategoryDetailsScreen(
+                                Destinations.CategoryDetailsScreen(
                                     it.categoryId,
                                     it.categoryName,
                                     it.categoryIconNumber,
@@ -302,7 +302,7 @@ fun SharedTransitionScope.ScaffoldContent(
                             sharedTransitionScope, animatedVisibilityScope
                         ) {
                             navigationManager.navController.navigate(
-                                RootScreen.CategoryDetailsScreen(
+                                Destinations.CategoryDetailsScreen(
                                     it.categoryId,
                                     it.categoryName,
                                     it.categoryIconNumber,
