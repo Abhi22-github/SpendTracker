@@ -278,7 +278,7 @@ fun NavigationDrawer(
             }
         },
 
-        gesturesEnabled = true
+        gesturesEnabled = false
     ) {
         CompositionLocalProvider() {
             if (!showAppBar) {
