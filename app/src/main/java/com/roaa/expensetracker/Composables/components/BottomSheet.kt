@@ -1063,7 +1063,7 @@ fun validateTransactionData(
             ) else
             transactionsViewModel.updateFormDataInDatabase(singleTransaction.transaction.also {
                 it.type = type
-                it.date = selectedDate
+                selectedDate?.let { date -> it.date = date }
                 it.amount = amount.toFloat()
                 it.note = comment
                 it.categoryId = selectedCategory.categoryId

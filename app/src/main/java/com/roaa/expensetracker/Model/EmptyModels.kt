@@ -46,7 +46,7 @@ val emptyBudgetDayClass = BudgetDayModelClass(
 
 val emptyTotalExpenseIncomeClass = TotalExpenseIncomeClass(20250101L, 0f, 0f)
 
-val emptyTransactionClass = TransactionClass(EXPENSE, 0f, "", 0L, 20250101L, 1L, 1L)
+val emptyTransactionClass = TransactionClass(0L,EXPENSE, 0f, "", 0L, 20250101L, 1L, 1L)
 
 val firstSampleClass = CategoryClass(
     -1, "Select Category", 1, -99, EXPENSE, isActive = false

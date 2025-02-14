@@ -25,6 +25,7 @@ import com.roaa.expensetracker.Composables.Screens.SettingsScreen
 import com.roaa.expensetracker.Composables.Screens.TransactionDetailsScreen
 import com.roaa.expensetracker.Composables.components.TransactionsListCompose
 import com.roaa.expensetracker.Utilities.toLong
+import com.roaa.expensetracker.ViewModels.UiViewModel
 import java.time.LocalDate
 
 
@@ -32,7 +33,8 @@ import java.time.LocalDate
 @Composable
 fun RootNavGraph(
     rooNavController: NavHostController,
-    navigationManager: NavigationManager
+    navigationManager: NavigationManager,
+    uiViewModel: UiViewModel,
 ) {
     SharedTransitionLayout {
         val context = LocalContext.current
@@ -48,6 +50,7 @@ fun RootNavGraph(
                         modifier = Modifier,
                         showSingleDateTransactions = false,
                         date = LocalDate.now().toLong(),
+                        uiViewModel,
                     )
                 }
                 composable<Destinations.MonthScreen> {
@@ -55,7 +58,7 @@ fun RootNavGraph(
                 }
                 composable<Destinations.DayScreen> {
                     val args = it.toRoute<Destinations.DayScreen>()
-                    DayViewScreen(rooNavController, navigationManager, args.date)
+                    DayViewScreen(rooNavController, navigationManager, args.date,uiViewModel)
                 }
             }
 
@@ -111,7 +114,8 @@ fun RootNavGraph(
                     rooNavController,
                     navigationManager,
                     args.amount,
-                    args.categoryName
+                    args.categoryName,
+                    uiViewModel
                 )
             }
         }
@@ -123,7 +127,8 @@ fun RootNavGraph(
 @Composable
 fun AppNavGraph(
     rooNavController: NavHostController,
-    navigationManager: NavigationManager
+    navigationManager: NavigationManager,
+    uiViewModel: UiViewModel
 ) {
     SharedTransitionLayout {
         val context = LocalContext.current
@@ -139,6 +144,7 @@ fun AppNavGraph(
                         modifier = Modifier,
                         showSingleDateTransactions = false,
                         date = LocalDate.now().toLong(),
+                        uiViewModel
                     )
                 }
                 composable<Destinations.MonthScreen> {
@@ -146,7 +152,7 @@ fun AppNavGraph(
                 }
                 composable<Destinations.DayScreen> {
                     val args = it.toRoute<Destinations.DayScreen>()
-                    DayViewScreen(rooNavController, navigationManager, args.date)
+                    DayViewScreen(rooNavController, navigationManager, args.date,uiViewModel)
                 }
             }
 
@@ -202,7 +208,8 @@ fun AppNavGraph(
                     rooNavController,
                     navigationManager,
                     args.amount,
-                    args.categoryName
+                    args.categoryName,
+                    uiViewModel
                 )
             }
         }
