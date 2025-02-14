@@ -80,8 +80,8 @@ fun TransactionsListCompose(
     modifier: Modifier,
     showSingleDateTransactions: Boolean,
     date: Long,
+    uiViewModel: UiViewModel,
     viewModel: TransactionsViewModel = hiltViewModel(),
-    uiViewModel: UiViewModel = hiltViewModel(),
     preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     var showAddBottomSheet by remember { mutableStateOf(false) }

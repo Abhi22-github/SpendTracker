@@ -1,10 +1,12 @@
 package com.roaa.expensetracker.Model
 
+import android.os.Parcelable
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.Serializer
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.roaa.expensetracker.Utilities.Constants.CASH
+import kotlinx.android.parcel.Parcelize
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -14,6 +16,7 @@ import kotlinx.serialization.json.Json
 import java.io.InputStream
 import java.io.OutputStream
 
+@Parcelize
 @Serializable
 @Entity(tableName = "bank_accounts")
 data class BankAccountsClass(
@@ -26,7 +29,7 @@ data class BankAccountsClass(
     val cardIconNumber: Int,
     val accountType: String,
     val isActive: Boolean,
-)
+):Parcelable
 
 
 @OptIn(ExperimentalSerializationApi::class)
