@@ -292,7 +292,7 @@ fun NavigationDrawer(
                         TopAppBar(
                             // colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Blue),
                             title = {
-                                Text(text = "Expense Tracker")
+                                Text(text = "")
                             },
                             navigationIcon = {
                                 IconButton(onClick = {
