@@ -52,10 +52,15 @@ import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
+import com.roaa.expensetracker.Composables.blueColor
 import com.roaa.expensetracker.Composables.failureColor
+import com.roaa.expensetracker.Composables.greenColor
+import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.successColor
+import com.roaa.expensetracker.Composables.utils.HarmonizedColorPalette
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
+import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Converters.TransactionConverter
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Model.TransactionClass
@@ -109,6 +114,8 @@ fun TransactionsListCompose(
         }
         val scope = rememberCoroutineScope()
         val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
+        val orangePalette = toPalette(orange)
+        val greenPalette = toPalette(greenColor)
         Column {
             if (!showSingleDateTransactions) {
 
@@ -123,40 +130,68 @@ fun TransactionsListCompose(
                 }.reversed()
                 val lazyList = rememberLazyListState()
                 Surface(color = MaterialTheme.colorScheme.surface) {
-                    if (!transactionConverterList.isEmpty()) LazyColumn(
-                        modifier = Modifier.fillMaxWidth(), state = lazyList
-                    ) {
-                        transactionConverterList.forEach { (date, transactionList) ->
-                            val date = transactionList.get(0).transaction.date
+                    if (!transactionConverterList.isEmpty())
+                        LazyColumn(
+                            modifier = Modifier.fillMaxWidth(), state = lazyList
+                        ) {
                             item {
-                                Header(
-                                    if (date == System.currentTimeMillis().LongMillisToNoralLong()
-                                    ) "Today" else date.toLocalDate().toDisplayDate()
-                                )
+                                SummaryCard(blueColor)
+                                Row {
+                                    Spacer(Modifier.width(16.dp))
+                                    HomeStatCard(
+                                        Modifier.weight(1f),
+                                        "₹3,000",
+                                        "Total Expense",
+                                        toPalette(orange)
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    HomeStatCard(
+                                        Modifier.weight(1f),
+                                        "₹3,500",
+                                        "Total Income",
+                                        toPalette(greenColor)
+                                    )
+                                    Spacer(Modifier.width(8.dp))
+                                    HomeStatCard(
+                                        Modifier.weight(1f),
+                                        "₹3,500",
+                                        "Total Income",
+                                        toPalette(blueColor)
+                                    )
+                                    Spacer(Modifier.width(16.dp))
+                                }
                             }
-                            items(transactionList, key = { it.transaction.id }) { item ->
-                                SingleTransaction(item, onSingleItemClick = {
-
-                                    singleTransaction = (item)
-                                    scope.launch {
-                                        uiViewModel.transactionDetailsWithViewModelFlow.emit(
-                                            singleTransaction
-                                        )
-                                    }
-                                    if (showNewLayouts)
-                                        navController.navigateTo(
-                                            Destinations.DetailsScreen(
-                                                it.transaction.amount,
-                                                it.category.categoryName
+                            transactionConverterList.forEach { (date, transactionList) ->
+                                val date = transactionList.get(0).transaction.date
+                                item {
+                                    Header(
+                                        if (date == System.currentTimeMillis()
+                                                .LongMillisToNoralLong()
+                                        ) "Today" else date.toLocalDate().toDisplayDate()
+                                    )
+                                }
+                                items(transactionList, key = { it.transaction.id }) { item ->
+                                    SingleTransaction(item, onSingleItemClick = {
+                                        singleTransaction = (item)
+                                        scope.launch {
+                                            uiViewModel.transactionDetailsWithViewModelFlow.emit(
+                                                singleTransaction
                                             )
-                                        )
-                                    else
-                                        bottomSheet = true
+                                        }
+                                        if (showNewLayouts)
+                                            navController.navigateTo(
+                                                Destinations.DetailsScreen(
+                                                    it.transaction.amount,
+                                                    it.category.categoryName
+                                                )
+                                            )
+                                        else
+                                            bottomSheet = true
 
-                                })
+                                    })
+                                }
                             }
                         }
-                    }
                     else EmptyScreen()
                 }
             } else {
@@ -301,6 +336,42 @@ fun SingleTransaction(
 
         }
 
+    }
+}
+
+
+@Composable
+fun HomeStatCard(
+    modifier: Modifier = Modifier,
+    value: String,
+    label: String,
+    palette: HarmonizedColorPalette
+) {
+    Card(
+        modifier = modifier,
+        shape = RoundedCornerShape(12.dp),
+        colors = CardDefaults.cardColors(containerColor = palette.container)
+    ) {
+        Column(
+            modifier = Modifier
+                .align(Alignment.CenterHorizontally)
+                .padding(0.dp, 16.dp)
+        ) {
+            Text(
+                text = value,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.bodyLarge.copy(fontFamily = CustomFonts.numberFont),
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = label,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        }
     }
 }
 
