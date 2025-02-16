@@ -45,8 +45,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
-import com.roaa.expensetracker.Composables.Navigation.SectionScreenNavRoutes
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.toPalette
@@ -58,7 +58,6 @@ import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import java.time.DayOfWeek
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.time.temporal.WeekFields
 import java.util.Locale
@@ -106,7 +105,7 @@ fun MonthViewScreen(
     LaunchedEffect(sendUserToDayView, selectedDate) {
         if (sendUserToDayView && selectedDate != null) {
           navController.navigate(
-                SectionScreenNavRoutes.DayScreen(
+                Destinations.DayScreen(
                     selectedDate!!.toLong()
                 )
             )
@@ -132,11 +131,11 @@ fun MonthView(
 ) {
     Column(modifier = Modifier) {
         // Month header
-        Text(
-            text = monthStart.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
-            style = MaterialTheme.typography.titleMedium,
-            modifier = Modifier.padding(8.dp)
-        )
+//        Text(
+//            text = monthStart.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+//            style = MaterialTheme.typography.titleMedium,
+//            modifier = Modifier.padding(8.dp)
+//        )
 
         // Day names row
         Row(modifier = Modifier.fillMaxWidth()) {
@@ -267,7 +266,7 @@ fun DayCell(
             Card(
                 shape = RoundedCornerShape(50),
                 modifier = Modifier
-                    .height(32.dp)
+                    .height(24.dp)
                     .aspectRatio(1f),
                 colors = CardDefaults.cardColors(containerColor = if (isToday) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.surface)
             ) {
@@ -276,7 +275,7 @@ fun DayCell(
                         text = date.dayOfMonth.toString(),
                         color = textColor,
                         fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = MaterialTheme.typography.labelMedium,
                         textAlign = TextAlign.Center,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis

@@ -1,19 +1,12 @@
 package com.roaa.expensetracker.Model
 
-import com.roaa.expensetracker.Composables.Navigation.RootScreen
-import com.roaa.expensetracker.Composables.Navigation.SectionScreenNavRoutes
+import com.roaa.expensetracker.Composables.Navigation.Destinations
 
 data class NavigationItems(
     val title: String,
     val selectedIcon: Int,
     val unselectedIcon: Int,
     val badgeCount: Int? = null,
-    val route: SectionScreenNavRoutes
+    val route: Destinations
 )
-data class NavigationItems2(
-    val title: String,
-    val selectedIcon: Int,
-    val unselectedIcon: Int,
-    val badgeCount: Int? = null,
-    val route: RootScreen
-)
+

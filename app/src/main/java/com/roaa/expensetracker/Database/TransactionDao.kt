@@ -58,6 +58,12 @@ interface TransactionDao {
     @Query("SELECT * FROM transaction_table where date == :date ORDER BY dateWithTime DESC")
     fun getAllTransactionsForDate(date: Long): Flow<List<TransactionWithDetails>>
 
+    @Query("SELECT * FROM transaction_table where date >= :startDate AND date<= :endDate ORDER BY dateWithTime DESC")
+    fun getAllTransactionsForMonth(
+        startDate: Long,
+        endDate: Long
+    ): Flow<List<TransactionWithDetails>>
+
     //Transaction Supporting
     @Query("SELECT SUM(amount) FROM transaction_table where date == :date and type == :type")
     fun getTotalAmountForDateWithoutFlow(date: Long, type: String): Float?

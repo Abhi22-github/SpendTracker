@@ -12,7 +12,6 @@ import com.roaa.expensetracker.Database.TransactionRepository
 import com.roaa.expensetracker.Model.TotalAmountClass
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Model.TransactionClass
-import com.roaa.expensetracker.Utilities.Constants
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
 import com.roaa.expensetracker.Utilities.UiState
@@ -151,19 +150,21 @@ class TransactionsViewModel @Inject constructor(
     ) {
         // on below line we are creating
         // a variable for our modal class.
-        val modal = TransactionClass()
-        modal.amount = amount.trim { it <= ' ' }.replace(",", "").toFloat()
-        modal.type = expense.trim { it <= ' ' }
-        modal.note = note.trim { it <= ' ' }
-        modal.dateWithTime = System.currentTimeMillis()
-        modal.date = date
-        modal.bankAccountId = selectedBankAccountId;
-        modal.categoryId = selectedCategoryId;
+        val modal = TransactionClass(
+            id = 0L,
+            type = expense.trim { it <= ' ' },
+            amount = amount.trim { it <= ' ' }.replace(",", "").toFloat(),
+            note = note.trim { it <= ' ' },
+            dateWithTime = System.currentTimeMillis(),
+            date = date,
+            categoryId = selectedCategoryId,
+            bankAccountId = selectedBankAccountId
+        )
 
         viewModelScope.launch { transactionRepository.insertAndPropagateChanges(modal) }
     }
 
-     fun updateFormDataInDatabase(transactionClass: TransactionClass){
+    fun updateFormDataInDatabase(transactionClass: TransactionClass) {
         viewModelScope.launch { transactionRepository.updateAndPropagateChanges(transactionClass) }
     }
 
@@ -174,12 +175,19 @@ class TransactionsViewModel @Inject constructor(
     val allTransactions: Flow<List<TransactionWithDetails>>
         get() = transactionRepository.allTransactions
 
+    fun getTotalTransactionForMonth(
+        startDate: Long,
+        endDate: Long
+    ): Flow<List<TransactionWithDetails>> {
+        return transactionRepository.getTotalTransactionForMonth(startDate, endDate)
+    }
+
 
     fun getTotalIncomeForRange(startDate: Long, endDate: Long) {
         viewModelScope.launch {
             loading()
             getTotalAmountByDateRangeAndCategoryType(
-                startDate, endDate, Constants.INCOME
+                startDate, endDate, INCOME
             ).catch { e ->
                 error(e)
             }.collect { totalAmount ->

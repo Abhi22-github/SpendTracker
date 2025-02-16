@@ -3,16 +3,20 @@ package com.roaa.expensetracker.Composables.Navigation
 import kotlinx.serialization.Serializable
 
 
-sealed class RootScreen() {
+sealed class NavRoutes() {
+    @Serializable
+    data object HomeScreen : NavRoutes()
 
     @Serializable
-    data object MainScreen : RootScreen()
+    data object AppScreen : NavRoutes()
+}
+sealed class Destinations(){
 
     @Serializable
-    data object BudgetScreen : RootScreen()
+    data object BudgetScreen : Destinations()
 
     @Serializable
-    data object CategoryScreen : RootScreen()
+    data object CategoryScreen : Destinations()
 
     @Serializable
     data class CategoryDetailsScreen(
@@ -20,59 +24,26 @@ sealed class RootScreen() {
         val categoryName: String,
         val categoryIconNumber: Int,
         val categoryType: String
-    ) : RootScreen()
+    ) : Destinations()
 
     @Serializable
-    data object BankAccountScreen : RootScreen()
+    data object BankAccountScreen : Destinations()
 
     @Serializable
-    data object SettingScreen : RootScreen()
+    data object SettingScreen : Destinations()
 
     @Serializable
-    data class DetailsScreen(val amount: Float, val categoryName: String) : RootScreen()
+    data class DetailsScreen(val amount: Float, val categoryName: String) : Destinations()
+
+    @Serializable
+    data object ListScreen : Destinations()
+
+    @Serializable
+    data object MonthScreen : Destinations()
+
+    @Serializable
+    data class DayScreen(val date: Long) : Destinations()
 
 }
 
-sealed class SectionScreenNavRoutes() {
-
-    @Serializable
-    data object ListScreen : SectionScreenNavRoutes()
-
-    @Serializable
-    data object MonthScreen : SectionScreenNavRoutes()
-
-    @Serializable
-    data class DayScreen(val date: Long) : SectionScreenNavRoutes()
-
-}
-//
-//@Serializable
-//sealed class FullScreenNavRoutes() {
-//
-//    @Serializable
-//    data object BudgetScreen : FullScreenNavRoutes()
-//
-//    @Serializable
-//    data object CategoryScreen : FullScreenNavRoutes()
-//
-//    @Serializable
-//    data class CategoryDetailsScreen(
-//        val categoryId: Long,
-//        val categoryName: String,
-//        val categoryIconNumber: Int,
-//        val categoryType: String
-//    ) : FullScreenNavRoutes()
-//
-//    @Serializable
-//    data object BankAccountScreen : FullScreenNavRoutes()
-//
-//    @Serializable
-//    data object SettingScreen : FullScreenNavRoutes()
-//
-//    @Serializable
-//    data object DetailsScreen : FullScreenNavRoutes()
-//}
-//
-//
-//
 

@@ -65,6 +65,7 @@ import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.ViewModels.AnimationViewModel
 import com.roaa.expensetracker.ViewModels.BudgetViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
+import com.roaa.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import kotlin.math.absoluteValue
@@ -79,6 +80,7 @@ fun DayScreen(
     budgetAmountPerDay: Float,
     oldPercent: Float,
     percent: Float,
+    uiViewModel: UiViewModel,
     animationViewModel: AnimationViewModel = hiltViewModel(),
     transactionsViewModel: TransactionsViewModel = hiltViewModel(),
     budgetViewModel: BudgetViewModel = hiltViewModel()
@@ -89,7 +91,7 @@ fun DayScreen(
             Row(modifier = Modifier.padding(12.dp, 16.dp)) {
                 RestBudgetPill(totalExpenseAmountForDate, budgetAmountPerDay, oldPercent, percent)
             }
-        TransactionsListCompose(navigationManager, Modifier, true, date)
+        TransactionsListCompose(navigationManager, Modifier, true, date,uiViewModel)
     }
 }
 
@@ -99,6 +101,7 @@ fun DayViewScreen(
     navController: NavController,
     navigationManager: NavigationManager,
     date: Long,
+    uiViewModel: UiViewModel,
     modifier: Modifier = Modifier,
     transactionViewModel: TransactionsViewModel = hiltViewModel(),
     budgetViewModel: BudgetViewModel = hiltViewModel()
@@ -296,7 +299,8 @@ fun DayViewScreen(
                 getTotalAmountForDate,
                 getCurrentBudget.budgetSummary.budgetAmountPerDay,
                 1 - oldPercent,
-                1 - percent
+                1 - percent,
+                uiViewModel
             )
         }
     }
