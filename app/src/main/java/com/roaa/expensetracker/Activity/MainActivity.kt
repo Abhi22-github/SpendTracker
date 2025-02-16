@@ -7,13 +7,16 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -22,10 +25,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -60,12 +65,14 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
@@ -82,6 +89,8 @@ import com.roaa.expensetracker.Composables.Navigation.navigateToWithSingleTop
 import com.roaa.expensetracker.Composables.Screens.MonthChip
 import com.roaa.expensetracker.Composables.syncTheme
 import com.roaa.expensetracker.R
+import com.roaa.expensetracker.Utilities.currentDay
+import com.roaa.expensetracker.Utilities.currentMonth
 import com.roaa.expensetracker.Utilities.currentYear
 import com.roaa.expensetracker.Utilities.getPreviousAndNext500Months
 import com.roaa.expensetracker.Utilities.lockScreenOrientation
@@ -318,7 +327,22 @@ fun NavigationDrawer(
                             TopAppBar(
                                 // colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Blue),
                                 title = {
-                                    Text(text = "")
+                                    TextButton(
+                                        onClick = {
+                                            scope.launch {
+                                                uiViewModel.showMonthFilterChips.emit(!showMonthFilterChips)
+                                            }
+                                        },
+                                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
+                                    ) {
+//                                        Icon(Icons.Filled.CalendarMonth, contentDescription = null)
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            text = selectedMonth,
+                                            style = MaterialTheme.typography.titleMedium
+                                        )
+                                        Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
+                                    }
                                 },
                                 navigationIcon = {
                                     IconButton(onClick = {
@@ -336,15 +360,27 @@ fun NavigationDrawer(
                                 },
                                 colors = TopAppBarDefaults.topAppBarColors(),
                                 actions = {
-                                    TextButton(onClick = {
-                                        scope.launch {
-                                            uiViewModel.showMonthFilterChips.emit(!showMonthFilterChips)
+                                    Card(
+                                        modifier = Modifier
+                                            .size(36.dp)
+                                            .clip(RoundedCornerShape(5.dp))
+                                            .clickable {
+                                                scope.launch {
+                                                    lazyMonthListState.animateScrollToItem(250)
+                                                    uiViewModel.selectedMonth.emit(currentMonth)
+                                                }
+                                            },
+                                    ) {
+                                        Box(
+                                            contentAlignment = Alignment.Center,
+                                            modifier = Modifier.fillMaxSize()
+                                        ) {
+                                            Text(
+                                                text = currentDay,
+                                                style = MaterialTheme.typography.bodyLarge,
+                                                textAlign = TextAlign.Center
+                                            )
                                         }
-                                    }) {
-                                        Icon(Icons.Filled.CalendarMonth, contentDescription = null)
-                                        Spacer(Modifier.width(8.dp))
-                                        Text(text = selectedMonth)
-                                        Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
                                     }
                                     Spacer(Modifier.width(8.dp))
                                 },
@@ -369,7 +405,6 @@ fun NavigationDrawer(
                                             })
                                     }
                                 }
-                                Spacer(modifier = Modifier.height(8.dp))
                             }
                         }
                     },

@@ -10,12 +10,13 @@ import java.time.YearMonth
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
+import java.time.temporal.ChronoUnit
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
 
-val monthWithYearFormat = DateTimeFormatter.ofPattern("MMM uuuu",Locale.getDefault())
+val monthWithYearFormat = DateTimeFormatter.ofPattern("MMM uuuu", Locale.getDefault())
 
 fun getFirstAndLastDateOfGivenPeriod(prevMonth: LocalDate, nextMonth: LocalDate): Pair<Long, Long> {
 
@@ -338,10 +339,21 @@ fun getValidDatesListFromLong(startDate: Long, endDate: Long): List<Long> {
     return dateList
 }
 
-val currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("MMM YYYY"))
-val currentYear = LocalDate.now().format(DateTimeFormatter.ofPattern("YYYY"))
+val currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("MMM uuuu"))
+val currentDay = LocalDate.now().format(DateTimeFormatter.ofPattern("dd"))
+val currentYear = LocalDate.now().format(DateTimeFormatter.ofPattern("uuuu"))
 
 fun getFirstAndLastMonth(month: String) = run {
     val yearMonth = YearMonth.parse(month.trim(), monthWithYearFormat)
     Pair(yearMonth.atDay(1).toLong(), yearMonth.atEndOfMonth().toLong())
+}
+
+fun getMonthFromLocalDate(date: LocalDate) = run {
+    date.format(monthWithYearFormat)
+}
+
+fun calculateEffectivePage(month: String) = run {
+    val yearMonth: YearMonth = YearMonth.parse(month.trim(), monthWithYearFormat)
+    val currentMonth: YearMonth = YearMonth.now()
+    currentMonth.until(yearMonth, ChronoUnit.MONTHS)
 }
