@@ -1,7 +1,6 @@
 package com.roaa.expensetracker.Composables.components
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -53,13 +52,13 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Screens.MonthChip
-import com.roaa.expensetracker.Composables.blueColor
 import com.roaa.expensetracker.Composables.failureColor
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
@@ -144,24 +143,33 @@ fun TransactionsListCompose(
 
         val pagerState = rememberPagerState(initialPage = 500 / 2, pageCount = { 500 })
 
-        Column {
-            LazyRow(
-                state = lazyMonthListState,
-                horizontalArrangement = Arrangement.spacedBy(5.dp)
-            ) {
-                items(monthList) {
-                    MonthChip(it, currentYear, selectedChip, { selectedChip = it })
-                }
-            }
+        LaunchedEffect(selectedChip) {
+            val (firstDate, lastDate) = getFirstAndLastMonth(selectedChip)
+            viewModel.getTotalExpenseForRange(firstDate,lastDate)
+            viewModel.getTotalIncomeForRange(firstDate,lastDate)
+        }
 
+        Column {
             if (!showSingleDateTransactions) {
+                LazyRow(
+                    state = lazyMonthListState,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    items(monthList) {
+                        MonthChip(it, currentYear, selectedChip, { selectedChip = it })
+                    }
+                }
+                Spacer(modifier = Modifier.height(8.dp))
                 HorizontalPager(state = pagerState, userScrollEnabled = false) {
                     val (firstDate, lastDate) = getFirstAndLastMonth(selectedChip)
-                    Log.d("Testing","$firstDate $lastDate")
                     val transactionListOfMonth by viewModel.getTotalTransactionForMonth(
                         firstDate,
                         lastDate
                     ).collectAsState(emptyList())
+
+                    val totalExpenseForMonth  by viewModel.getTotalExpenseAmountForRangeFlow.collectAsState()
+                    val totalIncomeForMonth  by viewModel.getTotalIncomeAmountForRangeFlow.collectAsState()
+
                     val transactionsMap =
                         transactionListOfMonth.sortedByDescending { it.transaction.date }
                             .groupBy { it.transaction.date }
@@ -178,30 +186,30 @@ fun TransactionsListCompose(
                             ) {
 
                                 item {
-                                   // SummaryCard(blueColor)
+                                    // SummaryCard(blueColor)
                                     Row {
                                         Spacer(Modifier.width(16.dp))
                                         HomeStatCard(
                                             Modifier.weight(1f),
-                                            "₹3,000",
+                                            parseAmount(totalExpenseForMonth.totalAmount),
                                             "Total Expense",
                                             toPalette(orange)
                                         )
                                         Spacer(Modifier.width(8.dp))
                                         HomeStatCard(
                                             Modifier.weight(1f),
-                                            "₹3,500",
+                                            parseAmount(totalIncomeForMonth.totalAmount),
                                             "Total Income",
                                             toPalette(greenColor)
                                         )
                                         Spacer(Modifier.width(8.dp))
-                                        HomeStatCard(
-                                            Modifier.weight(1f),
-                                            "₹3,500",
-                                            "Total Income",
-                                            toPalette(blueColor)
-                                        )
-                                        Spacer(Modifier.width(16.dp))
+//                                        HomeStatCard(
+//                                            Modifier.weight(1f),
+//                                            "₹3,500",
+//                                            "Total Income",
+//                                            toPalette(blueColor)
+//                                        )
+//                                        Spacer(Modifier.width(16.dp))
                                     }
                                 }
                                 transactionConverterList.forEach { (date, transactionList) ->
@@ -402,11 +410,11 @@ fun HomeStatCard(
                 .padding(0.dp, 16.dp)
         ) {
             Text(
-                text = value,
+                text = "₹ $value",
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
-                style = MaterialTheme.typography.bodyLarge.copy(fontFamily = CustomFonts.numberFont),
-                color = MaterialTheme.colorScheme.onSurface
+                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = CustomFonts.numberFont, fontSize = 21.sp),
+                color = palette.onContainer
             )
             Text(
                 text = label,
