@@ -5,6 +5,7 @@ import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Model.emptyBank
 import com.roaa.expensetracker.Model.emptyCategoryClass
 import com.roaa.expensetracker.Model.emptyTransactionClass
+import com.roaa.expensetracker.Utilities.currentMonth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject
@@ -18,6 +19,7 @@ class UiViewModel @Inject constructor() : ViewModel() {
     var errorStatusInBudgetAdd = MutableStateFlow<Boolean>(false)
     var errorStatusMessage = MutableStateFlow<String>("")
 
+
     var selectedIconFromBottomSheet = MutableStateFlow<Int>(99)
     var addCategoryBackPressed = MutableStateFlow(false)
 
@@ -29,5 +31,8 @@ class UiViewModel @Inject constructor() : ViewModel() {
             emptyTransactionClass, emptyCategoryClass, emptyBank
         )
     )
+
+    var showMonthFilterChips = MutableStateFlow<Boolean>(false)
+    var selectedMonth = MutableStateFlow(currentMonth)
 
 }

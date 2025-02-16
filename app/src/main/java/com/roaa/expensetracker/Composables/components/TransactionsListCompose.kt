@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,7 +16,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.pager.HorizontalPager
@@ -58,7 +56,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
-import com.roaa.expensetracker.Composables.Screens.MonthChip
 import com.roaa.expensetracker.Composables.failureColor
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
@@ -75,10 +72,7 @@ import com.roaa.expensetracker.Model.emptyCategoryClass
 import com.roaa.expensetracker.Model.emptyTransactionClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.LongMillisToNoralLong
-import com.roaa.expensetracker.Utilities.currentMonth
-import com.roaa.expensetracker.Utilities.currentYear
 import com.roaa.expensetracker.Utilities.getFirstAndLastMonth
-import com.roaa.expensetracker.Utilities.getPreviousAndNext500Months
 import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toDisplayDate
 import com.roaa.expensetracker.Utilities.toLocalDate
@@ -86,7 +80,6 @@ import com.roaa.expensetracker.ViewModels.PreferencesViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import com.roaa.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -103,6 +96,7 @@ fun TransactionsListCompose(
     var showAddBottomSheet by remember { mutableStateOf(false) }
     var bottomSheet by remember { mutableStateOf(false) }
     val showNewLayouts by preferencesViewModel.showForecastBar.collectAsState(false)
+    val showMonthFilterChips by uiViewModel.showMonthFilterChips.collectAsState()
     Scaffold(floatingActionButton = {
         ExtendedFloatingActionButton(
             onClick = {
@@ -129,46 +123,26 @@ fun TransactionsListCompose(
         val greenPalette = toPalette(greenColor)
 
 
-        val monthList = getPreviousAndNext500Months(LocalDate.now())
-        var selectedChip by remember {
-            mutableStateOf(
-                currentMonth
-            )
-        }
-        val currentYear = currentYear
-        val lazyMonthListState = rememberLazyListState()
-        LaunchedEffect(true) {
-            lazyMonthListState.scrollToItem(250)
-        }
-
+        val selectedMonth by uiViewModel.selectedMonth.collectAsState()
         val pagerState = rememberPagerState(initialPage = 500 / 2, pageCount = { 500 })
 
-        LaunchedEffect(selectedChip) {
-            val (firstDate, lastDate) = getFirstAndLastMonth(selectedChip)
-            viewModel.getTotalExpenseForRange(firstDate,lastDate)
-            viewModel.getTotalIncomeForRange(firstDate,lastDate)
+        LaunchedEffect(selectedMonth) {
+            val (firstDate, lastDate) = getFirstAndLastMonth(selectedMonth)
+            viewModel.getTotalExpenseForRange(firstDate, lastDate)
+            viewModel.getTotalIncomeForRange(firstDate, lastDate)
         }
 
         Column {
             if (!showSingleDateTransactions) {
-                LazyRow(
-                    state = lazyMonthListState,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
-                ) {
-                    items(monthList) {
-                        MonthChip(it, currentYear, selectedChip, { selectedChip = it })
-                    }
-                }
-                Spacer(modifier = Modifier.height(8.dp))
                 HorizontalPager(state = pagerState, userScrollEnabled = false) {
-                    val (firstDate, lastDate) = getFirstAndLastMonth(selectedChip)
+                    val (firstDate, lastDate) = getFirstAndLastMonth(selectedMonth)
                     val transactionListOfMonth by viewModel.getTotalTransactionForMonth(
                         firstDate,
                         lastDate
                     ).collectAsState(emptyList())
 
-                    val totalExpenseForMonth  by viewModel.getTotalExpenseAmountForRangeFlow.collectAsState()
-                    val totalIncomeForMonth  by viewModel.getTotalIncomeAmountForRangeFlow.collectAsState()
+                    val totalExpenseForMonth by viewModel.getTotalExpenseAmountForRangeFlow.collectAsState()
+                    val totalIncomeForMonth by viewModel.getTotalIncomeAmountForRangeFlow.collectAsState()
 
                     val transactionsMap =
                         transactionListOfMonth.sortedByDescending { it.transaction.date }
@@ -413,7 +387,10 @@ fun HomeStatCard(
                 text = "₹ $value",
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
-                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = CustomFonts.numberFont, fontSize = 21.sp),
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontFamily = CustomFonts.numberFont,
+                    fontSize = 21.sp
+                ),
                 color = palette.onContainer
             )
             Text(
