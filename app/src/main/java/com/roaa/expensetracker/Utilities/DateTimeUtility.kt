@@ -15,7 +15,7 @@ import java.util.Date
 import java.util.Locale
 
 
-val monthWithYearFormat = DateTimeFormatter.ofPattern("MMM YYYY",Locale.getDefault())
+val monthWithYearFormat = DateTimeFormatter.ofPattern("MMM uuuu",Locale.getDefault())
 
 fun getFirstAndLastDateOfGivenPeriod(prevMonth: LocalDate, nextMonth: LocalDate): Pair<Long, Long> {
 

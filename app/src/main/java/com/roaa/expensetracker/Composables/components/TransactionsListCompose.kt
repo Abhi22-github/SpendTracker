@@ -155,7 +155,7 @@ fun TransactionsListCompose(
             }
 
             if (!showSingleDateTransactions) {
-                HorizontalPager(state = pagerState) {
+                HorizontalPager(state = pagerState, userScrollEnabled = false) {
                     val (firstDate, lastDate) = getFirstAndLastMonth(selectedChip)
                     Log.d("Testing","$firstDate $lastDate")
                     val transactionListOfMonth by viewModel.getTotalTransactionForMonth(
@@ -178,7 +178,7 @@ fun TransactionsListCompose(
                             ) {
 
                                 item {
-                                    SummaryCard(blueColor)
+                                   // SummaryCard(blueColor)
                                     Row {
                                         Spacer(Modifier.width(16.dp))
                                         HomeStatCard(
