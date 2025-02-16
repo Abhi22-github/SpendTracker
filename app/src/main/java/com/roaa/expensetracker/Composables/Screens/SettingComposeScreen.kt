@@ -29,8 +29,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
+import com.roaa.expensetracker.Composables.Navigation.RootScreen
 import com.roaa.expensetracker.Composables.ThemeMode
 import com.roaa.expensetracker.Composables.components.SingleItemRadioButton
 import com.roaa.expensetracker.Composables.components.TopBar
@@ -59,8 +59,8 @@ fun SettingsScreen(
         if (navigationManager.navController.previousBackStackEntry != null) {
             navigationManager.navController.popBackStack() // Pop one screen if there is a back stack
         } else {
-            navigationManager.navController.navigate(Destinations.ListScreen) {
-                popUpTo(Destinations.ListScreen) { inclusive = true }
+            navigationManager.navController.navigate(RootScreen.MainScreen) {
+                popUpTo(RootScreen.MainScreen) { inclusive = true }
             }
         }
     }

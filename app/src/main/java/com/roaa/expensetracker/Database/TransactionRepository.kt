@@ -44,10 +44,6 @@ class TransactionRepository(@ApplicationContext applicationContext: Context) {
         transactionDao.delete(transactionClass)
     }
 
-    fun getTotalTransactionForMonth(startDate: Long, endDate: Long): Flow<List<TransactionWithDetails>> {
-        return transactionDao.getAllTransactionsForMonth(startDate, endDate)
-    }
-
     fun getTotalAmountByDateRangeAndCategoryType(
         startDate: Long,
         endDate: Long,

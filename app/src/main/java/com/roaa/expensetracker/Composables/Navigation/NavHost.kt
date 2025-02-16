@@ -10,11 +10,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
-import androidx.navigation.NavOptions
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.navigation
 import androidx.navigation.toRoute
+import com.roaa.expensetracker.Activity.NavigationDrawer
 import com.roaa.expensetracker.Composables.Screens.AddCategory
 import com.roaa.expensetracker.Composables.Screens.BudgetScreen
 import com.roaa.expensetracker.Composables.Screens.CategoryScreen
@@ -25,7 +24,6 @@ import com.roaa.expensetracker.Composables.Screens.SettingsScreen
 import com.roaa.expensetracker.Composables.Screens.TransactionDetailsScreen
 import com.roaa.expensetracker.Composables.components.TransactionsListCompose
 import com.roaa.expensetracker.Utilities.toLong
-import com.roaa.expensetracker.ViewModels.UiViewModel
 import java.time.LocalDate
 
 
@@ -33,90 +31,71 @@ import java.time.LocalDate
 @Composable
 fun RootNavGraph(
     rooNavController: NavHostController,
-    navigationManager: NavigationManager,
-    uiViewModel: UiViewModel,
+    navController: NavHostController,
+    navigationManager: NavigationManager
 ) {
     SharedTransitionLayout {
         val context = LocalContext.current
         NavHost(
             navController = rooNavController,
-            startDestination = NavRoutes.HomeScreen,
+            startDestination = RootScreen.MainScreen,
         ) {
-
-            navigation<NavRoutes.HomeScreen>(startDestination = Destinations.ListScreen) {
-                composable<Destinations.ListScreen> {
-                    TransactionsListCompose(
-                        navigationManager,
-                        modifier = Modifier,
-                        showSingleDateTransactions = false,
-                        date = LocalDate.now().toLong(),
-                        uiViewModel,
-                    )
-                }
-                composable<Destinations.MonthScreen> {
-                    MonthViewScreen(rooNavController, navigationManager, modifier = Modifier)
-                }
-                composable<Destinations.DayScreen> {
-                    val args = it.toRoute<Destinations.DayScreen>()
-                    DayViewScreen(rooNavController, navigationManager, args.date,uiViewModel)
-                }
+            // Main Navigation (Contains the Drawer & HomeNavGraph)
+            composable<RootScreen.MainScreen> {
+                NavigationDrawer(rooNavController, navController, navigationManager, Modifier)
+            }
+            composable<RootScreen.CategoryScreen>() {
+                CategoryScreen(
+                    rooNavController,
+                    navigationManager,
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedVisibilityScope = this
+                )
+            }
+            composable<RootScreen.CategoryDetailsScreen> {
+                val args = it.toRoute<RootScreen.CategoryDetailsScreen>()
+                AddCategory(
+                    rooNavController,
+                    navigationManager,
+                    args.categoryId,
+                    args.categoryName,
+                    args.categoryIconNumber,
+                    args.categoryType,
+                    sharedTransitionScope = this@SharedTransitionLayout,
+                    animatedVisibilityScope = this
+                )
             }
 
-            navigation<NavRoutes.AppScreen>(startDestination = Destinations.BudgetScreen) {
 
-                composable<Destinations.CategoryScreen>() {
-                    CategoryScreen(
-                        rooNavController,
-                        navigationManager,
-                        sharedTransitionScope = this@SharedTransitionLayout,
-                        animatedVisibilityScope = this
-                    )
-                }
-                composable<Destinations.CategoryDetailsScreen> {
-                    val args = it.toRoute<Destinations.CategoryDetailsScreen>()
-                    AddCategory(
-                        rooNavController,
-                        navigationManager,
-                        args.categoryId,
-                        args.categoryName,
-                        args.categoryIconNumber,
-                        args.categoryType,
-                        sharedTransitionScope = this@SharedTransitionLayout,
-                        animatedVisibilityScope = this
-                    )
-                }
-
-
-                composable<Destinations.BudgetScreen>() {
-                    BudgetScreen(
-                        rooNavController,
-                        navigationManager,
-                        modifier = Modifier
-                    )
-                }
-
-                composable<Destinations.BankAccountScreen>() {
-                    PaymentMethodScreen(
-                        rooNavController,
-                        navigationManager,
-                        Modifier,
-                        {})
-                }
-                composable<Destinations.SettingScreen>() {
-
-                    SettingsScreen(rooNavController, navigationManager, {})
-                }
+            composable<RootScreen.BudgetScreen>() {
+                BudgetScreen(
+                    rooNavController,
+                    navigationManager,
+                    modifier = Modifier
+                )
             }
-            composable<Destinations.DetailsScreen> {
-                val args = it.toRoute<Destinations.DetailsScreen>()
+
+            composable<RootScreen.DetailsScreen> {
+                val args = it.toRoute<RootScreen.DetailsScreen>()
                 TransactionDetailsScreen(
                     modifier = Modifier,
                     rooNavController,
                     navigationManager,
                     args.amount,
-                    args.categoryName,
-                    uiViewModel
+                    args.categoryName
                 )
+            }
+
+            composable<RootScreen.BankAccountScreen>() {
+                PaymentMethodScreen(
+                    rooNavController,
+                    navigationManager,
+                    Modifier,
+                    {})
+            }
+            composable<RootScreen.SettingScreen>() {
+
+                SettingsScreen(rooNavController, navigationManager, {})
             }
         }
 
@@ -125,97 +104,92 @@ fun RootNavGraph(
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
-fun AppNavGraph(
-    rooNavController: NavHostController,
-    navigationManager: NavigationManager,
-    uiViewModel: UiViewModel
-) {
+fun SectionNavigation(navController: NavHostController, navigationManager: NavigationManager) {
     SharedTransitionLayout {
         val context = LocalContext.current
         NavHost(
-            navController = rooNavController,
-            startDestination = NavRoutes.HomeScreen,
+            navController = navController, startDestination = SectionScreenNavRoutes.ListScreen
         ) {
 
-            navigation<NavRoutes.HomeScreen>(startDestination = Destinations.ListScreen) {
-                composable<Destinations.ListScreen> {
-                    TransactionsListCompose(
-                        navigationManager,
-                        modifier = Modifier,
-                        showSingleDateTransactions = false,
-                        date = LocalDate.now().toLong(),
-                        uiViewModel
-                    )
-                }
-                composable<Destinations.MonthScreen> {
-                    MonthViewScreen(rooNavController, navigationManager, modifier = Modifier)
-                }
-                composable<Destinations.DayScreen> {
-                    val args = it.toRoute<Destinations.DayScreen>()
-                    DayViewScreen(rooNavController, navigationManager, args.date,uiViewModel)
-                }
-            }
-
-            navigation<NavRoutes.AppScreen>(startDestination = Destinations.BudgetScreen) {
-
-                composable<Destinations.CategoryScreen>() {
-                    CategoryScreen(
-                        rooNavController,
-                        navigationManager,
-                        sharedTransitionScope = this@SharedTransitionLayout,
-                        animatedVisibilityScope = this
-                    )
-                }
-                composable<Destinations.CategoryDetailsScreen> {
-                    val args = it.toRoute<Destinations.CategoryDetailsScreen>()
-                    AddCategory(
-                        rooNavController,
-                        navigationManager,
-                        args.categoryId,
-                        args.categoryName,
-                        args.categoryIconNumber,
-                        args.categoryType,
-                        sharedTransitionScope = this@SharedTransitionLayout,
-                        animatedVisibilityScope = this
-                    )
-                }
-
-
-                composable<Destinations.BudgetScreen>() {
-                    BudgetScreen(
-                        rooNavController,
-                        navigationManager,
-                        modifier = Modifier
-                    )
-                }
-
-                composable<Destinations.BankAccountScreen>() {
-                    PaymentMethodScreen(
-                        rooNavController,
-                        navigationManager,
-                        Modifier,
-                        {})
-                }
-                composable<Destinations.SettingScreen>() {
-
-                    SettingsScreen(rooNavController, navigationManager, {})
-                }
-            }
-            composable<Destinations.DetailsScreen> {
-                val args = it.toRoute<Destinations.DetailsScreen>()
-                TransactionDetailsScreen(
-                    modifier = Modifier,
-                    rooNavController,
+            composable<SectionScreenNavRoutes.ListScreen> {
+                TransactionsListCompose(
                     navigationManager,
-                    args.amount,
-                    args.categoryName,
-                    uiViewModel
+                    modifier = Modifier,
+                    showSingleDateTransactions = false,
+                    date = LocalDate.now().toLong(),
                 )
             }
-        }
+            composable<SectionScreenNavRoutes.MonthScreen> {
+                MonthViewScreen(navController, navigationManager, modifier = Modifier)
+            }
 
+            composable<SectionScreenNavRoutes.DayScreen> {
+                val args = it.toRoute<SectionScreenNavRoutes.DayScreen>()
+                DayViewScreen(navController, navigationManager, args.date)
+            }
+        }
     }
 }
+
+//@OptIn(ExperimentalSharedTransitionApi::class)
+//@Composable
+//fun FullNavigation(
+//    navRootController: NavHostController,
+//    navController: NavHostController,
+//    navigationManager: NavigationManager
+//) {
+//    SharedTransitionLayout {
+//        val context = LocalContext.current
+//        BackHandler {
+//            // Navigate to the HomeNavGraph default screen instead of exiting
+//            navRootController.navigate(RootScreen.MainScreen) {
+//                popUpTo(0) // Clear back stack
+//            }
+//        }
+//        NavHost(
+//            navController = navController, startDestination = FullScreenNavRoutes.BudgetScreen
+//        ) {
+//            composable<FullScreenNavRoutes.CategoryScreen> {
+//                CategoryScreen(
+//                    navigationManager,
+//                    sharedTransitionScope = this@SharedTransitionLayout,
+//                    animatedVisibilityScope = this
+//                )
+//            }
+//            composable<FullScreenNavRoutes.CategoryDetailsScreen> {
+//                val args = it.toRoute<FullScreenNavRoutes.CategoryDetailsScreen>()
+//                AddCategory(
+//                    navigationManager,
+//                    args.categoryId,
+//                    args.categoryName,
+//                    args.categoryIconNumber,
+//                    args.categoryType,
+//                    sharedTransitionScope = this@SharedTransitionLayout,
+//                    animatedVisibilityScope = this
+//                )
+//            }
+//
+//
+//            composable<FullScreenNavRoutes.BudgetScreen> {
+//                BudgetScreen(navigationManager, modifier = Modifier)
+//            }
+//
+//            composable<FullScreenNavRoutes.DetailsScreen> {
+//                TransactionDetailsScreen(navigationManager, modifier = Modifier)
+//            }
+//
+//            composable<FullScreenNavRoutes.BankAccountScreen> {
+//                PaymentMethodScreen(navigationManager, Modifier, {})
+//            }
+//            composable<FullScreenNavRoutes.SettingScreen> {
+//                SettingsScreen(navigationManager, {})
+//            }
+//
+//
+//        }
+//    }
+//
+//}
 
 val enterTransition = {
     slideInHorizontally(
@@ -242,14 +216,13 @@ fun NavController.onBackPressed() {
     navigateUp()
 }
 
-fun NavController.navigateToWithSingleTop(screen: Destinations) {
-    val navOptions = NavOptions.Builder()
-        .setPopUpTo(Destinations.ListScreen, inclusive = false) // Pop up to MainScreen
-        .setLaunchSingleTop(true)
-        .build()
-
-    navigate(screen, navOptions)
-}
+//fun NavController.navigateTo(screen: SectionScreenNavRoutes) {
+//    val navOptions = NavOptions.Builder()
+//        .setPopUpTo(RootScreen.MainScreen, inclusive = false) // Pop up to MainScreen
+//        .build()
+//
+//    navigate(screen, navOptions)
+//}
 
 
 

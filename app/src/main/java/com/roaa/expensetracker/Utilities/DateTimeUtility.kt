@@ -6,16 +6,12 @@ import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
-import java.time.YearMonth
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
-
-
-val monthWithYearFormat = DateTimeFormatter.ofPattern("MMM uuuu",Locale.getDefault())
 
 fun getFirstAndLastDateOfGivenPeriod(prevMonth: LocalDate, nextMonth: LocalDate): Pair<Long, Long> {
 
@@ -41,7 +37,6 @@ fun Long.toLocalDate(): LocalDate {
 fun LocalDate.toDisplayStringForMonth(): String {
     return this.format(DateTimeFormatter.ofPattern("dd MMM")).toString()
 }
-
 fun LocalDate.toDisplayStringForMonthWithYear(): String {
     return this.format(DateTimeFormatter.ofPattern("dd MMM,yyyy")).toString()
 }
@@ -111,25 +106,6 @@ fun getPrev10Dates(date: LocalDate): List<String> {
         prev10Dates.add(formattedDate)
     }
     return prev10Dates
-}
-
-fun getPreviousAndNext500Months(date: LocalDate): List<String> {
-    val allMonths = mutableListOf<String>()
-    for (i in 250 downTo 1) {
-        val previousMonth = date.minusMonths(i.toLong())  // Subtract days for previous dates
-        val formattedPrevMonth =
-            previousMonth.format(monthWithYearFormat)
-        allMonths.add(formattedPrevMonth)
-    }
-
-    allMonths.add(date.format(monthWithYearFormat))
-
-    for (i in 1..250) {
-        val nextMonth = date.plusMonths(i.toLong())  // Add days for next dates
-        val formattedNextMonth = nextMonth.format(monthWithYearFormat)
-        allMonths.add(formattedNextMonth)
-    }
-    return allMonths
 }
 
 fun getPreviousAndNext500Days(date: LocalDate): List<String> {
@@ -336,12 +312,4 @@ fun getValidDatesListFromLong(startDate: Long, endDate: Long): List<Long> {
         dateList.add(startDate.toLocalDate().plusDays(i).toLong())
     }
     return dateList
-}
-
-val currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("MMM YYYY"))
-val currentYear = LocalDate.now().format(DateTimeFormatter.ofPattern("YYYY"))
-
-fun getFirstAndLastMonth(month: String) = run {
-    val yearMonth = YearMonth.parse(month.trim(), monthWithYearFormat)
-    Pair(yearMonth.atDay(1).toLong(), yearMonth.atEndOfMonth().toLong())
 }

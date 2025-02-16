@@ -5,9 +5,7 @@ import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -19,12 +17,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -38,9 +31,7 @@ import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
@@ -49,10 +40,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.compositionLocalOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -61,7 +50,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
@@ -69,28 +57,20 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.core.view.WindowCompat
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
-import com.roaa.expensetracker.Composables.Navigation.AppNavGraph
-import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.RootNavGraph
-import com.roaa.expensetracker.Composables.Navigation.navigateToWithSingleTop
-import com.roaa.expensetracker.Composables.Screens.MonthChip
+import com.roaa.expensetracker.Composables.Navigation.RootScreen
+import com.roaa.expensetracker.Composables.Navigation.SectionNavigation
 import com.roaa.expensetracker.Composables.syncTheme
 import com.roaa.expensetracker.R
-import com.roaa.expensetracker.Utilities.currentYear
-import com.roaa.expensetracker.Utilities.getPreviousAndNext500Months
 import com.roaa.expensetracker.Utilities.lockScreenOrientation
 import com.roaa.expensetracker.Utilities.section1Items
 import com.roaa.expensetracker.Utilities.section2Items
-import com.roaa.expensetracker.ViewModels.UiViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
-import java.time.LocalDate
 
 val LocalWindowSize = compositionLocalOf { WindowWidthSizeClass.Compact }
 val LocalWindowInsets = compositionLocalOf { PaddingValues(0.dp) }
@@ -108,6 +88,7 @@ class ComposeMainActivity : ComponentActivity() {
         setContent {
             val localContext = LocalContext.current
             val rootNavController = rememberNavController()
+            val section1NavController = rememberNavController()
             val navigationManager = remember { NavigationManager(rootNavController) }
             LaunchedEffect(Unit) {
                 syncTheme(localContext)
@@ -132,11 +113,19 @@ class ComposeMainActivity : ComponentActivity() {
                         LocalWindowSize provides widthSizeClass,
                         LocalWindowInsets provides windowInsets,
                     ) {
-                        NavigationDrawer(rootNavController, navigationManager, Modifier)
+//                        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+//                            NavigationDrawer(
+//                                rootNavController,
+//                                navigationManager,
+//                                Modifier.padding(0.dp)
+//                            )
+                        RootNavGraph(rootNavController, section1NavController, navigationManager)
+
                         LaunchedEffect(Unit) {
                             // App rendered and splash screen can be hidden
                             isDone.value = true
                         }
+//                        }
                     }
                 }
             }
@@ -149,39 +138,24 @@ class ComposeMainActivity : ComponentActivity() {
 @Composable
 fun NavigationDrawer(
     rootNavController: NavHostController,
+    navController: NavHostController,
     navigationManager: NavigationManager,
     modifier: Modifier,
-    uiViewModel: UiViewModel = hiltViewModel()
 ) {
 
     val section1 = section1Items
     val section2 = section2Items
     val deviceDensity = LocalDensity.current
 
-    val currentBackStackEntry by rootNavController.currentBackStackEntryAsState()
-    val currentRoute = currentBackStackEntry?.destination?.route?.substringBefore("/")
+    var selectedFullScreenRoute by remember { mutableStateOf<RootScreen?>(null) }
 
     //Remember Clicked index state
     var selectedItemIndex by rememberSaveable {
-        mutableIntStateOf(0)
+        mutableStateOf(0)
     }
-    selectedItemIndex = when (currentRoute) {
-        Destinations.ListScreen.javaClass.canonicalName -> 0
-        Destinations.MonthScreen.javaClass.canonicalName -> 1
-        Destinations.DayScreen::class.java.canonicalName -> 2
-        else -> 0
-    }
-    val showAppBar = if (currentRoute in listOf(
-            Destinations.ListScreen.javaClass.canonicalName,
-            Destinations.MonthScreen.javaClass.canonicalName,
-            Destinations.DayScreen::class.java.canonicalName
-        )
-    ) true else false
-
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val showMonthFilterChips by uiViewModel.showMonthFilterChips.collectAsState()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -225,7 +199,7 @@ fun NavigationDrawer(
                                 scope.launch {
                                     drawerState.close()
                                 }
-                                rootNavController.navigateToWithSingleTop(item.route)
+                                navController.navigate(item.route)
                             },
                             icon = {
                                 Icon(
@@ -268,7 +242,8 @@ fun NavigationDrawer(
                                 scope.launch {
                                     drawerState.close()
                                 }
-                                rootNavController.navigateToWithSingleTop(item.route)
+                                selectedFullScreenRoute = item.route
+                                rootNavController.navigate(item.route)
 
                             },
                             icon = {
@@ -299,86 +274,39 @@ fun NavigationDrawer(
 
         gesturesEnabled = true
     ) {
-        val currentYear = currentYear
-        val lazyMonthListState = rememberLazyListState()
-        val monthList = getPreviousAndNext500Months(LocalDate.now())
-        val selectedMonth by uiViewModel.selectedMonth.collectAsState()
-        LaunchedEffect(true) {
-            lazyMonthListState.scrollToItem(250)
-        }
-        val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+//        val currentBackStackEntry by navController.currentBackStackEntryAsState()
+//        val currentRoute = currentBackStackEntry?.destination?.route
         CompositionLocalProvider() {
-            if (!showAppBar) {
-                AppNavGraph(rootNavController, navigationManager, uiViewModel)
-            } else {
-                Scaffold(
-                    modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
-                    topBar = { //TopBar to show title
-                        Column {
-                            TopAppBar(
-                                // colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Blue),
-                                title = {
-                                    Text(text = "")
-                                },
-                                navigationIcon = {
-                                    IconButton(onClick = {
-                                        scope.launch {
-                                            drawerState.apply {
-                                                if (isClosed) open() else close()
-                                            }
+            Scaffold(
+                topBar = { //TopBar to show title
+                    if (selectedItemIndex in 0..2)
+                        TopAppBar(
+                            // colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Blue),
+                            title = {
+                                Text(text = "Expense Tracker")
+                            },
+                            navigationIcon = {
+                                IconButton(onClick = {
+                                    scope.launch {
+                                        drawerState.apply {
+                                            if (isClosed) open() else close()
                                         }
-                                    }) {
-                                        Icon(  //Show Menu Icon on TopBar
-                                            imageVector = Icons.Default.Menu,
-                                            contentDescription = "Menu"
-                                        )
                                     }
-                                },
-                                colors = TopAppBarDefaults.topAppBarColors(),
-                                actions = {
-                                    TextButton(onClick = {
-                                        scope.launch {
-                                            uiViewModel.showMonthFilterChips.emit(!showMonthFilterChips)
-                                        }
-                                    }) {
-                                        Icon(Icons.Filled.CalendarMonth, contentDescription = null)
-                                        Spacer(Modifier.width(8.dp))
-                                        Text(text = selectedMonth)
-                                        Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
-                                    }
-                                    Spacer(Modifier.width(8.dp))
-                                },
-                                scrollBehavior = scrollBehavior,
-                            )
-                            AnimatedVisibility(
-                                showMonthFilterChips,
-                            ) {
-                                LazyRow(
-                                    state = lazyMonthListState,
-                                    horizontalArrangement = Arrangement.spacedBy(5.dp)
-                                ) {
-                                    items(monthList) {
-                                        MonthChip(
-                                            it,
-                                            currentYear,
-                                            selectedMonth,
-                                            {
-                                                scope.launch {
-                                                    uiViewModel.selectedMonth.emit(it)
-                                                }
-                                            })
-                                    }
+                                }) {
+                                    Icon(  //Show Menu Icon on TopBar
+                                        imageVector = Icons.Default.Menu,
+                                        contentDescription = "Menu"
+                                    )
                                 }
-                                Spacer(modifier = Modifier.height(8.dp))
                             }
-                        }
-                    },
-                ) { innerPadding ->
-                    Column(Modifier.padding(innerPadding)) {
-                        RootNavGraph(rootNavController, navigationManager, uiViewModel)
-                    }
-
+                        )
+                },
+            ) { innerPadding ->
+                Column(Modifier.padding(innerPadding)) {
+                    SectionNavigation(navController, navigationManager)
+//                     SetupNavigationGraph(navController, navigationManager)
                 }
+
             }
         }
     }

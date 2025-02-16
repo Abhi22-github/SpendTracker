@@ -239,7 +239,11 @@ fun BottomSheetContentItemAddContent(
 
 
     //animations
+    var expanded by remember { mutableStateOf(false) }
     var typeToggle by remember { mutableStateOf(true) }
+    val boxSize by animateDpAsState(
+        targetValue = if (expanded) 160.dp else 56.dp, animationSpec = tween(500)
+    )
     val colorAnimate by animateColorAsState(
         targetValue = if (typeToggle) orange.copy(alpha = .20f) else successColor.copy(
             alpha = 0.20f
@@ -262,12 +266,12 @@ fun BottomSheetContentItemAddContent(
         categoryViewModel.getOnlyIncomeCategoryNames()
     }
 
-//    LaunchedEffect( typeToggle) {
-//        if (expanded) {
-//            delay(5000)
-//            expanded = false
-//        }
-//    }
+    LaunchedEffect(expanded, typeToggle) {
+        if (expanded) {
+            delay(5000)
+            expanded = false
+        }
+    }
     val budget by preferencesViewModel.getTotalAmountPerDay.collectAsState(1f)
     val oldAmount by transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
     val newAmountTemp = if (expenseValue.text.isEmpty()) 0L else extractNumbers(expenseValue.text)
@@ -312,15 +316,19 @@ fun BottomSheetContentItemAddContent(
 
                 Box(contentAlignment = Alignment.Center,
                     modifier = Modifier
-                        .fillMaxWidth(0.35f)
+                        .width(boxSize)
                         .background(
                             color = colorAnimate, shape = RoundedCornerShape(30.dp)
                         )
                         .clip(RoundedCornerShape(30.dp))
                         .clickable {
+                            if (!expanded) {
+                                expanded = !expanded
+                            } else {
                                 typeToggle = !typeToggle
                                 categoryViewModel.getCorrespondingList(if (typeToggle) expenseType.type else incomeType.type)
                                 selectedCategory = firstSampleClass
+                            }
                         }
                         .height(56.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -334,12 +342,14 @@ fun BottomSheetContentItemAddContent(
                             modifier = Modifier.size(36.dp),
                         )
 
+                        AnimatedVisibility(expanded) {
                             Text(
                                 text = if (typeToggle) expenseType.type else incomeType.type,
                                 modifier = Modifier.padding(start = 8.dp),
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
+                        }
                     }
                 }
                 Spacer(Modifier.width(12.dp))
@@ -1053,7 +1063,7 @@ fun validateTransactionData(
             ) else
             transactionsViewModel.updateFormDataInDatabase(singleTransaction.transaction.also {
                 it.type = type
-                selectedDate?.let { date -> it.date = date }
+                it.date = selectedDate
                 it.amount = amount.toFloat()
                 it.note = comment
                 it.categoryId = selectedCategory.categoryId

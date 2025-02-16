@@ -6,7 +6,6 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
     alias(libs.plugins.kotlin.serialization)
-    id("kotlin-parcelize")
     id("com.google.firebase.crashlytics")
     // Apply Hilt plugin
 }
@@ -24,8 +23,8 @@ android {
         applicationId = "com.roaa.expensetracker"
         minSdk = 26
         targetSdk = 35
-        versionCode = 5
-        versionName = "0.4"
+        versionCode = 4
+        versionName = "0.3"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         signingConfig = signingConfigs.getByName("debug")
     }

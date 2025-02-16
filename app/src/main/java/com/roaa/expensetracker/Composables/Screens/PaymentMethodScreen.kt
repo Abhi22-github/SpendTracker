@@ -70,8 +70,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
-import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
+import com.roaa.expensetracker.Composables.Navigation.RootScreen
 import com.roaa.expensetracker.Composables.components.AddPaymentMethodBottomSheet
 import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.Composables.components.DropDownBankAccountOption
@@ -142,8 +142,8 @@ fun PaymentMethodScreen(
         if (navigationManager.navController.previousBackStackEntry != null) {
             navigationManager.navController.popBackStack() // Pop one screen if there is a back stack
         } else {
-            navigationManager.navController.navigate(Destinations.ListScreen) {
-                popUpTo(Destinations.ListScreen) { inclusive = true }
+            navigationManager.navController.navigate(RootScreen.MainScreen) {
+                popUpTo(RootScreen.MainScreen) { inclusive = true }
             }
         }
     }
