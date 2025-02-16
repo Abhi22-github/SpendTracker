@@ -6,7 +6,6 @@ plugins {
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
     alias(libs.plugins.kotlin.serialization)
-    id("kotlin-parcelize")
     id("com.google.firebase.crashlytics")
     // Apply Hilt plugin
 }
@@ -81,7 +80,6 @@ dependencies {
     //add below dependancy for using room.
     kapt(libs.androidx.room.compiler)
     implementation(libs.androidx.core)
-    implementation(libs.joda.time)
     implementation(libs.commons.lang3)
     implementation(libs.lottie)
     implementation(libs.kotlinx.serialization.json)
