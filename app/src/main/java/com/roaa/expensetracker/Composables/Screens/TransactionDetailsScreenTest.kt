@@ -38,6 +38,8 @@ import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -185,14 +187,14 @@ fun TransactionDetailsScreen(
                     Spacer(Modifier.height(24.dp))
                     Text(
                         text = "₹ ${singleTransaction.transaction.amount}",
-                        style = MaterialTheme.typography.displayMedium.copy(fontFamily = numberFont),
+                        style = typography.displayMedium.copy(fontFamily = numberFont),
                         color = colorPalette.main
                     )
 //        Text(text = "Food & Drink", style = MaterialTheme.typography.titleMedium)
                     Spacer(Modifier.height(0.dp))
                     Text(
                         text = singleTransaction.transaction.note,
-                        style = MaterialTheme.typography.labelLarge,
+                        style = typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
                     )
                     Spacer(Modifier.height(24.dp))
@@ -522,13 +524,13 @@ fun SingleInfoBoxForTransactions(
             }
             Spacer(Modifier.height(10.dp))
             Text(
-                text = label, style = MaterialTheme.typography.labelLarge,
+                text = label, style = typography.labelLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurface.copy(0.38f)
             )
             Spacer(Modifier.height(0.dp))
             Text(
-                text = value, style = MaterialTheme.typography.titleMedium,
+                text = value, style = typography.titleMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -549,5 +551,41 @@ fun TagChip(text: String) {
         ),
         border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.5f)),
         shape = RoundedCornerShape(15.dp)
+    )
+}
+
+@Composable
+fun MonthChip(
+    monthWithYear: String,
+    currentYear: String,
+    selectedChip: String,
+    selectedChipSetter: (String) -> Unit
+) {
+    val text = if (monthWithYear.split(" ").get(1) == currentYear) {
+        monthWithYear.split(" ").get(0)
+    } else {
+        monthWithYear
+    }
+    FilterChip(
+        selected = monthWithYear == selectedChip,
+        onClick = { selectedChipSetter(monthWithYear) },
+        label = {
+            Text(
+                text = text,
+                style = typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        },
+        colors = FilterChipDefaults.filterChipColors(
+            labelColor = MaterialTheme.colorScheme.onSurface.copy(
+                0.6f
+            )
+        ),
+        border = if (monthWithYear == selectedChip) BorderStroke(
+            0.dp,
+            Color.Transparent
+        )
+        else BorderStroke(1.dp, MaterialTheme.colorScheme.outline.copy(alpha = 0.3f)),
+        shape = RoundedCornerShape(10.dp)
     )
 }

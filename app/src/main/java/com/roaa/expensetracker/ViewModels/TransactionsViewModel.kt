@@ -164,7 +164,7 @@ class TransactionsViewModel @Inject constructor(
         viewModelScope.launch { transactionRepository.insertAndPropagateChanges(modal) }
     }
 
-     fun updateFormDataInDatabase(transactionClass: TransactionClass){
+    fun updateFormDataInDatabase(transactionClass: TransactionClass) {
         viewModelScope.launch { transactionRepository.updateAndPropagateChanges(transactionClass) }
     }
 
@@ -174,6 +174,13 @@ class TransactionsViewModel @Inject constructor(
 
     val allTransactions: Flow<List<TransactionWithDetails>>
         get() = transactionRepository.allTransactions
+
+    fun getTotalTransactionForMonth(
+        startDate: Long,
+        endDate: Long
+    ): Flow<List<TransactionWithDetails>> {
+        return transactionRepository.getTotalTransactionForMonth(startDate, endDate)
+    }
 
 
     fun getTotalIncomeForRange(startDate: Long, endDate: Long) {
