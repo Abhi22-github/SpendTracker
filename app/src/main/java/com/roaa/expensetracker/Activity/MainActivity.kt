@@ -187,6 +187,12 @@ fun NavigationDrawer(
         )
     ) true else false
 
+    val showMonthFilter = if (currentRoute in listOf(
+            Destinations.ListScreen.javaClass.canonicalName,
+            Destinations.MonthScreen.javaClass.canonicalName,
+        )
+    ) true else false
+
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
@@ -385,7 +391,7 @@ fun NavigationDrawer(
                                 scrollBehavior = scrollBehavior,
                             )
                             AnimatedVisibility(
-                                showMonthFilterChips,
+                                showMonthFilterChips && showMonthFilter,
                             ) {
                                 LazyRow(
                                     state = lazyMonthListState,
