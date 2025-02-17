@@ -133,6 +133,28 @@ fun getPreviousAndNext500Months(date: LocalDate): List<String> {
     return allMonths
 }
 
+fun getPreviousAndNext10Days(date: LocalDate): List<String> {
+    val allDates = mutableListOf<String>()
+    val dayFormatter = DateTimeFormatter.ofPattern("EEE")
+    val DateFormatter = DateTimeFormatter.ofPattern("dd")
+
+    for (i in 5 downTo 1) {
+        val previousDate = date.minusDays(i.toLong())  // Subtract days for previous dates
+        val formattedPrevDate =
+            "${previousDate.format(dayFormatter)},${previousDate.format(DateFormatter)}"
+        allDates.add(formattedPrevDate)
+    }
+
+    allDates.add("${date.format(dayFormatter)},${date.format(DateFormatter)}")
+
+    for (i in 1..5) {
+        val nextDate = date.plusDays(i.toLong())  // Add days for next dates
+        val formattedNextDate = "${nextDate.format(dayFormatter)},${nextDate.format(DateFormatter)}"
+        allDates.add(formattedNextDate)
+    }
+    return allDates
+}
+
 fun getPreviousAndNext500Days(date: LocalDate): List<String> {
     val allDates = mutableListOf<String>()
     val dayFormatter = DateTimeFormatter.ofPattern("EEE")
