@@ -96,7 +96,6 @@ fun TransactionsListCompose(
     var showAddBottomSheet by remember { mutableStateOf(false) }
     var bottomSheet by remember { mutableStateOf(false) }
     val showNewLayouts by preferencesViewModel.showForecastBar.collectAsState(false)
-    val showMonthFilterChips by uiViewModel.showMonthFilterChips.collectAsState()
     Scaffold(floatingActionButton = {
         ExtendedFloatingActionButton(
             onClick = {

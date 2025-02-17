@@ -89,8 +89,9 @@ fun MonthViewScreen(
         Log.d("month", "${calculateEffectivePage(month).toInt()}")
         pagerState.animateScrollToPage(250 + calculateEffectivePage(month).toInt())
     }
-    LaunchedEffect(pagerState.currentPage) {
+    LaunchedEffect(pagerState.settledPage) {
         scope.launch {
+            Log.d("Month Testing12", "${pagerState.currentPage}")
             uiViewModel.selectedMonth.emit(
                 getMonthFromLocalDate(
                     calculateMonthStartDate(
@@ -98,6 +99,14 @@ fun MonthViewScreen(
                         MAX_PAGES / 2
                     )
                 )
+            )
+            Log.d(
+                "Month Testing123", getMonthFromLocalDate(
+                            calculateMonthStartDate(
+                                pagerState.currentPage,
+                                MAX_PAGES / 2
+                            )
+                        )
             )
         }
     }

@@ -9,6 +9,6 @@ public class Constants {
     public final static String PRIMARY = "PRIMARY";
     public final static String SECONDARY = "SECONDARY";
 
-    public final static int MAX_PAGES = 10;
+    public final static int MAX_PAGES = 500;
 
 }
