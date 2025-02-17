@@ -282,9 +282,7 @@ fun NavigationDrawer(
                             },
                             icon = {
                                 Icon(
-                                    imageVector = if (index == selectedItemIndex) {
-                                        ImageVector.vectorResource(item.selectedIcon)
-                                    } else ImageVector.vectorResource(item.unselectedIcon),
+                                    imageVector = ImageVector.vectorResource(item.unselectedIcon),
                                     contentDescription = item.title,
                                     modifier = Modifier.size(24.dp)
                                 )
