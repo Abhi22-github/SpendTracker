@@ -76,6 +76,7 @@ import com.roaa.expensetracker.Composables.Navigation.onBackPressed
 import com.roaa.expensetracker.Composables.components.BottomSheetIconPicker
 import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.Composables.components.ErrorRow
+import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.secondaryAlpha
@@ -105,7 +106,7 @@ fun AddCategory(
     uiViewModel: UiViewModel = hiltViewModel(),
     categoryViewModel: CategoryViewModel = hiltViewModel()
 ) {
-    val category = CategoryClass(categoryId, categoryName, 1, categoryIcon, categoryType,true)
+    val category = CategoryClass(categoryId, categoryName, 1, categoryIcon, categoryType, true)
     val showDeleteButton by remember { mutableStateOf(if (category.categoryId == 0L) false else true) }
     var showConfirmationDialog by remember { mutableStateOf(false) }
     var confirmationDialogType by remember { mutableIntStateOf(1) }
@@ -113,7 +114,17 @@ fun AddCategory(
 
     with(sharedTransitionScope) {
         ExpenseTrackerTheme {
-            Scaffold() { paddingValues ->
+            Scaffold(topBar = {
+                TopBar(
+                    title = if(categoryId == 0L ) "Add Category" else "Edit Category",
+                    showDelete = true,
+                    sendUserBackToPreviousActivity = { },
+                    delete = {
+                        confirmationDialogType = 1
+                        showConfirmationDialog = true
+                    }
+                )
+            }) { paddingValues ->
                 ScaffoldContentDetails(
                     Modifier.padding(paddingValues),
                     category,
@@ -131,7 +142,7 @@ fun AddCategory(
                 onConfirmation = {
                     categoryViewModel.deleteCategoryFromDatabase(category)
                     showConfirmationDialog = !showConfirmationDialog
-                 rootNavController.onBackPressed()
+                    rootNavController.onBackPressed()
 
                 },
                 dialogTitle = "Delete Category",
@@ -230,13 +241,11 @@ fun SharedTransitionScope.ScaffoldContentDetails(
                     contentAlignment = Alignment.Center
                 ) {
 
-                    //     AnimatedContent(targetState = selectedIcon) { index ->
-
                     val image =
                         rememberAsyncImagePainter(IconState.fromNumber(if (selectedIcon == 99) categoryClass.categoryIconNumber else selectedIcon))
                     Image(
                         painter = image,
-                        contentDescription = "Test Image",
+                        contentDescription = "Image ${categoryClass.categoryIconNumber}",
                         modifier = Modifier
                             .size(96.dp)
                             .sharedElement(
@@ -282,7 +291,7 @@ fun SharedTransitionScope.ScaffoldContentDetails(
                     "Category Name",
                     Modifier.fillMaxWidth(),
                     style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha),
+                    color = MaterialTheme.colorScheme.onSurface.copy(secondaryAlpha),
                     textAlign = TextAlign.Center
                 )
             },

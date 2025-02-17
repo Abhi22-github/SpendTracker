@@ -47,12 +47,14 @@ val section2Items = listOf(
         selectedIcon = R.drawable.bank_account_checked,
         unselectedIcon = R.drawable.bank_account_unchecked,
         route = Destinations.BankAccountScreen,
-    ), NavigationItems(
-        title = "Statistics",
-        selectedIcon = R.drawable.analysis_checked,
-        unselectedIcon = R.drawable.analysis_unchecked,
-        route = Destinations.CategoryScreen,
-    ), NavigationItems(
+    ),
+//    NavigationItems(
+//        title = "Statistics",
+//        selectedIcon = R.drawable.analysis_checked,
+//        unselectedIcon = R.drawable.analysis_unchecked,
+//        route = Destinations.CategoryScreen,
+//    ),
+    NavigationItems(
         title = "Settings",
         selectedIcon = R.drawable.settings_checked,
         unselectedIcon = R.drawable.settings_unchecked,

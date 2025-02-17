@@ -54,7 +54,7 @@ fun RootNavGraph(
                     )
                 }
                 composable<Destinations.MonthScreen> {
-                    MonthViewScreen(rooNavController, navigationManager, modifier = Modifier)
+                    MonthViewScreen(rooNavController, navigationManager, modifier = Modifier,uiViewModel)
                 }
                 composable<Destinations.DayScreen> {
                     val args = it.toRoute<Destinations.DayScreen>()
@@ -148,7 +148,7 @@ fun AppNavGraph(
                     )
                 }
                 composable<Destinations.MonthScreen> {
-                    MonthViewScreen(rooNavController, navigationManager, modifier = Modifier)
+                    MonthViewScreen(rooNavController, navigationManager, modifier = Modifier,uiViewModel)
                 }
                 composable<Destinations.DayScreen> {
                     val args = it.toRoute<Destinations.DayScreen>()

@@ -1,6 +1,7 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -29,6 +30,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,11 +53,15 @@ import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Utilities.Constants.MAX_PAGES
+import com.roaa.expensetracker.Utilities.calculateEffectivePage
 import com.roaa.expensetracker.Utilities.convertTotalExpenseIncomeClassToMap
 import com.roaa.expensetracker.Utilities.getCalendarForMonthFromDate
+import com.roaa.expensetracker.Utilities.getMonthFromLocalDate
 import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
+import com.roaa.expensetracker.ViewModels.UiViewModel
+import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.TextStyle
@@ -67,14 +73,43 @@ fun MonthViewScreen(
     navController: NavController,
     navigationManager: NavigationManager,
     modifier: Modifier = Modifier,
-    transactionViewModel: TransactionsViewModel = hiltViewModel()
-) {
+    uiViewModel: UiViewModel,
+    transactionViewModel: TransactionsViewModel = hiltViewModel(),
+
+    ) {
+    val scope = rememberCoroutineScope()
     val pagerState = rememberPagerState(initialPage = MAX_PAGES / 2, pageCount = { MAX_PAGES })
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     val configuration = LocalConfiguration.current
     val firstDayOfWeek = WeekFields.of(configuration.locale).firstDayOfWeek
     var sendUserToDayView by remember { mutableStateOf(false) }
-
+    val month by uiViewModel.selectedMonth.collectAsState()
+    LaunchedEffect(month) {
+        Log.d("month", month)
+        Log.d("month", "${calculateEffectivePage(month).toInt()}")
+        pagerState.animateScrollToPage(250 + calculateEffectivePage(month).toInt())
+    }
+    LaunchedEffect(pagerState.settledPage) {
+        scope.launch {
+            Log.d("Month Testing12", "${pagerState.currentPage}")
+            uiViewModel.selectedMonth.emit(
+                getMonthFromLocalDate(
+                    calculateMonthStartDate(
+                        pagerState.currentPage,
+                        MAX_PAGES / 2
+                    )
+                )
+            )
+            Log.d(
+                "Month Testing123", getMonthFromLocalDate(
+                            calculateMonthStartDate(
+                                pagerState.currentPage,
+                                MAX_PAGES / 2
+                            )
+                        )
+            )
+        }
+    }
     HorizontalPager(
         state = pagerState,
     ) { page ->
@@ -104,7 +139,7 @@ fun MonthViewScreen(
     }
     LaunchedEffect(sendUserToDayView, selectedDate) {
         if (sendUserToDayView && selectedDate != null) {
-          navController.navigate(
+            navController.navigate(
                 Destinations.DayScreen(
                     selectedDate!!.toLong()
                 )
