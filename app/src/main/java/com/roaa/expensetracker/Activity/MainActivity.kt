@@ -208,7 +208,7 @@ fun NavigationDrawer(
                         Image(
                             painter = painterResource(R.drawable.app_icon),
                             contentDescription = "App icon",
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(24.dp),
                         )
 
                         Text(

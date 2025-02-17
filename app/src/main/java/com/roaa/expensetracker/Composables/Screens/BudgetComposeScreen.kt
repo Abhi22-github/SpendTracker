@@ -1,7 +1,6 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
@@ -52,6 +51,7 @@ import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.blueColor
 import com.roaa.expensetracker.Composables.components.BudgetBottomSheet
+import com.roaa.expensetracker.Composables.components.EmptyScreen
 import com.roaa.expensetracker.Composables.components.SpendsBudgetCard
 import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.greenColor
@@ -102,9 +102,6 @@ fun BudgetScreen(
             )
         )
     }
-    Log.d("BudgetComposeScreen room", " $getCurrentBudgetFromRoom")
-    Log.d("BudgetComposeScreen var ", "$getCurrentBudget ")
-
     var isBudgetSet by remember { mutableStateOf(false) }
     LaunchedEffect(getCurrentBudgetFromRoom) {
         getCurrentBudgetFromRoom?.let {
@@ -141,7 +138,7 @@ fun BudgetScreen(
                     showBottomSheet = !showBottomSheet
                 },
                 icon = { Icon(Icons.Filled.Add, "Localized description") },
-                text = { Text(text = "Add") },
+                text = { Text(text = if(isBudgetSet) "Manage" else "Add") },
             )
         },
     ) {
@@ -268,12 +265,13 @@ fun BudgetScreen(
                     }
                     SpendCalender(Modifier, getCurrentBudget)
                 }
+            }else{
+                EmptyScreen(text = "No Budget Found")
             }
             Spacer(Modifier.height(36.dp))
         }
     }
     AnimatedVisibility(showBottomSheet) {
-
         BudgetBottomSheet(
             bottomSheetState,
             bottomSheetDismissed = { showBottomSheet = !showBottomSheet },

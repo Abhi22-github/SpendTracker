@@ -52,7 +52,6 @@ import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
-import com.roaa.expensetracker.Composables.secondaryAlpha
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Model.CategoryClass
@@ -112,7 +111,7 @@ fun CategoryScreen(
                                 )
                             )
                         },
-                        icon = { Icon(Icons.Filled.Add, "Localized description") },
+                        icon = { Icon(Icons.Filled.Add, "Add Category") },
                         text = { Text(text = "Add Category") },
                     )
                 },
@@ -151,7 +150,7 @@ fun SharedTransitionScope.ScaffoldContent(
         Text(
             text = "This categories will be shown when the transaction type is expense",
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha),
+            color = MaterialTheme.colorScheme.onSurface.copy(0.6f),
             modifier = Modifier.padding(startEndPadding, topBottomPadding)
         )
 
@@ -255,7 +254,7 @@ fun SharedTransitionScope.ScaffoldContent(
         Text(
             text = "This categories will be shown when the transaction type is expense",
             style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha),
+            color = MaterialTheme.colorScheme.onSurface.copy(0.6f),
             modifier = Modifier.padding(startEndPadding, topBottomPadding)
         )
 
@@ -376,7 +375,7 @@ fun SharedTransitionScope.SingleCategory(
                                 rememberAsyncImagePainter(IconState.fromNumber(item.categoryIconNumber))
                             Image(
                                 painter = image,
-                                contentDescription = "Test Image",
+                                contentDescription = "Image ${item.categoryIconNumber}",
                                 modifier = Modifier
                                     .size(24.dp)
                                     .sharedElement(
