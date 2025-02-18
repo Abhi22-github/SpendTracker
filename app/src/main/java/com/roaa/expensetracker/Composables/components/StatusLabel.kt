@@ -1,8 +1,6 @@
 package com.roaa.expensetracker.Composables.components
 
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.core.TweenSpec
-import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -20,7 +18,6 @@ import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
@@ -44,13 +41,13 @@ fun StatusLabel(
             modifier = Modifier.height(44.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            val textStartOffset by animateDpAsState(
-                label = "textStartOffset",
-                targetValue = if (budgetState === DaileBudgetState.END) 44.dp else 18.dp,
-                animationSpec = TweenSpec(250),
-            )
+//            val textStartOffset by animateDpAsState(
+//                label = "textStartOffset",
+//                targetValue = if (budgetState === DaileBudgetState.END) 44.dp else 18.dp,
+//                animationSpec = TweenSpec(250),
+//            )
 
-            Spacer(modifier = Modifier.width(textStartOffset))
+            Spacer(modifier = Modifier.width(24.dp))
             Text(
 //                text = when (budgetState) {
 //                    DaileBudgetState.NORMAL -> "You Spent"
@@ -58,7 +55,7 @@ fun StatusLabel(
 //                    DaileBudgetState.END -> "New Daily"
 //                    DaileBudgetState.OVERSPEND -> "Daily Budget Exhausted"
 //                },
-                text = "You Spent",
+                text = "Today's Expense",
                 style = MaterialTheme.typography.headlineMedium.copy(
                     fontSize = MaterialTheme.typography.titleMedium.fontSize
                 ),

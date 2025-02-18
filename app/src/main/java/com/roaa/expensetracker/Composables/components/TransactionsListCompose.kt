@@ -46,11 +46,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts
@@ -70,6 +72,7 @@ import com.roaa.expensetracker.Model.TransactionClass
 import com.roaa.expensetracker.Model.emptyBank
 import com.roaa.expensetracker.Model.emptyCategoryClass
 import com.roaa.expensetracker.Model.emptyTransactionClass
+import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.LongMillisToNoralLong
 import com.roaa.expensetracker.Utilities.getFirstAndLastMonth
@@ -160,7 +163,7 @@ fun TransactionsListCompose(
 
                                 item {
                                     // SummaryCard(blueColor)
-                                    Row {
+                                    Row(modifier = Modifier.padding(top = 8.dp)) {
                                         Spacer(Modifier.width(16.dp))
                                         HomeStatCard(
                                             Modifier.weight(1f),
@@ -375,29 +378,58 @@ fun HomeStatCard(
     Card(
         modifier = modifier,
         shape = RoundedCornerShape(12.dp),
-        colors = CardDefaults.cardColors(containerColor = palette.container)
-    ) {
-        Column(
-            modifier = Modifier
-                .align(Alignment.CenterHorizontally)
-                .padding(0.dp, 16.dp)
-        ) {
-            Text(
-                text = "₹ $value",
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontFamily = CustomFonts.numberFont,
-                    fontSize = 21.sp
-                ),
-                color = palette.onContainer
+        colors = CardDefaults.cardColors(
+            containerColor = combineColors(
+                MaterialTheme.colorScheme.surface,
+                palette.container,
+                angle = 0.5f,
             )
-            Text(
-                text = label,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth(),
-                style = MaterialTheme.typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+        )
+    ) {
+        ConstraintLayout(
+            Modifier
+                .fillMaxSize()
+        ) {
+            val (content, decoration1) = createRefs()
+            Column(
+                modifier = Modifier
+                    .padding(0.dp, 16.dp)
+                    .constrainAs(content) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    }
+            ) {
+                Text(
+                    text = "₹ $value",
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontFamily = CustomFonts.numberFont,
+                        fontSize = 21.sp
+                    ),
+                    color = palette.onContainer
+                )
+                Text(
+                    text = label,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.fillMaxWidth(),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+
+            val image = rememberAsyncImagePainter(R.drawable.shape_soft_star_1)
+            Image(
+                painter = image,
+                contentDescription = "Test Image",
+                modifier = Modifier
+                    .size(64.dp)
+                    .constrainAs(decoration1) {
+                        top.linkTo(parent.top, margin = -10.dp)
+                        start.linkTo(parent.start, margin = -10.dp)
+                    }, alpha = 0.6f, colorFilter = ColorFilter.tint(palette.container)
             )
         }
     }

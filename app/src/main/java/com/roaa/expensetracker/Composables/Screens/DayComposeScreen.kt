@@ -87,11 +87,10 @@ fun DayScreen(
 ) {
 
     Column {
-        if (isBudgetSet)
-            Row(modifier = Modifier.padding(12.dp, 16.dp)) {
-                RestBudgetPill(totalExpenseAmountForDate, budgetAmountPerDay, oldPercent, percent)
-            }
-        TransactionsListCompose(navigationManager, Modifier, true, date,uiViewModel)
+        Row(modifier = Modifier.padding(12.dp, 16.dp)) {
+            RestBudgetPill(totalExpenseAmountForDate, budgetAmountPerDay, oldPercent, percent)
+        }
+        TransactionsListCompose(navigationManager, Modifier, true, date, uiViewModel)
     }
 }
 
@@ -242,6 +241,7 @@ fun DayViewScreen(
 
         HorizontalPager(
             state = pagerState,
+            modifier = Modifier.padding(top = 0.dp)
         ) { page ->
             val currentDay = calculateCurrentPageDay(page, 250, date.toLocalDate())
             val getCurrentBudgetFromRoom by budgetViewModel.getCurrentBudgetWithDetails()
@@ -286,22 +286,19 @@ fun DayViewScreen(
                 // Handle edge case (division by zero or null value)
                 0f  // or use another default value, depending on your requirements
             }
-
-            Log.d(
-                "DayComposeScreen---",
-                "${currentDay.toLong()} :$percent: $oldPercent: ${getCurrentBudget.budgetSummary.budgetAmountPerDay}"
-            )
-            DayScreen(
-                navigationManager,
-                false,
-                currentDay.toLong(),
-                isBudgetSet,
-                getTotalAmountForDate,
-                getCurrentBudget.budgetSummary.budgetAmountPerDay,
-                1 - oldPercent,
-                1 - percent,
-                uiViewModel
-            )
+            Column {
+                DayScreen(
+                    navigationManager,
+                    false,
+                    currentDay.toLong(),
+                    isBudgetSet,
+                    getTotalAmountForDate,
+                    getCurrentBudget.budgetSummary.budgetAmountPerDay,
+                    1 - oldPercent,
+                    1 - percent,
+                    uiViewModel
+                )
+            }
         }
     }
 }
@@ -414,7 +411,7 @@ fun TabItem(
             ) {
                 Text(
                     text = dataSplit[1],
-                    color = if (isSelected) color else MaterialTheme.colorScheme.onSurface.copy(
+                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onPrimaryContainer.copy(
                         alpha = 0.38f
                     ),
                     style = MaterialTheme.typography.bodyMedium,
