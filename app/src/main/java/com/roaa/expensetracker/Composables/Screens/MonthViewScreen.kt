@@ -84,18 +84,24 @@ fun MonthViewScreen(
     val firstDayOfWeek = WeekFields.of(configuration.locale).firstDayOfWeek
     var sendUserToDayView by remember { mutableStateOf(false) }
     val month by uiViewModel.selectedMonth.collectAsState()
-    LaunchedEffect(month) {
+
+    var monthChipFlag by remember { mutableStateOf(true) }
+    var pagerFlag by remember { mutableStateOf(false) }
+
+    LaunchedEffect(month,monthChipFlag) {
         Log.d("month", month)
         Log.d("month", "${calculateEffectivePage(month).toInt()}")
         pagerState.animateScrollToPage(250 + calculateEffectivePage(month).toInt())
+        pagerFlag = true
+        monthChipFlag = false
     }
-    LaunchedEffect(pagerState.settledPage) {
+    LaunchedEffect(pagerState.targetPage,pagerFlag) {
         scope.launch {
-            Log.d("Month Testing12", "${pagerState.currentPage}")
+            Log.d("Month Testing12", "${pagerState.targetPage}")
             uiViewModel.selectedMonth.emit(
                 getMonthFromLocalDate(
                     calculateMonthStartDate(
-                        pagerState.currentPage,
+                        pagerState.targetPage,
                         MAX_PAGES / 2
                     )
                 )
@@ -103,12 +109,14 @@ fun MonthViewScreen(
             Log.d(
                 "Month Testing123", getMonthFromLocalDate(
                             calculateMonthStartDate(
-                                pagerState.currentPage,
+                                pagerState.targetPage,
                                 MAX_PAGES / 2
                             )
                         )
             )
         }
+        pagerFlag = false
+        monthChipFlag = true
     }
     HorizontalPager(
         state = pagerState,
