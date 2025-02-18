@@ -319,7 +319,7 @@ fun NavigationDrawer(
         LaunchedEffect(true) {
             lazyMonthListState.scrollToItem(250)
         }
-        val scrollBehavior = TopAppBarDefaults.exitUntilCollapsedScrollBehavior()
+        val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
         CompositionLocalProvider() {
             if (!showAppBar) {
                 AppNavGraph(rootNavController, navigationManager, uiViewModel)
