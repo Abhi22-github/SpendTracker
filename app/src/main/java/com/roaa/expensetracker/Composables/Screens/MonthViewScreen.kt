@@ -95,13 +95,14 @@ fun MonthViewScreen(
         pagerFlag = true
         monthChipFlag = false
     }
-    LaunchedEffect(pagerState.targetPage,pagerFlag) {
+    Log.d("Month outside", "${pagerState.currentPage}")
+    LaunchedEffect(pagerState.currentPage,pagerFlag) {
         scope.launch {
-            Log.d("Month Testing12", "${pagerState.targetPage}")
+            Log.d("Month Testing12", "${pagerState.currentPage}")
             uiViewModel.selectedMonth.emit(
                 getMonthFromLocalDate(
                     calculateMonthStartDate(
-                        pagerState.targetPage,
+                        pagerState.currentPage,
                         MAX_PAGES / 2
                     )
                 )
@@ -109,7 +110,7 @@ fun MonthViewScreen(
             Log.d(
                 "Month Testing123", getMonthFromLocalDate(
                             calculateMonthStartDate(
-                                pagerState.targetPage,
+                                pagerState.currentPage,
                                 MAX_PAGES / 2
                             )
                         )
@@ -121,6 +122,7 @@ fun MonthViewScreen(
     HorizontalPager(
         state = pagerState,
     ) { page ->
+        Log.d("asdaj","$page")
         val currentMonthStart = calculateMonthStartDate(page, MAX_PAGES / 2)
         val allDays = remember(currentMonthStart) {
             getCalendarForMonthFromDate(currentMonthStart)
@@ -157,6 +159,7 @@ fun MonthViewScreen(
 }
 
 private fun calculateMonthStartDate(page: Int, initialPage: Int): LocalDate {
+    Log.d("Month Debug","$page $initialPage")
     val initialDate = LocalDate.now().withDayOfMonth(1)
     val monthsOffset = (page - initialPage).toLong()
     return initialDate.plusMonths(monthsOffset)
