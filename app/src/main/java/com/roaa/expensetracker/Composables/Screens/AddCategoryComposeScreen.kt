@@ -1,6 +1,7 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
+import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
@@ -71,6 +72,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
+import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.onBackPressed
 import com.roaa.expensetracker.Composables.components.BottomSheetIconPicker
@@ -112,13 +114,27 @@ fun AddCategory(
     var confirmationDialogType by remember { mutableIntStateOf(1) }
     val context = LocalContext.current
 
+    fun handleBackNavigation() {
+        if (navigationManager.navController.previousBackStackEntry != null) {
+            navigationManager.navController.popBackStack() // Pop one screen if there is a back stack
+        } else {
+            navigationManager.navController.navigate(Destinations.ListScreen) {
+                popUpTo(Destinations.ListScreen) { inclusive = true }
+            }
+        }
+    }
+
+    BackHandler() {
+        handleBackNavigation()
+    }
+
     with(sharedTransitionScope) {
         ExpenseTrackerTheme {
             Scaffold(topBar = {
                 TopBar(
                     title = if(categoryId == 0L ) "Add Category" else "Edit Category",
                     showDelete = true,
-                    sendUserBackToPreviousActivity = { },
+                    sendUserBackToPreviousActivity = { handleBackNavigation()},
                     delete = {
                         confirmationDialogType = 1
                         showConfirmationDialog = true
