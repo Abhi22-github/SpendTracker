@@ -1,5 +1,6 @@
 package com.roaa.expensetracker.Utilities
 
+import android.util.Log
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import okhttp3.internal.toLongOrDefault
 import java.text.DecimalFormat
@@ -17,6 +18,7 @@ import java.util.Locale
 
 
 val monthWithYearFormat = DateTimeFormatter.ofPattern("MMM uuuu", Locale.getDefault())
+val fullMonthNameFormat = DateTimeFormatter.ofPattern("MMMM", Locale.getDefault())
 
 fun getFirstAndLastDateOfGivenPeriod(prevMonth: LocalDate, nextMonth: LocalDate): Pair<Long, Long> {
 
@@ -372,6 +374,12 @@ fun getFirstAndLastMonth(month: String) = run {
 
 fun getMonthFromLocalDate(date: LocalDate) = run {
     date.format(monthWithYearFormat)
+}
+
+fun convertToWholeMonthName(monthWithYear:String): String = run{
+    val yearMonth = YearMonth.parse(monthWithYear.trim(), monthWithYearFormat)
+    Log.d("Test123",yearMonth.format(fullMonthNameFormat))
+    yearMonth.format(fullMonthNameFormat)
 }
 
 fun calculateEffectivePage(month: String) = run {

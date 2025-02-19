@@ -80,6 +80,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.roaa.expensetracker.Composables.CustomFonts
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
 import com.roaa.expensetracker.Composables.Navigation.AppNavGraph
 import com.roaa.expensetracker.Composables.Navigation.Destinations
@@ -89,6 +90,7 @@ import com.roaa.expensetracker.Composables.Navigation.navigateToWithSingleTop
 import com.roaa.expensetracker.Composables.Screens.MonthChip
 import com.roaa.expensetracker.Composables.syncTheme
 import com.roaa.expensetracker.R
+import com.roaa.expensetracker.Utilities.convertToWholeMonthName
 import com.roaa.expensetracker.Utilities.currentDay
 import com.roaa.expensetracker.Utilities.currentMonth
 import com.roaa.expensetracker.Utilities.currentYear
@@ -342,8 +344,8 @@ fun NavigationDrawer(
 //                                        Icon(Icons.Filled.CalendarMonth, contentDescription = null)
                                         Spacer(Modifier.width(8.dp))
                                         Text(
-                                            text = selectedMonth,
-                                            style = MaterialTheme.typography.titleMedium
+                                            text = convertToWholeMonthName(selectedMonth),
+                                            style = MaterialTheme.typography.titleLarge.copy(fontFamily = CustomFonts.numberFont)
                                         )
                                         Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
                                     }
