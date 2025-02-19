@@ -22,6 +22,7 @@ import com.roaa.expensetracker.Composables.Screens.DayViewScreen
 import com.roaa.expensetracker.Composables.Screens.MonthViewScreen
 import com.roaa.expensetracker.Composables.Screens.PaymentMethodScreen
 import com.roaa.expensetracker.Composables.Screens.SettingsScreen
+import com.roaa.expensetracker.Composables.Screens.StatisticsScreen
 import com.roaa.expensetracker.Composables.Screens.TransactionDetailsScreen
 import com.roaa.expensetracker.Composables.components.TransactionsListCompose
 import com.roaa.expensetracker.Utilities.toLong
@@ -103,8 +104,11 @@ fun RootNavGraph(
                         {})
                 }
                 composable<Destinations.SettingScreen>() {
-
                     SettingsScreen(rooNavController, navigationManager, {})
+                }
+
+                composable<Destinations.StatisticsScreen>() {
+                    StatisticsScreen(rooNavController, navigationManager)
                 }
             }
             composable<Destinations.DetailsScreen> {
@@ -197,8 +201,10 @@ fun AppNavGraph(
                         {})
                 }
                 composable<Destinations.SettingScreen>() {
-
                     SettingsScreen(rooNavController, navigationManager, {})
+                }
+                composable<Destinations.StatisticsScreen>() {
+                    StatisticsScreen(rooNavController, navigationManager)
                 }
             }
             composable<Destinations.DetailsScreen> {

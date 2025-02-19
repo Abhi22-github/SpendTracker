@@ -10,6 +10,7 @@ sealed class NavRoutes() {
     @Serializable
     data object AppScreen : NavRoutes()
 }
+
 sealed class Destinations(){
 
     @Serializable
@@ -40,6 +41,9 @@ sealed class Destinations(){
 
     @Serializable
     data object MonthScreen : Destinations()
+
+    @Serializable
+    data object StatisticsScreen : Destinations()
 
     @Serializable
     data class DayScreen(val date: Long) : Destinations()
