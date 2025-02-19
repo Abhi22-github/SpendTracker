@@ -59,6 +59,7 @@ import com.roaa.expensetracker.Composables.components.TransactionsListCompose
 import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import com.roaa.expensetracker.Model.emptyBudgetClass
 import com.roaa.expensetracker.Model.emptyBudgetDayClass
+import com.roaa.expensetracker.Utilities.currentMonth
 import com.roaa.expensetracker.Utilities.getPreviousAndNext500Days
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
@@ -85,7 +86,10 @@ fun DayScreen(
     transactionsViewModel: TransactionsViewModel = hiltViewModel(),
     budgetViewModel: BudgetViewModel = hiltViewModel()
 ) {
-
+    val scope = rememberCoroutineScope()
+    LaunchedEffect(true) {
+        scope.launch { uiViewModel.selectedMonth.emit(currentMonth) }
+    }
     Column {
         Row(modifier = Modifier.padding(12.dp, 16.dp)) {
             RestBudgetPill(totalExpenseAmountForDate, budgetAmountPerDay, oldPercent, percent)

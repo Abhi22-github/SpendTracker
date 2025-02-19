@@ -345,7 +345,9 @@ fun NavigationDrawer(
                                         Spacer(Modifier.width(8.dp))
                                         Text(
                                             text = convertToWholeMonthName(selectedMonth),
-                                            style = MaterialTheme.typography.titleLarge.copy(fontFamily = CustomFonts.numberFont)
+                                            style = MaterialTheme.typography.titleLarge.copy(
+                                                fontFamily = CustomFonts.numberFont
+                                            )
                                         )
                                         Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
                                     }
