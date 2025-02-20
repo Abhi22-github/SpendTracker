@@ -367,6 +367,7 @@ fun NavigationDrawer(
                                     }
                                 },
                                 colors = TopAppBarDefaults.topAppBarColors(),
+
                                 actions = {
                                     Card(
                                         modifier = Modifier
