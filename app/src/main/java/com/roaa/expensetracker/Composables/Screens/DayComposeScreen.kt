@@ -16,7 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -42,6 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
@@ -368,24 +368,20 @@ fun TabItem(
 ) {
     val tabRef = remember { mutableStateOf<LayoutCoordinates?>(null) }
 
-    // Measure the tab's position and width
-    LaunchedEffect(isSelected, tabRef.value) {
-//        if (isSelected) {
-//            tabRef.value?.let { coordinates ->
-//                val offset = coordinates.localToWindow(Offset.Zero).x
-//                val width = coordinates.size.width.toFloat()
-//                onTabMeasured(offset, width)
-//            }
-//        }
-    }
     val color by animateColorAsState(MaterialTheme.colorScheme.onPrimary)
     val colorGreen by animateColorAsState(Color.Green)
     val dataSplit = index.split(",")
 
     Box(modifier = Modifier
-        .padding(horizontal = 4.dp)
-        .width(48.dp)
+        .clip(RoundedCornerShape(10.dp))
         .clickable { onClick() }
+        .background(
+            if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
+            RoundedCornerShape(10.dp)
+        )
+        .padding(horizontal = 5.dp, vertical = 5.dp)
+        .width(48.dp)
+
         .onGloballyPositioned { tabRef.value = it }) {
         Column(
             verticalArrangement = Arrangement.Center,
@@ -395,34 +391,28 @@ fun TabItem(
         ) {
             Text(
                 text = dataSplit[0],
-                color = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(
-                    alpha = 0.38f
+                color = MaterialTheme.colorScheme.onSurface.copy(
+                    alpha = 1f
                 ),
-                style = MaterialTheme.typography.bodySmall,
+                style = MaterialTheme.typography.bodySmall.copy(),
                 textAlign = TextAlign.Center,
                 modifier = Modifier.padding(1.dp, 1.dp)
             )
-            Spacer(Modifier.height(2.dp))
+            Spacer(Modifier.height(1.dp))
             Box(
                 Modifier
-                    .background(
-                        if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
-                        RoundedCornerShape(50)
-                    )
-                    .padding(2.dp, 2.dp)
-                    .size(30.dp)
-
+                    .padding(0.dp, 0.dp)
             ) {
                 Text(
                     text = dataSplit[1],
-                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onPrimaryContainer.copy(
-                        alpha = 0.38f
+                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = 1f
                     ),
                     style = MaterialTheme.typography.bodyMedium,
                     textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(0.dp, 2.dp)
+                        .padding(4.dp)
                         .align(Alignment.Center)
                 )
             }
