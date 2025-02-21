@@ -26,8 +26,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -108,25 +110,75 @@ fun DayViewScreen(
     var indicatorOffset by remember { mutableFloatStateOf(0f) }
     var indicatorWidth by remember { mutableFloatStateOf(0f) }
 
-    LaunchedEffect(pagerState.currentPage) {
-        lazyListState.scrollToItem(index = pagerState.settledPage)
-        lazyListState.scrollToItem(pagerState.currentPage)
-        val itemInfo =
-            lazyListState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == pagerState.currentPage }
+//    LaunchedEffect(pagerState.currentPage) {
+//        lazyListState.scrollToItem(index = pagerState.settledPage)
+//        lazyListState.scrollToItem(pagerState.currentPage)
+//        val itemInfo =
+//            lazyListState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == pagerState.currentPage }
+//
+//        if (itemInfo != null) {
+//            Log.d(
+//                "****viewPortEndOffset", lazyListState.layoutInfo.viewportEndOffset.toString()
+//            )
+//            Log.d("****itemInfo.size", itemInfo.size.toString())
+//            var centerOffset = ((itemInfo.size - lazyListState.layoutInfo.viewportEndOffset) / 2)
+//            Log.d("****centerOffset", centerOffset.toString())
+//            lazyListState.scrollToItem(pagerState.currentPage, centerOffset)
+//            // indicatorWidth = itemInfo.size.toFloat() / 2
+//            // itemInfoSize = itemInfo.size
+//            Log.d("****off", itemInfo.offset.toString())
+//        }
+//    }
 
-        if (itemInfo != null) {
-            Log.d(
-                "****viewPortEndOffset", lazyListState.layoutInfo.viewportEndOffset.toString()
-            )
-            Log.d("****itemInfo.size", itemInfo.size.toString())
-            var centerOffset = ((itemInfo.size - lazyListState.layoutInfo.viewportEndOffset) / 2)
-            Log.d("****centerOffset", centerOffset.toString())
-            lazyListState.scrollToItem(pagerState.currentPage, centerOffset)
-            // indicatorWidth = itemInfo.size.toFloat() / 2
-            // itemInfoSize = itemInfo.size
-            Log.d("****off", itemInfo.offset.toString())
+    val visibleItemInfo by remember { derivedStateOf { lazyListState.layoutInfo.visibleItemsInfo } }
+    var isSelected by remember { mutableStateOf(false) }
+
+//    LaunchedEffect(pagerState.currentPage) {
+//        val itemInfo =
+//            lazyListState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == pagerState.currentPage }
+//        if(itemInfo != null){
+//            var centerOffset = ((itemInfo.size - lazyListState.layoutInfo.viewportEndOffset) / 2)
+//            lazyListState.scrollToItem(pagerState.currentPage, centerOffset)
+//        }else{
+//            lazyListState.scrollToItem(index = pagerState.settledPage)
+//            lazyListState.scrollToItem(pagerState.currentPage)
+//        }
+//    }
+
+    var currentIndex by remember { mutableIntStateOf(pagerState.currentPage) }
+
+    LaunchedEffect(pagerState.currentPage) {
+        currentIndex = pagerState.currentPage
+        visibleItemInfo.forEach {
+            Log.d("DayComposeScreen", "VisiblieItem --- ${it.index}")
         }
+        val itemInfo =
+            lazyListState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == currentIndex }
+        val isPresent = visibleItemInfo.drop(1).dropLast(1).any{
+            currentIndex == it.index
+        }
+        if (isPresent) {
+            Log.d("DayComposeScreen", "A")
+        } else {
+            Log.d("DayComposeScreen", "B")
+
+            if (itemInfo != null) {
+                Log.d("DayComposeScreen", "c")
+                var centerOffset =
+                    ((itemInfo.size * (currentIndex - lazyListState.layoutInfo.visibleItemsInfo.last().index)) / 2)
+
+                Log.d("DayComposeScreen", "${lazyListState.layoutInfo.viewportEndOffset} $centerOffset")
+                lazyListState.scrollToItem(currentIndex)
+            }else{
+
+            }
+            lazyListState.scrollToItem(pagerState.currentPage)
+        }
+        Log.d("DayComposeScreen", "Total - $currentIndex -- ")
+
+
     }
+
 
     val scope = rememberCoroutineScope()
     Column {
@@ -143,15 +195,10 @@ fun DayViewScreen(
                 )
             ) {
                 itemsIndexed(tabs) { index, data ->
-                    val isSelected = index == pagerState.currentPage
-                    TabItem(index = data, isSelected = isSelected, onClick = {
+                    TabItem(data = data, index = index, currentIndex = currentIndex, onClick = {
                         coroutineScope.launch {
                             pagerState.animateScrollToPage(index)
-                        }
-                    }, onTabMeasured = { offset, width ->
-                        if (isSelected) {
-                            indicatorOffset = offset
-                            indicatorWidth = width
+                            currentIndex = index
                         }
                     })
                 }
@@ -226,16 +273,17 @@ fun DayViewScreen(
 
 @Composable
 fun TabItem(
-    index: String,
-    isSelected: Boolean,
+    data: String,
+    index: Int,
+    currentIndex: Int,
     onClick: () -> Unit,
-    onTabMeasured: (offset: Float, width: Float) -> Unit
 ) {
     val tabRef = remember { mutableStateOf<LayoutCoordinates?>(null) }
+    val isSelected = index == currentIndex
 
     val color by animateColorAsState(MaterialTheme.colorScheme.onPrimary)
     val colorGreen by animateColorAsState(Color.Green)
-    val dataSplit = index.split(",")
+    val dataSplit = data.split(",")
 
     Box(modifier = Modifier
         .clip(RoundedCornerShape(10.dp))
