@@ -1,5 +1,6 @@
 package com.roaa.expensetracker.Composables.Screens
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
@@ -8,6 +9,7 @@ import androidx.compose.foundation.gestures.snapping.SnapPosition
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -41,6 +43,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -89,6 +92,7 @@ fun DayScreen(
 }
 
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun DayViewScreen(
     navController: NavController,
@@ -149,12 +153,10 @@ fun DayViewScreen(
 
     LaunchedEffect(pagerState.currentPage) {
         currentIndex = pagerState.currentPage
-        visibleItemInfo.forEach {
-            Log.d("DayComposeScreen", "VisiblieItem --- ${it.index}")
-        }
+
         val itemInfo =
             lazyListState.layoutInfo.visibleItemsInfo.firstOrNull { it.index == currentIndex }
-        val isPresent = visibleItemInfo.drop(1).dropLast(1).any{
+        val isPresent = visibleItemInfo.drop(1).dropLast(1).any {
             currentIndex == it.index
         }
         if (isPresent) {
@@ -164,28 +166,23 @@ fun DayViewScreen(
 
             if (itemInfo != null) {
                 Log.d("DayComposeScreen", "c")
-                var centerOffset =
-                    ((itemInfo.size * (currentIndex - lazyListState.layoutInfo.visibleItemsInfo.last().index)) / 2)
-
-                Log.d("DayComposeScreen", "${lazyListState.layoutInfo.viewportEndOffset} $centerOffset")
-                lazyListState.scrollToItem(currentIndex)
-            }else{
-
+                lazyListState.scrollToItem(pagerState.currentPage-2)
+            } else {
+                lazyListState.scrollToItem(pagerState.currentPage )
             }
-            lazyListState.scrollToItem(pagerState.currentPage)
+
         }
         Log.d("DayComposeScreen", "Total - $currentIndex -- ")
-
-
     }
+
+    LaunchedEffect(Unit) { lazyListState.scrollToItem(pagerState.currentPage - 4) }
 
 
     val scope = rememberCoroutineScope()
     Column {
 
-        Box(
+        BoxWithConstraints(
             modifier = Modifier.fillMaxWidth()
-
         ) {
             LazyRow(
                 state = lazyListState,
@@ -195,12 +192,17 @@ fun DayViewScreen(
                 )
             ) {
                 itemsIndexed(tabs) { index, data ->
-                    TabItem(data = data, index = index, currentIndex = currentIndex, onClick = {
-                        coroutineScope.launch {
-                            pagerState.animateScrollToPage(index)
-                            currentIndex = index
-                        }
-                    })
+                    TabItem(
+                        data = data,
+                        index = index,
+                        currentIndex = currentIndex,
+                        maxWidth / 9,
+                        onClick = {
+                            coroutineScope.launch {
+                                pagerState.animateScrollToPage(index)
+                                currentIndex = index
+                            }
+                        })
                 }
             }
         }
@@ -276,6 +278,7 @@ fun TabItem(
     data: String,
     index: Int,
     currentIndex: Int,
+    tabSize: Dp,
     onClick: () -> Unit,
 ) {
     val tabRef = remember { mutableStateOf<LayoutCoordinates?>(null) }
@@ -292,8 +295,8 @@ fun TabItem(
             if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
             RoundedCornerShape(10.dp)
         )
-        .padding(horizontal = 5.dp, vertical = 5.dp)
-        .width(48.dp)
+        .padding(vertical = 5.dp)
+        .width(tabSize)
 
         .onGloballyPositioned { tabRef.value = it }) {
         Column(
@@ -309,7 +312,7 @@ fun TabItem(
                 ),
                 style = MaterialTheme.typography.bodySmall.copy(),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(1.dp, 1.dp)
+                modifier = Modifier.padding(vertical = 1.dp)
             )
             Spacer(Modifier.height(1.dp))
             Box(
