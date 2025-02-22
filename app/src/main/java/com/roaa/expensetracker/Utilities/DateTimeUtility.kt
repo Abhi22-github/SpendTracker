@@ -1,6 +1,5 @@
 package com.roaa.expensetracker.Utilities
 
-import android.util.Log
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import okhttp3.internal.toLongOrDefault
 import java.text.DecimalFormat
@@ -18,6 +17,7 @@ import java.util.Locale
 
 
 val monthWithYearFormat = DateTimeFormatter.ofPattern("MMM uuuu", Locale.getDefault())
+val fullMonthNameWithYearFormat = DateTimeFormatter.ofPattern("MMMM uuuu", Locale.getDefault())
 val fullMonthNameFormat = DateTimeFormatter.ofPattern("MMMM", Locale.getDefault())
 
 fun getFirstAndLastDateOfGivenPeriod(prevMonth: LocalDate, nextMonth: LocalDate): Pair<Long, Long> {
@@ -376,10 +376,31 @@ fun getMonthFromLocalDate(date: LocalDate) = run {
     date.format(monthWithYearFormat)
 }
 
-fun convertToWholeMonthName(monthWithYear:String): String = run{
+fun convertToWholeMonthName(monthWithYear: String): String = run {
     val yearMonth = YearMonth.parse(monthWithYear.trim(), monthWithYearFormat)
-    Log.d("Test123",yearMonth.format(fullMonthNameFormat))
     yearMonth.format(fullMonthNameFormat)
+}
+
+fun convertMonthShortToFullName(monthWithYear: String) = run {
+    val yearMonth = YearMonth.parse(monthWithYear.trim(), monthWithYearFormat)
+    yearMonth.format(fullMonthNameWithYearFormat)
+}
+
+fun getAllDatesWithDayNameForMonth(monthYear: String): List<String> {
+    // Parse the input string (e.g., "Feb 2024") into a YearMonth object
+    val formatter = DateTimeFormatter.ofPattern("MMM yyyy")
+    val yearMonth = YearMonth.parse(monthYear, formatter)
+
+    // Generate all dates in the month with day names
+    return (1..yearMonth.lengthOfMonth()).map { day ->
+        val date = yearMonth.atDay(day)
+        val dayOfMonth = date.dayOfMonth // Get the day of the month (e.g., 1, 2, 3)
+        val dayName = date.dayOfWeek.getDisplayName(
+            TextStyle.SHORT,
+            Locale.getDefault()
+        ) // Full day name (e.g., "Thursday")
+        "$dayOfMonth $dayName" // Format: "01 Thursday"
+    }
 }
 
 fun calculateEffectivePage(month: String) = run {

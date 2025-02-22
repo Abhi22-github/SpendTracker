@@ -7,6 +7,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -84,6 +85,9 @@ import com.roaa.expensetracker.R
 import com.roaa.expensetracker.StatisticsComponent.BarChart
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.LongMillisToNoralLong
+import com.roaa.expensetracker.Utilities.convertMonthShortToFullName
+import com.roaa.expensetracker.Utilities.currentYear
+import com.roaa.expensetracker.Utilities.getAllDatesWithDayNameForMonth
 import com.roaa.expensetracker.Utilities.getFirstAndLastMonth
 import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toDisplayDate
@@ -107,6 +111,27 @@ fun TransactionsListCompose(
     preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     var showAddBottomSheet by remember { mutableStateOf(false) }
+    val currentSelectedMonth by uiViewModel.selectedMonth.collectAsState()
+    val monthName =
+        convertMonthShortToFullName(currentSelectedMonth)
+    var selectedMonthString by remember { mutableStateOf(monthName) }
+    var currentMonthAllDayAndDatesList by remember {
+        mutableStateOf(
+            getAllDatesWithDayNameForMonth(
+                currentSelectedMonth
+            )
+        )
+    }
+
+    LaunchedEffect(currentSelectedMonth) {
+        if (monthName.split(" ").get(1) == currentYear) {
+            selectedMonthString = monthName.split(" ").get(0)
+        } else {
+            selectedMonthString = monthName
+        }
+        currentMonthAllDayAndDatesList = getAllDatesWithDayNameForMonth(currentSelectedMonth)
+    }
+
     var bottomSheet by remember { mutableStateOf(false) }
     val showNewLayouts by preferencesViewModel.showForecastBar.collectAsState(false)
     Scaffold(floatingActionButton = {
@@ -192,7 +217,9 @@ fun TransactionsListCompose(
                                         HomeStatCardNew(
                                             Modifier,
                                             parseAmount(totalIncomeForMonth.totalAmount),
-                                            parseAmount(totalExpenseForMonth.totalAmount)
+                                            parseAmount(totalExpenseForMonth.totalAmount),
+                                            selectedMonthString,
+                                            currentMonthAllDayAndDatesList
                                         )
 //
                                     }
@@ -377,11 +404,14 @@ fun SingleTransaction(
 }
 
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun HomeStatCardNew(
     modifier: Modifier = Modifier,
     income: String,
-    expense: String
+    expense: String,
+    currentSelectedMonth: String,
+    currentMonthAllDayAndDatesList: List<String>
 ) {
     val palette =
         toPalette(orange)
@@ -439,7 +469,7 @@ fun HomeStatCardNew(
                         Spacer(Modifier.width(12.dp))
                         Column(Modifier.weight(0.8f)) {
                             Text(
-                                text = "February",
+                                text = currentSelectedMonth,
                                 textAlign = TextAlign.Start,
                                 modifier = Modifier.fillMaxWidth(),
                                 style = typography.titleMedium,
@@ -466,17 +496,24 @@ fun HomeStatCardNew(
                         Spacer(Modifier.width(24.dp))
                     }
                 }
+                AnimatedVisibility(mainContentVisibility) {
+                    Column(
+                        Modifier
+                            .height(240.dp)
+                            .padding(vertical = 16.dp)
+                            .fillMaxWidth()
+                    ) {
+                        BoxWithConstraints {
+                            BarChart(Modifier.fillMaxSize(), maxWidth, maxHeight,currentMonthAllDayAndDatesList,palette)
+                        }
+                    }
+                }
                 HorizontalDivider(
                     thickness = 0.7.dp,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
                     modifier = Modifier
                         .padding(horizontal = 12.dp)
                 )
-                AnimatedVisibility(mainContentVisibility) {
-                    Column(Modifier.height(240.dp)) {
-                        BarChart(Modifier.fillMaxSize())
-                    }
-                }
                 Row(
                     Modifier
                 ) {
@@ -519,7 +556,6 @@ fun HomeStatCardNew(
         }
     }
 }
-
 
 
 @Composable
