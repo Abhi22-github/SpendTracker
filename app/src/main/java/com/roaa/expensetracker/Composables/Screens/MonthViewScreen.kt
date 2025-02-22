@@ -377,7 +377,7 @@ fun DayCell(
                     Text(
                         text = "-₹${parseAmount(it.first)}",
                         color = colorPalletOrange.main,
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.labelSmall.copy(fontFamily = CustomFonts.numberFont),
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -401,7 +401,7 @@ fun DayCell(
                     Text(
                         text = "+₹${parseAmount(it.second)}",
                         color = colorPalletGreen.main,
-                        style = MaterialTheme.typography.labelSmall,
+                        style = MaterialTheme.typography.labelSmall.copy(fontFamily = CustomFonts.numberFont),
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .padding(3.dp, 2.dp)
