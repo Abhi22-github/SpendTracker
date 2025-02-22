@@ -22,12 +22,15 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -43,10 +46,14 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.roaa.expensetracker.Composables.CustomFonts
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.greenColor
@@ -88,7 +95,7 @@ fun MonthViewScreen(
     var monthChipFlag by remember { mutableStateOf(true) }
     var pagerFlag by remember { mutableStateOf(false) }
 
-    LaunchedEffect(month,monthChipFlag) {
+    LaunchedEffect(month, monthChipFlag) {
         Log.d("month", month)
         Log.d("month", "${calculateEffectivePage(month).toInt()}")
         pagerState.animateScrollToPage(250 + calculateEffectivePage(month).toInt())
@@ -96,9 +103,8 @@ fun MonthViewScreen(
         monthChipFlag = false
     }
     Log.d("Month outside", "${pagerState.currentPage}")
-    LaunchedEffect(pagerState.targetPage,pagerFlag) {
+    LaunchedEffect(pagerState.targetPage, pagerFlag) {
         scope.launch {
-            Log.d("Month Testing12", "${pagerState.targetPage}")
             uiViewModel.selectedMonth.emit(
                 getMonthFromLocalDate(
                     calculateMonthStartDate(
@@ -107,14 +113,14 @@ fun MonthViewScreen(
                     )
                 )
             )
-            Log.d(
-                "Month Testing123", getMonthFromLocalDate(
-                            calculateMonthStartDate(
-                                pagerState.targetPage,
-                                MAX_PAGES / 2
-                            )
-                        )
-            )
+//            Log.d(
+//                "Month Testing123", getMonthFromLocalDate(
+//                            calculateMonthStartDate(
+//                                pagerState.targetPage,
+//                                MAX_PAGES / 2
+//                            )
+//                        )
+//            )
         }
         pagerFlag = false
         monthChipFlag = true
@@ -122,30 +128,57 @@ fun MonthViewScreen(
     HorizontalPager(
         state = pagerState,
     ) { page ->
-        Log.d("asdaj","$page")
+
         val currentMonthStart = calculateMonthStartDate(page, MAX_PAGES / 2)
         val allDays = remember(currentMonthStart) {
             getCalendarForMonthFromDate(currentMonthStart)
         }
-
         val totalExpenseList by transactionViewModel.getListOfTotalAmountPerDayForRangeForCompose(
             allDays[0].toLong(),
             allDays[41].toLong()
         ).collectAsState(listOf())
+        var totalExpense by remember { mutableFloatStateOf(0f) }
+        var totalIncome by remember { mutableFloatStateOf(0f) }
+        LaunchedEffect(totalExpenseList) {
+            totalExpenseList.forEach {
+                totalExpense += it.totalExpense
+                totalIncome += it.totalIncome
+            }
+        }
         val totalValuesPerDayForMonthMap = remember(totalExpenseList) {
             convertTotalExpenseIncomeClassToMap(totalExpenseList)
         }
-        MonthView(
-            monthStart = currentMonthStart,
-            selectedDate = selectedDate,
-            onDateSelected = {
-                selectedDate = it
-                sendUserToDayView = !sendUserToDayView
-            },
-            firstDayOfWeek = firstDayOfWeek,
-            allDays,
-            totalValuesPerDayForMonthMap
-        )
+        val color = toPalette(orange)
+        Column {
+            HorizontalDivider(
+                thickness = 0.7.dp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                modifier = Modifier
+                    .padding()
+            )
+            Row(Modifier) {
+                MonthStatCard(Modifier.weight(1f), parseAmount(totalExpense), "Total Expense")
+                MonthStatCard(Modifier.weight(1f), parseAmount(totalIncome), "Total Income")
+            }
+            HorizontalDivider(
+                thickness = 0.7.dp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                modifier = Modifier
+                    .padding(bottom = 8.dp)
+            )
+            MonthView(
+                modifier = Modifier,
+                monthStart = currentMonthStart,
+                selectedDate = selectedDate,
+                onDateSelected = {
+                    selectedDate = it
+                    sendUserToDayView = !sendUserToDayView
+                },
+                firstDayOfWeek = firstDayOfWeek,
+                allDays,
+                totalValuesPerDayForMonthMap
+            )
+        }
     }
     LaunchedEffect(sendUserToDayView, selectedDate) {
         if (sendUserToDayView && selectedDate != null) {
@@ -159,7 +192,7 @@ fun MonthViewScreen(
 }
 
 private fun calculateMonthStartDate(page: Int, initialPage: Int): LocalDate {
-    Log.d("Month Debug","$page $initialPage")
+    Log.d("Month Debug", "$page $initialPage")
     val initialDate = LocalDate.now().withDayOfMonth(1)
     val monthsOffset = (page - initialPage).toLong()
     return initialDate.plusMonths(monthsOffset)
@@ -168,6 +201,7 @@ private fun calculateMonthStartDate(page: Int, initialPage: Int): LocalDate {
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun MonthView(
+    modifier: Modifier,
     monthStart: LocalDate,
     selectedDate: LocalDate?,
     onDateSelected: (LocalDate) -> Unit,
@@ -175,7 +209,7 @@ fun MonthView(
     allDays: List<LocalDate>,
     totalValuesPerDayForMonthMap: HashMap<Long, Pair<Float, Float>>,
 ) {
-    Column(modifier = Modifier) {
+    Column(modifier = modifier) {
         // Month header
 //        Text(
 //            text = monthStart.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
@@ -378,9 +412,56 @@ fun DayCell(
                 }
 
             }
-
-
             // Add event indicators/dots here if needed
         }
     }
 }
+
+@Composable
+fun MonthStatCard(
+    modifier: Modifier = Modifier,
+    value: String,
+    label: String,
+) {
+
+    ConstraintLayout(
+        modifier = modifier
+    ) {
+        val (content, decoration1) = createRefs()
+        Column(
+            modifier = Modifier
+                .padding(0.dp, 8.dp)
+                .constrainAs(content) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }
+        ) {
+            Text(
+                text = "₹ $value",
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+                style = typography.bodyMedium.copy(
+                    fontFamily = CustomFonts.numberFont,
+                    fontSize = 18.sp
+                ),
+            )
+            Text(
+                text = label,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth(),
+                style = typography.labelMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+        }
+    }
+
+}
+
+@Preview
+@Composable
+private fun MonthStatCardPreview() {
+    MonthStatCard(Modifier, "3230", "Total Expense")
+}
+

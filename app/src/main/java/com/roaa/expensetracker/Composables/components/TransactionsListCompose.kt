@@ -86,6 +86,7 @@ import com.roaa.expensetracker.Model.emptyTransactionClass
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.StatisticsComponent.BarChart
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
+import com.roaa.expensetracker.Utilities.Constants.INCOME
 import com.roaa.expensetracker.Utilities.LongMillisToNoralLong
 import com.roaa.expensetracker.Utilities.convertMonthShortToFullName
 import com.roaa.expensetracker.Utilities.createListForBarGraph
@@ -560,7 +561,7 @@ fun HomeStatCardNew(
                 Row(
                     Modifier
                 ) {
-                    HomeStatCardSingleNew(Modifier.weight(1f), expense, "Expense")
+                    HomeStatCardSingleNew(Modifier.weight(1f), expense, EXPENSE)
 //                VerticalDivider(
 //                    thickness = 5.dp,
 //                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
@@ -569,7 +570,7 @@ fun HomeStatCardNew(
 //                        .weight(0.2f)
 //                        .padding(horizontal = 12.dp)
 //                )
-                    HomeStatCardSingleNew(Modifier.weight(1f), income, "Income")
+                    HomeStatCardSingleNew(Modifier.weight(1f), income, INCOME)
                 }
             }
 
