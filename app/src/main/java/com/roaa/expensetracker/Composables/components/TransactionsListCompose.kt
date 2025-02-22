@@ -81,6 +81,7 @@ import com.roaa.expensetracker.Model.emptyBank
 import com.roaa.expensetracker.Model.emptyCategoryClass
 import com.roaa.expensetracker.Model.emptyTransactionClass
 import com.roaa.expensetracker.R
+import com.roaa.expensetracker.StatisticsComponent.BarChart
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.LongMillisToNoralLong
 import com.roaa.expensetracker.Utilities.getFirstAndLastMonth
@@ -91,6 +92,7 @@ import com.roaa.expensetracker.ViewModels.PreferencesViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import com.roaa.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.launch
+
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
@@ -389,6 +391,7 @@ fun HomeStatCardNew(
         angle = 0.7f,
     )
     var mainContentVisibility by remember { mutableStateOf(false) }
+
     Card(
         modifier = modifier.padding(horizontal = 12.dp),
         shape = RoundedCornerShape(25.dp),
@@ -439,14 +442,14 @@ fun HomeStatCardNew(
                                 text = "February",
                                 textAlign = TextAlign.Start,
                                 modifier = Modifier.fillMaxWidth(),
-                                style = MaterialTheme.typography.titleMedium,
+                                style = typography.titleMedium,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
                                 text = "234 transactions",
                                 textAlign = TextAlign.Start,
                                 modifier = Modifier.fillMaxWidth(),
-                                style = MaterialTheme.typography.labelLarge,
+                                style = typography.labelLarge,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
                         }
@@ -471,7 +474,7 @@ fun HomeStatCardNew(
                 )
                 AnimatedVisibility(mainContentVisibility) {
                     Column(Modifier.height(240.dp)) {
-
+                        BarChart(Modifier.fillMaxSize())
                     }
                 }
                 Row(
@@ -517,6 +520,8 @@ fun HomeStatCardNew(
     }
 }
 
+
+
 @Composable
 fun HomeStatCardSingleNew(
     modifier: Modifier = Modifier,
@@ -545,7 +550,7 @@ fun HomeStatCardSingleNew(
                     text = "₹ $value",
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.bodySmall.copy(
+                    style = typography.bodySmall.copy(
                         fontFamily = CustomFonts.numberFont,
                         fontSize = 21.sp
                     ),
@@ -555,7 +560,7 @@ fun HomeStatCardSingleNew(
                     text = label,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.labelLarge,
+                    style = typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
@@ -600,7 +605,7 @@ fun HomeStatCard(
                     text = "₹ $value",
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.bodyMedium.copy(
+                    style = typography.bodyMedium.copy(
                         fontFamily = CustomFonts.numberFont,
                         fontSize = 21.sp
                     ),
@@ -610,7 +615,7 @@ fun HomeStatCard(
                     text = label,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.labelLarge,
+                    style = typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
             }
