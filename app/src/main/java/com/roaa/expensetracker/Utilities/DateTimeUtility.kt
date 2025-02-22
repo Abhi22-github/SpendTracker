@@ -386,7 +386,7 @@ fun convertMonthShortToFullName(monthWithYear: String) = run {
     yearMonth.format(fullMonthNameWithYearFormat)
 }
 
-fun getAllDatesWithDayNameForMonth(monthYear: String): List<String> {
+fun getAllDatesWithDayNameForMonth(monthYear: String): List<Pair<String, Long>> {
     // Parse the input string (e.g., "Feb 2024") into a YearMonth object
     val formatter = DateTimeFormatter.ofPattern("MMM yyyy")
     val yearMonth = YearMonth.parse(monthYear, formatter)
@@ -399,7 +399,7 @@ fun getAllDatesWithDayNameForMonth(monthYear: String): List<String> {
             TextStyle.SHORT,
             Locale.getDefault()
         ) // Full day name (e.g., "Thursday")
-        "$dayOfMonth $dayName" // Format: "01 Thursday"
+        Pair("$dayOfMonth $dayName", date.toLong()) // Format: "01 Thursday"
     }
 }
 

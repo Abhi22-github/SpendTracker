@@ -78,14 +78,17 @@ import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Converters.TransactionConverter
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Model.TransactionClass
+import com.roaa.expensetracker.Model.UiDateModels.BarChartExpenseModel
 import com.roaa.expensetracker.Model.emptyBank
 import com.roaa.expensetracker.Model.emptyCategoryClass
+import com.roaa.expensetracker.Model.emptyTotalExpenseIncomeClass
 import com.roaa.expensetracker.Model.emptyTransactionClass
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.StatisticsComponent.BarChart
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.LongMillisToNoralLong
 import com.roaa.expensetracker.Utilities.convertMonthShortToFullName
+import com.roaa.expensetracker.Utilities.createListForBarGraph
 import com.roaa.expensetracker.Utilities.currentYear
 import com.roaa.expensetracker.Utilities.getAllDatesWithDayNameForMonth
 import com.roaa.expensetracker.Utilities.getFirstAndLastMonth
@@ -107,7 +110,7 @@ fun TransactionsListCompose(
     showSingleDateTransactions: Boolean,
     date: Long,
     uiViewModel: UiViewModel,
-    viewModel: TransactionsViewModel = hiltViewModel(),
+    transactionViewModel: TransactionsViewModel = hiltViewModel(),
     preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     var showAddBottomSheet by remember { mutableStateOf(false) }
@@ -115,13 +118,22 @@ fun TransactionsListCompose(
     val monthName =
         convertMonthShortToFullName(currentSelectedMonth)
     var selectedMonthString by remember { mutableStateOf(monthName) }
-    var currentMonthAllDayAndDatesList by remember {
-        mutableStateOf(
+
+    var firstAndLastDates = getFirstAndLastMonth(currentSelectedMonth)
+    val totalAmountList by transactionViewModel.getListOfTotalAmountPerDayForRangeForCompose(
+        firstAndLastDates.first,
+        firstAndLastDates.second
+    ).collectAsState(listOf(emptyTotalExpenseIncomeClass))
+
+    val totalAmountMap = totalAmountList.associateBy { it.date }
+
+    var currentMonthAllDayAndDatesListAndMaxValue =
+        createListForBarGraph(
             getAllDatesWithDayNameForMonth(
                 currentSelectedMonth
-            )
+            ),
+            totalAmountMap
         )
-    }
 
     LaunchedEffect(currentSelectedMonth) {
         if (monthName.split(" ").get(1) == currentYear) {
@@ -129,7 +141,12 @@ fun TransactionsListCompose(
         } else {
             selectedMonthString = monthName
         }
-        currentMonthAllDayAndDatesList = getAllDatesWithDayNameForMonth(currentSelectedMonth)
+        currentMonthAllDayAndDatesListAndMaxValue = createListForBarGraph(
+            getAllDatesWithDayNameForMonth(
+                currentSelectedMonth
+            ),
+            totalAmountMap
+        )
     }
 
     var bottomSheet by remember { mutableStateOf(false) }
@@ -165,21 +182,21 @@ fun TransactionsListCompose(
 
         LaunchedEffect(selectedMonth) {
             val (firstDate, lastDate) = getFirstAndLastMonth(selectedMonth)
-            viewModel.getTotalExpenseForRange(firstDate, lastDate)
-            viewModel.getTotalIncomeForRange(firstDate, lastDate)
+            transactionViewModel.getTotalExpenseForRange(firstDate, lastDate)
+            transactionViewModel.getTotalIncomeForRange(firstDate, lastDate)
         }
 
         Column {
             if (!showSingleDateTransactions) {
                 HorizontalPager(state = pagerState, userScrollEnabled = false) {
                     val (firstDate, lastDate) = getFirstAndLastMonth(selectedMonth)
-                    val transactionListOfMonth by viewModel.getTotalTransactionForMonth(
+                    val transactionListOfMonth by transactionViewModel.getTotalTransactionForMonth(
                         firstDate,
                         lastDate
                     ).collectAsState(emptyList())
 
-                    val totalExpenseForMonth by viewModel.getTotalExpenseAmountForRangeFlow.collectAsState()
-                    val totalIncomeForMonth by viewModel.getTotalIncomeAmountForRangeFlow.collectAsState()
+                    val totalExpenseForMonth by transactionViewModel.getTotalExpenseAmountForRangeFlow.collectAsState()
+                    val totalIncomeForMonth by transactionViewModel.getTotalIncomeAmountForRangeFlow.collectAsState()
 
                     val transactionsMap =
                         transactionListOfMonth.sortedByDescending { it.transaction.date }
@@ -218,8 +235,9 @@ fun TransactionsListCompose(
                                             Modifier,
                                             parseAmount(totalIncomeForMonth.totalAmount),
                                             parseAmount(totalExpenseForMonth.totalAmount),
+                                            currentSelectedMonth,
                                             selectedMonthString,
-                                            currentMonthAllDayAndDatesList
+                                            currentMonthAllDayAndDatesListAndMaxValue,
                                         )
 //
                                     }
@@ -259,8 +277,8 @@ fun TransactionsListCompose(
                     }
                 }
             } else {
-                viewModel.getAllTransactionsForDate(date)
-                val transactionList by viewModel.getAllTransactionsForDateCompose(
+                transactionViewModel.getAllTransactionsForDate(date)
+                val transactionList by transactionViewModel.getAllTransactionsForDateCompose(
                     date
                 ).collectAsState(listOf())
                 val lazyList = rememberLazyListState()
@@ -411,7 +429,8 @@ fun HomeStatCardNew(
     income: String,
     expense: String,
     currentSelectedMonth: String,
-    currentMonthAllDayAndDatesList: List<String>
+    selectedMonthShort:String,
+    currentMonthAllDayAndDatesListAndMaxValue: Pair<List<BarChartExpenseModel>, Float>
 ) {
     val palette =
         toPalette(orange)
@@ -421,6 +440,8 @@ fun HomeStatCardNew(
         angle = 0.7f,
     )
     var mainContentVisibility by remember { mutableStateOf(false) }
+    val currentMontAllDayList = currentMonthAllDayAndDatesListAndMaxValue.first
+    val maxExpense = currentMonthAllDayAndDatesListAndMaxValue.second
 
     Card(
         modifier = modifier.padding(horizontal = 12.dp),
@@ -469,7 +490,7 @@ fun HomeStatCardNew(
                         Spacer(Modifier.width(12.dp))
                         Column(Modifier.weight(0.8f)) {
                             Text(
-                                text = currentSelectedMonth,
+                                text = selectedMonthShort,
                                 textAlign = TextAlign.Start,
                                 modifier = Modifier.fillMaxWidth(),
                                 style = typography.titleMedium,
@@ -504,7 +525,15 @@ fun HomeStatCardNew(
                             .fillMaxWidth()
                     ) {
                         BoxWithConstraints {
-                            BarChart(Modifier.fillMaxSize(), maxWidth, maxHeight,currentMonthAllDayAndDatesList,palette)
+                            BarChart(
+                                Modifier.fillMaxSize(),
+                                currentSelectedMonth,
+                                maxWidth,
+                                maxHeight,
+                                currentMontAllDayList,
+                                maxExpense,
+                                palette
+                            )
                         }
                     }
                 }
