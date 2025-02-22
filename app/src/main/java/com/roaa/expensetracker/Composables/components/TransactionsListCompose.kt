@@ -429,7 +429,7 @@ fun HomeStatCardNew(
     income: String,
     expense: String,
     currentSelectedMonth: String,
-    selectedMonthShort:String,
+    selectedMonthShort: String,
     currentMonthAllDayAndDatesListAndMaxValue: Pair<List<BarChartExpenseModel>, Float>
 ) {
     val palette =
@@ -520,10 +520,24 @@ fun HomeStatCardNew(
                 AnimatedVisibility(mainContentVisibility) {
                     Column(
                         Modifier
-                            .height(240.dp)
-                            .padding(vertical = 16.dp)
+                            .height(260.dp)
+                            .padding(bottom = 16.dp)
                             .fillMaxWidth()
                     ) {
+                        HorizontalDivider(
+                            thickness = 0.7.dp,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp)
+                        )
+//                        Spacer(Modifier.height(8.dp))
+//                        Text(
+//                            text = "Spending per day",
+//                            style = MaterialTheme.typography.labelLarge,
+//                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+//                            modifier = Modifier.padding(start = 16.dp)
+//                        )
+                        Spacer(Modifier.height(16.dp))
                         BoxWithConstraints {
                             BarChart(
                                 Modifier.fillMaxSize(),
