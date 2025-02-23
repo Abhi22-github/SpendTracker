@@ -96,7 +96,6 @@ fun SingleBar(
             .fillMaxHeight()
             .clickable {
                 showTooltip = !showTooltip
-
                 Toast.makeText(
                     context,
                     barChartExpenseModel.expenseAmount.toString(),
@@ -116,7 +115,7 @@ fun SingleBar(
                 .padding(horizontal = 5.dp)
                 .background(
                     if (isDataPresent) palette.main else palette.main.copy(alpha = 0.05f),
-                    RoundedCornerShape(12.dp)
+                    RoundedCornerShape(25.dp)
                 )
                 .constrainAs(bar) {
                     bottom.linkTo(text.top)
