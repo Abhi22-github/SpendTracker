@@ -19,6 +19,10 @@ import java.util.Locale
 val monthWithYearFormat = DateTimeFormatter.ofPattern("MMM uuuu", Locale.getDefault())
 val fullMonthNameWithYearFormat = DateTimeFormatter.ofPattern("MMMM uuuu", Locale.getDefault())
 val fullMonthNameFormat = DateTimeFormatter.ofPattern("MMMM", Locale.getDefault())
+val yearMonthDateLongFormat = DateTimeFormatter.ofPattern("yyyyMMdd", Locale.getDefault())
+val showDateFormat = DateTimeFormatter.ofPattern("dd MMM,yyyy",Locale.getDefault())
+val onlyDayName = DateTimeFormatter.ofPattern("EEE",Locale.getDefault())
+val only2LetterDate = DateTimeFormatter.ofPattern("dd",Locale.getDefault())
 
 fun getFirstAndLastDateOfGivenPeriod(prevMonth: LocalDate, nextMonth: LocalDate): Pair<Long, Long> {
 
@@ -26,18 +30,16 @@ fun getFirstAndLastDateOfGivenPeriod(prevMonth: LocalDate, nextMonth: LocalDate)
 
     val lastDate = nextMonth.withDayOfMonth(nextMonth.lengthOfMonth())
 
-    val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
-    return Pair(firstDate.format(formatter).toLong(), lastDate.format(formatter).toLong())
+    return Pair(firstDate.format(yearMonthDateLongFormat).toLong(), lastDate.format(yearMonthDateLongFormat).toLong())
 }
 
 fun LocalDate.toLong(): Long {
-    return this.format(DateTimeFormatter.ofPattern("yyyyMMdd")).toLong()
+    return this.format(yearMonthDateLongFormat).toLong()
 }
 
 fun Long.toLocalDate(): LocalDate {
     val dateString = this.toString()
-    val formatter = DateTimeFormatter.ofPattern("yyyyMMdd")
-    return LocalDate.parse(dateString, formatter)
+    return LocalDate.parse(dateString, yearMonthDateLongFormat)
 }
 
 
@@ -46,7 +48,7 @@ fun LocalDate.toDisplayStringForMonth(): String {
 }
 
 fun LocalDate.toDisplayStringForMonthWithYear(): String {
-    return this.format(DateTimeFormatter.ofPattern("dd MMM,yyyy")).toString()
+    return this.format(showDateFormat).toString()
 }
 
 fun parseAmount(amount: Float): String {
@@ -137,21 +139,18 @@ fun getPreviousAndNext500Months(date: LocalDate): List<String> {
 
 fun getPreviousAndNext10Days(date: LocalDate): List<String> {
     val allDates = mutableListOf<String>()
-    val dayFormatter = DateTimeFormatter.ofPattern("EEE")
-    val DateFormatter = DateTimeFormatter.ofPattern("dd")
-
     for (i in 5 downTo 1) {
         val previousDate = date.minusDays(i.toLong())  // Subtract days for previous dates
         val formattedPrevDate =
-            "${previousDate.format(dayFormatter)},${previousDate.format(DateFormatter)}"
+            "${previousDate.format(onlyDayName)},${previousDate.format(only2LetterDate)}"
         allDates.add(formattedPrevDate)
     }
 
-    allDates.add("${date.format(dayFormatter)},${date.format(DateFormatter)}")
+    allDates.add("${date.format(onlyDayName)},${date.format(only2LetterDate)}")
 
     for (i in 1..5) {
         val nextDate = date.plusDays(i.toLong())  // Add days for next dates
-        val formattedNextDate = "${nextDate.format(dayFormatter)},${nextDate.format(DateFormatter)}"
+        val formattedNextDate = "${nextDate.format(onlyDayName)},${nextDate.format(only2LetterDate)}"
         allDates.add(formattedNextDate)
     }
     return allDates
@@ -159,21 +158,18 @@ fun getPreviousAndNext10Days(date: LocalDate): List<String> {
 
 fun getPreviousAndNext500Days(date: LocalDate): List<String> {
     val allDates = mutableListOf<String>()
-    val dayFormatter = DateTimeFormatter.ofPattern("EEE")
-    val DateFormatter = DateTimeFormatter.ofPattern("dd")
-
     for (i in 250 downTo 1) {
         val previousDate = date.minusDays(i.toLong())  // Subtract days for previous dates
         val formattedPrevDate =
-            "${previousDate.format(dayFormatter)},${previousDate.format(DateFormatter)}"
+            "${previousDate.format(onlyDayName)},${previousDate.format(only2LetterDate)}"
         allDates.add(formattedPrevDate)
     }
 
-    allDates.add("${date.format(dayFormatter)},${date.format(DateFormatter)}")
+    allDates.add("${date.format(onlyDayName)},${date.format(only2LetterDate)}")
 
     for (i in 1..250) {
         val nextDate = date.plusDays(i.toLong())  // Add days for next dates
-        val formattedNextDate = "${nextDate.format(dayFormatter)},${nextDate.format(DateFormatter)}"
+        val formattedNextDate = "${nextDate.format(onlyDayName)},${nextDate.format(only2LetterDate)}"
         allDates.add(formattedNextDate)
     }
     return allDates
