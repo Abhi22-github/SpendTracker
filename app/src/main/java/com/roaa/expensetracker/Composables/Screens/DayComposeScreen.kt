@@ -2,7 +2,6 @@ package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
 import android.util.Log
-import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.snapping.SnapPosition
@@ -285,8 +284,6 @@ fun TabItem(
     val tabRef = remember { mutableStateOf<LayoutCoordinates?>(null) }
     val isSelected = index == currentIndex
 
-    val color by animateColorAsState(MaterialTheme.colorScheme.onPrimary)
-    val colorGreen by animateColorAsState(Color.Green)
     val dataSplit = data.split(",")
     Box(Modifier.padding(horizontal = 5.dp)) {
         Box(modifier = Modifier
