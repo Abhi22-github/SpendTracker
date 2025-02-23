@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -166,9 +167,9 @@ fun DayViewScreen(
 
             if (itemInfo != null) {
                 Log.d("DayComposeScreen", "c")
-                lazyListState.scrollToItem(pagerState.currentPage-2)
+                lazyListState.scrollToItem(pagerState.currentPage - 2)
             } else {
-                lazyListState.scrollToItem(pagerState.currentPage )
+                lazyListState.scrollToItem(pagerState.currentPage)
             }
 
         }
@@ -287,50 +288,59 @@ fun TabItem(
     val color by animateColorAsState(MaterialTheme.colorScheme.onPrimary)
     val colorGreen by animateColorAsState(Color.Green)
     val dataSplit = data.split(",")
-
-    Box(modifier = Modifier
-        .clip(RoundedCornerShape(10.dp))
-        .clickable { onClick() }
-        .background(
-            if (isSelected) MaterialTheme.colorScheme.primaryContainer else Color.Transparent,
-            RoundedCornerShape(10.dp)
-        )
-        .padding(vertical = 5.dp)
-        .width(tabSize)
-
-        .onGloballyPositioned { tabRef.value = it }) {
-        Column(
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            Text(
-                text = dataSplit[0],
-                color = MaterialTheme.colorScheme.onSurface.copy(
-                    alpha = 1f
-                ),
-                style = MaterialTheme.typography.bodySmall.copy(),
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(vertical = 1.dp)
+    Box(Modifier.padding(horizontal = 5.dp)) {
+        Box(modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .clickable { onClick() }
+            .background(
+//                if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primaryContainer.copy(
+//                    alpha = 0.4f
+//                ),
+                Color.Transparent,
+                RoundedCornerShape(10.dp)
             )
-            Spacer(Modifier.height(1.dp))
-            Box(
-                Modifier
-                    .padding(0.dp, 0.dp)
+            .width(tabSize)
+            .onGloballyPositioned { tabRef.value = it }) {
+            Column(
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth().padding(3.dp)
             ) {
+                Spacer(Modifier.height(5.dp))
                 Text(
-                    text = dataSplit[1],
-                    color = if (isSelected) MaterialTheme.colorScheme.onPrimaryContainer else MaterialTheme.colorScheme.onSurface.copy(
-                        alpha = 1f
+                    text = dataSplit[0],
+                    color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(
+                        alpha = 0.6f
                     ),
-                    style = MaterialTheme.typography.bodyMedium,
+                    style = MaterialTheme.typography.bodySmall.copy(),
                     textAlign = TextAlign.Center,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(4.dp)
-                        .align(Alignment.Center)
+                    modifier = Modifier.padding()
                 )
+                Spacer(Modifier.height(3.dp))
+                Box(
+                    Modifier
+                        .padding(0.dp, 0.dp)
+                        .background(
+                            if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer.copy(
+                                alpha = 0.3f
+                            ),
+                            RoundedCornerShape(50)
+                        ).aspectRatio(1f)
+                ) {
+                    Text(
+                        text = dataSplit[1],
+                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary.copy(
+                            alpha = 1f
+                        ),
+                        style = MaterialTheme.typography.bodyMedium,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(0.dp)
+                            .align(Alignment.Center)
+                    )
+                }
             }
         }
     }
