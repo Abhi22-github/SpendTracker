@@ -1,5 +1,6 @@
 package com.roaa.expensetracker.Composables.components
 
+import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -24,6 +25,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -103,6 +105,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -318,9 +321,9 @@ fun BottomSheetContentItemAddContent(
                         )
                         .clip(RoundedCornerShape(30.dp))
                         .clickable {
-                                typeToggle = !typeToggle
-                                categoryViewModel.getCorrespondingList(if (typeToggle) expenseType.type else incomeType.type)
-                                selectedCategory = firstSampleClass
+                            typeToggle = !typeToggle
+                            categoryViewModel.getCorrespondingList(if (typeToggle) expenseType.type else incomeType.type)
+                            selectedCategory = firstSampleClass
                         }
                         .height(56.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
@@ -334,12 +337,12 @@ fun BottomSheetContentItemAddContent(
                             modifier = Modifier.size(36.dp),
                         )
 
-                            Text(
-                                text = if (typeToggle) expenseType.type else incomeType.type,
-                                modifier = Modifier.padding(start = 8.dp),
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
+                        Text(
+                            text = if (typeToggle) expenseType.type else incomeType.type,
+                            modifier = Modifier.padding(start = 8.dp),
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
                     }
                 }
                 Spacer(Modifier.width(12.dp))
@@ -1501,7 +1504,10 @@ fun BottomSheetContentItemDetailsContent(
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
-fun BottomSheetIconPicker(sheetState: SheetState, closeBottomSheet: () -> Unit) {
+fun BottomSheetIconPicker(
+    sheetState: SheetState,
+    closeBottomSheet: () -> Unit
+) {
     ModalBottomSheet(
         onDismissRequest = {
             closeBottomSheet()
@@ -1509,50 +1515,57 @@ fun BottomSheetIconPicker(sheetState: SheetState, closeBottomSheet: () -> Unit) 
         sheetState = sheetState,
         modifier = Modifier.fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime },
-
         scrimColor = Color.Transparent
     ) {
         BottomSheetContentIconPicker(modifier = Modifier)
     }
 }
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun BottomSheetContentIconPicker(modifier: Modifier = Modifier) {
-    Column(Modifier.heightIn(max = 400.dp)) {
-        Text(
-            text = "Choose Icon",
-            modifier = modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-            style = typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-
-        val items = iconsList
-
-        // LazyVerticalGrid with a fixed number of columns (e.g., 2 columns)
-        LazyVerticalGrid(
-            columns = GridCells.Adaptive(minSize = 60.dp), // 2 columns
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(16.dp) // Optional padding for content
+    BoxWithConstraints(Modifier.padding(horizontal = 8.dp)) {
+        val width = maxWidth / 7
+        Column(
+            Modifier
+                .heightIn(max = 400.dp)
+                .fillMaxWidth()
         ) {
-            items(items) { item ->
-                SingleIcon(item)
-            }
+            Text(
+                text = "Choose Icon",
+                modifier = modifier.fillMaxWidth(),
+                textAlign = TextAlign.Center,
+                style = typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.height(16.dp))
+            val items = iconsList
 
+            // LazyVerticalGrid with a fixed number of columns (e.g., 2 columns)
+            LazyVerticalGrid(
+                columns = GridCells.Adaptive(width), // 2 columns
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                // contentPadding = PaddingValues(16.dp) // Optional padding for content
+            ) {
+                items(items) { item ->
+                    SingleIcon(item, width)
+                }
+
+            }
         }
     }
 }
 
 @Composable
-fun SingleIcon(item: Int, uiViewModel: UiViewModel = hiltViewModel()) {
+fun SingleIcon(item: Int, width: Dp, uiViewModel: UiViewModel = hiltViewModel()) {
     val scope = rememberCoroutineScope()
     Surface(
         shape = CircleShape,
         modifier = Modifier
-            .size(70.dp)
             .fillMaxSize()
+            .aspectRatio(1f)
             .clip(shape = RoundedCornerShape(50))
             .clickable { scope.launch { uiViewModel.selectedIconFromBottomSheet.emit(item) } },
         color = MaterialTheme.colorScheme.surfaceVariant

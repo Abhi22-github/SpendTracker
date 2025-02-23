@@ -132,9 +132,9 @@ fun AddCategory(
         ExpenseTrackerTheme {
             Scaffold(topBar = {
                 TopBar(
-                    title = if(categoryId == 0L ) "Add Category" else "Edit Category",
+                    title = if (categoryId == 0L) "Add Category" else "Edit Category",
                     showDelete = true,
-                    sendUserBackToPreviousActivity = { handleBackNavigation()},
+                    sendUserBackToPreviousActivity = { handleBackNavigation() },
                     delete = {
                         confirmationDialogType = 1
                         showConfirmationDialog = true
@@ -183,6 +183,7 @@ fun AddCategory(
     }
 }
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
 @Composable
 fun SharedTransitionScope.ScaffoldContentDetails(
@@ -219,156 +220,162 @@ fun SharedTransitionScope.ScaffoldContentDetails(
 
     }
 
-    Column(
-        modifier
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        val options = listOf("Expense", "Income")
 
-        Spacer(Modifier.height(12.dp))
-
-        Column {
-            TextSwitch(
-                selectedIndex = selectedIndex,
-                items = options,
-                onSelectionChange = {
-                    selectedIndex = it
-                }
-            )
-        }
-
-        Spacer(Modifier.height(40.dp))
-        ErrorRow(errorStatus)
-
-        Spacer(Modifier.height(40.dp))
-        Box() {
-            Surface(
-                shape = RoundedCornerShape(20),
-                modifier = Modifier
-                    .size(160.dp)
-                    .fillMaxSize(),
-                color = containerColor
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(24.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-
-                    val image =
-                        rememberAsyncImagePainter(IconState.fromNumber(if (selectedIcon == 99) categoryClass.categoryIconNumber else selectedIcon))
-                    Image(
-                        painter = image,
-                        contentDescription = "Image ${categoryClass.categoryIconNumber}",
-                        modifier = Modifier
-                            .size(96.dp)
-                            .sharedElement(
-                                state = rememberSharedContentState(key = "image/${categoryClass.categoryId}"),
-                                animatedVisibilityScope = animatedVisibilityScope,
-                            ),
-                    )
-                    //  }
-                }
-            }
-            FilledTonalIconButton(
-                onClick = {
-                    bottomSheetStatus = !bottomSheetStatus
-                },
-                Modifier
-                    .align(Alignment.BottomEnd)
-                    .offset(x = 8.dp, y = 8.dp)
-            ) {
-                Icon(Icons.Filled.Edit, contentDescription = "edit")
-            }
-        }
-
-        Spacer(Modifier.height(32.dp))
-
-        TextField(
-            value = categoryName,
-            onValueChange = { newText ->
-                categoryName = newText
-                scope.launch {
-                    uiViewModel.errorStatusInAddCategory.emit(false)
-                }
-            },
-            singleLine = true,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(30.dp, 8.dp)
-                .sharedElement(
-                    state = rememberSharedContentState(key = "text/${categoryClass.categoryId}"),
-                    animatedVisibilityScope = animatedVisibilityScope,
-                ),
-            placeholder = {
-                Text(
-                    "Category Name",
-                    Modifier.fillMaxWidth(),
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface.copy(secondaryAlpha),
-                    textAlign = TextAlign.Center
-                )
-            },
-            shape = RoundedCornerShape(36.dp),
-            colors = TextFieldDefaults.colors(
-                focusedIndicatorColor = Color.Transparent,
-                unfocusedIndicatorColor = Color.Transparent,
-                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-            ),
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-            textStyle = MaterialTheme.typography.titleMedium.copy(textAlign = TextAlign.Center),
-        )
-
-        Spacer(Modifier.height(12.dp))
-
-        /*Button*/
-        FilledTonalButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(30.dp, 8.dp),
-            onClick = {
-                scope.launch {
-                    if (categoryName.isEmpty()) {
-                        uiViewModel.errorStatusInAddCategory.emit(true)
-                        uiViewModel.errorStatusMessage.emit("Please provide the category name")
-                        return@launch
-                    }
-                    if (selectedIcon == 99) {
-                        uiViewModel.errorStatusInAddCategory.emit(true)
-                        uiViewModel.errorStatusMessage.emit("Please select icon for Category")
-                        return@launch
-                    }
-                    if (categoryClass.categoryId != 0L) {
-                        showConfirmationDialog = true
-                        return@launch
-                    } else {
-                        storeCategoryData(
-                            categoryClass.categoryId,
-                            categoryName,
-                            selectedIcon,
-                            selectedIndex,
-                            scope,
-                            categoryViewModel,
-                            backButtonClick = { backButtonClick() }
-                        )
-                    }
-                }
-
-            },
+    BoxWithConstraints(Modifier.fillMaxSize()) {
+        Column(
+            modifier
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "Save", Modifier.padding(12.dp, 6.dp),
-                style = MaterialTheme.typography.titleMedium
+            val options = listOf("Expense", "Income")
+
+            Spacer(Modifier.height(12.dp))
+
+            Column {
+                TextSwitch(
+                    selectedIndex = selectedIndex,
+                    items = options,
+                    onSelectionChange = {
+                        selectedIndex = it
+                    }
+                )
+            }
+
+            Spacer(Modifier.height(40.dp))
+            ErrorRow(errorStatus)
+
+            Spacer(Modifier.height(40.dp))
+            Box() {
+                Surface(
+                    shape = RoundedCornerShape(20),
+                    modifier = Modifier
+                        .size(160.dp)
+                        .fillMaxSize(),
+                    color = containerColor
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(24.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+
+                        val image =
+                            rememberAsyncImagePainter(IconState.fromNumber(if (selectedIcon == 99) categoryClass.categoryIconNumber else selectedIcon))
+                        Image(
+                            painter = image,
+                            contentDescription = "Image ${categoryClass.categoryIconNumber}",
+                            modifier = Modifier
+                                .size(96.dp)
+                                .sharedElement(
+                                    state = rememberSharedContentState(key = "image/${categoryClass.categoryId}"),
+                                    animatedVisibilityScope = animatedVisibilityScope,
+                                ),
+                        )
+                        //  }
+                    }
+                }
+                FilledTonalIconButton(
+                    onClick = {
+                        bottomSheetStatus = !bottomSheetStatus
+                    },
+                    Modifier
+                        .align(Alignment.BottomEnd)
+                        .offset(x = 8.dp, y = 8.dp)
+                ) {
+                    Icon(Icons.Filled.Edit, contentDescription = "edit")
+                }
+            }
+
+            Spacer(Modifier.height(32.dp))
+
+            TextField(
+                value = categoryName,
+                onValueChange = { newText ->
+                    categoryName = newText
+                    scope.launch {
+                        uiViewModel.errorStatusInAddCategory.emit(false)
+                    }
+                },
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(30.dp, 8.dp)
+                    .sharedElement(
+                        state = rememberSharedContentState(key = "text/${categoryClass.categoryId}"),
+                        animatedVisibilityScope = animatedVisibilityScope,
+                    ),
+                placeholder = {
+                    Text(
+                        "Category Name",
+                        Modifier.fillMaxWidth(),
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface.copy(secondaryAlpha),
+                        textAlign = TextAlign.Center
+                    )
+                },
+                shape = RoundedCornerShape(36.dp),
+                colors = TextFieldDefaults.colors(
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+                ),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                textStyle = MaterialTheme.typography.titleMedium.copy(textAlign = TextAlign.Center),
             )
+
+            Spacer(Modifier.height(12.dp))
+
+            /*Button*/
+            FilledTonalButton(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(30.dp, 8.dp),
+                onClick = {
+                    scope.launch {
+                        if (categoryName.isEmpty()) {
+                            uiViewModel.errorStatusInAddCategory.emit(true)
+                            uiViewModel.errorStatusMessage.emit("Please provide the category name")
+                            return@launch
+                        }
+                        if (selectedIcon == 99) {
+                            uiViewModel.errorStatusInAddCategory.emit(true)
+                            uiViewModel.errorStatusMessage.emit("Please select icon for Category")
+                            return@launch
+                        }
+                        if (categoryClass.categoryId != 0L) {
+                            showConfirmationDialog = true
+                            return@launch
+                        } else {
+                            storeCategoryData(
+                                categoryClass.categoryId,
+                                categoryName,
+                                selectedIcon,
+                                selectedIndex,
+                                scope,
+                                categoryViewModel,
+                                backButtonClick = { backButtonClick() }
+                            )
+                        }
+                    }
+
+                },
+            ) {
+                Text(
+                    text = "Save", Modifier.padding(12.dp, 6.dp),
+                    style = MaterialTheme.typography.titleMedium
+                )
+            }
+
+
         }
-
-
     }
+
     if (bottomSheetStatus) {
-        BottomSheetIconPicker(bottomSheetState) { bottomSheetStatus = !bottomSheetStatus }
+        BottomSheetIconPicker(bottomSheetState) {
+            bottomSheetStatus = !bottomSheetStatus
+        }
     }
     if (showConfirmationDialog) {
         ConfirmationAlertDialog(
