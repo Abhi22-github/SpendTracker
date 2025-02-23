@@ -613,7 +613,6 @@ fun HomeStatCardSingleNew(
     ) {
         ConstraintLayout(
             Modifier
-                .fillMaxSize()
         ) {
             val (content) = createRefs()
             Column(

@@ -979,7 +979,6 @@ fun BottomSheetContentItemEditContent(
                 { selectedPaymentMethod = it },
             )
         }
-        Log.d("vpd 22", "$selectedPaymentMethod")
         Spacer(Modifier.height(8.dp))
         Row(
             modifier = Modifier
