@@ -420,7 +420,7 @@ fun DayStatCard(
                 Box(Modifier.clickable { mainContentVisibility = !mainContentVisibility }) {
                     Row(
                         Modifier
-                            .padding(vertical = 6.dp),
+                            .padding(vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Spacer(Modifier.width(24.dp))
@@ -453,7 +453,7 @@ fun DayStatCard(
                         }
                         IconButton(
                             onClick = { mainContentVisibility = !mainContentVisibility },
-                            modifier = Modifier.weight(0.1f)
+                            modifier = Modifier.weight(0.1f).aspectRatio(1f)
                         ) {
                             Icon(
                                 Icons.Rounded.KeyboardArrowDown,
