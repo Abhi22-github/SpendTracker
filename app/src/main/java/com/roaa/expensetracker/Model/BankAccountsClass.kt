@@ -25,7 +25,7 @@ data class BankAccountsClass(
     val cardColorNumber: Int,
     val cardIconNumber: Int,
     val accountType: String,
-    val isActive: Boolean,
+    var isActive: Boolean,
 )
 
 

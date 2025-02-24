@@ -29,6 +29,14 @@ class BankAccountRepository(@ApplicationContext applicationContext: Context) {
         return bankAccountsDao.getSingleBankAccount(id)
     }
 
+    suspend fun migrateTransactions(firstBank:BankAccountsClass, secondBank:BankAccountsClass){
+        bankAccountsDao.MigrateTransactionToAnotherBankAccountAndDeleteIt(firstBank,secondBank)
+    }
+
+    suspend fun deleteBankAccountWithTransactions(bank:BankAccountsClass){
+        bankAccountsDao.deleteBankAccountWithTransactions(bank)
+    }
+
     // creating a method to update data in database.
     suspend fun update(bankAccountsClass: BankAccountsClass) {
         bankAccountsDao.update(bankAccountsClass)

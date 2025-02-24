@@ -9,6 +9,7 @@ import com.roaa.expensetracker.Utilities.Constants.PRIMARY
 import com.roaa.expensetracker.Utilities.UiState
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBank
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
@@ -85,6 +86,14 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
         }
     }
 
+    fun getAllBankAccountsExcept(): Flow<List<BankAccountsClass>> {
+        return bankAccountRepository.allBankAccounts
+    }
+
+    fun getAllBankAccountsExceptCashCompose(): Flow<List<BankAccountsClass>> {
+        return bankAccountRepository.allBankAccountsExceptCash
+    }
+
     fun deleteBankAccount(bankAccountsClass: BankAccountsClass) {
         viewModelScope.launch {
             bankAccountRepository.delete(bankAccountsClass)
@@ -123,6 +132,18 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
             }
         }
 
+    }
+
+    fun migrateTransactions(firstBank: BankAccountsClass, secondBank: BankAccountsClass) {
+        viewModelScope.launch {
+            bankAccountRepository.migrateTransactions(firstBank, secondBank)
+        }
+    }
+
+    fun deleteBankAccountWithTransactions(bank: BankAccountsClass) {
+        viewModelScope.launch {
+            bankAccountRepository.deleteBankAccountWithTransactions(bank)
+        }
     }
 
 
