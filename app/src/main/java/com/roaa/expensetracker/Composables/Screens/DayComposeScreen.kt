@@ -77,11 +77,11 @@ import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.harmonize
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
-import com.roaa.expensetracker.Model.emptyBudgetClass
-import com.roaa.expensetracker.Model.emptyBudgetDayClass
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
+import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBudgetClass
+import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBudgetDayClass
 import com.roaa.expensetracker.Utilities.currentMonth
 import com.roaa.expensetracker.Utilities.getPreviousAndNext500Days
 import com.roaa.expensetracker.Utilities.parseAmount

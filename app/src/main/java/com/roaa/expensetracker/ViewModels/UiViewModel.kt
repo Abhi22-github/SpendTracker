@@ -2,9 +2,9 @@ package com.roaa.expensetracker.ViewModels
 
 import androidx.lifecycle.ViewModel
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
-import com.roaa.expensetracker.Model.emptyBank
-import com.roaa.expensetracker.Model.emptyCategoryClass
-import com.roaa.expensetracker.Model.emptyTransactionClass
+import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBank
+import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyCategoryClass
+import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTransactionClass
 import com.roaa.expensetracker.Utilities.currentMonth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow

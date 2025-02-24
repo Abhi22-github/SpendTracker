@@ -5,9 +5,9 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roaa.expensetracker.Database.BankAccountRepository
 import com.roaa.expensetracker.Model.BankAccountsClass
-import com.roaa.expensetracker.Model.emptyBank
 import com.roaa.expensetracker.Utilities.Constants.PRIMARY
 import com.roaa.expensetracker.Utilities.UiState
+import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBank
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

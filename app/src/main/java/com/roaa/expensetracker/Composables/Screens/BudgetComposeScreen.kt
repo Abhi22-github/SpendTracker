@@ -61,10 +61,10 @@ import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.harmonize
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
-import com.roaa.expensetracker.Model.emptyBudgetClass
-import com.roaa.expensetracker.Model.emptyBudgetDayClass
 import com.roaa.expensetracker.Utilities.CalenderDayState
 import com.roaa.expensetracker.Utilities.DayState
+import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBudgetClass
+import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBudgetDayClass
 import com.roaa.expensetracker.Utilities.datesListForMonth
 import com.roaa.expensetracker.Utilities.dayNameList
 import com.roaa.expensetracker.Utilities.getDaysRemaining
