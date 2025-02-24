@@ -29,6 +29,6 @@ interface BankAccountDao {
     @get:Query("SELECT * FROM bank_accounts ")
     val allBankAccountsClass: Flow<List<BankAccountsClass>>
 
-    @get:Query("SELECT * FROM bank_accounts WHERE accountType != 'CASH'")
+    @get:Query("SELECT * FROM bank_accounts WHERE accountType != 'CASH' AND isActive == 1")
     val allBankAccountsClassExceptCash: Flow<List<BankAccountsClass>>
 }
