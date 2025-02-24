@@ -61,7 +61,9 @@ abstract class AppDatabase : RoomDatabase() {
                         // destructive migration to our database.
                         .addMigrations(MIGRATION_1_2)// below line is to add callback
                         // to our database.
-                        .addCallback(prePopulateData).allowMainThreadQueries() // below line is to
+                        .addCallback(prePopulateData).allowMainThreadQueries()
+                        .fallbackToDestructiveMigration()
+                        // below line is to
                         // build our database.
                         .build()
             }
