@@ -1,13 +1,18 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -20,6 +25,9 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
@@ -43,6 +51,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -76,18 +85,22 @@ import com.roaa.expensetracker.Composables.components.AddPaymentMethodBottomShee
 import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.Composables.components.DropDownBankAccountOption
 import com.roaa.expensetracker.Composables.components.EmptyScreen
+import com.roaa.expensetracker.Composables.components.SingleTransaction
 import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.ColorState
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.toPalette
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.CASH
+import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTransactionWithDetailsClass
 import com.roaa.expensetracker.Utilities.extractNumbers
 import com.roaa.expensetracker.ViewModels.BankAccountsViewModel
 import com.roaa.expensetracker.ViewModels.PreferencesViewModel
+import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import com.roaa.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.launch
 
@@ -100,11 +113,33 @@ fun PaymentMethodScreen(
     sendUserBack: () -> Unit,
     uiViewModel: UiViewModel = hiltViewModel(),
     bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
-    preferencesViewModel: PreferencesViewModel = hiltViewModel()
+    preferencesViewModel: PreferencesViewModel = hiltViewModel(),
+    transactionViewModel: TransactionsViewModel = hiltViewModel()
 ) {
     val showBottomSheet by uiViewModel.paymentMethodBottomSheetStatus.collectAsState()
     val bankAccountsList by bankAccountsViewModel.allBankAccountListExceptCash.collectAsState()
-    val primaryBankAccountNumber by preferencesViewModel.getPrimaryAccountNumber.collectAsState(1L);
+    val allTransaction by transactionViewModel.allTransactions.collectAsState(
+        listOf(emptyTransactionWithDetailsClass)
+    )
+    val context = LocalContext.current
+    val pagerState = rememberPagerState(initialPage = 0, pageCount = { bankAccountsList.size })
+
+    var filteredTransactionList = remember { emptyList<TransactionWithDetails>() }
+
+    LaunchedEffect(pagerState.currentPage) {
+        Log.d(
+            "PaymentMethodScreen",
+            "${pagerState.currentPage} ${filteredTransactionList.size} ${bankAccountsList.size} ${allTransaction.size}"
+        )
+//        if(bankAccountsList.isNotEmpty()) {
+//            filteredTransactionList = allTransaction.filter {
+//                it.BankAccount.bankAccountId == bankAccountsList.get(
+//                    pagerState.currentPage
+//                ).bankAccountId
+//            }
+//        }
+    }
+
 
     val lazyListState = rememberLazyListState()
     val scope = rememberCoroutineScope()
@@ -126,17 +161,7 @@ fun PaymentMethodScreen(
             emptyBankAccountsClass
         )
     }
-    val context = LocalContext.current
 
-    if (!bankAccountsList.isEmpty()) {
-        bankAccountsList.forEachIndexed { index, it ->
-            if (it.bankAccountId == primaryBankAccountNumber) {
-                val temp = bankAccountsList.get(0)
-                bankAccountsList[0] = it
-                bankAccountsList[index] = temp
-            }
-        }
-    }
     // Function to handle back navigation logic
     fun handleBackNavigation() {
         if (navigationManager.navController.previousBackStackEntry != null) {
@@ -152,48 +177,44 @@ fun PaymentMethodScreen(
         handleBackNavigation()
     }
 
-    Scaffold(
-        topBar = {
-            TopBar(title = "Bank Accounts",
-                showDelete = false,
-                sendUserBackToPreviousActivity = { handleBackNavigation() },
-                delete = {})
-        },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(
-                onClick = {
-                    scope.launch {
-                        uiViewModel.paymentMethodBottomSheetStatus.emit(true)
-                    }
-                },
-                icon = { Icon(Icons.Filled.Add, "Localized description") },
-                text = { Text(text = "Add Payment Method") },
-            )
-        }) { paddingValue ->
+    Scaffold(topBar = {
+        TopBar(title = "Bank Accounts",
+            showDelete = false,
+            sendUserBackToPreviousActivity = { handleBackNavigation() },
+            delete = {})
+    }, floatingActionButton = {
+        ExtendedFloatingActionButton(
+            onClick = {
+                scope.launch {
+                    uiViewModel.paymentMethodBottomSheetStatus.emit(true)
+                }
+            },
+            icon = { Icon(Icons.Filled.Add, "Localized description") },
+            text = { Text(text = "Add Payment Method") },
+        )
+    }) { paddingValue ->
         if (!bankAccountsList.isEmpty()) {
-            Column(Modifier.padding(paddingValue)) {
-                Spacer(Modifier.height(10.dp))
-                LazyColumn(state = lazyListState) {
-                    item {
-                        if (!bankAccountsList.take(1).isEmpty()) {
-                            Column(Modifier.padding(18.dp, 4.dp)) {
-                                Text(
-                                    text = "Primary Account",
-                                    style = typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                                Text(
-                                    text = "This will be selected as your default account for payments",
-                                    style = typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
-                                )
-                            }
-                        }
+            Column(
+                modifier = Modifier
+                    .padding(paddingValue)
+                    .fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                HorizontalPager(
+                    pagerState,
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
+                    pageSpacing = 8.dp
+                ) { page ->
+                    filteredTransactionList = allTransaction.filter {
+                        it.BankAccount.bankAccountId == bankAccountsList.get(
+                            pagerState.currentPage
+                        ).bankAccountId
                     }
-                    items(bankAccountsList.take(1), key = { it.bankAccountId }) {
-                        PaymentCard(
-                            Modifier.animateItem(),
-                            it,
+                    Column {
+                        PaymentCard(Modifier,
+                            bankAccountsList.get(page),
                             bankAccountsViewModel,
                             { bankAccounts ->
                                 bankAccountsClass = bankAccounts
@@ -202,42 +223,57 @@ fun PaymentMethodScreen(
                                 }
                             })
                     }
-                    item {
-                        if (!bankAccountsList.drop(1).isEmpty())
-                            Column {
-                                Text(
-                                    text = "Secondary Accounts",
-                                    modifier = Modifier.padding(18.dp, top = 24.dp, bottom = 4.dp),
-                                    style = typography.bodyLarge,
-                                    color = MaterialTheme.colorScheme.onSurface
-                                )
-                            }
-                    }
-                    items(bankAccountsList.drop(1), key = { it.bankAccountId }) {
-                        PaymentCard(
-                            Modifier.animateItem(),
-                            it,
-                            bankAccountsViewModel,
-                            { bankAccounts ->
-                                bankAccountsClass = bankAccounts
-                                scope.launch {
-                                    uiViewModel.paymentMethodBottomSheetStatus.emit(true)
-                                }
-                            })
-                    }
-                    item {
-                        Spacer(Modifier.height(84.dp))
+                }
+                Spacer(Modifier.height(8.dp))
+                Row(
+                    Modifier
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    repeat(pagerState.pageCount) { index ->
+                        val isSelected = pagerState.currentPage == index
+                        val dotSize by animateDpAsState(
+                            targetValue = if (isSelected) 14.dp else 8.dp,
+                            animationSpec = tween(durationMillis = 300),
+                            label = "Dot Size"
+                        )
+
+                        val dotColor by animateColorAsState(
+                            targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest,
+                            animationSpec = tween(durationMillis = 300),
+                            label = "Dot Color"
+                        )
+
+                        Box(
+                            modifier = Modifier
+                                .width(dotSize)
+                                .height(8.dp)
+                                .clip(CircleShape)
+                                .background(dotColor)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
                     }
                 }
 
+                Spacer(Modifier.height(16.dp))
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
 
-//            Spacer(Modifier.height(24.dp))
-//            Text(
-//                text = "Secondary Account",
-//                modifier = Modifier.padding(18.dp, 4.dp),
-//                style = MaterialTheme.typography.bodyMedium,
-//                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.60f)
-//            )
+                ) {
+                    Text(
+                        text = "Transactions",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                        modifier = Modifier.padding(horizontal = 24.dp)
+                    )
+                    LazyColumn {
+                        items(filteredTransactionList, key = { it.transaction.id }) {
+                            SingleTransaction(it) { }
+                        }
+                    }
+                }
             }
         } else {
             EmptyScreen("No Bank Account Found")
@@ -267,10 +303,10 @@ fun PaymentCard(
     var showConfirmationDeleteDialog by remember { mutableStateOf(false) }
 
     Card(
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(25.dp),
         modifier = modifier
-            .padding(16.dp, 4.dp)
-            .clip(RoundedCornerShape(12.dp))
+            .padding(0.dp, 4.dp)
+            .clip(RoundedCornerShape(25.dp))
             .clickable {
                 //  onSingleItemClick(item)
             },
@@ -278,7 +314,7 @@ fun PaymentCard(
             containerColor = combineColors(
                 MaterialTheme.colorScheme.surface,
                 color,
-                angle = 0.1f,
+                angle = 0.3f,
             )
         )
     ) {
