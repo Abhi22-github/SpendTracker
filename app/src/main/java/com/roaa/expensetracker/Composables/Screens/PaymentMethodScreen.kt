@@ -81,6 +81,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
+import com.roaa.expensetracker.Composables.components.ActionConfirmation
 import com.roaa.expensetracker.Composables.components.AddPaymentMethodBottomSheet
 import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.Composables.components.DropDownBankAccountOption
@@ -96,6 +97,8 @@ import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.CASH
+import com.roaa.expensetracker.Utilities.DeleteAction
+import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBank
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTransactionWithDetailsClass
 import com.roaa.expensetracker.Utilities.extractNumbers
 import com.roaa.expensetracker.ViewModels.BankAccountsViewModel
@@ -117,12 +120,16 @@ fun PaymentMethodScreen(
     transactionViewModel: TransactionsViewModel = hiltViewModel()
 ) {
     val showBottomSheet by uiViewModel.paymentMethodBottomSheetStatus.collectAsState()
-    val bankAccountsList by bankAccountsViewModel.allBankAccountListExceptCash.collectAsState()
+    val bankAccountsList by bankAccountsViewModel.getAllBankAccountsExceptCashCompose()
+        .collectAsState(
+            listOf(emptyBank)
+        )
     val allTransaction by transactionViewModel.allTransactions.collectAsState(
         listOf(emptyTransactionWithDetailsClass)
     )
     val context = LocalContext.current
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { bankAccountsList.size })
+    var actionConfirmationFlag by remember { mutableStateOf(false) }
 
     var filteredTransactionList = remember { emptyList<TransactionWithDetails>() }
 
@@ -202,15 +209,14 @@ fun PaymentMethodScreen(
             ) {
                 HorizontalPager(
                     pagerState,
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
                     pageSpacing = 8.dp
                 ) { page ->
                     filteredTransactionList = allTransaction.filter {
-                        it.BankAccount.bankAccountId == bankAccountsList.get(
+                        it.BankAccount.bankAccountId == bankAccountsList.getOrElse(
                             pagerState.currentPage
-                        ).bankAccountId
+                        ) { emptyBankAccountsClass }.bankAccountId
                     }
                     Column {
                         PaymentCard(Modifier,
@@ -221,13 +227,16 @@ fun PaymentMethodScreen(
                                 scope.launch {
                                     uiViewModel.paymentMethodBottomSheetStatus.emit(true)
                                 }
+                            },
+                            { bankAccount ->
+                                actionConfirmationFlag = true
+                                bankAccountsClass = bankAccount
                             })
                     }
                 }
                 Spacer(Modifier.height(8.dp))
                 Row(
-                    Modifier
-                        .fillMaxWidth(),
+                    Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -258,8 +267,7 @@ fun PaymentMethodScreen(
 
                 Spacer(Modifier.height(16.dp))
                 Column(
-                    modifier = Modifier
-                        .fillMaxSize()
+                    modifier = Modifier.fillMaxSize()
 
                 ) {
                     Text(
@@ -283,6 +291,37 @@ fun PaymentMethodScreen(
         AddPaymentMethodBottomSheet(bankAccountsClass)
         bankAccountsClass = emptyBankAccountsClass
     }
+    if (actionConfirmationFlag) {
+        ActionConfirmation(Modifier,
+            bankAccountsList.size > 1,
+            bankAccountsClass,
+            bankAccountsList,
+            { action, targetBankAccountClass ->
+                when (action) {
+                    DeleteAction.DELETE_BANK_ACCOUNT -> {
+                        scope.launch {
+                            bankAccountsViewModel.storeBankAccount(bankAccountsClass.apply {
+                                this.isActive = false
+                            })
+                        }
+                    }
+
+                    DeleteAction.DELETE_AND_MIGRATE -> {
+                        bankAccountsViewModel.migrateTransactions(
+                            bankAccountsClass, targetBankAccountClass
+                        )
+                    }
+
+                    DeleteAction.DELETE_ALL -> {
+                        bankAccountsViewModel.deleteBankAccountWithTransactions(bankAccountsClass)
+                    }
+
+                }
+                actionConfirmationFlag = !actionConfirmationFlag
+            }) {
+            actionConfirmationFlag = !actionConfirmationFlag
+        }
+    }
 
 }
 
@@ -293,6 +332,7 @@ fun PaymentCard(
     bankAccountsClass: BankAccountsClass,
     bankAccountsViewModel: BankAccountsViewModel,
     editClicked: (bankAccountsClass: BankAccountsClass) -> Unit,
+    deleteClicked: (bankAccountClass: BankAccountsClass) -> Unit,
     uiViewModel: UiViewModel = hiltViewModel(),
     preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
@@ -461,12 +501,13 @@ fun PaymentCard(
                         editClicked(bankAccountsClass)
                     },
                     deleteClicked = {
-                        showConfirmationDeleteDialog = !showConfirmationDeleteDialog
+                        deleteClicked(bankAccountsClass)
+                        //showConfirmationDeleteDialog = !showConfirmationDeleteDialog
                     })
             }
         }
     }
-
+    //need to remove this changed the flow
     if (showConfirmationDeleteDialog) ConfirmationAlertDialog(
         onDismissRequest = { showConfirmationDeleteDialog = !showConfirmationDeleteDialog },
         onConfirmation = {
