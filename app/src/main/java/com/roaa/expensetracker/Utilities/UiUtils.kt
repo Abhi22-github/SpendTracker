@@ -4,6 +4,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Model.UiDateModels.BarChartExpenseModel
+import com.roaa.expensetracker.Utilities.UtilityModalClass.DeleteActionsModelClass
 
 fun createListForBarGraph(
     dateList: List<Pair<String, Long>>,
@@ -31,9 +32,31 @@ fun createListForBarGraph(
 fun calculateBarPercentageHeight(maxHeight: Dp, maxExpense: Float, expenseAmount: Float): Dp {
     if (maxExpense == 0f)
         return 0.dp
-
     if (expenseAmount == 0f)
         return 0.dp
 
     return (maxHeight.value * expenseAmount / maxExpense).dp
 }
+
+enum class DeleteAction {
+    DELETE_BANK_ACCOUNT,
+    DELETE_AND_MIGRATE,
+    DELETE_ALL
+}
+
+
+val deleteActionList = listOf(
+    DeleteActionsModelClass(
+        "Delete Bank Account",
+        "The Bank account will be deleted, but transactions will remain.",
+        DeleteAction.DELETE_BANK_ACCOUNT
+    ), DeleteActionsModelClass(
+        "Delete and Migrate Transactions",
+        "Delete this Bank account and move transactions to another Bank Account.",
+        DeleteAction.DELETE_AND_MIGRATE
+    ), DeleteActionsModelClass(
+        "Delete All",
+        "Permanently delete this Bank account and all transactions",
+        DeleteAction.DELETE_ALL
+    )
+)
