@@ -12,8 +12,8 @@ import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 
 val emptyBank = BankAccountsClass(
     1L,
-    0L,
-    0L,
+    0f,
+    0f,
     "Cash",
     1,
     99,

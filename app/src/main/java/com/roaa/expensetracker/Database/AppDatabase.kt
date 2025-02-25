@@ -14,7 +14,7 @@ import com.roaa.expensetracker.Model.TransactionClass
 
 @Database(
     entities = [TransactionClass::class, CategoryClass::class, BankAccountsClass::class, BudgetModelClass::class, BudgetDayModelClass::class],
-    version = 1
+    version = 2
 )
 abstract class AppDatabase : RoomDatabase() {
     // below line is to create
@@ -59,7 +59,8 @@ abstract class AppDatabase : RoomDatabase() {
                         context.applicationContext, AppDatabase::class.java, "database"
                     ) // below line is use to add fall back to
                         // destructive migration to our database.
-                        .addMigrations(MIGRATION_1_2)// below line is to add callback
+                        .addMigrations(MIGRATION_1_2)
+                        .addMigrations(MIGRATION_2_3)// below line is to add callback
                         // to our database.
                         .addCallback(prePopulateData).allowMainThreadQueries()
                         .fallbackToDestructiveMigration()
@@ -72,9 +73,61 @@ abstract class AppDatabase : RoomDatabase() {
             return instance!!
         }
 
+        val MIGRATION_2_3 = object : Migration(2,3) {
+            override fun migrate(database: SupportSQLiteDatabase) {
+
+            }
+        }
+
         val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 // For example, adding a new column
+                database.execSQL(
+                    """
+            CREATE TABLE bank_accounts_temp (
+                bankAccountId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                initialAmount Float NOT NULL, 
+                currentAmount Float NOT NULL,
+                bankName TEXT NOT NULL,
+                cardColorNumber INTEGER NOT NULL,
+                cardIconNumber INTEGER NOT NULL,
+                accountType TEXT NOT NULL,
+                isActive INTEGER NOT NULL
+            )
+            """
+                )
+
+                // Step 2: Copy data from the old table to the new table
+                database.execSQL(
+                    """
+            INSERT INTO bank_accounts_temp (
+                bankAccountId, 
+                initialAmount, 
+                currentAmount, 
+                bankName, 
+                cardColorNumber, 
+                cardIconNumber, 
+                accountType, 
+                isActive
+            )
+            SELECT 
+                bankAccountId, 
+                CAST(initialAmount AS Float), 
+                CAST(currentAmount AS Float), 
+                bankName, 
+                cardColorNumber, 
+                cardIconNumber, 
+                accountType, 
+                isActive
+            FROM bank_accounts
+            """
+                )
+
+                // Step 3: Drop the old table
+                database.execSQL("DROP TABLE bank_accounts")
+
+                // Step 4: Rename the new table to the original table name
+                database.execSQL("ALTER TABLE bank_accounts_temp RENAME TO bank_accounts")
 
             }
         }

@@ -19,8 +19,8 @@ import java.io.OutputStream
 data class BankAccountsClass(
     @PrimaryKey(autoGenerate = true)
     val bankAccountId: Long,
-    val initialAmount: Long,
-    val currentAmount: Long,
+    val initialAmount: Float,
+    val currentAmount: Float,
     val bankName: String,
     val cardColorNumber: Int,
     val cardIconNumber: Int,
@@ -32,7 +32,7 @@ data class BankAccountsClass(
 @OptIn(ExperimentalSerializationApi::class)
 object BankAccountsSerializer : Serializer<BankAccountsClass> {
 
-    override val defaultValue = BankAccountsClass(1, 0, 0, "Cash", 1, 25, CASH,false)
+    override val defaultValue = BankAccountsClass(1, 0f, 0f, "Cash", 1, 25, CASH,false)
 
     override suspend fun readFrom(input: InputStream): BankAccountsClass {
         try {

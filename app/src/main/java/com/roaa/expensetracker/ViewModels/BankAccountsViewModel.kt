@@ -108,8 +108,8 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
     ) {
         val bankAccountObj = BankAccountsClass(
             bankAccountId = id,
-            initialAmount = bankAmount.toLong(),
-            currentAmount = bankAmount.toLong(),
+            initialAmount = bankAmount.toFloat(),
+            currentAmount = bankAmount.toFloat(),
             bankName = bankName,
             cardColorNumber = selectedColor,
             cardIconNumber = 24,
