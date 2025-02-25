@@ -1574,18 +1574,13 @@ fun SingleIcon(item: Int, width: Dp, uiViewModel: UiViewModel = hiltViewModel())
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddPaymentMethodBottomSheet(
-    bankAccountsClass: BankAccountsClass,
     closeBottomSheet: () -> Unit,
     uiViewModel: UiViewModel = hiltViewModel(),
     bankAccountsViewModel: BankAccountsViewModel = hiltViewModel()
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
-    val bankAccountsClass by remember { mutableStateOf(bankAccountsClass) }
     val showError by uiViewModel.errorStatusInBankAccountAdd.collectAsState()
-    var isEdit by remember { mutableStateOf(false) }
-    if (bankAccountsClass.bankAccountId != 0L) isEdit = true
-
 
     ModalBottomSheet(onDismissRequest = {
         closeBottomSheet()
@@ -1596,9 +1591,6 @@ fun AddPaymentMethodBottomSheet(
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
 
-//            BottomSheetContentPaymentMethodAddContentNew(
-//                modifier = Modifier.padding(16.dp, 0.dp), isEdit, bankAccountsClass
-//            )
         BottomSheetContentPaymentMethodAddContentNew(Modifier
             .padding(16.dp, 0.dp),
             showError,
@@ -1629,203 +1621,60 @@ fun AddPaymentMethodBottomSheet(
 
 }
 
-val horizontalPadding = 16.dp
-val verticalPadding = 0.dp
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BottomSheetContentPaymentMethodAddContent(
-    modifier: Modifier,
-    isEdit: Boolean,
+fun EditPaymentMethodBottomSheet(
     bankAccountsClass: BankAccountsClass,
+    closeBottomSheet: () -> Unit,
     uiViewModel: UiViewModel = hiltViewModel(),
     bankAccountsViewModel: BankAccountsViewModel = hiltViewModel()
 ) {
-    val showError by uiViewModel.errorStatusInBankAccountAdd.collectAsState()
-    var bankAmount by remember { mutableStateOf(bankAccountsClass.initialAmount.toString()) }
-    var bankName by remember { mutableStateOf(bankAccountsClass.bankName) }
-
-    var selectedColor by remember { mutableIntStateOf(bankAccountsClass.cardColorNumber) }
-    var showConfirmationDialog by remember { mutableStateOf(false) }
-
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
+    val showError by uiViewModel.errorStatusInBankAccountAdd.collectAsState()
 
-    val title = if (isEdit) "Edit Bank Account" else "Add Bank Account"
+    ModalBottomSheet(onDismissRequest = {
+        closeBottomSheet()
+    },
+        sheetState = bottomSheetState,
+        modifier = Modifier
+            .imePadding()
+            .fillMaxWidth(),
+        contentWindowInsets = { WindowInsets.ime }) {
 
-    Column() {
-        Text(
-            text = title,
-            modifier = modifier.fillMaxWidth(),
-            textAlign = TextAlign.Center,
-            style = typography.titleLarge,
-            color = MaterialTheme.colorScheme.onSurface
-        )
-        Spacer(Modifier.height(16.dp))
-//        LivePaymentCard(color = ColorState.fromNumber(selectedColor)!!,
-//            bankAccountsClass,
-//            sendBankAmount = { bankAmount = it },
-//            sendBankName = { bankName = it })
-        Text(
-            text = "Enter total Amount present in bank along with bank name in designated field",
-            style = typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha),
-            modifier = Modifier.padding(16.dp, 8.dp)
-        )
-        Spacer(Modifier.height(8.dp))
-
-//        Text(
-//            text = "Colors", style = MaterialTheme.typography.titleMedium,
-//            color = MaterialTheme.colorScheme.onSurface,
-//        )
-
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(15.dp),
-            modifier = Modifier.padding(16.dp, 8.dp)
-        ) {
-            for (i in colorList) {
-                SingleColorButton(i, selectedColor) { selectedColor = it }
-            }
-        }
-//        if (false) {
-//            Spacer(Modifier.height(16.dp))
-//            Text(
-//                text = "Amount",
-//                style = MaterialTheme.typography.titleMedium,
-//                color = MaterialTheme.colorScheme.onSurface
-//            )
-//
-//            Text(
-//                text = "Enter total Amount present in bank account",
-//                style = MaterialTheme.typography.labelLarge,
-//                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
-//            )
-//            TextField(
-//                value = bankAmount,
-//                onValueChange = { newText ->
-//                    bankAmount = newText
-//                },
-//                singleLine = true,
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(0.dp, 8.dp),
-//                placeholder = {
-//                    Text(
-//                        "Amount",
-//                        style = MaterialTheme.typography.bodyLarge,
-//                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
-//                    )
-//                },
-//                leadingIcon = { Text("₹", style = MaterialTheme.typography.bodyLarge) },
-//                shape = RoundedCornerShape(24.dp),
-//                colors = TextFieldDefaults.colors(
-//                    focusedIndicatorColor = Color.Transparent,
-//                    unfocusedIndicatorColor = Color.Transparent,
-//                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-//                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-//                ),
-//                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-//                // visualTransformation = NumberCommaTransformation()
-//            )
-//
-//            Spacer(Modifier.height(12.dp))
-//
-//            Text(
-//                text = "Bank Name",
-//                style = MaterialTheme.typography.titleMedium,
-//                color = MaterialTheme.colorScheme.onSurface
-//            )
-//            Text(
-//                text = "Enter the name of your bank",
-//                style = MaterialTheme.typography.labelLarge,
-//                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
-//            )
-//            TextField(
-//                value = bankAmount,
-//                onValueChange = { newText ->
-//                    bankAmount = newText
-//                },
-//                singleLine = true,
-//                modifier = Modifier
-//                    .fillMaxWidth()
-//                    .padding(0.dp, 8.dp),
-//                placeholder = {
-//                    Text(
-//                        "Bank Name",
-//                        style = MaterialTheme.typography.bodyLarge,
-//                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
-//                    )
-//                },
-//                leadingIcon = {
-//                    Image(
-//                        painter = painterResource(IconState.fromNumber(24)!!),
-//                        contentDescription = null,
-//                        modifier = Modifier.size(24.dp)
-//                    )
-//                },
-//                shape = RoundedCornerShape(24.dp),
-//                colors = TextFieldDefaults.colors(
-//                    focusedIndicatorColor = Color.Transparent,
-//                    unfocusedIndicatorColor = Color.Transparent,
-//                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
-//                    focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
-//                ),
-//                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-//                // visualTransformation = NumberCommaTransformation()
-//            )
-//
-//        }
-        Spacer(Modifier.height(8.dp))
-        ErrorRow(showError)
-        Spacer(Modifier.height(16.dp))
-
-
-
-        FilledTonalButton(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontalPadding, verticalPadding),
-            onClick = {
+        BottomSheetContentPaymentMethodEditContentNew(Modifier
+            .padding(16.dp, 0.dp),
+            bankAccountsClass,
+            showError,
+            { scope.launch { uiViewModel.errorStatusInBankAccountAdd.emit(false) } },
+            { bankName, amount, selectedColor ->
                 scope.launch {
-                    if (bankAmount.isEmpty()) {
+                    if (amount.isEmpty()) {
                         uiViewModel.errorStatusMessage.emit("Please enter bank amount")
                         uiViewModel.errorStatusInBankAccountAdd.emit(true)
+                        return@launch
                     }
                     if (bankName.isEmpty()) {
                         uiViewModel.errorStatusMessage.emit("Please enter bank name")
                         uiViewModel.errorStatusInBankAccountAdd.emit(true)
+                        return@launch
                     }
-                    if (!bankName.isEmpty() && !bankAmount.isEmpty()) {
-                        if (isEdit) showConfirmationDialog = isEdit
-                        else scope.launch {
-                            bankAccountsViewModel.createObjectAndStoreIt(
-                                bankAccountsClass.bankAccountId, bankAmount, bankName, selectedColor
-                            )
-                            // uiViewModel.paymentMethodBottomSheetStatus.emit(false)
-                        }
+                    if (bankName.isNotEmpty() && amount.isNotEmpty()) {
+                        bankAccountsViewModel.createObjectAndStoreIt(
+                            bankAccountsClass.bankAccountId, amount, bankName, selectedColor
+                        )
+                        closeBottomSheet()
+                        return@launch
                     }
                 }
-            },
-        ) {
-            Text(text = "Save")
-        }
-        if (showConfirmationDialog) {
-            ConfirmationAlertDialog(
-                onDismissRequest = { showConfirmationDialog = !showConfirmationDialog },
-                onConfirmation = {
-                    scope.launch {
-                        bankAccountsViewModel.createObjectAndStoreIt(
-                            bankAccountsClass.bankAccountId, bankAmount, bankName, selectedColor
-                        )
-                        // uiViewModel.paymentMethodBottomSheetStatus.emit(false)
-                    }
-                },
-                dialogTitle = "Change Bank Details",
-                dialogText = "Are you sure, that you want to change current bank details",
-                icon = ImageVector.vectorResource(R.drawable.icon_income)
-            )
-        }
-        Spacer(Modifier.height(32.dp))
+            })
+
     }
+
 }
+
+val horizontalPadding = 16.dp
+val verticalPadding = 0.dp
 
 @Composable
 fun BottomSheetContentPaymentMethodAddContentNew(
@@ -2052,11 +1901,247 @@ fun BottomSheetContentPaymentMethodAddContentNew(
     }
 }
 
+@Composable
+fun BottomSheetContentPaymentMethodEditContentNew(
+    modifier: Modifier,
+    bankAccountsClass: BankAccountsClass,
+    showError: Boolean,
+    removeError: () -> Unit,
+    saveButtonClicked: (bankName: String, bankAmount: String, selectedColor: Int) -> Unit,
+) {
+    var bankAmount by remember { mutableStateOf(TextFieldValue(bankAccountsClass.currentAmount.toString())) }
+    var bankName by remember { mutableStateOf(TextFieldValue(bankAccountsClass.bankName)) }
+
+    var selectedColor by remember { mutableIntStateOf(bankAccountsClass.cardColorNumber) }
+    val color = ColorState.fromNumber(selectedColor)!!
+    val title = "Edit Bank Account"
+
+    Column() {
+        Text(
+            text = title,
+            modifier = modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(8.dp))
+        LivePaymentCard(
+            color = ColorState.fromNumber(selectedColor)!!, bankAmount.text, bankName.text
+        )
+
+        Spacer(Modifier.height(16.dp))
+        Text(
+            modifier = modifier,
+            text = "Card Details",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(4.dp))
+        TextField(
+            value = bankName,
+            onValueChange = { newText ->
+                bankName = newText
+                removeError()
+            },
+            singleLine = true,
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(0.dp, 4.dp),
+            placeholder = {
+                Text(
+                    "Bank Name",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
+                )
+            },
+            shape = RoundedCornerShape(20.dp),
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            ),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+        )
+
+        TextField(
+            value = bankAmount,
+            onValueChange = { newText ->
+                val filteredText = newText.text.filter { it.isDigit() || it == '.' }
+                // Ensure only one decimal point is allowed
+                if (filteredText.count { it == '.' } <= 1) {
+                    // Split into parts before and after the decimal
+                    val parts = filteredText.split('.')
+                    // Ensure max 7 digits before the decimal and max 2 after
+                    if (parts.size == 1 && parts[0].length <= 7 || parts.size == 2 && parts[0].length <= 7 && parts[1].length <= 2) {
+                        // Update the TextFieldValue with the filtered text
+                        bankAmount = newText.copy(text = filteredText)
+                    }
+                }
+                removeError()
+            },
+            singleLine = true,
+            modifier = modifier
+                .fillMaxWidth()
+                .padding(0.dp, 4.dp),
+            visualTransformation = DecimalFilterTransformation(),
+            placeholder = {
+                Text(
+                    "Amount",
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
+                )
+            },
+            shape = RoundedCornerShape(20.dp),
+            colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = Color.Transparent,
+                unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+                focusedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh
+            ),
+            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
+            // visualTransformation = NumberCommaTransformation()
+        )
+
+        Spacer(Modifier.height(16.dp))
+
+        Text(
+            modifier = modifier,
+            text = "Card Colors", style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface,
+        )
+        Spacer(Modifier.height(8.dp))
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(15.dp),
+            modifier = Modifier.padding(16.dp, 0.dp)
+        ) {
+            for (i in colorList) {
+                SingleColorButton(i, selectedColor) { selectedColor = it }
+            }
+        }
+        if (false) {
+            Spacer(Modifier.height(24.dp))
+            Text(
+                modifier = modifier,
+                text = "Card Limit",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.height(8.dp))
+            Card(
+                modifier = modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp, 16.dp)
+                        .fillMaxWidth()
+                ) {
+                    LinearProgressIndicator(progress = { Math.random().toFloat() },
+                        modifier = Modifier
+                            .height(15.dp)
+                            .fillMaxWidth(),
+                        color = color.copy(alpha = 0.80f),
+                        trackColor = color.copy(alpha = 0.10f),
+                        strokeCap = StrokeCap.Round,
+                        gapSize = 0.dp,
+                        drawStopIndicator = {
+                            drawStopIndicator(
+                                drawScope = this,
+                                stopSize = ProgressIndicatorDefaults.CircularStrokeWidth,
+                                color = color,
+                                strokeCap = StrokeCap.Round
+                            )
+                        })
+                    Spacer(Modifier.height(12.dp))
+                    Text(
+                        modifier = Modifier,
+                        text = "₹345890",
+                        style = MaterialTheme.typography.titleMedium.copy(fontFamily = CustomFonts.numberFont),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Text(
+                        modifier = Modifier,
+                        text = "left in this month",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+            Text(
+                modifier = modifier,
+                text = "Usage Notification",
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Spacer(Modifier.height(8.dp))
+            Card(
+                modifier = modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+            ) {
+                Column(
+                    modifier = Modifier
+                        .padding(16.dp, 16.dp)
+                        .fillMaxWidth()
+                ) {
+                    var sliderPosition by remember { mutableFloatStateOf(80f) }
+                    Column {
+                        Slider(
+                            value = sliderPosition,
+                            onValueChange = { sliderPosition = it },
+                            colors = SliderDefaults.colors(
+                                thumbColor = color.copy(0.8f),
+                                activeTrackColor = color.copy(0.8f),
+                                inactiveTrackColor = color.copy(0.1f),
+                            ),
+                            steps = 9,
+                            valueRange = 0f..100f
+                        )
+                    }
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        modifier = Modifier,
+                        text = "get notification when you use ${sliderPosition}% of balance in your bank account",
+                        style = MaterialTheme.typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    )
+                }
+            }
+        }
+        ErrorRow(showError)
+        Spacer(Modifier.height(16.dp))
+        FilledTonalButton(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontalPadding, verticalPadding),
+            colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.primary),
+            onClick = {
+                saveButtonClicked(bankName.text, bankAmount.text, selectedColor)
+            },
+        ) {
+            Text(text = "Save", color = MaterialTheme.colorScheme.onPrimary)
+        }
+        Spacer(Modifier.height(32.dp))
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun PaymentAddContentPreview() {
     BottomSheetContentPaymentMethodAddContentNew(
         modifier = Modifier.padding(16.dp, 0.dp),
+        showError = true, {},
+        saveButtonClicked = { a, b, c -> },
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun PaymentEditContentPreview() {
+    BottomSheetContentPaymentMethodEditContentNew(
+        modifier = Modifier.padding(16.dp, 0.dp),emptyBank,
         showError = true, {},
         saveButtonClicked = { a, b, c -> },
     )

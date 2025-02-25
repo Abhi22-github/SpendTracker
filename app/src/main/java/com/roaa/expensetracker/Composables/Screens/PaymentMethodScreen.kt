@@ -78,6 +78,7 @@ import com.roaa.expensetracker.Composables.components.ActionConfirmation
 import com.roaa.expensetracker.Composables.components.AddPaymentMethodBottomSheet
 import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.Composables.components.DropDownBankAccountOption
+import com.roaa.expensetracker.Composables.components.EditPaymentMethodBottomSheet
 import com.roaa.expensetracker.Composables.components.EmptyScreen
 import com.roaa.expensetracker.Composables.components.SingleTransaction
 import com.roaa.expensetracker.Composables.components.TopBar
@@ -112,6 +113,7 @@ fun PaymentMethodScreen(
     transactionViewModel: TransactionsViewModel = hiltViewModel()
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
+    var showEditBottomSheet by remember { mutableStateOf(false) }
     val bankAccountsList by bankAccountsViewModel.getAllBankAccountsExceptCashCompose()
         .collectAsState(
             listOf(emptyBank)
@@ -214,7 +216,7 @@ fun PaymentMethodScreen(
                             bankAccountsViewModel,
                             { bankAccounts ->
                                 bankAccountsClass = bankAccounts
-                                showBottomSheet = !showBottomSheet
+                                showEditBottomSheet = !showEditBottomSheet
                             },
                             { bankAccount ->
                                 actionConfirmationFlag = true
@@ -276,8 +278,12 @@ fun PaymentMethodScreen(
         }
     }
     if (showBottomSheet) {
-        AddPaymentMethodBottomSheet(bankAccountsClass, { showBottomSheet = !showBottomSheet })
-        bankAccountsClass = emptyBankAccountsClass
+        AddPaymentMethodBottomSheet({ showBottomSheet = !showBottomSheet })
+    }
+    if (showEditBottomSheet) {
+        EditPaymentMethodBottomSheet(
+            bankAccountsClass,
+            { showEditBottomSheet = !showEditBottomSheet })
     }
     if (actionConfirmationFlag) {
         ActionConfirmation(Modifier,
