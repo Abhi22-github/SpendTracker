@@ -29,13 +29,9 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Star
-import androidx.compose.material.icons.twotone.Star
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -63,16 +59,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -100,7 +93,6 @@ import com.roaa.expensetracker.Utilities.Constants.CASH
 import com.roaa.expensetracker.Utilities.DeleteAction
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBank
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTransactionWithDetailsClass
-import com.roaa.expensetracker.Utilities.extractNumbers
 import com.roaa.expensetracker.ViewModels.BankAccountsViewModel
 import com.roaa.expensetracker.ViewModels.PreferencesViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
@@ -119,7 +111,7 @@ fun PaymentMethodScreen(
     preferencesViewModel: PreferencesViewModel = hiltViewModel(),
     transactionViewModel: TransactionsViewModel = hiltViewModel()
 ) {
-    val showBottomSheet by uiViewModel.paymentMethodBottomSheetStatus.collectAsState()
+    var showBottomSheet by remember { mutableStateOf(false) }
     val bankAccountsList by bankAccountsViewModel.getAllBankAccountsExceptCashCompose()
         .collectAsState(
             listOf(emptyBank)
@@ -154,8 +146,8 @@ fun PaymentMethodScreen(
     //empty bank account class
     val emptyBankAccountsClass = BankAccountsClass(
         bankAccountId = 0L,
-        initialAmount = 0,
-        currentAmount = 0,
+        initialAmount = 0f,
+        currentAmount = 0f,
         bankName = "",
         cardColorNumber = 1,
         cardIconNumber = 25,
@@ -192,9 +184,7 @@ fun PaymentMethodScreen(
     }, floatingActionButton = {
         ExtendedFloatingActionButton(
             onClick = {
-                scope.launch {
-                    uiViewModel.paymentMethodBottomSheetStatus.emit(true)
-                }
+                showBottomSheet = !showBottomSheet
             },
             icon = { Icon(Icons.Filled.Add, "Localized description") },
             text = { Text(text = "Add Payment Method") },
@@ -224,9 +214,7 @@ fun PaymentMethodScreen(
                             bankAccountsViewModel,
                             { bankAccounts ->
                                 bankAccountsClass = bankAccounts
-                                scope.launch {
-                                    uiViewModel.paymentMethodBottomSheetStatus.emit(true)
-                                }
+                                showBottomSheet = !showBottomSheet
                             },
                             { bankAccount ->
                                 actionConfirmationFlag = true
@@ -288,7 +276,7 @@ fun PaymentMethodScreen(
         }
     }
     if (showBottomSheet) {
-        AddPaymentMethodBottomSheet(bankAccountsClass)
+        AddPaymentMethodBottomSheet(bankAccountsClass, { showBottomSheet = !showBottomSheet })
         bankAccountsClass = emptyBankAccountsClass
     }
     if (actionConfirmationFlag) {
@@ -339,7 +327,7 @@ fun PaymentCard(
     val color = ColorState.fromNumber(bankAccountsClass.cardColorNumber)!!
     val scope = rememberCoroutineScope()
     var showOptionMenu by remember { mutableStateOf(false) }
-    val showBottomSheet by uiViewModel.paymentMethodBottomSheetStatus.collectAsState()
+    val showBottomSheet by remember { mutableStateOf(false) }
     var showConfirmationDeleteDialog by remember { mutableStateOf(false) }
 
     Card(
@@ -610,31 +598,20 @@ fun PaymentMethodCardOld() {
 @Composable
 fun LivePaymentCard(
     color: Color,
-    bankAccountsClass: BankAccountsClass,
-    sendBankAmount: (String) -> Unit,
-    sendBankName: (String) -> Unit,
-    uiViewModel: UiViewModel = hiltViewModel(),
+    amount: String,
+    bankName: String,
 ) {
-
-    var bankAmount by remember { mutableStateOf(TextFieldValue(bankAccountsClass.currentAmount.toString())) }
-    var bankName by remember { mutableStateOf(TextFieldValue(bankAccountsClass.bankName)) }
-    var iconToggle by remember { mutableStateOf(false) }
-
-    val hintStyleAmount = typography.titleLarge.copy(fontFamily = numberFont)
-    val hintColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.60f)
 
     val newColor = combineColors(
         MaterialTheme.colorScheme.surface,
         color,
-        angle = 0.1f,
+        angle = 0.3f,
     )
-    val scope = rememberCoroutineScope()
-
     Card(
-        shape = RoundedCornerShape(12.dp),
+        shape = RoundedCornerShape(25.dp),
         modifier = Modifier
             .padding(16.dp, 4.dp)
-            .clip(RoundedCornerShape(12.dp)),
+            .clip(RoundedCornerShape(25.dp)),
         colors = CardDefaults.cardColors(
             containerColor = newColor
         )
@@ -654,36 +631,7 @@ fun LivePaymentCard(
                     ),
                 )
                 Spacer(modifier = Modifier.width(8.dp))
-                Box {
-                    BasicTextField(value = bankAmount,
-                        onValueChange = {
-                            bankAmount = TextFieldValue(
-                                extractNumbers(it.text).toString(),
-                                selection = TextRange(extractNumbers(it.text).toString().length)
-                            )
-                            sendBankAmount(bankAmount.text)
-                            scope.launch { uiViewModel.errorStatusInBankAccountAdd.emit(false) }
-                        },
-                        cursorBrush = SolidColor(color),
-                        modifier = Modifier
-                            .background(
-                                color.copy(alpha = 0.2f), RoundedCornerShape(5.dp)
-                            )
-                            .padding(10.dp, 3.dp),
-                        textStyle = typography.titleLarge.copy(fontFamily = numberFont),
-                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                        maxLines = 1,
-                        decorationBox = { innerTextField ->
-                            if (bankAmount.text.isEmpty()) {
-                                Text(
-                                    text = "Amount",
-                                    style = hintStyleAmount,
-                                    color = hintColor,
-                                )
-                            }
-                            innerTextField()
-                        })
-                }
+                Text(text = amount, style = typography.headlineMedium.copy(fontFamily = numberFont))
             }
             Text(text = "Amount",
                 style = typography.bodyMedium,
@@ -703,7 +651,7 @@ fun LivePaymentCard(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Surface(
-                    shape = RoundedCornerShape(12.dp),
+                    shape = RoundedCornerShape(20.dp),
                     modifier = Modifier
                         .size(56.dp)
                         .fillMaxSize(),
@@ -731,37 +679,10 @@ fun LivePaymentCard(
                 ) {
 
                     Spacer(Modifier.height(2.dp))
-                    BasicTextField(
-                        value = bankName,
-                        onValueChange = {
-                            bankName = it
-                            sendBankName(bankName.text)
-                            scope.launch { uiViewModel.errorStatusInBankAccountAdd.emit(false) }
-                        },
-                        cursorBrush = SolidColor(color),
-                        modifier = Modifier
-                            .background(
-                                color.copy(alpha = 0.2f), RoundedCornerShape(5.dp)
-                            )
-                            .padding(10.dp, 3.dp),
-                        textStyle = typography.titleLarge.copy(fontFamily = numberFont),
-                        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Text)
-                    ) { innerTextField ->
-                        if (bankName.text.isEmpty()) {
-                            Text(
-                                text = "Bank Name",
-                                style = hintStyleAmount.copy(),
-                                color = hintColor,
-                            )
-                        }
-                        innerTextField()
-
-                    }
-//                    Text(
-//                        text = liveBankName,
-//                        style = typography.labelLarge.copy(fontWeight = FontWeight.Medium),
-//                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-//                    )
+                    Text(
+                        text = bankName,
+                        style = typography.titleLarge.copy(fontFamily = numberFont)
+                    )
 
                 }
 
@@ -777,9 +698,10 @@ fun LivePaymentCard(
                     .constrainAs(backgroundImage1) {
                         top.linkTo(parent.top, margin = -30.dp)
                         start.linkTo(parent.start, margin = -30.dp)
-                    },
+                    }
+                    .zIndex(1f),
                 alpha = 0.1f,
-                colorFilter = ColorFilter.tint(color)
+                colorFilter = ColorFilter.tint(color.copy())
             )
             Image(
                 painter = image,
@@ -789,23 +711,11 @@ fun LivePaymentCard(
                     .constrainAs(backgroundImage2) {
                         end.linkTo(parent.end, margin = -30.dp)
                         bottom.linkTo(parent.bottom, margin = -30.dp)
-                    },
+                    }
+                    .zIndex(1f),
                 alpha = 0.1f,
                 colorFilter = ColorFilter.tint(color)
             )
-            var icon = Icons.TwoTone.Star
-            if (iconToggle) icon = Icons.Filled.Star
-            else icon = Icons.TwoTone.Star
-
-            IconButton(onClick = { iconToggle = !iconToggle },
-                modifier = Modifier.constrainAs(moreIcon) {
-                    top.linkTo(parent.top, 18.dp)
-                    end.linkTo(parent.end, 18.dp)
-                }) {
-                Icon(
-                    imageVector = icon, contentDescription = null, tint = color
-                )
-            }
         }
     }
 }
