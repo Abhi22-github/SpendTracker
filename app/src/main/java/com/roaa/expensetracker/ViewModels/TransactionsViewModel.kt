@@ -1,12 +1,10 @@
 package com.roaa.expensetracker.ViewModels
 
-import android.content.SharedPreferences
 import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.material.chip.Chip
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Database.TransactionRepository
 import com.roaa.expensetracker.Model.TotalAmountClass
@@ -70,20 +68,11 @@ class TransactionsViewModel @Inject constructor(
     val getTotalExpenseAmountForDateFlow: StateFlow<Float> = _getTotalExpenseAmountForDateFlow
 
 
-    private val chipsName = arrayOf<String>()
-    private val chipsList: List<Chip> = ArrayList()
-    private var currentSelectedExpenseCategory = ""
-    private var currentSelectedIncomeCategory = ""
-    private val amount = 0
-    private val note = ""
     var selectedDate: Long
         private set
     private val dateFormatter: DateTimeFormatter? = null
     var transactionTypeFromViewModel: String
         private set
-    private var category: String? = null
-    private val sharedPreferences: SharedPreferences? = null
-
     private val _currentSelectedDate: MutableLiveData<Int>
     var currentSelectedDate: LiveData<Int>
     var todaysDate: LocalDate
@@ -109,17 +98,6 @@ class TransactionsViewModel @Inject constructor(
         dateList = MutableLiveData(mutableListOf<String>())
     }
 
-    fun storeCurrentExpenseSelectChip(s: String) {
-        currentSelectedExpenseCategory = s
-    }
-
-    fun storeCurrentIncomeSelectChip(s: String) {
-        currentSelectedIncomeCategory = s
-    }
-
-    fun setTransactionTypeInViewModel(transaction: String) {
-        transactionTypeFromViewModel = transaction
-    }
 
     fun validateAndPrepareTransactionData(
         selectedType: String,
@@ -281,6 +259,10 @@ class TransactionsViewModel @Inject constructor(
             }
 
         }
+    }
+
+    fun getTransactionsListForBankAccountId(bankAccountId:Long): Flow<List<TransactionWithDetails>> {
+        return transactionRepository.getTransactionListForBankAccountId(bankAccountId)
     }
 
     fun getTotalExpenseAmountForDateCompose(date: Long): Flow<Float> {

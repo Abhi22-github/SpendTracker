@@ -70,6 +70,7 @@ import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.Composables.components.DropDownBankAccountOption
 import com.roaa.expensetracker.Composables.components.EditPaymentMethodBottomSheet
 import com.roaa.expensetracker.Composables.components.EmptyScreen
+import com.roaa.expensetracker.Composables.components.SingleTransaction
 import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.ColorState
@@ -166,7 +167,8 @@ fun PaymentMethodScreen(
         AddPaymentMethodBottomSheet({ showBottomSheet = !showBottomSheet })
     }
     if (showEditBottomSheet) {
-        EditPaymentMethodBottomSheet(bankAccountsClass,
+        EditPaymentMethodBottomSheet(
+            bankAccountsClass,
             { showEditBottomSheet = !showEditBottomSheet })
     }
     if (actionConfirmationFlag) {
@@ -616,7 +618,8 @@ fun PaymentDetailsScreen(
     modifier: Modifier = Modifier,
     bankAccountId: Long,
     uiViewModel: UiViewModel,
-    bankAccountsViewModel: BankAccountsViewModel = hiltViewModel()
+    bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
+    transactionViewModel: TransactionsViewModel = hiltViewModel()
 ) {
     val bankAccount by bankAccountsViewModel.getSingleBankAccountForCompose(bankAccountId)
         .collectAsState(emptyBank)
@@ -627,6 +630,11 @@ fun PaymentDetailsScreen(
             emptyBank
         )
     }
+    val transactionListForBankAccount by transactionViewModel.getTransactionsListForBankAccountId(
+        bankAccountId
+    ).collectAsState(
+        listOf()
+    )
     val bankAccountsList by bankAccountsViewModel.getAllBankAccountsExceptCashCompose()
         .collectAsState(
             listOf(emptyBank)
@@ -641,21 +649,44 @@ fun PaymentDetailsScreen(
             sendUserBackToPreviousActivity = { handleBackNavigation(navigationManager) },
             delete = {})
     }) {
-        Column(Modifier.padding(it)) {
-            PaymentCard(modifier = Modifier,
-                bankAccountsClass = bankAccount,
-                editClicked = { bankAccounts ->
-                    bankAccountsClass = bankAccounts
-                    showEditBottomSheet = !showEditBottomSheet
-                },
-                deleteClicked = { bankAccount ->
-                    actionConfirmationFlag = true
-                    bankAccountsClass = bankAccount
-                },
-                onSingleItemClick = {})
+        val modifierWithHorizotalPadding = Modifier.padding(16.dp, 0.dp)
+        Column(
+            Modifier
+                .padding(it)
+                .padding()
+        ) {
+            Column {
+                PaymentCard(modifier = modifierWithHorizotalPadding,
+                    bankAccountsClass = bankAccount,
+                    editClicked = { bankAccounts ->
+                        bankAccountsClass = bankAccounts
+                        showEditBottomSheet = !showEditBottomSheet
+                    },
+                    deleteClicked = { bankAccount ->
+                        actionConfirmationFlag = true
+                        bankAccountsClass = bankAccount
+                    },
+                    onSingleItemClick = {})
+                Spacer(Modifier.height(8.dp))
+                LazyColumn {
+                    item {
+                        Text(
+                            modifier = modifierWithHorizotalPadding.padding(vertical = 8.dp),
+                            text = "Transactions",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    items(transactionListForBankAccount, key = { it.transaction.id }) {
+                        SingleTransaction(it) { }
+                    }
+                }
+            }
         }
+
         if (showEditBottomSheet) {
-            EditPaymentMethodBottomSheet(bankAccountsClass,
+            EditPaymentMethodBottomSheet(
+                bankAccountsClass,
                 { showEditBottomSheet = !showEditBottomSheet })
         }
         if (actionConfirmationFlag) {
@@ -687,6 +718,7 @@ fun PaymentDetailsScreen(
 
                     }
                     actionConfirmationFlag = !actionConfirmationFlag
+                    handleBackNavigation(navigationManager)
                 }) {
                 actionConfirmationFlag = !actionConfirmationFlag
             }

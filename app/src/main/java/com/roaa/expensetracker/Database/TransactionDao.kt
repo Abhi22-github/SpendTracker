@@ -58,6 +58,9 @@ interface TransactionDao {
     @Query("SELECT * FROM transaction_table where date == :date ORDER BY dateWithTime DESC")
     fun getAllTransactionsForDate(date: Long): Flow<List<TransactionWithDetails>>
 
+    @Query("SELECT * FROM transaction_table where bankAccountId == :bankAccountId")
+    fun getAllTransactionForBankAccountId(bankAccountId: Long): Flow<List<TransactionWithDetails>>
+
     @Query("SELECT * FROM transaction_table where date >= :startDate AND date<= :endDate ORDER BY dateWithTime DESC")
     fun getAllTransactionsForMonth(
         startDate: Long,

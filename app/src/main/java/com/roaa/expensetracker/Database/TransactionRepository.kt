@@ -44,7 +44,10 @@ class TransactionRepository(@ApplicationContext applicationContext: Context) {
         transactionDao.delete(transactionClass)
     }
 
-    fun getTotalTransactionForMonth(startDate: Long, endDate: Long): Flow<List<TransactionWithDetails>> {
+    fun getTotalTransactionForMonth(
+        startDate: Long,
+        endDate: Long
+    ): Flow<List<TransactionWithDetails>> {
         return transactionDao.getAllTransactionsForMonth(startDate, endDate)
     }
 
@@ -66,6 +69,10 @@ class TransactionRepository(@ApplicationContext applicationContext: Context) {
 
     fun getTotalAmountForDateExcludingLast(date: Long, type: String): Flow<Float> {
         return transactionDao.getTotalAmountForDate(date, type).map { it ?: 0f }
+    }
+
+    fun getTransactionListForBankAccountId(bankAccountId: Long): Flow<List<TransactionWithDetails>> {
+        return transactionDao.getAllTransactionForBankAccountId(bankAccountId)
     }
 
     fun getListOfTotalAmountPerDayForRange(
