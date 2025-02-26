@@ -1,6 +1,7 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -38,8 +39,10 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -64,12 +67,15 @@ import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
+import com.roaa.expensetracker.Composables.StatisticsComponent.LineChart
+import com.roaa.expensetracker.Composables.blueColor
 import com.roaa.expensetracker.Composables.components.ActionConfirmation
 import com.roaa.expensetracker.Composables.components.AddPaymentMethodBottomSheet
 import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.Composables.components.DropDownBankAccountOption
 import com.roaa.expensetracker.Composables.components.EditPaymentMethodBottomSheet
 import com.roaa.expensetracker.Composables.components.EmptyScreen
+import com.roaa.expensetracker.Composables.components.HomeStatCardSingleNew
 import com.roaa.expensetracker.Composables.components.SingleTransaction
 import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.orange
@@ -79,13 +85,21 @@ import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.R
+import com.roaa.expensetracker.Utilities.Constants.EXPENSE
+import com.roaa.expensetracker.Utilities.Constants.INCOME
 import com.roaa.expensetracker.Utilities.DeleteAction
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBank
+import com.roaa.expensetracker.Utilities.convertDataToSeries
+import com.roaa.expensetracker.Utilities.convertTotalExpenseIncomeClassToMap
+import com.roaa.expensetracker.Utilities.getCalendarForMonthFromDate
+import com.roaa.expensetracker.Utilities.parseAmount
+import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.ViewModels.BankAccountsViewModel
 import com.roaa.expensetracker.ViewModels.PreferencesViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import com.roaa.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 
 @Composable
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -640,6 +654,40 @@ fun PaymentDetailsScreen(
             listOf(emptyBank)
         )
     val scope = rememberCoroutineScope()
+    val currentMonthStart = LocalDate.now()
+    val allDays = remember(currentMonthStart) {
+        getCalendarForMonthFromDate(currentMonthStart)
+    }
+
+
+    val totalExpenseListFromRoom by transactionViewModel.getListOfTotalAmountPerDayForRangeForComposeForBankAccountId(
+        allDays[0].toLong(),
+        allDays[41].toLong(),
+        bankAccountId
+    ).collectAsState(listOf())
+
+    val totalValuesPerDayForMonthMap = remember(totalExpenseListFromRoom) {
+        convertTotalExpenseIncomeClassToMap(totalExpenseListFromRoom)
+    }
+
+    var totalExpense by remember { mutableFloatStateOf(0f) }
+    var totalIncome by remember { mutableFloatStateOf(0f) }
+    LaunchedEffect(totalExpenseListFromRoom) {
+        totalExpenseListFromRoom.forEach {
+            totalExpense += it.totalExpense
+            totalIncome += it.totalIncome
+        }
+    }
+    Log.d(
+        "TopLineChart3 size",
+        "${totalValuesPerDayForMonthMap.size}}"
+    )
+    val (expenseListPerDayHashMap, incomeListPerDayHashMap) =
+        convertDataToSeries(
+            allDays,
+            totalValuesPerDayForMonthMap
+        )
+
 
     BackHandler { handleBackNavigation(navigationManager) }
 
@@ -649,29 +697,81 @@ fun PaymentDetailsScreen(
             sendUserBackToPreviousActivity = { handleBackNavigation(navigationManager) },
             delete = {})
     }) {
-        val modifierWithHorizotalPadding = Modifier.padding(16.dp, 0.dp)
+        val modifierWithHorizontalPadding = Modifier.padding(16.dp, 0.dp)
         Column(
             Modifier
                 .padding(it)
                 .padding()
         ) {
             Column {
-                PaymentCard(modifier = modifierWithHorizotalPadding,
-                    bankAccountsClass = bankAccount,
-                    editClicked = { bankAccounts ->
-                        bankAccountsClass = bankAccounts
-                        showEditBottomSheet = !showEditBottomSheet
-                    },
-                    deleteClicked = { bankAccount ->
-                        actionConfirmationFlag = true
-                        bankAccountsClass = bankAccount
-                    },
-                    onSingleItemClick = {})
-                Spacer(Modifier.height(8.dp))
+
                 LazyColumn {
                     item {
+                        PaymentCard(modifier = modifierWithHorizontalPadding,
+                            bankAccountsClass = bankAccount,
+                            editClicked = { bankAccounts ->
+                                bankAccountsClass = bankAccounts
+                                showEditBottomSheet = !showEditBottomSheet
+                            },
+                            deleteClicked = { bankAccount ->
+                                actionConfirmationFlag = true
+                                bankAccountsClass = bankAccount
+                            },
+                            onSingleItemClick = {})
+                        Spacer(Modifier.height(16.dp))
                         Text(
-                            modifier = modifierWithHorizotalPadding.padding(vertical = 8.dp),
+                            modifier = modifierWithHorizontalPadding.padding(vertical = 8.dp),
+                            text = "Card Statistics",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+
+                        Card(
+                            modifier = modifierWithHorizontalPadding,
+                            shape = RoundedCornerShape(25.dp)
+                        ) {
+                            Row(
+                                Modifier
+                            ) {
+                                HomeStatCardSingleNew(
+                                    Modifier
+                                        .weight(1f)
+                                        .wrapContentHeight(), parseAmount(totalExpense), EXPENSE
+                                )
+                                HomeStatCardSingleNew(
+                                    Modifier
+                                        .weight(1f)
+                                        .wrapContentHeight(), parseAmount(totalIncome), INCOME
+                                )
+                                HomeStatCardSingleNew(
+                                    Modifier
+                                        .weight(1f)
+                                        .wrapContentHeight(),
+                                    "${transactionListForBankAccount.size}",
+                                    "Transactions"
+                                )
+                            }
+                        }
+                        Spacer(Modifier.height(8.dp))
+
+                        StatisticsCardForCardStats(
+                            modifier = modifierWithHorizontalPadding,
+                            expenseListPerDayHashMap,
+                            incomeListPerDayHashMap,
+                            EXPENSE, totalExpense, totalIncome
+                        )
+                        Spacer(Modifier.height(8.dp))
+                        StatisticsCardForCardStats(
+                            modifier = modifierWithHorizontalPadding,
+                            expenseListPerDayHashMap,
+                            incomeListPerDayHashMap,
+                            INCOME, totalExpense, totalIncome
+                        )
+                        Spacer(Modifier.height(16.dp))
+                    }
+                    item {
+                        Text(
+                            modifier = modifierWithHorizontalPadding.padding(vertical = 8.dp),
                             text = "Transactions",
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface
@@ -725,5 +825,59 @@ fun PaymentDetailsScreen(
         }
     }
 }
+
+@Composable
+fun StatisticsCardForCardStats(
+    modifier: Modifier = Modifier,
+    expenseListPerDay: LinkedHashMap<String, Int>,
+    incomeListPerDay: LinkedHashMap<String, Int>,
+    type: String,
+    totalExpense: Float,
+    totalIncome: Float,
+) {
+    val subTitle = if (type == EXPENSE) "Total Expense" else "Total Income"
+    val title = parseAmount(if (type == EXPENSE) totalExpense else totalIncome)
+    val palette = toPalette(if (type == EXPENSE) orange else blueColor)
+    val cardColor = combineColors(
+        MaterialTheme.colorScheme.surface,
+        palette.container,
+        angle = 0.7f,
+    )
+    Card(
+        modifier = modifier,
+        colors = CardDefaults.cardColors(containerColor = cardColor),
+        shape = RoundedCornerShape(25.dp)
+    ) {
+        Column(Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleLarge,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+                text = subTitle,
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+            Spacer(Modifier.height(8.dp))
+            Box() {
+                if (type == EXPENSE) {
+                    LineChart(
+                        Modifier,
+                        palette,
+                        expenseListPerDay,
+                    )
+                } else {
+                    LineChart(
+                        Modifier,
+                        palette,
+                        incomeListPerDay,
+                    )
+                }
+            }
+        }
+    }
+}
+
 
 

@@ -5,6 +5,7 @@ import androidx.compose.ui.unit.dp
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Model.UiDateModels.BarChartExpenseModel
 import com.roaa.expensetracker.Utilities.UtilityModalClass.DeleteActionsModelClass
+import java.time.LocalDate
 
 fun createListForBarGraph(
     dateList: List<Pair<String, Long>>,
@@ -27,6 +28,26 @@ fun createListForBarGraph(
         list.add(BarChartExpenseModel(it.second, it.first, totalExpense, totalIncome))
     }
     return Pair(list, maxExpense)
+}
+
+fun convertDataToSeries(
+    allDays: List<LocalDate>,
+    totalValuesPerDayForMonthMap: HashMap<Long, Pair<Float, Float>>
+): Pair<LinkedHashMap<String, Int>, LinkedHashMap<String, Int>> {
+    val expenseListPerDayHashMap = LinkedHashMap<String,Int>()
+    val incomeListPerDayHashMap = LinkedHashMap<String,Int>()
+    for (day in allDays) {
+        val longDay = day.toLong()
+        var expense = 0
+        var income = 0
+        if (totalValuesPerDayForMonthMap.containsKey(longDay)) {
+            expense = totalValuesPerDayForMonthMap[longDay]!!.first.toInt()
+            income = totalValuesPerDayForMonthMap[longDay]!!.second.toInt()
+        }
+        expenseListPerDayHashMap[day.toDateWithDayName()] = expense
+        incomeListPerDayHashMap[day.toDateWithDayName()] = income
+    }
+    return Pair(expenseListPerDayHashMap,incomeListPerDayHashMap)
 }
 
 fun calculateBarPercentageHeight(maxHeight: Dp, maxExpense: Float, expenseAmount: Float): Dp {

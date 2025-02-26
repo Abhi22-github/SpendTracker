@@ -32,7 +32,9 @@ fun getFirstAndLastDateOfGivenPeriod(prevMonth: LocalDate, nextMonth: LocalDate)
 
     return Pair(firstDate.format(yearMonthDateLongFormat).toLong(), lastDate.format(yearMonthDateLongFormat).toLong())
 }
-
+/*
+* Extension Functions for Local Date
+*/
 fun LocalDate.toLong(): Long {
     return this.format(yearMonthDateLongFormat).toLong()
 }
@@ -50,12 +52,6 @@ fun LocalDate.toDisplayStringForMonth(): String {
 fun LocalDate.toDisplayStringForMonthWithYear(): String {
     return this.format(showDateFormat).toString()
 }
-
-fun parseAmount(amount: Float): String {
-    val formatter = DecimalFormat("##,##,##,###")
-    return formatter.format(amount)
-}
-
 fun Long.toDisplayDate(): String {
     // Create a DateFormatter object for displaying date in specified format.
     val formatter: SimpleDateFormat = SimpleDateFormat("MMM dd,yyyy")
@@ -64,14 +60,6 @@ fun Long.toDisplayDate(): String {
     val calendar: Calendar = Calendar.getInstance()
     calendar.setTimeInMillis(this)
     return formatter.format(calendar.getTime())
-}
-
-fun convertTotalExpenseIncomeClassToMap(totalExpenseIncomeClassList: List<TotalExpenseIncomeClass>): HashMap<Long, Pair<Float, Float>> {
-    val map = hashMapOf<Long, Pair<Float, Float>>()
-    totalExpenseIncomeClassList.forEach { it ->
-        map[it.date] = Pair(it.totalExpense, it.totalIncome)
-    }
-    return map
 }
 
 fun LocalDate.toLongMillis(): Long {
@@ -90,6 +78,24 @@ fun Long.LongMillisToNoralLong(): Long {
     val instant = Instant.ofEpochMilli(this)
     // Convert Instant to LocalDate (using UTC)
     return instant.atZone(ZoneOffset.UTC).toLocalDate().toLong()
+}
+
+fun LocalDate.toDateWithDayName(): String {
+    return "${this.format(showDateFormat)}"
+}
+
+fun parseAmount(amount: Float): String {
+    val formatter = DecimalFormat("##,##,##,###")
+    return formatter.format(amount)
+}
+
+
+fun convertTotalExpenseIncomeClassToMap(totalExpenseIncomeClassList: List<TotalExpenseIncomeClass>): HashMap<Long, Pair<Float, Float>> {
+    val map = hashMapOf<Long, Pair<Float, Float>>()
+    totalExpenseIncomeClassList.forEach { it ->
+        map[it.date] = Pair(it.totalExpense, it.totalIncome)
+    }
+    return map
 }
 
 fun Float.clamp(min: Float, max: Float): Float =
