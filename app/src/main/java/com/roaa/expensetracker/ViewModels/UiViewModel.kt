@@ -31,8 +31,6 @@ class UiViewModel @Inject constructor() : ViewModel() {
         )
     )
 
-    var bankDetailsWithViewModelFlow = MutableStateFlow(emptyBank)
-
     //
 
     var showMonthFilterChips = MutableStateFlow<Boolean>(false)

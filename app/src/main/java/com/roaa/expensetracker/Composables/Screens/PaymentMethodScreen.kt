@@ -152,13 +152,8 @@ fun PaymentMethodScreen(
                         }, { bankAccount ->
                             actionConfirmationFlag = true
                             bankAccountsClass = bankAccount
-                        }, { bankAccount->
-                            scope.launch {
-                                uiViewModel.bankDetailsWithViewModelFlow.emit(
-                                    bankAccount
-                                )
-                            }
-                            navigationManager.navigateTo(Destinations.BankDetailsScreen)
+                        }, { bankAccount ->
+                            navigationManager.navigateTo(Destinations.BankDetailsScreen(bankAccount.bankAccountId))
                         })
                     }
                 }
@@ -619,10 +614,12 @@ fun PaymentDetailsScreen(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
     modifier: Modifier = Modifier,
+    bankAccountId: Long,
     uiViewModel: UiViewModel,
     bankAccountsViewModel: BankAccountsViewModel = hiltViewModel()
 ) {
-    val bankAccount by uiViewModel.bankDetailsWithViewModelFlow.collectAsState()
+    val bankAccount by bankAccountsViewModel.getSingleBankAccountForCompose(bankAccountId)
+        .collectAsState(emptyBank)
     var showEditBottomSheet by remember { mutableStateOf(false) }
     var actionConfirmationFlag by remember { mutableStateOf(false) }
     var bankAccountsClass by remember {

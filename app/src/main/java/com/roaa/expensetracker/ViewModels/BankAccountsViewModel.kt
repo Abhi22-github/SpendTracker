@@ -66,6 +66,12 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
         }
     }
 
+    fun getSingleBankAccountForCompose(id: Long): Flow<BankAccountsClass> {
+
+        return bankAccountRepository.getSingleBankAccount(id)
+
+    }
+
     fun getAllBankAccounts() {
         viewModelScope.launch {
             loading()

@@ -130,10 +130,12 @@ fun RootNavGraph(
                 )
             }
             composable<Destinations.BankDetailsScreen> {
+                val args = it.toRoute<Destinations.BankDetailsScreen>()
                 PaymentDetailsScreen(
                     rootNavController = rooNavController,
                     navigationManager = navigationManager,
                     modifier = Modifier,
+                    bankAccountId = args.bankAccountId,
                     uiViewModel = uiViewModel
                 )
             }
@@ -240,10 +242,12 @@ fun AppNavGraph(
                 )
             }
             composable<Destinations.BankDetailsScreen> {
+                val args = it.toRoute<Destinations.BankDetailsScreen>()
                 PaymentDetailsScreen(
                     rootNavController = rooNavController,
                     navigationManager = navigationManager,
                     modifier = Modifier,
+                    args.bankAccountId,
                     uiViewModel = uiViewModel
                 )
             }

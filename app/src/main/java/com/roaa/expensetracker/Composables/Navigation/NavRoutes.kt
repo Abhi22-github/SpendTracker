@@ -46,7 +46,7 @@ sealed class Destinations(){
     data object StatisticsScreen : Destinations()
 
     @Serializable
-    data object BankDetailsScreen : Destinations()
+    data class BankDetailsScreen(val bankAccountId:Long) : Destinations()
 
     @Serializable
     data class DayScreen(val date: Long) : Destinations()
