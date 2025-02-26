@@ -1,18 +1,12 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,9 +19,7 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -47,7 +39,6 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -80,14 +71,12 @@ import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.Composables.components.DropDownBankAccountOption
 import com.roaa.expensetracker.Composables.components.EditPaymentMethodBottomSheet
 import com.roaa.expensetracker.Composables.components.EmptyScreen
-import com.roaa.expensetracker.Composables.components.SingleTransaction
 import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.ColorState
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.toPalette
-import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.CASH
@@ -124,22 +113,6 @@ fun PaymentMethodScreen(
     val context = LocalContext.current
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { bankAccountsList.size })
     var actionConfirmationFlag by remember { mutableStateOf(false) }
-
-    var filteredTransactionList = remember { emptyList<TransactionWithDetails>() }
-
-    LaunchedEffect(pagerState.currentPage) {
-        Log.d(
-            "PaymentMethodScreen",
-            "${pagerState.currentPage} ${filteredTransactionList.size} ${bankAccountsList.size} ${allTransaction.size}"
-        )
-//        if(bankAccountsList.isNotEmpty()) {
-//            filteredTransactionList = allTransaction.filter {
-//                it.BankAccount.bankAccountId == bankAccountsList.get(
-//                    pagerState.currentPage
-//                ).bankAccountId
-//            }
-//        }
-    }
 
 
     val lazyListState = rememberLazyListState()
@@ -196,23 +169,14 @@ fun PaymentMethodScreen(
             Column(
                 modifier = Modifier
                     .padding(paddingValue)
+                    .padding(horizontal = 16.dp)
                     .fillMaxSize(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                HorizontalPager(
-                    pagerState,
-                    modifier = Modifier.fillMaxWidth(),
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 0.dp),
-                    pageSpacing = 8.dp
-                ) { page ->
-                    filteredTransactionList = allTransaction.filter {
-                        it.BankAccount.bankAccountId == bankAccountsList.getOrElse(
-                            pagerState.currentPage
-                        ) { emptyBankAccountsClass }.bankAccountId
-                    }
-                    Column {
+                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    items(bankAccountsList) {
                         PaymentCard(Modifier,
-                            bankAccountsList.get(page),
+                            it,
                             bankAccountsViewModel,
                             { bankAccounts ->
                                 bankAccountsClass = bankAccounts
@@ -221,55 +185,9 @@ fun PaymentMethodScreen(
                             { bankAccount ->
                                 actionConfirmationFlag = true
                                 bankAccountsClass = bankAccount
+                            }, {
+
                             })
-                    }
-                }
-                Spacer(Modifier.height(8.dp))
-                Row(
-                    Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    repeat(pagerState.pageCount) { index ->
-                        val isSelected = pagerState.currentPage == index
-                        val dotSize by animateDpAsState(
-                            targetValue = if (isSelected) 14.dp else 8.dp,
-                            animationSpec = tween(durationMillis = 300),
-                            label = "Dot Size"
-                        )
-
-                        val dotColor by animateColorAsState(
-                            targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceContainerHighest,
-                            animationSpec = tween(durationMillis = 300),
-                            label = "Dot Color"
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .width(dotSize)
-                                .height(8.dp)
-                                .clip(CircleShape)
-                                .background(dotColor)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                    }
-                }
-
-                Spacer(Modifier.height(16.dp))
-                Column(
-                    modifier = Modifier.fillMaxSize()
-
-                ) {
-                    Text(
-                        text = "Transactions",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-                        modifier = Modifier.padding(horizontal = 24.dp)
-                    )
-                    LazyColumn {
-                        items(filteredTransactionList, key = { it.transaction.id }) {
-                            SingleTransaction(it) { }
-                        }
                     }
                 }
             }
@@ -327,6 +245,7 @@ fun PaymentCard(
     bankAccountsViewModel: BankAccountsViewModel,
     editClicked: (bankAccountsClass: BankAccountsClass) -> Unit,
     deleteClicked: (bankAccountClass: BankAccountsClass) -> Unit,
+    onSingleItemClick: (bankAccountsClass: BankAccountsClass) -> Unit,
     uiViewModel: UiViewModel = hiltViewModel(),
     preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
@@ -342,7 +261,7 @@ fun PaymentCard(
             .padding(0.dp, 4.dp)
             .clip(RoundedCornerShape(25.dp))
             .clickable {
-                //  onSingleItemClick(item)
+                onSingleItemClick(bankAccountsClass)
             },
         colors = CardDefaults.cardColors(
             containerColor = combineColors(
@@ -724,6 +643,18 @@ fun LivePaymentCard(
             )
         }
     }
+}
+
+
+// payment detail screen
+@Composable
+fun PaymentDetailsScreen(
+    rootNavController: NavHostController,
+    navigationManager: NavigationManager,
+    modifier: Modifier = Modifier,
+    bankAccountsClass: BankAccountsClass,
+) {
+
 }
 
 

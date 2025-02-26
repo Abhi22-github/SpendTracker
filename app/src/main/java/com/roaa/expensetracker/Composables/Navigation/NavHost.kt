@@ -20,6 +20,7 @@ import com.roaa.expensetracker.Composables.Screens.BudgetScreen
 import com.roaa.expensetracker.Composables.Screens.CategoryScreen
 import com.roaa.expensetracker.Composables.Screens.DayViewScreen
 import com.roaa.expensetracker.Composables.Screens.MonthViewScreen
+import com.roaa.expensetracker.Composables.Screens.PaymentDetailsScreen
 import com.roaa.expensetracker.Composables.Screens.PaymentMethodScreen
 import com.roaa.expensetracker.Composables.Screens.SettingsScreen
 import com.roaa.expensetracker.Composables.Screens.StatisticsScreen
@@ -55,11 +56,16 @@ fun RootNavGraph(
                     )
                 }
                 composable<Destinations.MonthScreen> {
-                    MonthViewScreen(rooNavController, navigationManager, modifier = Modifier,uiViewModel)
+                    MonthViewScreen(
+                        rooNavController,
+                        navigationManager,
+                        modifier = Modifier,
+                        uiViewModel
+                    )
                 }
                 composable<Destinations.DayScreen> {
                     val args = it.toRoute<Destinations.DayScreen>()
-                    DayViewScreen(rooNavController, navigationManager, args.date,uiViewModel)
+                    DayViewScreen(rooNavController, navigationManager, args.date, uiViewModel)
                 }
             }
 
@@ -122,6 +128,15 @@ fun RootNavGraph(
                     uiViewModel
                 )
             }
+            composable<Destinations.BankDetailsScreen> {
+                val args = it.toRoute<Destinations.BankDetailsScreen>()
+                PaymentDetailsScreen(
+                    rootNavController = rooNavController,
+                    navigationManager = navigationManager,
+                    modifier = Modifier,
+                    bankAccountsClass = args.bankAccountsClass
+                )
+            }
         }
 
     }
@@ -152,11 +167,16 @@ fun AppNavGraph(
                     )
                 }
                 composable<Destinations.MonthScreen> {
-                    MonthViewScreen(rooNavController, navigationManager, modifier = Modifier,uiViewModel)
+                    MonthViewScreen(
+                        rooNavController,
+                        navigationManager,
+                        modifier = Modifier,
+                        uiViewModel
+                    )
                 }
                 composable<Destinations.DayScreen> {
                     val args = it.toRoute<Destinations.DayScreen>()
-                    DayViewScreen(rooNavController, navigationManager, args.date,uiViewModel)
+                    DayViewScreen(rooNavController, navigationManager, args.date, uiViewModel)
                 }
             }
 
@@ -216,6 +236,15 @@ fun AppNavGraph(
                     args.amount,
                     args.categoryName,
                     uiViewModel
+                )
+            }
+            composable<Destinations.BankDetailsScreen> {
+                val args = it.toRoute<Destinations.BankDetailsScreen>()
+                PaymentDetailsScreen(
+                    rootNavController = rooNavController,
+                    navigationManager = navigationManager,
+                    modifier = Modifier,
+                    bankAccountsClass = args.bankAccountsClass
                 )
             }
         }
