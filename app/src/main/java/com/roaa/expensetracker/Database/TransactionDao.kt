@@ -51,6 +51,13 @@ interface TransactionDao {
         endDate: Long
     ): Flow<List<TotalExpenseIncomeClass>>
 
+    @Query("SELECT date,SUM(CASE WHEN type == \"Expense\" then amount else 0 END) AS totalExpense,SUM(CASE WHEN type == \"Income\" then amount else 0 END) AS totalIncome from transaction_table where date >= :startDate and date <= :endDate and bankAccountId == :bankAccountId group by date")
+    fun getListOfTotalAmountPerDayForRangeForBankAccountId(
+        startDate: Long,
+        endDate: Long,
+        bankAccountId: Long
+    ): Flow<List<TotalExpenseIncomeClass>>
+
     //Relations
     @get:Query("SELECT * FROM transaction_table ORDER BY dateWithTime DESC")
     val allTransactions: Flow<List<TransactionWithDetails>>

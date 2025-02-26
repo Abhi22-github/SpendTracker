@@ -81,6 +81,16 @@ class TransactionRepository(@ApplicationContext applicationContext: Context) {
     ): Flow<List<TotalExpenseIncomeClass>> {
         return transactionDao.getListOfTotalAmountPerDayForRange(startDate, endDate)
     }
+    fun getListOfTotalAmountPerDayForRangeForBankAccountId(
+        startDate: Long,
+        endDate: Long,
+        bankAccountId: Long
+    ): Flow<List<TotalExpenseIncomeClass>> {
+        return transactionDao.getListOfTotalAmountPerDayForRangeForBankAccountId(startDate, endDate, bankAccountId)
+    }
+
+
+
 
     fun getAllTransactionsForDate(date: Long): Flow<List<TransactionWithDetails>> {
         return transactionDao.getAllTransactionsForDate(date)
