@@ -2,15 +2,13 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
-    id("kotlin-kapt")
+    id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
     id("com.google.gms.google-services")
     alias(libs.plugins.kotlin.serialization)
     id("com.google.firebase.crashlytics")
     // Apply Hilt plugin
 }
-apply(plugin = "kotlin-kapt")
-//apply(plugin = "realm-android")
 
 apply(plugin = "kotlin-android")
 
@@ -78,14 +76,14 @@ dependencies {
     implementation(libs.kotlinx.coroutines.android)
 
     //add below dependancy for using room.
-    kapt(libs.androidx.room.compiler)
+    ksp(libs.androidx.room.compiler)
     implementation(libs.androidx.core)
     implementation(libs.commons.lang3)
     implementation(libs.lottie)
     implementation(libs.kotlinx.serialization.json)
 
     implementation(libs.hilt.android)
-    kapt(libs.hilt.android.compiler)
+    ksp(libs.hilt.android.compiler)
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation(libs.androidx.datastore.preferences)
     implementation(libs.androidx.datastore)
@@ -131,5 +129,12 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.compose)
 
     implementation("androidx.compose.material3:material3-window-size-class:1.3.1")
+
+    val vicoVersion = "2.0.1"
+    // For Jetpack Compose.
+    implementation("com.patrykandpatrick.vico:compose:$vicoVersion")
+
+    // For Material 3 theming in Jetpack Compose.
+    implementation("com.patrykandpatrick.vico:compose-m3:$vicoVersion")
 
 }
