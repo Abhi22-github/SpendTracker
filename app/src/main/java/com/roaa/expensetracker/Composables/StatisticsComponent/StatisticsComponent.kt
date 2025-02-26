@@ -1,4 +1,4 @@
-package com.roaa.expensetracker.StatisticsComponent
+package com.roaa.expensetracker.Composables.StatisticsComponent
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D

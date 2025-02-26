@@ -16,9 +16,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
+import com.roaa.expensetracker.Composables.StatisticsComponent.AnimatedPieChart
+import com.roaa.expensetracker.Composables.StatisticsComponent.PieData
 import com.roaa.expensetracker.Composables.components.TopBar
-import com.roaa.expensetracker.StatisticsComponent.AnimatedPieChart
-import com.roaa.expensetracker.StatisticsComponent.PieData
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable

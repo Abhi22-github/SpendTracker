@@ -1,4 +1,4 @@
-package com.roaa.expensetracker.StatisticsComponent
+package com.roaa.expensetracker.Composables.StatisticsComponent
 
 import android.widget.Toast
 import androidx.compose.foundation.background

@@ -1,4 +1,4 @@
-package com.roaa.expensetracker.StatisticsComponent
+package com.roaa.expensetracker.Composables.StatisticsComponent
 
 import androidx.compose.ui.graphics.Color
 
