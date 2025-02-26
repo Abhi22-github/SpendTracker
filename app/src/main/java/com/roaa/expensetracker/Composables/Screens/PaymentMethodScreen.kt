@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -52,7 +51,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -80,10 +78,8 @@ import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.R
-import com.roaa.expensetracker.Utilities.Constants.CASH
 import com.roaa.expensetracker.Utilities.DeleteAction
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBank
-import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTransactionWithDetailsClass
 import com.roaa.expensetracker.ViewModels.BankAccountsViewModel
 import com.roaa.expensetracker.ViewModels.PreferencesViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
@@ -97,7 +93,7 @@ fun PaymentMethodScreen(
     navigationManager: NavigationManager,
     modifier: Modifier = Modifier,
     sendUserBack: () -> Unit,
-    uiViewModel: UiViewModel = hiltViewModel(),
+    uiViewModel: UiViewModel,
     bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
     preferencesViewModel: PreferencesViewModel = hiltViewModel(),
     transactionViewModel: TransactionsViewModel = hiltViewModel()
@@ -108,32 +104,16 @@ fun PaymentMethodScreen(
         .collectAsState(
             listOf(emptyBank)
         )
-    val allTransaction by transactionViewModel.allTransactions.collectAsState(
-        listOf(emptyTransactionWithDetailsClass)
-    )
-    val context = LocalContext.current
-    val pagerState = rememberPagerState(initialPage = 0, pageCount = { bankAccountsList.size })
+
     var actionConfirmationFlag by remember { mutableStateOf(false) }
 
 
     val lazyListState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
-    //empty bank account class
-    val emptyBankAccountsClass = BankAccountsClass(
-        bankAccountId = 0L,
-        initialAmount = 0f,
-        currentAmount = 0f,
-        bankName = "",
-        cardColorNumber = 1,
-        cardIconNumber = 25,
-        accountType = CASH,
-        isActive = true
-    )
-
     var bankAccountsClass by remember {
         mutableStateOf(
-            emptyBankAccountsClass
+            emptyBank
         )
     }
 
@@ -166,24 +146,20 @@ fun PaymentMethodScreen(
             ) {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(bankAccountsList) {
-                        PaymentCard(Modifier,
-                            it,
-                            bankAccountsViewModel,
-                            { bankAccounts ->
-                                bankAccountsClass = bankAccounts
-                                showEditBottomSheet = !showEditBottomSheet
-                            },
-                            { bankAccount ->
-                                actionConfirmationFlag = true
-                                bankAccountsClass = bankAccount
-                            }, {
-                                scope.launch {
-                                    uiViewModel.bankDetailsWithViewModelFlow.emit(
-                                        bankAccountsClass
-                                    )
-                                }
-                                navigationManager.navigateTo(Destinations.BankDetailsScreen)
-                            })
+                        PaymentCard(Modifier, it, { bankAccounts ->
+                            bankAccountsClass = bankAccounts
+                            showEditBottomSheet = !showEditBottomSheet
+                        }, { bankAccount ->
+                            actionConfirmationFlag = true
+                            bankAccountsClass = bankAccount
+                        }, { bankAccount->
+                            scope.launch {
+                                uiViewModel.bankDetailsWithViewModelFlow.emit(
+                                    bankAccount
+                                )
+                            }
+                            navigationManager.navigateTo(Destinations.BankDetailsScreen)
+                        })
                     }
                 }
             }
@@ -195,8 +171,7 @@ fun PaymentMethodScreen(
         AddPaymentMethodBottomSheet({ showBottomSheet = !showBottomSheet })
     }
     if (showEditBottomSheet) {
-        EditPaymentMethodBottomSheet(
-            bankAccountsClass,
+        EditPaymentMethodBottomSheet(bankAccountsClass,
             { showEditBottomSheet = !showEditBottomSheet })
     }
     if (actionConfirmationFlag) {
@@ -238,11 +213,11 @@ fun PaymentMethodScreen(
 fun PaymentCard(
     modifier: Modifier,
     bankAccountsClass: BankAccountsClass,
-    bankAccountsViewModel: BankAccountsViewModel,
     editClicked: (bankAccountsClass: BankAccountsClass) -> Unit,
     deleteClicked: (bankAccountClass: BankAccountsClass) -> Unit,
     onSingleItemClick: (bankAccountsClass: BankAccountsClass) -> Unit,
     uiViewModel: UiViewModel = hiltViewModel(),
+    bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
     preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val color = ColorState.fromNumber(bankAccountsClass.cardColorNumber)!!
@@ -601,8 +576,7 @@ fun LivePaymentCard(
 
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        text = bankName,
-                        style = typography.titleLarge.copy(fontFamily = numberFont)
+                        text = bankName, style = typography.titleLarge.copy(fontFamily = numberFont)
                     )
 
                 }
@@ -611,8 +585,7 @@ fun LivePaymentCard(
             }
 
             val image = rememberAsyncImagePainter(R.drawable.shape_soft_star_1)
-            Image(
-                painter = image,
+            Image(painter = image,
                 contentDescription = "Test Image",
                 modifier = Modifier
                     .size(144.dp)
@@ -622,10 +595,8 @@ fun LivePaymentCard(
                     }
                     .zIndex(1f),
                 alpha = 0.1f,
-                colorFilter = ColorFilter.tint(color.copy())
-            )
-            Image(
-                painter = image,
+                colorFilter = ColorFilter.tint(color.copy()))
+            Image(painter = image,
                 contentDescription = "Test Image",
                 modifier = Modifier
                     .size(144.dp)
@@ -635,23 +606,94 @@ fun LivePaymentCard(
                     }
                     .zIndex(1f),
                 alpha = 0.1f,
-                colorFilter = ColorFilter.tint(color)
-            )
+                colorFilter = ColorFilter.tint(color))
         }
     }
 }
 
 
 // payment detail screen
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun PaymentDetailsScreen(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
     modifier: Modifier = Modifier,
-    uiViewModel: UiViewModel
+    uiViewModel: UiViewModel,
+    bankAccountsViewModel: BankAccountsViewModel = hiltViewModel()
 ) {
-    Scaffold {
-        
+    val bankAccount by uiViewModel.bankDetailsWithViewModelFlow.collectAsState()
+    var showEditBottomSheet by remember { mutableStateOf(false) }
+    var actionConfirmationFlag by remember { mutableStateOf(false) }
+    var bankAccountsClass by remember {
+        mutableStateOf(
+            emptyBank
+        )
+    }
+    val bankAccountsList by bankAccountsViewModel.getAllBankAccountsExceptCashCompose()
+        .collectAsState(
+            listOf(emptyBank)
+        )
+    val scope = rememberCoroutineScope()
+
+    BackHandler { handleBackNavigation(navigationManager) }
+
+    Scaffold(topBar = {
+        TopBar(title = "",
+            showDelete = false,
+            sendUserBackToPreviousActivity = { handleBackNavigation(navigationManager) },
+            delete = {})
+    }) {
+        Column(Modifier.padding(it)) {
+            PaymentCard(modifier = Modifier,
+                bankAccountsClass = bankAccount,
+                editClicked = { bankAccounts ->
+                    bankAccountsClass = bankAccounts
+                    showEditBottomSheet = !showEditBottomSheet
+                },
+                deleteClicked = { bankAccount ->
+                    actionConfirmationFlag = true
+                    bankAccountsClass = bankAccount
+                },
+                onSingleItemClick = {})
+        }
+        if (showEditBottomSheet) {
+            EditPaymentMethodBottomSheet(bankAccountsClass,
+                { showEditBottomSheet = !showEditBottomSheet })
+        }
+        if (actionConfirmationFlag) {
+            ActionConfirmation(Modifier,
+                bankAccountsList.size > 1,
+                bankAccountsClass,
+                bankAccountsList,
+                { action, targetBankAccountClass ->
+                    when (action) {
+                        DeleteAction.DELETE_BANK_ACCOUNT -> {
+                            scope.launch {
+                                bankAccountsViewModel.storeBankAccount(bankAccountsClass.apply {
+                                    this.isActive = false
+                                })
+                            }
+                        }
+
+                        DeleteAction.DELETE_AND_MIGRATE -> {
+                            bankAccountsViewModel.migrateTransactions(
+                                bankAccountsClass, targetBankAccountClass
+                            )
+                        }
+
+                        DeleteAction.DELETE_ALL -> {
+                            bankAccountsViewModel.deleteBankAccountWithTransactions(
+                                bankAccountsClass
+                            )
+                        }
+
+                    }
+                    actionConfirmationFlag = !actionConfirmationFlag
+                }) {
+                actionConfirmationFlag = !actionConfirmationFlag
+            }
+        }
     }
 }
 

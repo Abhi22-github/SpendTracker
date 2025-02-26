@@ -16,7 +16,7 @@ val emptyBank = BankAccountsClass(
     0f,
     "Cash",
     1,
-    99,
+    25,
     CASH,
     isActive = true
 )
