@@ -129,12 +129,11 @@ fun RootNavGraph(
                 )
             }
             composable<Destinations.BankDetailsScreen> {
-                val args = it.toRoute<Destinations.BankDetailsScreen>()
                 PaymentDetailsScreen(
                     rootNavController = rooNavController,
                     navigationManager = navigationManager,
                     modifier = Modifier,
-                    bankAccountsClass = args.bankAccountsClass
+                    uiViewModel = uiViewModel
                 )
             }
         }
@@ -239,12 +238,11 @@ fun AppNavGraph(
                 )
             }
             composable<Destinations.BankDetailsScreen> {
-                val args = it.toRoute<Destinations.BankDetailsScreen>()
                 PaymentDetailsScreen(
                     rootNavController = rooNavController,
                     navigationManager = navigationManager,
                     modifier = Modifier,
-                    bankAccountsClass = args.bankAccountsClass
+                    uiViewModel = uiViewModel
                 )
             }
         }
@@ -284,6 +282,17 @@ fun NavController.navigateToWithSingleTop(screen: Destinations) {
         .build()
 
     navigate(screen, navOptions)
+}
+
+// Function to handle back navigation logic
+fun handleBackNavigation(navigationManager: NavigationManager) {
+    if (navigationManager.navController.previousBackStackEntry != null) {
+        navigationManager.navController.popBackStack() // Pop one screen if there is a back stack
+    } else {
+        navigationManager.navController.navigate(Destinations.ListScreen) {
+            popUpTo(Destinations.ListScreen) { inclusive = true }
+        }
+    }
 }
 
 

@@ -47,8 +47,8 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
+import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
 import com.roaa.expensetracker.Composables.blueColor
 import com.roaa.expensetracker.Composables.components.BudgetBottomSheet
 import com.roaa.expensetracker.Composables.components.EmptyScreen
@@ -111,24 +111,16 @@ fun BudgetScreen(
             emptyBudgetClass, listOf(emptyBudgetDayClass)
         )
     }
-    fun handleBackNavigation() {
-        if (navigationManager.navController.previousBackStackEntry != null) {
-            navigationManager.navController.popBackStack() // Pop one screen if there is a back stack
-        } else {
-            navigationManager.navController.navigate(Destinations.ListScreen) {
-                popUpTo(Destinations.ListScreen) { inclusive = true }
-            }
-        }
-    }
+
     BackHandler {
-        handleBackNavigation()
+        handleBackNavigation(navigationManager)
     }
     Scaffold(
         topBar = {
             TopBar(
                 title = "Budget",
                 showDelete = false,
-                sendUserBackToPreviousActivity = { handleBackNavigation() },
+                sendUserBackToPreviousActivity = { handleBackNavigation(navigationManager) },
                 delete = {}
             )
         },

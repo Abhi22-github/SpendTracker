@@ -49,6 +49,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
+import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
 import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
@@ -69,17 +70,9 @@ fun CategoryScreen(
 ) {
     with(sharedTransitionScope) {
         val context = LocalContext.current
-        fun handleBackNavigation() {
-            if (navigationManager.navController.previousBackStackEntry != null) {
-                navigationManager.navController.popBackStack() // Pop one screen if there is a back stack
-            } else {
-                navigationManager.navController.navigate(Destinations.ListScreen) {
-                    popUpTo(Destinations.ListScreen) { inclusive = true }
-                }
-            }
-        }
+
         BackHandler {
-            handleBackNavigation()
+            handleBackNavigation(navigationManager)
         }
         Surface {
             Scaffold(
@@ -87,7 +80,7 @@ fun CategoryScreen(
                     TopBar(
                         title = "Category",
                         showDelete = false,
-                        sendUserBackToPreviousActivity = { handleBackNavigation() },
+                        sendUserBackToPreviousActivity = { handleBackNavigation(navigationManager) },
                         delete = {}
                     )
                 },

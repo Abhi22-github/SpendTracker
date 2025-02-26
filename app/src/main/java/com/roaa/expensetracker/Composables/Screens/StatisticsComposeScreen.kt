@@ -14,8 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
-import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
+import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
 import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.StatisticsComponent.AnimatedPieChart
 import com.roaa.expensetracker.StatisticsComponent.PieData
@@ -26,25 +26,16 @@ fun StatisticsScreen(
     navHostController: NavHostController,
     navigationManager: NavigationManager,
 ) {
-    // Function to handle back navigation logic
-    fun handleBackNavigation() {
-        if (navigationManager.navController.previousBackStackEntry != null) {
-            navigationManager.navController.popBackStack() // Pop one screen if there is a back stack
-        } else {
-            navigationManager.navController.navigate(Destinations.ListScreen) {
-                popUpTo(Destinations.ListScreen) { inclusive = true }
-            }
-        }
-    }
+
 
     BackHandler() {
-        handleBackNavigation()
+        handleBackNavigation(navigationManager)
     }
     Scaffold(
         topBar = {
             TopBar(title = "Statistics",
                 showDelete = false,
-                sendUserBackToPreviousActivity = { handleBackNavigation() },
+                sendUserBackToPreviousActivity = { handleBackNavigation(navigationManager) },
                 delete = {})
         },
     ) {

@@ -106,7 +106,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun TransactionsListCompose(
-    navController: NavigationManager,
+    navigationManager: NavigationManager,
     modifier: Modifier,
     showSingleDateTransactions: Boolean,
     date: Long,
@@ -261,7 +261,7 @@ fun TransactionsListCompose(
                                                 )
                                             }
                                             if (showNewLayouts)
-                                                navController.navigateTo(
+                                                navigationManager.navigateTo(
                                                     Destinations.DetailsScreen(
                                                         it.transaction.amount,
                                                         it.category.categoryName
@@ -296,7 +296,7 @@ fun TransactionsListCompose(
                                     )
                                 }
                                 if (showNewLayouts)
-                                    navController.navigateTo(
+                                    navigationManager.navigateTo(
                                         Destinations.DetailsScreen(
                                             it.transaction.amount,
                                             it.category.categoryName

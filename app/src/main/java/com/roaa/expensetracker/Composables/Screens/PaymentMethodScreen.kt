@@ -65,6 +65,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
+import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
 import com.roaa.expensetracker.Composables.components.ActionConfirmation
 import com.roaa.expensetracker.Composables.components.AddPaymentMethodBottomSheet
 import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
@@ -136,25 +137,15 @@ fun PaymentMethodScreen(
         )
     }
 
-    // Function to handle back navigation logic
-    fun handleBackNavigation() {
-        if (navigationManager.navController.previousBackStackEntry != null) {
-            navigationManager.navController.popBackStack() // Pop one screen if there is a back stack
-        } else {
-            navigationManager.navController.navigate(Destinations.ListScreen) {
-                popUpTo(Destinations.ListScreen) { inclusive = true }
-            }
-        }
-    }
 
     BackHandler {
-        handleBackNavigation()
+        handleBackNavigation(navigationManager)
     }
 
     Scaffold(topBar = {
         TopBar(title = "Bank Accounts",
             showDelete = false,
-            sendUserBackToPreviousActivity = { handleBackNavigation() },
+            sendUserBackToPreviousActivity = { handleBackNavigation(navigationManager) },
             delete = {})
     }, floatingActionButton = {
         ExtendedFloatingActionButton(
@@ -186,7 +177,12 @@ fun PaymentMethodScreen(
                                 actionConfirmationFlag = true
                                 bankAccountsClass = bankAccount
                             }, {
-
+                                scope.launch {
+                                    uiViewModel.bankDetailsWithViewModelFlow.emit(
+                                        bankAccountsClass
+                                    )
+                                }
+                                navigationManager.navigateTo(Destinations.BankDetailsScreen)
                             })
                     }
                 }
@@ -652,9 +648,11 @@ fun PaymentDetailsScreen(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
     modifier: Modifier = Modifier,
-    bankAccountsClass: BankAccountsClass,
+    uiViewModel: UiViewModel
 ) {
-
+    Scaffold {
+        
+    }
 }
 
 

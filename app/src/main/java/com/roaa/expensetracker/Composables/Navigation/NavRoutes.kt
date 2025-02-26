@@ -1,6 +1,5 @@
 package com.roaa.expensetracker.Composables.Navigation
 
-import com.roaa.expensetracker.Model.BankAccountsClass
 import kotlinx.serialization.Serializable
 
 
@@ -47,7 +46,7 @@ sealed class Destinations(){
     data object StatisticsScreen : Destinations()
 
     @Serializable
-    data class BankDetailsScreen(val bankAccountsClass: BankAccountsClass) : Destinations()
+    data object BankDetailsScreen : Destinations()
 
     @Serializable
     data class DayScreen(val date: Long) : Destinations()
