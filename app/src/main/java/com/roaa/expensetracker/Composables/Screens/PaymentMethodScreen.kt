@@ -1,7 +1,6 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -38,6 +37,7 @@ import androidx.compose.material3.ProgressIndicatorDefaults.drawStopIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -69,9 +69,11 @@ import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
 import com.roaa.expensetracker.Composables.StatisticsComponent.LineChart
-import com.roaa.expensetracker.Composables.blueColor
+import com.roaa.expensetracker.Composables.color4
+import com.roaa.expensetracker.Composables.color8
 import com.roaa.expensetracker.Composables.components.ActionConfirmation
 import com.roaa.expensetracker.Composables.components.AddPaymentMethodBottomSheet
+import com.roaa.expensetracker.Composables.components.BottomSheetContentItemDetails
 import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.Composables.components.DropDownBankAccountOption
 import com.roaa.expensetracker.Composables.components.EditPaymentMethodBottomSheet
@@ -84,12 +86,15 @@ import com.roaa.expensetracker.Composables.utils.ColorState
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.toPalette
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
 import com.roaa.expensetracker.Utilities.DeleteAction
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBank
+import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyCategoryClass
+import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTransactionClass
 import com.roaa.expensetracker.Utilities.convertDataToSeries
 import com.roaa.expensetracker.Utilities.convertTotalExpenseIncomeClassToMap
 import com.roaa.expensetracker.Utilities.getCalendarForMonthFromDate
@@ -749,6 +754,7 @@ fun LivePaymentCard(
 
 
 // payment detail screen
+@OptIn(ExperimentalMaterial3Api::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
 fun PaymentDetailsScreen(
@@ -803,10 +809,17 @@ fun PaymentDetailsScreen(
             totalIncome += it.totalIncome
         }
     }
-    Log.d(
-        "TopLineChart3 size",
-        "${totalValuesPerDayForMonthMap.size}}"
-    )
+    var bottomSheet by remember { mutableStateOf(false) }
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var singleTransaction by remember {
+        mutableStateOf(
+            TransactionWithDetails(
+                emptyTransactionClass,
+                emptyCategoryClass,
+                emptyBank
+            )
+        )
+    }
     val (expenseListPerDayHashMap, incomeListPerDayHashMap) =
         convertDataToSeries(
             allDays,
@@ -861,12 +874,16 @@ fun PaymentDetailsScreen(
                                 HomeStatCardSingleNew(
                                     Modifier
                                         .weight(1f)
-                                        .wrapContentHeight(), parseAmount(totalExpense), EXPENSE
+                                        .wrapContentHeight(),
+                                    "₹ ${parseAmount(totalExpense)}",
+                                    EXPENSE
                                 )
                                 HomeStatCardSingleNew(
                                     Modifier
                                         .weight(1f)
-                                        .wrapContentHeight(), parseAmount(totalIncome), INCOME
+                                        .wrapContentHeight(),
+                                    "₹ ${parseAmount(totalIncome)}",
+                                    INCOME
                                 )
                                 HomeStatCardSingleNew(
                                     Modifier
@@ -877,21 +894,23 @@ fun PaymentDetailsScreen(
                                 )
                             }
                         }
-                        Spacer(Modifier.height(8.dp))
+                        if (false) {
+                            Spacer(Modifier.height(8.dp))
 
-                        StatisticsCardForCardStats(
-                            modifier = modifierWithHorizontalPadding,
-                            expenseListPerDayHashMap,
-                            incomeListPerDayHashMap,
-                            EXPENSE, totalExpense, totalIncome
-                        )
-                        Spacer(Modifier.height(8.dp))
-                        StatisticsCardForCardStats(
-                            modifier = modifierWithHorizontalPadding,
-                            expenseListPerDayHashMap,
-                            incomeListPerDayHashMap,
-                            INCOME, totalExpense, totalIncome
-                        )
+                            StatisticsCardForCardStats(
+                                modifier = modifierWithHorizontalPadding,
+                                expenseListPerDayHashMap,
+                                incomeListPerDayHashMap,
+                                EXPENSE, totalExpense, totalIncome
+                            )
+                            Spacer(Modifier.height(8.dp))
+                            StatisticsCardForCardStats(
+                                modifier = modifierWithHorizontalPadding,
+                                expenseListPerDayHashMap,
+                                incomeListPerDayHashMap,
+                                INCOME, totalExpense, totalIncome
+                            )
+                        }
                         Spacer(Modifier.height(16.dp))
                     }
                     item {
@@ -903,12 +922,20 @@ fun PaymentDetailsScreen(
                         )
                     }
                     items(transactionListForBankAccount, key = { it.transaction.id }) {
-                        SingleTransaction(it) { }
+                        SingleTransaction(it) {
+                            singleTransaction = it
+                            bottomSheet = !bottomSheet
+                        }
                     }
                 }
             }
         }
-
+        if (bottomSheet) {
+            BottomSheetContentItemDetails(
+                bottomSheetState,
+                singleTransaction,
+                { bottomSheet = !bottomSheet })
+        }
         if (showEditBottomSheet) {
             EditPaymentMethodBottomSheet(
                 bankAccountsClass,
@@ -962,11 +989,11 @@ fun StatisticsCardForCardStats(
 ) {
     val subTitle = if (type == EXPENSE) "Total Expense" else "Total Income"
     val title = parseAmount(if (type == EXPENSE) totalExpense else totalIncome)
-    val palette = toPalette(if (type == EXPENSE) orange else blueColor)
+    val palette = toPalette(if (type == EXPENSE) color8 else color4)
     val cardColor = combineColors(
         MaterialTheme.colorScheme.surface,
         palette.container,
-        angle = 0.7f,
+        angle = 0.5f,
     )
     Card(
         modifier = modifier,

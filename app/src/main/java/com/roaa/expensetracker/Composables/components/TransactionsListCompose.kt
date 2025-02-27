@@ -562,14 +562,6 @@ fun HomeStatCardNew(
                     Modifier
                 ) {
                     HomeStatCardSingleNew(Modifier.weight(1f), expense, EXPENSE)
-//                VerticalDivider(
-//                    thickness = 5.dp,
-//                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-//                    modifier = Modifier
-//                        .zIndex(1f)
-//                        .weight(0.2f)
-//                        .padding(horizontal = 12.dp)
-//                )
                     HomeStatCardSingleNew(Modifier.weight(1f), income, INCOME)
                 }
             }
@@ -626,7 +618,7 @@ fun HomeStatCardSingleNew(
                     }
             ) {
                 Text(
-                    text = "₹ $value",
+                    text = value,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                     style = typography.bodySmall.copy(
