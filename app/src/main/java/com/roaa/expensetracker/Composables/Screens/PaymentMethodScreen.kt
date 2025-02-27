@@ -32,8 +32,6 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.ProgressIndicatorDefaults
-import androidx.compose.material3.ProgressIndicatorDefaults.drawStopIndicator
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -395,27 +393,21 @@ fun PaymentCard(
             }
 
 
-            LinearProgressIndicator(progress = { Math.random().toFloat() },
+            LinearProgressIndicator(
+                progress = { Math.random().toFloat() },
                 modifier = Modifier
-                    .height(10.dp)
+                    .height(30.dp)
                     .constrainAs(progress) {
                         top.linkTo(balanceLabel.bottom, 20.dp)
                         start.linkTo(parent.start, 24.dp)
                         end.linkTo(parent.end, 24.dp)
                         width = Dimension.fillToConstraints
                     },
-                color = color.copy(alpha = 0.30f),
+                color = color.copy(alpha = 0.50f),
                 trackColor = color.copy(alpha = 0.10f),
                 strokeCap = StrokeCap.Round,
-                gapSize = 0.dp,
-                drawStopIndicator = {
-                    drawStopIndicator(
-                        drawScope = this,
-                        stopSize = ProgressIndicatorDefaults.CircularStrokeWidth,
-                        color = color,
-                        strokeCap = StrokeCap.Round
-                    )
-                })
+                gapSize = -30.dp,
+            )
             Image(
                 painter = image,
                 contentDescription = "Test Image",
@@ -764,10 +756,14 @@ fun PaymentDetailsScreen(
     bankAccountId: Long,
     uiViewModel: UiViewModel,
     bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
-    transactionViewModel: TransactionsViewModel = hiltViewModel()
+    transactionViewModel: TransactionsViewModel = hiltViewModel(),
+    preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val bankAccount by bankAccountsViewModel.getSingleBankAccountForCompose(bankAccountId)
         .collectAsState(emptyBank)
+    val showExperimentalComponent by preferencesViewModel.showExperimentalComponent.collectAsState(
+        false
+    )
     var showEditBottomSheet by remember { mutableStateOf(false) }
     var actionConfirmationFlag by remember { mutableStateOf(false) }
     var bankAccountsClass by remember {
@@ -894,9 +890,8 @@ fun PaymentDetailsScreen(
                                 )
                             }
                         }
-                        if (false) {
+                        if (showExperimentalComponent) {
                             Spacer(Modifier.height(8.dp))
-
                             StatisticsCardForCardStats(
                                 modifier = modifierWithHorizontalPadding,
                                 expenseListPerDayHashMap,
@@ -914,12 +909,14 @@ fun PaymentDetailsScreen(
                         Spacer(Modifier.height(16.dp))
                     }
                     item {
-                        Text(
-                            modifier = modifierWithHorizontalPadding.padding(vertical = 8.dp),
-                            text = "Transactions",
-                            style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface
-                        )
+                        if (transactionListForBankAccount.isNotEmpty()) {
+                            Text(
+                                modifier = modifierWithHorizontalPadding.padding(vertical = 8.dp),
+                                text = "Transactions",
+                                style = MaterialTheme.typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                        }
                     }
                     items(transactionListForBankAccount, key = { it.transaction.id }) {
                         SingleTransaction(it) {

@@ -11,7 +11,7 @@ import com.roaa.expensetracker.Utilities.PreferenceManger.CURRENT_BUDGET_START_D
 import com.roaa.expensetracker.Utilities.PreferenceManger.IS_BUDGET_SET
 import com.roaa.expensetracker.Utilities.PreferenceManger.PRIMARY_BANK_ACCOUNT
 import com.roaa.expensetracker.Utilities.PreferenceManger.PreferenceManager
-import com.roaa.expensetracker.Utilities.PreferenceManger.SHOW_FORECAST
+import com.roaa.expensetracker.Utilities.PreferenceManger.SHOW_EXPERIMENTAL_COMPONENTS
 import com.roaa.expensetracker.Utilities.PreferenceManger.THEME_MODE
 import com.roaa.expensetracker.Utilities.PreferenceManger.TOTAL_BUDGET_FOR_MONTH
 import com.roaa.expensetracker.Utilities.PreferenceManger.TOTAL_BUDGET_PER_DAY
@@ -32,13 +32,13 @@ class PreferencesViewModel @Inject constructor(private val preferenceManager: Pr
     val getThemeMode = preferenceManager.getThemeValue(THEME_MODE)
 
 
-    fun setForecastState(state: Boolean) {
+    fun setExperimentalComponentsState(state: Boolean) {
         viewModelScope.launch {
-            preferenceManager.saveBooleanValue(state, SHOW_FORECAST)
+            preferenceManager.saveBooleanValue(state, SHOW_EXPERIMENTAL_COMPONENTS)
         }
     }
 
-    val showForecastBar = preferenceManager.getBooleanValue(SHOW_FORECAST)
+    val showExperimentalComponent = preferenceManager.getBooleanValue(SHOW_EXPERIMENTAL_COMPONENTS)
 
     fun setPrimaryAccountNumber(position: Long) {
         viewModelScope.launch {

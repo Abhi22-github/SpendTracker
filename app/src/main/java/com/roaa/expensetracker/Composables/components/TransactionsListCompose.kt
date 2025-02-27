@@ -151,7 +151,7 @@ fun TransactionsListCompose(
     }
 
     var bottomSheet by remember { mutableStateOf(false) }
-    val showNewLayouts by preferencesViewModel.showForecastBar.collectAsState(false)
+    val showExperimentalComponents by preferencesViewModel.showExperimentalComponent.collectAsState(false)
     Scaffold(floatingActionButton = {
         ExtendedFloatingActionButton(
             onClick = {
@@ -173,7 +173,6 @@ fun TransactionsListCompose(
             )
         }
         val scope = rememberCoroutineScope()
-        val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
         val orangePalette = toPalette(orange)
         val greenPalette = toPalette(greenColor)
 
@@ -213,25 +212,8 @@ fun TransactionsListCompose(
                             LazyColumn(
                                 modifier = Modifier.fillMaxWidth(), state = lazyList
                             ) {
-
                                 item {
-                                    // SummaryCard(blueColor)
                                     Row(modifier = Modifier.padding(top = 8.dp)) {
-//                                        Spacer(Modifier.width(16.dp))
-//                                        HomeStatCard(
-//                                            Modifier.weight(1f),
-//                                            parseAmount(totalExpenseForMonth.totalAmount),
-//                                            "Total Expense",
-//                                            toPalette(orange)
-//                                        )
-//                                        Spacer(Modifier.width(8.dp))
-//                                        HomeStatCard(
-//                                            Modifier.weight(1f),
-//                                            parseAmount(totalIncomeForMonth.totalAmount),
-//                                            "Total Income",
-//                                            toPalette(greenColor)
-//                                        )
-//                                        Spacer(Modifier.width(8.dp))
                                         HomeStatCardNew(
                                             Modifier,
                                             parseAmount(totalIncomeForMonth.totalAmount),
@@ -240,7 +222,6 @@ fun TransactionsListCompose(
                                             selectedMonthString,
                                             currentMonthAllDayAndDatesListAndMaxValue,
                                         )
-//
                                     }
                                 }
                                 transactionConverterList.forEach { (date, transactionList) ->
@@ -260,7 +241,7 @@ fun TransactionsListCompose(
                                                     singleTransaction
                                                 )
                                             }
-                                            if (showNewLayouts)
+                                            if (showExperimentalComponents)
                                                 navigationManager.navigateTo(
                                                     Destinations.DetailsScreen(
                                                         it.transaction.amount,
@@ -295,7 +276,7 @@ fun TransactionsListCompose(
                                         singleTransaction
                                     )
                                 }
-                                if (showNewLayouts)
+                                if (showExperimentalComponents)
                                     navigationManager.navigateTo(
                                         Destinations.DetailsScreen(
                                             it.transaction.amount,

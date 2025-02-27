@@ -228,8 +228,6 @@ fun BottomSheetContentItemAddContent(
     var selectedPaymentMethod by remember { mutableStateOf<BankAccountsClass>(emptyBank) }
     val focusRequester = remember { FocusRequester() }
     val categoryList by categoryViewModel.categoryList.collectAsState()
-    val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
-
     var selectedCategory by remember {
         mutableStateOf(
             firstSampleClass
@@ -305,14 +303,6 @@ fun BottomSheetContentItemAddContent(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(16.dp))
-//            AnimatedVisibility(showForecast) {
-//                Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
-//                    RestBudgetPill(LocalDate.now().toLong())
-//                }
-//            }
-            if (showForecast) {
-                Spacer(Modifier.height(16.dp))
-            }
             Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
 
                 Box(contentAlignment = Alignment.Center,
@@ -626,8 +616,6 @@ fun BottomSheetContentItemEditContent(
     var selectedPaymentMethod by remember { mutableStateOf<BankAccountsClass>(singleTransaction.BankAccount) }
     val focusRequester = remember { FocusRequester() }
     val categoryList by categoryViewModel.categoryList.collectAsState()
-    val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
-
     var selectedCategory by remember {
         mutableStateOf(
             singleTransaction.category
@@ -709,14 +697,6 @@ fun BottomSheetContentItemEditContent(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(16.dp))
-//            AnimatedVisibility(showForecast) {
-//                Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
-//                    RestBudgetPill(LocalDate.now().toLong())
-//                }
-//            }
-            if (showForecast) {
-                Spacer(Modifier.height(16.dp))
-            }
             Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
 
                 Box(contentAlignment = Alignment.Center,
@@ -1214,7 +1194,6 @@ fun AddBottomSheet(
         val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         val bottomSheetStateTest = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         val scope = rememberCoroutineScope()
-        val showNewLayout by preferencesViewModel.showForecastBar.collectAsState(false)
 
         if (true) BottomSheetContentAddItem(date, bottomSheetState) {
             scope.launch {
@@ -2260,7 +2239,6 @@ fun BottomSheetContentItemAddContentTest(
     var comment by remember { mutableStateOf(TextFieldValue("")) }
     var selectedDate by remember { mutableStateOf<Long?>(System.currentTimeMillis()) }
     val categoryList by categoryViewModel.categoryList.collectAsState()
-    val showForecast by preferencesViewModel.showForecastBar.collectAsState(false)
     val firstSampleClass = firstSampleClass
     var selectedCategory by remember {
         mutableStateOf(
@@ -2353,14 +2331,6 @@ fun BottomSheetContentItemAddContentTest(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(16.dp))
-//            AnimatedVisibility(showForecast) {
-//                Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
-//                    RestBudgetPill(LocalDate.now().toLong())
-//                }
-//            }
-//            if (showForecast) {
-//                Spacer(Modifier.height(16.dp))
-//            }
             Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
 
                 Box(contentAlignment = Alignment.Center,

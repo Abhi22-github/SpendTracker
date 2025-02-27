@@ -80,7 +80,7 @@ fun SettingsScreenContent(
     preferenceViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val themeSelected by preferenceViewModel.getThemeMode.collectAsState(ThemeMode.SYSTEM.toString())
-    val showForecast by preferenceViewModel.showForecastBar.collectAsState(false)
+    val showExperimentalComponent by preferenceViewModel.showExperimentalComponent.collectAsState(false)
     val sheetState = rememberModalBottomSheetState()
     var bottomSheet by remember { mutableStateOf(false) }
     val list = listOf("LIGHT", "NIGHT", "SYSTEM")
@@ -117,22 +117,22 @@ fun SettingsScreenContent(
             Row() {
                 Column(Modifier.weight(1f)) {
                     Text(
-                        text = "Forecast Budget", style = MaterialTheme.typography.titleMedium,
+                        text = "Experiment Components", style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         modifier = Modifier.padding(startEndPadding, topBottomPadding)
                     )
                     Text(
-                        text = "Show Forecast budget bar while Adding the transactions",
+                        text = "Show all experimental components",
                         style = MaterialTheme.typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.6f),
                         modifier = Modifier.padding(startEndPadding, topBottomPadding)
                     )
                 }
                 Switch(
-                    checked = showForecast,
+                    checked = showExperimentalComponent,
                     onCheckedChange = {
                         scope.launch {
-                            preferenceViewModel.setForecastState(it)
+                            preferenceViewModel.setExperimentalComponentsState(it)
                         }
                     },
                     modifier = Modifier
