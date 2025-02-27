@@ -21,15 +21,14 @@ val purpleColor = Color(0xFF9C27B0)
 val greenColor = Color(0xFF216C34)
 val orange = Color(0xFFDF7D1A)
 
-val blueColorGradient1 = Color(0xFF2196f3)
-val blueColorGradient2 = Color(0xFF79C3Fd)
-
-val orangeColorGradient1 = Color(0xFFFF8400)
-val orangeColorGradient2 = Color(0xFFFDA35F)
-
-val greenColorGradient1 = Color(0xFF11B114)
-val greenColorGradient2 = Color(0xFF52DB59)
-
+val color1 = Color(0xFFCD6A65)
+val color2 = Color(0xFFD06DA6)
+val color3 = Color(0xFF358C76)
+val color4 = Color(0xFF4D67B5)
+val color5 = Color(0xFF6D4CE1)
+val color6 = Color(0xFF3C411E)
+val color7 = Color(0xFF9CA1AD)
+val color8 = Color(0xFFF79066)
 
 
 

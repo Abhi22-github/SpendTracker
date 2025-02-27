@@ -1,9 +1,14 @@
 package com.roaa.expensetracker.Composables.utils
 
 import androidx.compose.ui.graphics.Color
-import com.roaa.expensetracker.Composables.blueColor
-import com.roaa.expensetracker.Composables.greenColor
-import com.roaa.expensetracker.Composables.orange
+import com.roaa.expensetracker.Composables.color1
+import com.roaa.expensetracker.Composables.color2
+import com.roaa.expensetracker.Composables.color3
+import com.roaa.expensetracker.Composables.color4
+import com.roaa.expensetracker.Composables.color5
+import com.roaa.expensetracker.Composables.color6
+import com.roaa.expensetracker.Composables.color7
+import com.roaa.expensetracker.Composables.color8
 import com.roaa.expensetracker.R
 
 enum class IconState(val number: Int, val drawableResId: Int) {
@@ -65,15 +70,28 @@ enum class IconStateForType(val number: Int, val drawableResId: Int) {
 }
 
 enum class ColorState(val number: Int, val color: Color) {
-    COLOR_1(1, blueColor),
-    COLOR_2(2, greenColor),
-    COLOR_3(3, orange),
-    COLOR_4(4, Color.Red);
+//    COLOR_1(1, blueColor),
+//    COLOR_2(2, greenColor),
+//    COLOR_3(3, orange),
+//    COLOR_4(4, Color.Red);
+    COLOR_1(1, color1),
+    COLOR_2(2, color2),
+    COLOR_3(3, color3),
+    COLOR_4(4, color4),
+    COLOR_5(5, color5),
+    COLOR_6(6, color6),
+    COLOR_7(7, color7),
+    COLOR_8(8, color8);
+
+
 
     companion object {
         // This function maps a number to the corresponding Icon enum constant
         fun fromNumber(number: Int): Color? {
             return values().firstOrNull { it.number == number }?.color
+        }
+        fun fromColor(color: Color): Int {
+            return values().firstOrNull { it.color == color }?.number ?: 1
         }
     }
 }

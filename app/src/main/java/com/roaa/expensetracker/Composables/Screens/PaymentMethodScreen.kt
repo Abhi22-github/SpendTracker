@@ -62,6 +62,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.Navigation.Destinations
@@ -249,12 +250,79 @@ fun PaymentCard(
             containerColor = combineColors(
                 MaterialTheme.colorScheme.surface,
                 color,
-                angle = 0.3f,
+                angle = 0.4f,
             )
         )
     ) {
         ConstraintLayout(Modifier.fillMaxWidth()) {
             val (balanceText, balanceLabel, cardNumber, moreIcon, backgroundImage1, backgroundImage2, progress) = createRefs()
+            val circleModifier1 = Modifier.constrainAs(backgroundImage1) {
+                end.linkTo(parent.end, margin = 30.dp)
+                top.linkTo(parent.top, margin = -30.dp)
+            }
+            val circleModifier2 = Modifier.constrainAs(backgroundImage2) {
+                end.linkTo(parent.end, margin = -50.dp)
+            }
+            val squareModifier1 = Modifier.constrainAs(backgroundImage1) {
+                end.linkTo(parent.end, margin = 30.dp)
+                top.linkTo(parent.top, margin = -30.dp)
+            }
+            val squareModifier2 = Modifier.constrainAs(backgroundImage2) {
+                end.linkTo(parent.end, margin = -60.dp)
+                bottom.linkTo(parent.bottom, margin = 0.dp)
+            }
+            val hexagonModifier1 = Modifier.constrainAs(backgroundImage1) {
+                end.linkTo(parent.end, margin = -30.dp)
+                top.linkTo(parent.top, margin = -60.dp)
+            }
+            val hexagonModifier2 = Modifier.constrainAs(backgroundImage2) {
+                end.linkTo(parent.end, margin = -50.dp)
+                bottom.linkTo(parent.bottom, margin = 0.dp)
+            }
+
+            val polygonModifier1 = Modifier.constrainAs(backgroundImage1) {
+                end.linkTo(parent.end, margin = -30.dp)
+                top.linkTo(parent.top, margin = -60.dp)
+            }
+            val polygonModifier2 = Modifier.constrainAs(backgroundImage2) {
+                start.linkTo(parent.start, margin = -20.dp)
+                bottom.linkTo(parent.bottom, margin = -70.dp)
+            }
+            val number =
+                if (bankAccountsClass.cardColorNumber % 4 == 0) 4 else bankAccountsClass.cardColorNumber % 4
+            val (image, modifier1, modifier2) = when (number) {
+                1 -> Triple(
+                    rememberAsyncImagePainter(R.drawable.shape_soft_circle),
+                    circleModifier1,
+                    circleModifier2
+                )
+
+                2 -> Triple(
+                    rememberAsyncImagePainter(R.drawable.shape_soft_square),
+                    squareModifier1,
+                    squareModifier2
+                )
+
+                3 -> Triple(
+                    rememberAsyncImagePainter(R.drawable.shape_soft_hexagon),
+                    hexagonModifier1,
+                    hexagonModifier1
+                )
+
+                4 -> Triple(
+                    rememberAsyncImagePainter(
+                        R.drawable.shape_soft_polygon,
+                    ),
+                    polygonModifier1,
+                    polygonModifier2
+                )
+
+                else -> Triple(
+                    rememberAsyncImagePainter(R.drawable.shape_soft_circle),
+                    circleModifier1,
+                    circleModifier2
+                )
+            }
 
             Text(text = "₹${bankAccountsClass.currentAmount}",
                 style = typography.headlineMedium.copy(fontFamily = numberFont),
@@ -321,19 +389,7 @@ fun PaymentCard(
 
             }
 
-            val image = rememberAsyncImagePainter(R.drawable.shape_soft_star_1)
-            Image(
-                painter = image,
-                contentDescription = "Test Image",
-                modifier = Modifier
-                    .size(144.dp)
-                    .constrainAs(backgroundImage1) {
-                        top.linkTo(parent.top, margin = -30.dp)
-                        start.linkTo(parent.start, margin = -30.dp)
-                    },
-                alpha = 0.1f,
-                colorFilter = ColorFilter.tint(color)
-            )
+
             LinearProgressIndicator(progress = { Math.random().toFloat() },
                 modifier = Modifier
                     .height(10.dp)
@@ -358,12 +414,16 @@ fun PaymentCard(
             Image(
                 painter = image,
                 contentDescription = "Test Image",
-                modifier = Modifier
-                    .size(144.dp)
-                    .constrainAs(backgroundImage2) {
-                        end.linkTo(parent.end, margin = -30.dp)
-                        bottom.linkTo(parent.bottom, margin = -30.dp)
-                    },
+                modifier = modifier1
+                    .size(144.dp),
+                alpha = 0.1f,
+                colorFilter = ColorFilter.tint(color)
+            )
+            Image(
+                painter = image,
+                contentDescription = "Test Image",
+                modifier = modifier2
+                    .size(144.dp),
                 alpha = 0.1f,
                 colorFilter = ColorFilter.tint(color)
             )
@@ -512,7 +572,7 @@ fun LivePaymentCard(
     val newColor = combineColors(
         MaterialTheme.colorScheme.surface,
         color,
-        angle = 0.3f,
+        angle = 0.4f,
     )
     Card(
         shape = RoundedCornerShape(25.dp),
@@ -526,6 +586,76 @@ fun LivePaymentCard(
 
         ConstraintLayout(Modifier.fillMaxWidth()) {
             val (balanceText, balanceLabel, cardNumber, moreIcon, backgroundImage1, backgroundImage2) = createRefs()
+
+            val circleModifier1 = Modifier.constrainAs(backgroundImage1) {
+                end.linkTo(parent.end, margin = 30.dp)
+                top.linkTo(parent.top, margin = -30.dp)
+            }
+            val circleModifier2 = Modifier.constrainAs(backgroundImage2) {
+                end.linkTo(parent.end, margin = -50.dp)
+            }
+            val squareModifier1 = Modifier.constrainAs(backgroundImage1) {
+                end.linkTo(parent.end, margin = 30.dp)
+                top.linkTo(parent.top, margin = -30.dp)
+            }
+            val squareModifier2 = Modifier.constrainAs(backgroundImage2) {
+                end.linkTo(parent.end, margin = -60.dp)
+                bottom.linkTo(parent.bottom, margin = 0.dp)
+            }
+            val hexagonModifier1 = Modifier.constrainAs(backgroundImage1) {
+                end.linkTo(parent.end, margin = -30.dp)
+                top.linkTo(parent.top, margin = -60.dp)
+            }
+            val hexagonModifier2 = Modifier.constrainAs(backgroundImage2) {
+                end.linkTo(parent.end, margin = -50.dp)
+                bottom.linkTo(parent.bottom, margin = 0.dp)
+            }
+
+            val polygonModifier1 = Modifier.constrainAs(backgroundImage1) {
+                end.linkTo(parent.end, margin = -30.dp)
+                top.linkTo(parent.top, margin = -60.dp)
+            }
+            val polygonModifier2 = Modifier.constrainAs(backgroundImage2) {
+                start.linkTo(parent.start, margin = -20.dp)
+                bottom.linkTo(parent.bottom, margin = -70.dp)
+            }
+            val number =
+                if (ColorState.fromColor(color) % 4 == 0) 4 else ColorState.fromColor(color) % 4
+            val (image, modifier1, modifier2) = when (number) {
+                1 -> Triple(
+                    rememberAsyncImagePainter(R.drawable.shape_soft_circle),
+                    circleModifier1,
+                    circleModifier2
+                )
+
+                2 -> Triple(
+                    rememberAsyncImagePainter(R.drawable.shape_soft_square),
+                    squareModifier1,
+                    squareModifier2
+                )
+
+                3 -> Triple(
+                    rememberAsyncImagePainter(R.drawable.shape_soft_hexagon),
+                    hexagonModifier1,
+                    hexagonModifier1
+                )
+
+                4 -> Triple(
+                    rememberAsyncImagePainter(
+                        R.drawable.shape_soft_polygon,
+                        transform = AsyncImagePainter.DefaultTransform
+                    ),
+                    polygonModifier1,
+                    polygonModifier2
+                )
+
+                else -> Triple(
+                    rememberAsyncImagePainter(R.drawable.shape_soft_circle),
+                    circleModifier1,
+                    circleModifier2
+                )
+            }
+
 
             Row(modifier = Modifier.constrainAs(balanceText) {
                 top.linkTo(parent.top, margin = 24.dp)
@@ -595,29 +725,24 @@ fun LivePaymentCard(
 
             }
 
-            val image = rememberAsyncImagePainter(R.drawable.shape_soft_star_1)
-            Image(painter = image,
+            Image(
+                painter = image,
                 contentDescription = "Test Image",
-                modifier = Modifier
+                modifier = modifier1
                     .size(144.dp)
-                    .constrainAs(backgroundImage1) {
-                        top.linkTo(parent.top, margin = -30.dp)
-                        start.linkTo(parent.start, margin = -30.dp)
-                    }
                     .zIndex(1f),
                 alpha = 0.1f,
-                colorFilter = ColorFilter.tint(color.copy()))
-            Image(painter = image,
+                colorFilter = ColorFilter.tint(color.copy())
+            )
+            Image(
+                painter = image,
                 contentDescription = "Test Image",
-                modifier = Modifier
+                modifier = modifier2
                     .size(144.dp)
-                    .constrainAs(backgroundImage2) {
-                        end.linkTo(parent.end, margin = -30.dp)
-                        bottom.linkTo(parent.bottom, margin = -30.dp)
-                    }
                     .zIndex(1f),
                 alpha = 0.1f,
-                colorFilter = ColorFilter.tint(color))
+                colorFilter = ColorFilter.tint(color)
+            )
         }
     }
 }

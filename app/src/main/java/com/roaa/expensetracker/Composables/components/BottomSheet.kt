@@ -1,7 +1,6 @@
 package com.roaa.expensetracker.Composables.components
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
@@ -20,6 +19,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -1676,6 +1676,7 @@ fun EditPaymentMethodBottomSheet(
 val horizontalPadding = 16.dp
 val verticalPadding = 0.dp
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun BottomSheetContentPaymentMethodAddContentNew(
     modifier: Modifier,
@@ -1785,8 +1786,9 @@ fun BottomSheetContentPaymentMethodAddContentNew(
             color = MaterialTheme.colorScheme.onSurface,
         )
         Spacer(Modifier.height(8.dp))
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(15.dp),
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.padding(16.dp, 0.dp)
         ) {
             for (i in colorList) {
@@ -1901,6 +1903,7 @@ fun BottomSheetContentPaymentMethodAddContentNew(
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun BottomSheetContentPaymentMethodEditContentNew(
     modifier: Modifier,
@@ -2011,8 +2014,9 @@ fun BottomSheetContentPaymentMethodEditContentNew(
             color = MaterialTheme.colorScheme.onSurface,
         )
         Spacer(Modifier.height(8.dp))
-        Row(
-            horizontalArrangement = Arrangement.spacedBy(15.dp),
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp),
             modifier = Modifier.padding(16.dp, 0.dp)
         ) {
             for (i in colorList) {
@@ -2315,7 +2319,6 @@ fun BottomSheetContentItemAddContentTest(
         0f
     }
     animationViewModel.method("₹$amountInString", percent)
-    Log.d("Hello", percent.toString())
 
     LaunchedEffect(percent) {
         scope.launch {
