@@ -1,9 +1,13 @@
 package com.roaa.expensetracker.Database
 
 import android.content.Context
+import androidx.room.AutoMigration
 import androidx.room.Database
+import androidx.room.DeleteColumn
+import androidx.room.RenameColumn
 import androidx.room.Room.databaseBuilder
 import androidx.room.RoomDatabase
+import androidx.room.migration.AutoMigrationSpec
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.roaa.expensetracker.Model.BankAccountsClass
@@ -14,9 +18,38 @@ import com.roaa.expensetracker.Model.TransactionClass
 
 @Database(
     entities = [TransactionClass::class, CategoryClass::class, BankAccountsClass::class, BudgetModelClass::class, BudgetDayModelClass::class],
-    version = 2
+    version = 3,
+    exportSchema = true,
+    autoMigrations = [
+        AutoMigration(from = 2, to = 3, spec = AppDatabase.AutoMigrationSpecVersion2To3::class)
+    ]
 )
 abstract class AppDatabase : RoomDatabase() {
+    @RenameColumn.Entries(
+        RenameColumn(
+            tableName = "budget_table",
+            fromColumnName = "budgetAmountForMonth",
+            toColumnName = "totalBudgetAmount"
+        ),
+        RenameColumn(
+            tableName = "budget_table",
+            fromColumnName = "budgetMonthStartDate",
+            toColumnName = "budgetStartDate"
+        ),
+        RenameColumn(
+            tableName = "budget_table",
+            fromColumnName = "budgetMonthEndDate",
+            toColumnName = "budgetEndDate"
+        ),
+    )
+    @DeleteColumn.Entries(
+        DeleteColumn(
+            tableName = "budget_table",
+            columnName = "currentMonthName"
+        )
+    )
+    class AutoMigrationSpecVersion2To3 : AutoMigrationSpec
+
     // below line is to create
     // abstract variable for dao.
     abstract fun transactionDao(): TransactionDao
@@ -60,7 +93,7 @@ abstract class AppDatabase : RoomDatabase() {
                     ) // below line is use to add fall back to
                         // destructive migration to our database.
                         .addMigrations(MIGRATION_1_2)
-                        .addMigrations(MIGRATION_2_3)// below line is to add callback
+                        //.addMigrations(MIGRATION_2_3)// below line is to add callback
                         // to our database.
                         .addCallback(prePopulateData).allowMainThreadQueries()
                         .fallbackToDestructiveMigration()
@@ -73,7 +106,7 @@ abstract class AppDatabase : RoomDatabase() {
             return instance!!
         }
 
-        val MIGRATION_2_3 = object : Migration(2,3) {
+        val MIGRATION_2_3 = object : Migration(2, 3) {
             override fun migrate(database: SupportSQLiteDatabase) {
 
             }

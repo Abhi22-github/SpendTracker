@@ -98,7 +98,7 @@ interface TransactionDao {
 
         Log.d("TransactionDao", "$expense $income ${currentBudget?.budgetId}")
         currentBudget?.let {
-            if (transactionClass.date >= it.budgetMonthStartDate && transactionClass.date <= it.budgetMonthEndDate) {
+            if (transactionClass.date >= it.budgetStartDate && transactionClass.date <= it.budgetEndDate) {
                 var singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
                 singleDay?.let {
                     it.totalExpense = expense ?: 0f
@@ -119,7 +119,7 @@ interface TransactionDao {
 
         Log.d("TransactionDao", "$expense $income ${currentBudget?.budgetId}")
         currentBudget?.let {
-            if (transactionClass.date >= it.budgetMonthStartDate && transactionClass.date <= it.budgetMonthEndDate) {
+            if (transactionClass.date >= it.budgetStartDate && transactionClass.date <= it.budgetEndDate) {
                 var singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
                 singleDay?.let {
                     it.totalExpense = expense ?: 0f
@@ -140,7 +140,7 @@ interface TransactionDao {
 
         Log.d("TransactionDao", "$expense $income ${currentBudget?.budgetId}")
         currentBudget?.let {
-            if (transactionClass.date >= it.budgetMonthStartDate && transactionClass.date <= it.budgetMonthEndDate) {
+            if (transactionClass.date >= it.budgetStartDate && transactionClass.date <= it.budgetEndDate) {
                 var singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
                 singleDay?.let {
                     it.totalExpense = expense ?: 0f

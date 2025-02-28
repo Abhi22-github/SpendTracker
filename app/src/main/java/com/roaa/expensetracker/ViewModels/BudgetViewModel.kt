@@ -3,6 +3,7 @@ package com.roaa.expensetracker.ViewModels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.roaa.expensetracker.Composables.utils.DistributionMethod
 import com.roaa.expensetracker.Database.BudgetRepository
 import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import com.roaa.expensetracker.Model.BudgetModelClass
@@ -53,19 +54,24 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
         totalAMountForMonth: Float,
         totalAmountPerDay: Float,
         totalDaysRemaining: Long,
-        currentMonthName: String,
         budgeMonthStartDate: Long,
         budgetMonthEndDate: Long,
+        restDistributionValue: DistributionMethod,
+        notificationUsageValue: Float,
         validDatesListFromLong: List<Long>
     ) {
         val budgeObject = BudgetModelClass(
             budgetId = 0L,
-            budgetAmountForMonth = totalAMountForMonth,
+            totalBudgetAmount = totalAMountForMonth,
             budgetAmountPerDay = totalAmountPerDay,
             budgetTotalDays = totalDaysRemaining,
-            currentMonthName = currentMonthName,
-            budgetMonthStartDate = budgeMonthStartDate,
-            budgetMonthEndDate = budgetMonthEndDate,
+            budgetStartDate = budgeMonthStartDate,
+            budgetEndDate = budgetMonthEndDate,
+            restDistributionType = when (restDistributionValue) {
+                DistributionMethod.DEFAULT -> 1
+                DistributionMethod.SPILLOVER -> 2
+            },
+            notificationForBudgetUsage = notificationUsageValue,
             isActive = true
         )
         saveBudget(budgeObject, validDatesListFromLong)
@@ -75,7 +81,7 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
         if (budgetModelClass.budgetId == 0L) {
             //adding new bank Accounts
             viewModelScope.launch {
-                budgetRepository.insertWithDetails(budgetModelClass,validDatesListFromLong)
+                budgetRepository.insertWithDetails(budgetModelClass, validDatesListFromLong)
             }
         } else {
             //updating existing account

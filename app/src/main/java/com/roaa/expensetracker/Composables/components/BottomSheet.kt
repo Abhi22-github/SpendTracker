@@ -50,6 +50,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.Cable
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Payment
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -123,9 +124,11 @@ import com.roaa.expensetracker.Composables.secondaryAlpha
 import com.roaa.expensetracker.Composables.secondaryAlphaForElements
 import com.roaa.expensetracker.Composables.successColor
 import com.roaa.expensetracker.Composables.utils.ColorState
+import com.roaa.expensetracker.Composables.utils.DistributionMethod
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.IconStateForType
 import com.roaa.expensetracker.Composables.utils.colorList
+import com.roaa.expensetracker.Composables.utils.distributionChoiceList
 import com.roaa.expensetracker.Composables.utils.iconsList
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
@@ -2771,7 +2774,7 @@ fun NotificationPercentChooserBottomSheetContent(
                             sliderPosition = it
 
                         },
-                        onValueChangeFinished = {saveData(sliderPosition)},
+                        onValueChangeFinished = { saveData(sliderPosition) },
                         colors = SliderDefaults.colors(
                             thumbColor = color.copy(0.8f),
                             activeTrackColor = color.copy(0.8f),
@@ -2819,12 +2822,136 @@ fun NotificationPercentChooserBottomSheetContent(
 
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun DistributionMethodPickerBottomSheet(
+    modifier: Modifier = Modifier,
+    sheetState: SheetState,
+    closeBottomSheet: () -> Unit,
+    restDistributionValue: DistributionMethod,
+    saveDistributionMethod: (DistributionMethod) -> Unit
+) {
+    ModalBottomSheet(onDismissRequest = {
+        closeBottomSheet()
+    },
+        sheetState = sheetState,
+        modifier = Modifier
+            .imePadding()
+            .fillMaxWidth(),
+        contentWindowInsets = { WindowInsets.ime }) {
+        DistributionMethodPickerBottomSheetContent(
+            modifier = Modifier,
+            restDistributionValue,
+            { saveDistributionMethod(it) }
+        )
+    }
+}
+
+@Composable
+fun DistributionMethodPickerBottomSheetContent(
+    modifier: Modifier = Modifier,
+    restDistributionValue: DistributionMethod,
+    saveDistributionMethod: (DistributionMethod) -> Unit
+) {
+    Column(
+        Modifier
+            .padding(horizontal = 16.dp, vertical = 16.dp)
+            .navigationBarsPadding(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Choose a remaining amount distribution method",
+            modifier = modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = typography.titleLarge,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Text(
+            text = "You can choose how to distribute the remaining balance of the budget after the day",
+            modifier = modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+        )
+        Spacer(Modifier.height(16.dp))
+        distributionChoiceList.forEach {
+            DistributionRadioButtons(
+                Modifier,
+                it.first,
+                it.second,
+                it.third,
+                restDistributionValue,
+                { saveDistributionMethod(it) })
+        }
+
+    }
+}
+
+@Composable
+fun DistributionRadioButtons(
+    modifier: Modifier = Modifier,
+    title: String,
+    description: String,
+    type: DistributionMethod,
+    selectedDistributionMethod: DistributionMethod,
+    setCurrentDistributionMethod: (DistributionMethod) -> Unit
+) {
+    Box(Modifier.clickable { setCurrentDistributionMethod(type) }) {
+        Row(
+            Modifier.padding(horizontal = 16.dp, vertical = 16.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(Modifier.weight(0.1f)) {
+                androidx.compose.animation.AnimatedVisibility(type == selectedDistributionMethod) {
+                    Icon(Icons.Rounded.Check, contentDescription = null)
+                }
+            }
+
+            Column(Modifier.weight(0.9f)) {
+                Spacer(Modifier.width(16.dp))
+                Text(
+                    text = title,
+                    modifier = modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Start,
+                    style = typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                    text = description,
+                    modifier = modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Start,
+                    style = typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DistributionRadioButtonsPreview() {
+    DistributionRadioButtons(
+        Modifier,
+        "Distribute",
+        "The remaining amount will be distributed on the remaining days",
+        DistributionMethod.DEFAULT,
+        DistributionMethod.DEFAULT,
+        {}
+    )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun DistributionMethodPickerBottomSheetContentPreview() {
+    DistributionMethodPickerBottomSheetContent(Modifier,DistributionMethod.DEFAULT,{})
+}
+
 @Preview(showBackground = true)
 @Composable
 private fun NotificationPercentChooserBottomSheetContentPreview() {
     NotificationPercentChooserBottomSheetContent(Modifier, {})
 }
-
 
 
 //@Preview

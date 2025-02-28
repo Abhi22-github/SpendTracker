@@ -79,7 +79,7 @@ val verticalPadding = 8.dp
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BudgetScreen(
-    rootNavController:NavHostController,
+    rootNavController: NavHostController,
     navigationManager: NavigationManager,
     modifier: Modifier = Modifier,
     budgetViewModel: BudgetViewModel = hiltViewModel(),
@@ -125,7 +125,7 @@ fun BudgetScreen(
                     navigationManager.navigateTo(Destinations.BudgetSetupScreen)
                 },
                 icon = { Icon(Icons.Filled.Add, "Localized description") },
-                text = { Text(text = if(isBudgetSet) "Manage" else "Add") },
+                text = { Text(text = if (isBudgetSet) "Manage" else "Add") },
             )
         },
     ) {
@@ -138,13 +138,13 @@ fun BudgetScreen(
 
                 LaunchedEffect(getCurrentBudget, getTotalAmountForRange) {
                     transactionsViewModel.getTotalExpenseForRange(
-                        getCurrentBudget.budgetSummary.budgetMonthStartDate,
-                        getCurrentBudget.budgetSummary.budgetMonthEndDate
+                        getCurrentBudget.budgetSummary.budgetStartDate,
+                        getCurrentBudget.budgetSummary.budgetEndDate
                     )
-                    if (getCurrentBudget.budgetSummary.budgetAmountForMonth == 0f || getTotalAmountForRange.totalAmount == 0f) {
+                    if (getCurrentBudget.budgetSummary.totalBudgetAmount == 0f || getTotalAmountForRange.totalAmount == 0f) {
 
                     } else {
-                        currentBudgetLocal = getCurrentBudget.budgetSummary.budgetAmountForMonth
+                        currentBudgetLocal = getCurrentBudget.budgetSummary.totalBudgetAmount
                         currentExpenseLocal = getTotalAmountForRange.totalAmount
                     }
                 }
@@ -152,7 +152,7 @@ fun BudgetScreen(
                 LaunchedEffect(getCurrentBudget) {
                     if (getCurrentBudget.budgetSummary.budgetTotalDays != 0L) {
                         remainingDaysPercentage =
-                            (getDaysRemaining(getCurrentBudget.budgetSummary.budgetMonthEndDate.toLocalDate()).toFloat()
+                            (getDaysRemaining(getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate()).toFloat()
                                 .div(getCurrentBudget.budgetSummary.budgetTotalDays.toFloat()))
                     } else {
                         remainingDaysPercentage = 1f
@@ -175,7 +175,7 @@ fun BudgetScreen(
                             normalColor
                         )
                         Text(
-                            text = "${getDaysRemaining(getCurrentBudget.budgetSummary.budgetMonthEndDate.toLocalDate())} Days Left",
+                            text = "${getDaysRemaining(getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate())} Days Left",
                             style = MaterialTheme.typography.bodyMedium,
                             textAlign = TextAlign.Center,
                             modifier = Modifier.width(130.dp)
@@ -203,13 +203,13 @@ fun BudgetScreen(
                                 SingleInfoBox(
                                     Modifier.weight(1f),
                                     "Budget Amount",
-                                    "₹${getCurrentBudget.budgetSummary.budgetAmountForMonth}"
+                                    "₹${getCurrentBudget.budgetSummary.totalBudgetAmount}"
                                 )
                                 Spacer(Modifier.width(12.dp))
                                 SingleInfoBox(
                                     Modifier.weight(1f),
                                     "BudgetMonth",
-                                    "${getCurrentBudget.budgetSummary.currentMonthName}"
+                                    "${getCurrentBudget.budgetSummary.totalBudgetAmount}"
                                 )
                             }
                             Spacer(Modifier.height(12.dp))
@@ -221,10 +221,10 @@ fun BudgetScreen(
                                     Modifier.weight(1f),
                                     "Start-End Date",
                                     "${
-                                        getCurrentBudget.budgetSummary.budgetMonthStartDate.toLocalDate()
+                                        getCurrentBudget.budgetSummary.budgetStartDate.toLocalDate()
                                             .toDisplayStringForMonth()
                                     } - ${
-                                        getCurrentBudget.budgetSummary.budgetMonthEndDate.toLocalDate()
+                                        getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate()
                                             .toDisplayStringForMonth()
                                     }"
                                 )
@@ -252,7 +252,7 @@ fun BudgetScreen(
                     }
                     SpendCalender(Modifier, getCurrentBudget)
                 }
-            }else{
+            } else {
                 EmptyScreen(text = "No Budget Found")
             }
             Spacer(Modifier.height(36.dp))
@@ -364,8 +364,8 @@ fun SpendCalender(
 
             val list = datesListForMonth(
                 LocalDate.now(),
-                getCurrentBudget.budgetSummary.budgetMonthStartDate,
-                getCurrentBudget.budgetSummary.budgetMonthEndDate,
+                getCurrentBudget.budgetSummary.budgetStartDate,
+                getCurrentBudget.budgetSummary.budgetEndDate,
             )
 
             list.forEachIndexed { index, it ->

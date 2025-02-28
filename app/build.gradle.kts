@@ -7,6 +7,7 @@ plugins {
     id("com.google.gms.google-services")
     alias(libs.plugins.kotlin.serialization)
     id("com.google.firebase.crashlytics")
+    id("androidx.room")
     // Apply Hilt plugin
 }
 
@@ -17,6 +18,10 @@ android {
     namespace = "com.roaa.expensetracker"
     compileSdk = 35
 
+    room {
+        schemaDirectory("$projectDir/schemas")
+    }
+
     defaultConfig {
         applicationId = "com.roaa.expensetracker"
         minSdk = 26
@@ -25,6 +30,7 @@ android {
         versionName = "0.9"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         signingConfig = signingConfigs.getByName("debug")
+
     }
 
 
@@ -71,12 +77,13 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
-    implementation(libs.androidx.room.runtime)
-    implementation(libs.androidx.room.ktx)
     implementation(libs.kotlinx.coroutines.android)
 
     //add below dependancy for using room.
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
     ksp(libs.androidx.room.compiler)
+
     implementation(libs.androidx.core)
     implementation(libs.commons.lang3)
     implementation(libs.lottie)

@@ -31,12 +31,13 @@ val emptyCategoryClass = CategoryClass(
 
 val emptyBudgetClass = BudgetModelClass(
     budgetId = 0L,
-    budgetAmountForMonth = 0f,
+    totalBudgetAmount = 0f,
     budgetAmountPerDay = 0f,
     budgetTotalDays = 0L,
-    currentMonthName = "Month",
-    budgetMonthStartDate = 20250101,
-    budgetMonthEndDate = 20250131,
+    budgetStartDate = 20250101,
+    budgetEndDate = 20250131,
+    restDistributionType = 1,
+    notificationForBudgetUsage = 20f,
     isActive = false
 )
 

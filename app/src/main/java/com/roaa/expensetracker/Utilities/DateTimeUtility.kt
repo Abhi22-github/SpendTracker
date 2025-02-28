@@ -144,7 +144,7 @@ fun getPreviousAndNext500Months(date: LocalDate): List<String> {
 }
 
 fun getDayDifference(startDate: LocalDate,endDate: LocalDate): Long {
-return ChronoUnit.DAYS.between(startDate, endDate)
+return ChronoUnit.DAYS.between(startDate, endDate)+1
 }
 
 fun getPreviousAndNext10Days(date: LocalDate): List<String> {

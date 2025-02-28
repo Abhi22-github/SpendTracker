@@ -44,12 +44,13 @@ class BudgetDayViewModel @Inject constructor(private val budgetDayRepository: Bu
     ) {
         val budgeObject = BudgetModelClass(
             budgetId = 0L,
-            budgetAmountForMonth = totalAMountForMonth,
+            totalBudgetAmount = totalAMountForMonth,
             budgetAmountPerDay = totalAmountPerDay,
             budgetTotalDays = totalDaysRemaining,
-            currentMonthName = currentMonthName,
-            budgetMonthStartDate = budgeMonthStartDate,
-            budgetMonthEndDate = budgetMonthEndDate,
+            budgetStartDate = budgeMonthStartDate,
+            budgetEndDate = budgetMonthEndDate,
+            restDistributionType = 1,
+            notificationForBudgetUsage = 20f,
             isActive = true
         )
         // saveBudget(budgeObject)
