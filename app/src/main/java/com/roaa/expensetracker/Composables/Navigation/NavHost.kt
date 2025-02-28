@@ -17,6 +17,7 @@ import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.roaa.expensetracker.Composables.Screens.AddCategory
 import com.roaa.expensetracker.Composables.Screens.BudgetScreen
+import com.roaa.expensetracker.Composables.Screens.BudgetSetupScreen
 import com.roaa.expensetracker.Composables.Screens.CategoryScreen
 import com.roaa.expensetracker.Composables.Screens.DayViewScreen
 import com.roaa.expensetracker.Composables.Screens.MonthViewScreen
@@ -139,6 +140,9 @@ fun RootNavGraph(
                     uiViewModel = uiViewModel
                 )
             }
+            composable<Destinations.BudgetSetupScreen> {
+                BudgetSetupScreen(rooNavController, navigationManager)
+            }
         }
 
     }
@@ -250,6 +254,9 @@ fun AppNavGraph(
                     args.bankAccountId,
                     uiViewModel = uiViewModel
                 )
+            }
+            composable<Destinations.BudgetSetupScreen> {
+                BudgetSetupScreen(rooNavController, navigationManager)
             }
         }
 

@@ -32,6 +32,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -90,7 +91,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.focus.FocusManager
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Brush
@@ -99,9 +99,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
-import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
@@ -116,7 +113,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
-import com.roaa.expensetracker.Composables.CustomFonts
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.Screens.LivePaymentCard
 import com.roaa.expensetracker.Composables.Screens.ValueLabelList
@@ -148,19 +144,12 @@ import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTransactionClass
 import com.roaa.expensetracker.Utilities.UtilityModalClass.firstSampleClass
 import com.roaa.expensetracker.Utilities.convertMillisToDateString
 import com.roaa.expensetracker.Utilities.extractNumbers
-import com.roaa.expensetracker.Utilities.getCurrentDate
-import com.roaa.expensetracker.Utilities.getCurrentMonthName
-import com.roaa.expensetracker.Utilities.getMonthEndDate
-import com.roaa.expensetracker.Utilities.getRemainingDaysInCurrentMonth
-import com.roaa.expensetracker.Utilities.getValidDatesListFromLong
 import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLongMillis
 import com.roaa.expensetracker.ViewModels.AnimationViewModel
 import com.roaa.expensetracker.ViewModels.BankAccountsViewModel
-import com.roaa.expensetracker.ViewModels.BudgetDayViewModel
-import com.roaa.expensetracker.ViewModels.BudgetViewModel
 import com.roaa.expensetracker.ViewModels.CategoryViewModel
 import com.roaa.expensetracker.ViewModels.PreferencesViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
@@ -1555,10 +1544,14 @@ fun SingleIcon(item: Int, width: Dp, uiViewModel: UiViewModel = hiltViewModel())
 fun AddPaymentMethodBottomSheet(
     closeBottomSheet: () -> Unit,
     uiViewModel: UiViewModel = hiltViewModel(),
-    bankAccountsViewModel: BankAccountsViewModel = hiltViewModel()
+    bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
+    preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
+    val showExperimentalComponent by preferencesViewModel.showExperimentalComponent.collectAsState(
+        false
+    )
     val showError by uiViewModel.errorStatusInBankAccountAdd.collectAsState()
 
     ModalBottomSheet(onDismissRequest = {
@@ -1573,6 +1566,7 @@ fun AddPaymentMethodBottomSheet(
         BottomSheetContentPaymentMethodAddContentNew(Modifier
             .padding(16.dp, 0.dp),
             showError,
+            showExperimentalComponent,
             { scope.launch { uiViewModel.errorStatusInBankAccountAdd.emit(false) } },
             { bankName, amount, selectedColor ->
                 scope.launch {
@@ -1606,10 +1600,14 @@ fun EditPaymentMethodBottomSheet(
     bankAccountsClass: BankAccountsClass,
     closeBottomSheet: () -> Unit,
     uiViewModel: UiViewModel = hiltViewModel(),
-    bankAccountsViewModel: BankAccountsViewModel = hiltViewModel()
+    bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
+    preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
+    val showExperimentalComponent by preferencesViewModel.showExperimentalComponent.collectAsState(
+        false
+    )
     val showError by uiViewModel.errorStatusInBankAccountAdd.collectAsState()
 
     ModalBottomSheet(onDismissRequest = {
@@ -1625,6 +1623,7 @@ fun EditPaymentMethodBottomSheet(
             .padding(16.dp, 0.dp),
             bankAccountsClass,
             showError,
+            showExperimentalComponent,
             { scope.launch { uiViewModel.errorStatusInBankAccountAdd.emit(false) } },
             { bankName, amount, selectedColor ->
                 scope.launch {
@@ -1660,6 +1659,7 @@ val verticalPadding = 0.dp
 fun BottomSheetContentPaymentMethodAddContentNew(
     modifier: Modifier,
     showError: Boolean,
+    showExperimentalComponent: Boolean,
     removeError: () -> Unit,
     saveButtonClicked: (bankName: String, bankAmount: String, selectedColor: Int) -> Unit,
 ) {
@@ -1687,7 +1687,7 @@ fun BottomSheetContentPaymentMethodAddContentNew(
         Text(
             modifier = modifier,
             text = "Card Details",
-            style = MaterialTheme.typography.titleMedium,
+            style = typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(4.dp))
@@ -1704,7 +1704,7 @@ fun BottomSheetContentPaymentMethodAddContentNew(
             placeholder = {
                 Text(
                     "Bank Name",
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
                 )
             },
@@ -1742,7 +1742,7 @@ fun BottomSheetContentPaymentMethodAddContentNew(
             placeholder = {
                 Text(
                     "Amount",
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
                 )
             },
@@ -1761,7 +1761,7 @@ fun BottomSheetContentPaymentMethodAddContentNew(
 
         Text(
             modifier = modifier,
-            text = "Card Colors", style = MaterialTheme.typography.titleMedium,
+            text = "Card Colors", style = typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
         )
         Spacer(Modifier.height(8.dp))
@@ -1774,12 +1774,12 @@ fun BottomSheetContentPaymentMethodAddContentNew(
                 SingleColorButton(i, selectedColor) { selectedColor = it }
             }
         }
-        if (false) {
+        if (showExperimentalComponent) {
             Spacer(Modifier.height(24.dp))
             Text(
                 modifier = modifier,
                 text = "Card Limit",
-                style = MaterialTheme.typography.titleMedium,
+                style = typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(8.dp))
@@ -1812,13 +1812,13 @@ fun BottomSheetContentPaymentMethodAddContentNew(
                     Text(
                         modifier = Modifier,
                         text = "₹345890",
-                        style = MaterialTheme.typography.titleMedium.copy(fontFamily = CustomFonts.numberFont),
+                        style = typography.titleMedium.copy(fontFamily = numberFont),
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         modifier = Modifier,
                         text = "left in this month",
-                        style = MaterialTheme.typography.labelLarge,
+                        style = typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 }
@@ -1828,7 +1828,7 @@ fun BottomSheetContentPaymentMethodAddContentNew(
             Text(
                 modifier = modifier,
                 text = "Usage Notification",
-                style = MaterialTheme.typography.titleMedium,
+                style = typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(8.dp))
@@ -1859,7 +1859,7 @@ fun BottomSheetContentPaymentMethodAddContentNew(
                     Text(
                         modifier = Modifier,
                         text = "get notification when you use ${sliderPosition}% of balance in your bank account",
-                        style = MaterialTheme.typography.labelLarge,
+                        style = typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 }
@@ -1888,6 +1888,7 @@ fun BottomSheetContentPaymentMethodEditContentNew(
     modifier: Modifier,
     bankAccountsClass: BankAccountsClass,
     showError: Boolean,
+    showExperimentalComponent: Boolean,
     removeError: () -> Unit,
     saveButtonClicked: (bankName: String, bankAmount: String, selectedColor: Int) -> Unit,
 ) {
@@ -1915,7 +1916,7 @@ fun BottomSheetContentPaymentMethodEditContentNew(
         Text(
             modifier = modifier,
             text = "Card Details",
-            style = MaterialTheme.typography.titleMedium,
+            style = typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(4.dp))
@@ -1932,7 +1933,7 @@ fun BottomSheetContentPaymentMethodEditContentNew(
             placeholder = {
                 Text(
                     "Bank Name",
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
                 )
             },
@@ -1970,7 +1971,7 @@ fun BottomSheetContentPaymentMethodEditContentNew(
             placeholder = {
                 Text(
                     "Amount",
-                    style = MaterialTheme.typography.bodyLarge,
+                    style = typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
                 )
             },
@@ -1989,7 +1990,7 @@ fun BottomSheetContentPaymentMethodEditContentNew(
 
         Text(
             modifier = modifier,
-            text = "Card Colors", style = MaterialTheme.typography.titleMedium,
+            text = "Card Colors", style = typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface,
         )
         Spacer(Modifier.height(8.dp))
@@ -2002,12 +2003,12 @@ fun BottomSheetContentPaymentMethodEditContentNew(
                 SingleColorButton(i, selectedColor) { selectedColor = it }
             }
         }
-        if (false) {
+        if (showExperimentalComponent) {
             Spacer(Modifier.height(24.dp))
             Text(
                 modifier = modifier,
                 text = "Card Limit",
-                style = MaterialTheme.typography.titleMedium,
+                style = typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(8.dp))
@@ -2040,13 +2041,13 @@ fun BottomSheetContentPaymentMethodEditContentNew(
                     Text(
                         modifier = Modifier,
                         text = "₹345890",
-                        style = MaterialTheme.typography.titleMedium.copy(fontFamily = CustomFonts.numberFont),
+                        style = typography.titleMedium.copy(fontFamily = numberFont),
                         color = MaterialTheme.colorScheme.onSurface
                     )
                     Text(
                         modifier = Modifier,
                         text = "left in this month",
-                        style = MaterialTheme.typography.labelLarge,
+                        style = typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 }
@@ -2056,7 +2057,7 @@ fun BottomSheetContentPaymentMethodEditContentNew(
             Text(
                 modifier = modifier,
                 text = "Usage Notification",
-                style = MaterialTheme.typography.titleMedium,
+                style = typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Spacer(Modifier.height(8.dp))
@@ -2087,7 +2088,7 @@ fun BottomSheetContentPaymentMethodEditContentNew(
                     Text(
                         modifier = Modifier,
                         text = "get notification when you use ${sliderPosition}% of balance in your bank account",
-                        style = MaterialTheme.typography.labelLarge,
+                        style = typography.labelLarge,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                 }
@@ -2115,7 +2116,7 @@ fun BottomSheetContentPaymentMethodEditContentNew(
 private fun PaymentAddContentPreview() {
     BottomSheetContentPaymentMethodAddContentNew(
         modifier = Modifier.padding(16.dp, 0.dp),
-        showError = true, {},
+        showError = true, false, {},
         saveButtonClicked = { a, b, c -> },
     )
 }
@@ -2124,8 +2125,8 @@ private fun PaymentAddContentPreview() {
 @Composable
 private fun PaymentEditContentPreview() {
     BottomSheetContentPaymentMethodEditContentNew(
-        modifier = Modifier.padding(16.dp, 0.dp),emptyBank,
-        showError = true, {},
+        modifier = Modifier.padding(16.dp, 0.dp), emptyBank,
+        showError = true, false, {},
         saveButtonClicked = { a, b, c -> },
     )
 }
@@ -2712,314 +2713,126 @@ fun BottomRowTest(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BudgetBottomSheet(
+fun NotificationPercentChooserBottomSheet(
+    modifier: Modifier = Modifier,
     sheetState: SheetState,
-    bottomSheetDismissed: () -> Unit,
-    amount: TextFieldValue,
-    isBudgetSet: Boolean,
-    budgetViewModel: BudgetViewModel = hiltViewModel(),
-    budgetDayViewModel: BudgetDayViewModel = hiltViewModel(),
-    transactionsViewModel: TransactionsViewModel = hiltViewModel(),
-    uiViewModel: UiViewModel = hiltViewModel(),
+    closeBottomSheet: () -> Unit,
+    saveNotificationValue: (Float) -> Unit
 ) {
-    val modifier = Modifier.padding(16.dp, 0.dp)
-    var totalAmountText by remember { mutableStateOf(TextFieldValue("")) }
-    var totalAmountPerDay by remember { mutableFloatStateOf(0f) }
-    var totalDaysRemaining = remember {
-        getRemainingDaysInCurrentMonth()
-    }
-
-
-    var shouldShowConfirmation by remember { mutableStateOf(false) }
-    val errorStatus by uiViewModel.errorStatusInBudgetAdd.collectAsState()
-
-    val keyboardController = LocalSoftwareKeyboardController.current
-    val focusManager = LocalFocusManager.current
-    ModalBottomSheet(onDismissRequest = { bottomSheetDismissed() }, sheetState = sheetState) {
-        BottomSheetBudgetContent(modifier, totalAmountText, amountTextValueChange = {
-            totalAmountText = it
-        }, totalAmountPerDay, { totalAmountPerDay = it }, totalDaysRemaining, {
-            if (isBudgetSet) {
-                shouldShowConfirmation = true
-            } else {
-                SaveBudgetDetailsInDatabase(
-                    transactionsViewModel,
-                    budgetDayViewModel,
-                    budgetViewModel,
-                    totalAmountText.text,
-                    totalAmountPerDay,
-                    totalDaysRemaining,
-                    getCurrentMonthName(),
-                    getCurrentDate(),
-                    getMonthEndDate(),
-                    bottomSheetDismissed,
-                    keyboardController,
-                    focusManager
-                )
-            }
-        }, errorStatus, uiViewModel)
-    }
-    if (shouldShowConfirmation) {
-        ConfirmationAlertDialog(
-            { shouldShowConfirmation = false },
+    ModalBottomSheet(onDismissRequest = {
+        closeBottomSheet()
+    },
+        sheetState = sheetState,
+        modifier = Modifier
+            .imePadding()
+            .fillMaxWidth(),
+        contentWindowInsets = { WindowInsets.ime }) {
+        NotificationPercentChooserBottomSheetContent(
+            modifier = Modifier,
             {
-                SaveBudgetDetailsInDatabase(
-                    transactionsViewModel,
-                    budgetDayViewModel,
-                    budgetViewModel,
-                    totalAmountText.text,
-                    totalAmountPerDay,
-                    totalDaysRemaining,
-                    getCurrentMonthName(),
-                    getCurrentDate(),
-                    getMonthEndDate(),
-                    bottomSheetDismissed,
-                    keyboardController,
-                    focusManager
-                )
-            },
-            "Change Budget",
-            "Are you sure, you want to change the current budget?",
-            ImageVector.vectorResource(R.drawable.icon_expense)
-        )
+                saveNotificationValue(it)
+            })
     }
 }
-
-fun SaveBudgetDetailsInDatabase(
-    transactionsViewModel: TransactionsViewModel,
-    budgetDayViewModel: BudgetDayViewModel,
-    budgetViewModel: BudgetViewModel,
-    totalAmountForMonth: String,
-    totalAmountPerDay: Float,
-    totalDaysRemaining: Long,
-    currentMonthName: String,
-    budgetMonthStartDate: Long,
-    budgetMonthEndDate: Long,
-    bottomSheetDismissed: () -> Unit,
-    keyboardController: SoftwareKeyboardController?,
-    focusManager: FocusManager,
-) {
-    budgetViewModel.createObjectAndStoreIt(
-        totalAmountForMonth.toFloat(),
-        totalAmountPerDay,
-        totalDaysRemaining,
-        currentMonthName,
-        budgetMonthStartDate,
-        budgetMonthEndDate,
-        getValidDatesListFromLong(budgetMonthStartDate, budgetMonthEndDate)
-    )
-
-    focusManager.clearFocus()
-    keyboardController?.hide()
-    bottomSheetDismissed()
-
-}
-
 
 @Composable
-fun BottomSheetBudgetContent(
-    modifier: Modifier,
-    dailySpendLimit: TextFieldValue,
-    amountTextValueChange: (TextFieldValue) -> Unit,
-    totalAmountPerDay: Float,
-    totalAmountPerDayValueChange: (Float) -> Unit,
-    totalDaysRemaining: Long,
-    saveDailySpendLimit: () -> Unit,
-    errorStatus: Boolean,
-    uiViewModel: UiViewModel
+fun NotificationPercentChooserBottomSheetContent(
+    modifier: Modifier = Modifier,
+    saveData: (Float) -> Unit
 ) {
-    val scope = rememberCoroutineScope()
-    val focusRequester = remember {
-        FocusRequester()
-    }
-
-    LaunchedEffect(dailySpendLimit) {
-        focusRequester.requestFocus()
-        if (dailySpendLimit.text.isNotEmpty() && dailySpendLimit.text.toFloat() != 0f) {
-            totalAmountPerDayValueChange(dailySpendLimit.text.toFloat() / totalDaysRemaining)
-        } else {
-            totalAmountPerDayValueChange(0f)
-        }
-    }
-    Column(modifier.fillMaxWidth()) {
+    val color = MaterialTheme.colorScheme.primary
+    var sliderPosition by remember { mutableFloatStateOf(20f) }
+    Column(
+        Modifier
+            .padding(horizontal = 16.dp, vertical = 16.dp)
+            .navigationBarsPadding()
+    ) {
         Text(
-            text = "Set up a budget",
+            text = "Notification",
             modifier = modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
-            style = typography.titleLarge
-        )
-        Spacer(Modifier.height(4.dp))
-        Text(
-            text = "Setup your budget for current month ",
-            style = typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha),
-            modifier = Modifier.align(Alignment.CenterHorizontally)
-        )
-        Spacer(Modifier.height(12.dp))
-        ErrorRow(errorStatus)
-        Spacer(Modifier.height(32.dp))
-        Row {
-            TextField(
-                value = dailySpendLimit,
-                onValueChange = { newValue ->
-                    val filteredText = newValue.text.filter { it.isDigit() || it == '.' }
-                    // Ensure only one decimal point is allowed
-                    if (filteredText.count { it == '.' } <= 1) {
-                        // Split into parts before and after the decimal
-                        val parts = filteredText.split('.')
-                        // Ensure max 7 digits before the decimal and max 2 after
-                        if (parts.size == 1 && parts[0].length <= 7 || parts.size == 2 && parts[0].length <= 7 && parts[1].length <= 2) {
-                            // Update the TextFieldValue with the filtered text
-                            amountTextValueChange(newValue.copy(text = filteredText))
-                        }
-                    }
-                    scope.launch {
-                        uiViewModel.errorStatusInBudgetAdd.emit(false)
-                    }
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterVertically)
-                    .focusRequester(focusRequester),
-                singleLine = true,
-
-                placeholder = {
-                    Text(
-                        "₹0",
-                        style = typography.displayMedium,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .align(Alignment.CenterVertically),
-                        textAlign = TextAlign.Center,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
-                    )
-                },
-                visualTransformation = DecimalFilterTransformation(),
-                shape = RoundedCornerShape(24.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedIndicatorColor = Color.Transparent,
-                    unfocusedIndicatorColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent,
-                    focusedContainerColor = Color.Transparent,
-                ),
-                textStyle = typography.displayMedium.copy(
-                    textAlign = TextAlign.Center, fontFamily = numberFont
-                ),
-                keyboardOptions = KeyboardOptions.Default.copy(
-                    keyboardType = KeyboardType.Number, imeAction = ImeAction.Next
-                ),
-            )
-        }
-        Spacer(Modifier.height(64.dp))
-        Row {
-            Text(
-                text = "Current Month",
-                modifier = modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                textAlign = TextAlign.Start,
-                style = typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = getCurrentMonthName(),
-                modifier = modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                textAlign = TextAlign.End,
-                overflow = TextOverflow.Ellipsis,
-                style = typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
-        }
-
-        Spacer(Modifier.height(16.dp))
-        Row {
-            Text(
-                text = "Total Days ",
-                modifier = modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                textAlign = TextAlign.Start,
-                style = typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Text(
-                text = "${totalDaysRemaining} Days remaining",
-                modifier = modifier
-                    .weight(1f)
-                    .fillMaxWidth(),
-                textAlign = TextAlign.End,
-                overflow = TextOverflow.Ellipsis,
-                style = typography.labelLarge,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-            )
-        }
-        Spacer(Modifier.height(16.dp))
-        HorizontalDivider(color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f))
-        Spacer(Modifier.height(16.dp))
-        Text(
-            text = "Total",
-            modifier = modifier.fillMaxWidth(),
-            textAlign = TextAlign.Start,
-            style = typography.labelLarge,
+            style = typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurface
         )
-        Text(
-            text = "$totalAmountPerDay Per day",
+        Spacer(Modifier.height(8.dp))
+        Card(
             modifier = modifier.fillMaxWidth(),
-            textAlign = TextAlign.Start,
-            style = typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-        )
-        Spacer(Modifier.height(16.dp))
-        FilledTonalButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = {
-                if (dailySpendLimit.text.isEmpty()) {
-                    scope.launch {
-                        uiViewModel.errorStatusMessage.emit(
-                            "Please enter amount"
-                        )
-                        uiViewModel.errorStatusInBudgetAdd.emit(
-                            true
-                        )
-                    }
-                } else if (dailySpendLimit.text.toFloat() == 0f) {
-                    scope.launch {
-                        uiViewModel.errorStatusMessage.emit(
-                            "Please enter amount"
-                        )
-                        uiViewModel.errorStatusInBudgetAdd.emit(
-                            true
-                        )
-                    }
-                } else {
-                    saveDailySpendLimit()
-                }
-            },
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
         ) {
-            Text(text = "Create Budget")
+            Column(
+                modifier = Modifier
+                    .padding(16.dp, 16.dp)
+                    .fillMaxWidth()
+            ) {
+                Column {
+                    Slider(
+                        value = sliderPosition,
+                        onValueChange = {
+                            sliderPosition = it
+
+                        },
+                        onValueChangeFinished = {saveData(sliderPosition)},
+                        colors = SliderDefaults.colors(
+                            thumbColor = color.copy(0.8f),
+                            activeTrackColor = color.copy(0.8f),
+                            inactiveTrackColor = color.copy(0.1f),
+                        ),
+                        steps = 9,
+                        valueRange = 0f..100f
+                    )
+                }
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    modifier = Modifier,
+                    text = "get notification when only ${sliderPosition}% of your budget remains",
+                    style = typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+            }
         }
+        Spacer(Modifier.height(12.dp))
+//        Row {
+//            Row(
+//                modifier = Modifier
+//                    .weight(1f)
+//                    .fillMaxWidth(),
+//                horizontalArrangement = Arrangement.Start
+//            ) {
+//                FilledTonalButton(
+//                    onClick = { closeBottomSheet() },
+//                    colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.surfaceContainer)
+//                ) { Text(text = "Cancel", color = MaterialTheme.colorScheme.onSurface) }
+//            }
+//            Row(
+//                modifier = Modifier
+//                    .weight(1f)
+//                    .fillMaxWidth(),
+//                horizontalArrangement = Arrangement.End
+//            ) {
+//                FilledTonalButton(
+//                    onClick = { saveDataAndCloseBottomSheet(sliderPosition) },
+//                    colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.primary)
+//                ) { Text(text = "Save", color = MaterialTheme.colorScheme.onPrimary) }
+//            }
+//        }
     }
+
 }
 
-//@Preview
-//@Composable
-//fun BottomSheetBudgetContentPreview() {
-//    ExpenseTrackerTheme {
-//        Surface {
-//            // BottomSheetBudgetContent(Modifier, TextFieldValue("0"), {}, {})
-//        }
-//    }
-//}
-//
+@Preview(showBackground = true)
+@Composable
+private fun NotificationPercentChooserBottomSheetContentPreview() {
+    NotificationPercentChooserBottomSheetContent(Modifier, {})
+}
+
+
+
 //@Preview
 //@Composable
 //fun BottomSheetPreview() {
 //    ExpenseTrackerTheme {
 //        Surface {
-//            //  BottomSheetContentItemAddContent(Modifier, 0L, {})
+//            BottomSheetContentItemAddContent(Modifier, 0L, {})
 //        }
 //    }
 //}

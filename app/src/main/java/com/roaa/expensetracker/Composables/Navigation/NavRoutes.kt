@@ -51,6 +51,8 @@ sealed class Destinations(){
     @Serializable
     data class DayScreen(val date: Long) : Destinations()
 
+    @Serializable
+    data object BudgetSetupScreen : Destinations()
 }
 
 

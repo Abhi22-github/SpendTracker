@@ -2,7 +2,6 @@ package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,7 +28,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -41,16 +39,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
 import com.roaa.expensetracker.Composables.blueColor
-import com.roaa.expensetracker.Composables.components.BudgetBottomSheet
 import com.roaa.expensetracker.Composables.components.EmptyScreen
 import com.roaa.expensetracker.Composables.components.SpendsBudgetCard
 import com.roaa.expensetracker.Composables.components.TopBar
@@ -88,8 +85,6 @@ fun BudgetScreen(
     budgetViewModel: BudgetViewModel = hiltViewModel(),
     transactionsViewModel: TransactionsViewModel = hiltViewModel()
 ) {
-    var showBottomSheet by remember { mutableStateOf(false) }
-    var bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val getCurrentBudgetFromRoom by budgetViewModel.getCurrentBudgetWithDetails().collectAsState(
         BudgetWithDayDetails(
             emptyBudgetClass, listOf(emptyBudgetDayClass)
@@ -127,7 +122,7 @@ fun BudgetScreen(
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = {
-                    showBottomSheet = !showBottomSheet
+                    navigationManager.navigateTo(Destinations.BudgetSetupScreen)
                 },
                 icon = { Icon(Icons.Filled.Add, "Localized description") },
                 text = { Text(text = if(isBudgetSet) "Manage" else "Add") },
@@ -262,14 +257,6 @@ fun BudgetScreen(
             }
             Spacer(Modifier.height(36.dp))
         }
-    }
-    AnimatedVisibility(showBottomSheet) {
-        BudgetBottomSheet(
-            bottomSheetState,
-            bottomSheetDismissed = { showBottomSheet = !showBottomSheet },
-            TextFieldValue("000"),
-            false
-        )
     }
 }
 

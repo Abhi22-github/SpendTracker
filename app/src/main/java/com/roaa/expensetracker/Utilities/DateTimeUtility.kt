@@ -143,6 +143,10 @@ fun getPreviousAndNext500Months(date: LocalDate): List<String> {
     return allMonths
 }
 
+fun getDayDifference(startDate: LocalDate,endDate: LocalDate): Long {
+return ChronoUnit.DAYS.between(startDate, endDate)
+}
+
 fun getPreviousAndNext10Days(date: LocalDate): List<String> {
     val allDates = mutableListOf<String>()
     for (i in 5 downTo 1) {
