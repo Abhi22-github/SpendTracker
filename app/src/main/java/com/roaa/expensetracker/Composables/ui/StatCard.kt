@@ -30,6 +30,7 @@ import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
 fun StatCard(
     modifier: Modifier = Modifier,
     value: String,
+    budget: String,
     label: String,
     contentPadding: PaddingValues = PaddingValues(vertical = 16.dp, horizontal = 24.dp),
     colors: CardColors = CardDefaults.cardColors(),
@@ -65,7 +66,7 @@ fun StatCard(
                     .padding(contentPadding)
             ) {
                 Text(
-                    text = value,
+                    text = "$value out of $budget",
                     style = valueFontStyle,
                     fontSize = valueFontSize,
                     overflow = TextOverflow.Ellipsis,
@@ -85,7 +86,7 @@ fun StatCard(
                     LocalContentColor provides textColor,
                 ) {
                     Column(
-                        //modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth(),
                         content = content,
                     )
                 }
@@ -100,7 +101,8 @@ private fun Preview() {
     ExpenseTrackerTheme {
         StatCard(
             value = "value",
-            label = "label"
+            label = "label",
+            budget = "budget",
         )
     }
 }

@@ -163,7 +163,18 @@ fun BudgetScreen(
 
                 Column(Modifier.verticalScroll(rememberScrollState())) {
 
-                    Spacer(Modifier.height(32.dp))
+                    Spacer(Modifier.height(0.dp))
+                    Row(
+                        Modifier.height(150.dp)
+                            .padding(horizontalPadding, verticalPadding)
+                    ) {
+                        SpendsBudgetCard(
+                            Modifier,
+                            currentBudgetLocal,
+                            currentExpenseLocal
+                        )
+                    }
+
                     Box(
                         Modifier
                             .wrapContentHeight()
@@ -287,7 +298,7 @@ fun SingleInfoBox(modifier: Modifier, label: String, value: String) {
         ),
         modifier = modifier
             .fillMaxWidth(),
-        shape = RoundedCornerShape(50)
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(
             Modifier

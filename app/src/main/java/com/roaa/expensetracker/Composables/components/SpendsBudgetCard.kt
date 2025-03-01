@@ -106,6 +106,7 @@ fun SpendsBudgetCard(
             context,
             BigDecimal(spend.toDouble()),
         ),
+        budget = budget.toString(),
         label = stringResource(R.string.spent_budget),
         content = {
             Spacer(modifier = Modifier.height(6.dp))
