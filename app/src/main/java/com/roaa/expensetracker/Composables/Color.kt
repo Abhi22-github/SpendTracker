@@ -17,7 +17,7 @@ val greyTextColor = Color(0xFF616161)
 val successColor = Color(0xFF086024)
 val failureColor = Color(0xFFEA4335)
 val blueColor = Color(0xFF1A73E8)
-val purpleColor = Color(0xFF9C27B0)
+val purpleColor = Color(0xFF6C3BAA)
 val greenColor = Color(0xFF216C34)
 val orange = Color(0xFFDF7D1A)
 

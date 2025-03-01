@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.rounded.Settings
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -44,6 +45,37 @@ fun TopBar(
             if (showDelete) {
                 IconButton(onClick = { delete() }) {
                     Icon(Icons.Filled.Delete, "backIcon")
+                }
+            }
+        },
+    )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BudgetTopBar(
+    title: String,
+    showSetting: Boolean,
+    sendUserBackToPreviousActivity: () -> Unit,
+    settingsClicked: () -> Unit
+) {
+    TopAppBar(
+        title = {
+            Text(
+                text = title,
+                style = typography.titleLarge,
+                modifier = Modifier
+            )
+        },
+        navigationIcon = {
+            IconButton(onClick = { sendUserBackToPreviousActivity() }) {
+                Icon(Icons.Filled.ArrowBack, "backIcon")
+            }
+        },
+        actions = {
+            if (showSetting) {
+                IconButton(onClick = { settingsClicked() }) {
+                    Icon(Icons.Rounded.Settings, "settings_icon")
                 }
             }
         },
