@@ -44,7 +44,7 @@ interface BudgetDao {
     val getCurrentBudgetWithDays: Flow<BudgetWithDayDetails?>
 
     @Query("SELECT * FROM budget_table WHERE budgetId == :budgetId ")
-    fun getBudgetWithDays(budgetId: Long): Flow<BudgetWithDayDetails>
+    fun getBudgetWithDays(budgetId: Long): Flow<BudgetWithDayDetails?>
 
 
     // Transaction Supporting

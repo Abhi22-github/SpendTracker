@@ -35,7 +35,7 @@ class BudgetRepository(@ApplicationContext applicationContext: Context) {
         budgetDao.insertWithDayDetails(budgetModelClass, validDatesListFromLong)
     }
 
-    fun getBudgetWithDays(budgetId: Long): Flow<BudgetWithDayDetails> {
+    fun getBudgetWithDays(budgetId: Long): Flow<BudgetWithDayDetails?> {
         return budgetDao.getBudgetWithDays(budgetId)
     }
 
