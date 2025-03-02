@@ -141,7 +141,8 @@ fun RootNavGraph(
                 )
             }
             composable<Destinations.BudgetSetupScreen> {
-                BudgetSetupScreen(rooNavController, navigationManager)
+                val args = it.toRoute<Destinations.BudgetSetupScreen>()
+                BudgetSetupScreen(rooNavController, navigationManager,args.type,args.budgetId)
             }
         }
 
@@ -256,7 +257,8 @@ fun AppNavGraph(
                 )
             }
             composable<Destinations.BudgetSetupScreen> {
-                BudgetSetupScreen(rooNavController, navigationManager)
+                val args = it.toRoute<Destinations.BudgetSetupScreen>()
+                BudgetSetupScreen(rooNavController, navigationManager,args.type,args.budgetId)
             }
         }
 

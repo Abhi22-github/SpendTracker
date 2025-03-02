@@ -83,7 +83,7 @@ import com.roaa.expensetracker.Model.UiDateModels.BarChartExpenseModel
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
-import com.roaa.expensetracker.Utilities.LongMillisToNoralLong
+import com.roaa.expensetracker.Utilities.LongMillisToNormalLong
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBank
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyCategoryClass
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTotalExpenseIncomeClass
@@ -229,7 +229,7 @@ fun TransactionsListCompose(
                                     item {
                                         Header(
                                             if (date == System.currentTimeMillis()
-                                                    .LongMillisToNoralLong()
+                                                    .LongMillisToNormalLong()
                                             ) "Today" else date.toLocalDate().toDisplayDate()
                                         )
                                     }

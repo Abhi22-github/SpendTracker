@@ -48,8 +48,12 @@ interface BudgetDao {
 
 
     // Transaction Supporting
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertDays(budgetDayModelClass: BudgetDayModelClass): Long
+
+    @Update(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun updateDays(budgetDayModelClass: BudgetDayModelClass)
 
     //Transactions
     @Transaction
@@ -69,6 +73,21 @@ interface BudgetDao {
                 budgetId = transactionId
             )
             insertDays(budgetDayClass)
+        }
+    }
+
+    @Transaction
+    suspend fun updateWithDayDetails(
+        budgetModelClass: BudgetModelClass,
+        validDatesListFromLong: List<Long>,
+        validDatesListFromPreviousBudget: List<BudgetDayModelClass>
+    ) {
+        update(budgetModelClass)
+        val difference =
+            validDatesListFromPreviousBudget.filterNot { it.date in validDatesListFromLong }
+        difference.forEach {
+            var tempObj = it.copy(budgetId = 0L)
+            updateDays(tempObj)
         }
 
     }

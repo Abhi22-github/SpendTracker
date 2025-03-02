@@ -1,6 +1,7 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -36,7 +37,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -71,15 +74,20 @@ import com.roaa.expensetracker.Composables.components.ErrorRow
 import com.roaa.expensetracker.Composables.components.NotificationPercentChooserBottomSheet
 import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.secondaryAlpha
+import com.roaa.expensetracker.Composables.utils.ActionTypes
 import com.roaa.expensetracker.Composables.utils.DistributionMethod
+import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.DecimalFilterTransformation
-import com.roaa.expensetracker.Utilities.LongMillisToNoralLong
+import com.roaa.expensetracker.Utilities.LongMillisToNormalLong
+import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBudgetClass
+import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBudgetDayClass
 import com.roaa.expensetracker.Utilities.getDayDifference
 import com.roaa.expensetracker.Utilities.getValidDatesListFromLong
 import com.roaa.expensetracker.Utilities.toDateWithDayName
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
+import com.roaa.expensetracker.Utilities.toLongMillis
 import com.roaa.expensetracker.ViewModels.BudgetDayViewModel
 import com.roaa.expensetracker.ViewModels.BudgetViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
@@ -90,31 +98,63 @@ import kotlinx.coroutines.launch
 @Composable
 fun BudgetSetupScreen(
     rootNavController: NavHostController,
-    navigationManager: NavigationManager, modifier: Modifier = Modifier
+    navigationManager: NavigationManager,
+    type: ActionTypes,
+    budgetId: Long,
+    modifier: Modifier = Modifier,
+    budgetViewModel: BudgetViewModel = hiltViewModel()
 ) {
     BackHandler {
         handleBackNavigation(navigationManager)
     }
+    val title = when (type) {
+        ActionTypes.ADD -> "Setup Budget"
+        ActionTypes.EDIT -> "Edit Budget"
+    }
+    val budgetWithSummaryFromRoom by budgetViewModel.getBudgetWithDays(budgetId).collectAsState(
+        BudgetWithDayDetails(
+            emptyBudgetClass, listOf(emptyBudgetDayClass)
+        )
+    )
+    var budgetWithSummary by remember {
+        mutableStateOf(
+            BudgetWithDayDetails(
+                emptyBudgetClass, listOf(emptyBudgetDayClass)
+            )
+        )
+    }
+    var isBudgetSet by remember { mutableStateOf(false) }
+    LaunchedEffect(budgetWithSummaryFromRoom) {
+        budgetWithSummaryFromRoom?.let {
+            isBudgetSet = it?.budgetSummary?.isActive ?: false
+        }
+        budgetWithSummary = budgetWithSummaryFromRoom ?: BudgetWithDayDetails(
+            emptyBudgetClass, listOf(emptyBudgetDayClass)
+        )
+    }
     Scaffold(topBar = {
         TopBar(
-            title = "Setup Budget",
+            title = title,
             showDelete = false,
             sendUserBackToPreviousActivity = { handleBackNavigation(navigationManager) },
             delete = {}
         )
     }) {
         Column(Modifier.padding(it)) {
-            BudgetBottomSheet(
-                false,navigationManager
-            )
+            key(budgetWithSummary) {
+                BudgetContentController(
+                    isBudgetSet, navigationManager, budgetWithSummary
+                )
+            }
         }
     }
 }
 
 @Composable
-fun BudgetBottomSheet(
+fun BudgetContentController(
     isBudgetSet: Boolean,
     navigationManager: NavigationManager,
+    budgetWithSummary: BudgetWithDayDetails,
     budgetViewModel: BudgetViewModel = hiltViewModel(),
     budgetDayViewModel: BudgetDayViewModel = hiltViewModel(),
     transactionsViewModel: TransactionsViewModel = hiltViewModel(),
@@ -128,9 +168,25 @@ fun BudgetBottomSheet(
 
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
+    var totalAmountText by remember { mutableStateOf("") }
+    var totalAmountPerDay by remember { mutableFloatStateOf(0f) }
+    var totalDaysRemaining by remember { mutableLongStateOf(0L) }
+    var startDate by remember { mutableLongStateOf(0L) }
+    var endDate by remember { mutableLongStateOf(0L) }
+    var restDistributionValue by remember { mutableStateOf(DistributionMethod.DEFAULT) }
+    var notificationUsageValue by remember { mutableFloatStateOf(20f) }
     BottomSheetBudgetContent(
         modifier,
-        { totalAmountText, startDate, endDate, totalDaysRemaining, restDistributionValue, notificationUsageValue, totalAmountPerDay ->
+        isBudgetSet,
+        budgetWithSummary,
+        { totalAmountTextInner, startDateInner, endDateInner, totalDaysRemainingInner, restDistributionValueInner, notificationUsageValueInner, totalAmountPerDayInner ->
+            totalAmountText = totalAmountTextInner
+            totalAmountPerDay = totalAmountPerDayInner
+            totalDaysRemaining = totalDaysRemainingInner
+            startDate = startDateInner
+            endDate = endDateInner
+            restDistributionValue = restDistributionValueInner
+            notificationUsageValue = notificationUsageValueInner
             if (totalAmountText.isEmpty()) {
                 scope.launch {
                     uiViewModel.errorStatusMessage.emit(
@@ -154,6 +210,7 @@ fun BudgetBottomSheet(
                     shouldShowConfirmation = true
                 } else {
                     SaveBudgetDetailsInDatabase(
+                        budgetWithSummary,
                         transactionsViewModel,
                         budgetDayViewModel,
                         budgetViewModel,
@@ -172,27 +229,33 @@ fun BudgetBottomSheet(
             }
         },
         errorStatus,
-        //  uiViewModel
+        {
+            scope.launch {
+                uiViewModel.errorStatusInSetupBudget.emit(false)
+            }
+        }
     )
 
     if (shouldShowConfirmation) {
         ConfirmationAlertDialog(
             { shouldShowConfirmation = false },
             {
-//                SaveBudgetDetailsInDatabase(
-//                    transactionsViewModel,
-//                    budgetDayViewModel,
-//                    budgetViewModel,
-//                    totalAmountText,
-//                    totalAmountPerDay,
-//                    totalDaysRemaining,
-//                    startDate,
-//                    endDate,
-//                    restDistributionValue,
-//                    notificationUsageValue,
-//                    keyboardController,
-//                    focusManager
-//                )
+                SaveBudgetDetailsInDatabase(
+                    budgetWithSummary,
+                    transactionsViewModel,
+                    budgetDayViewModel,
+                    budgetViewModel,
+                    totalAmountText,
+                    totalAmountPerDay,
+                    totalDaysRemaining,
+                    startDate,
+                    endDate,
+                    restDistributionValue,
+                    notificationUsageValue,
+                    keyboardController,
+                    focusManager
+                )
+                shouldShowConfirmation = false
             },
             "Change Budget",
             "Are you sure, you want to change the current budget?",
@@ -202,6 +265,7 @@ fun BudgetBottomSheet(
 }
 
 fun SaveBudgetDetailsInDatabase(
+    budgetWithSummary: BudgetWithDayDetails,
     transactionsViewModel: TransactionsViewModel,
     budgetDayViewModel: BudgetDayViewModel,
     budgetViewModel: BudgetViewModel,
@@ -215,7 +279,10 @@ fun SaveBudgetDetailsInDatabase(
     keyboardController: SoftwareKeyboardController?,
     focusManager: FocusManager,
 ) {
+    Log.d(
+        "Teshkfajk",totalDaysRemaining.toString())
     budgetViewModel.createObjectAndStoreIt(
+        budgetWithSummary,
         totalAmountForMonth.toFloat(),
         totalAmountPerDay,
         totalDaysRemaining,
@@ -234,38 +301,76 @@ fun SaveBudgetDetailsInDatabase(
 @Composable
 fun BottomSheetBudgetContent(
     modifier: Modifier,
+    isBudgetSet: Boolean,
+    budgetWithSummary: BudgetWithDayDetails,
     saveButtonClicked: (String, Long, Long, Long, DistributionMethod, Float, Float) -> Unit,
     errorStatus: Boolean,
+    removeError: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val focusRequester = remember {
         FocusRequester()
     }
-    var totalAmountText by remember { mutableStateOf(TextFieldValue("")) }
-    var totalAmountPerDay by remember { mutableFloatStateOf(0f) }
+    val buttonTitle by remember { mutableStateOf(if (isBudgetSet) "Save Budget" else "Create Budget") }
+    var totalAmountText by remember { mutableStateOf(TextFieldValue(if (isBudgetSet) budgetWithSummary.budgetSummary.totalBudgetAmount.toString() else "")) }
+    var totalAmountPerDay by remember { mutableFloatStateOf(if (isBudgetSet) budgetWithSummary.budgetSummary.budgetAmountPerDay else 0f) }
     var showDateRangePicker by remember { mutableStateOf(false) }
     val dateRangePickerState =
         rememberDateRangePickerState(initialSelectedStartDateMillis = System.currentTimeMillis())
-    var startDate by remember { mutableStateOf<Long>(System.currentTimeMillis()) }
-    var endDate by remember { mutableStateOf<Long>(System.currentTimeMillis()) }
-    var totalDaysRemaining = remember {
-        getDayDifference(
-            startDate.LongMillisToNoralLong().toLocalDate(),
-            endDate.LongMillisToNoralLong().toLocalDate()
+    var startDate by remember {
+        mutableStateOf<Long>(
+            if (isBudgetSet) budgetWithSummary.budgetSummary.budgetStartDate.toLocalDate()
+                .toLongMillis() else System.currentTimeMillis()
         )
+    }
+    var endDate by remember {
+        mutableStateOf<Long>(
+            if (isBudgetSet) budgetWithSummary.budgetSummary.budgetEndDate.toLocalDate()
+                .toLongMillis() else System.currentTimeMillis()
+        )
+    }
+    var totalDaysRemaining = remember {
+        if (isBudgetSet) budgetWithSummary.budgetSummary.budgetTotalDays
+        else
+            getDayDifference(
+                startDate.LongMillisToNormalLong().toLocalDate(),
+                endDate.LongMillisToNormalLong().toLocalDate()
+            )
     }
     val notificationSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val restDistributionSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showNotificationPicker by remember { mutableStateOf(false) }
-    var notificationUsageValue by remember { mutableFloatStateOf(20f) }
+    var notificationUsageValue by remember { mutableFloatStateOf(if (isBudgetSet) budgetWithSummary.budgetSummary.notificationForBudgetUsage else 20f) }
     var restDistribution by remember { mutableStateOf(false) }
-    var restDistributionValue by remember { mutableStateOf(DistributionMethod.DEFAULT) }
+    var restDistributionValue by remember {
+        mutableStateOf(
+            if (isBudgetSet)
+                DistributionMethod.fromNumberToObject(budgetWithSummary.budgetSummary.restDistributionType)
+            else
+                DistributionMethod.DEFAULT
+        )
+    }
 
     LaunchedEffect(totalAmountText, startDate, endDate) {
         focusRequester.requestFocus()
         totalDaysRemaining = getDayDifference(
-            startDate.LongMillisToNoralLong().toLocalDate(),
-            endDate.LongMillisToNoralLong().toLocalDate()
+            startDate.LongMillisToNormalLong().toLocalDate(),
+            endDate.LongMillisToNormalLong().toLocalDate()
+        )
+        Log.d(
+            "Teshkfajk", "${
+                startDate.LongMillisToNormalLong().toLocalDate()
+            } ${
+                endDate.LongMillisToNormalLong().toLocalDate()
+            }"
+        )
+        Log.d(
+            "Teshkfajk", "${
+                getDayDifference(
+                    startDate.LongMillisToNormalLong().toLocalDate(),
+                    endDate.LongMillisToNormalLong().toLocalDate()
+                )
+            }"
         )
         if (totalAmountText.text.isNotEmpty() && totalAmountText.text.toFloat() != 0f) {
             totalAmountPerDay = totalAmountText.text.toFloat() / totalDaysRemaining
@@ -296,9 +401,7 @@ fun BottomSheetBudgetContent(
                                 totalAmountText = newValue.copy(text = filteredText)
                             }
                         }
-//                    scope.launch {
-//                        uiViewModel.errorStatusInBudgetAdd.emit(false)
-//                    }
+                        removeError()
                     },
                     modifier = Modifier
                         .fillMaxWidth()
@@ -346,11 +449,11 @@ fun BottomSheetBudgetContent(
                     Spacer(Modifier.width(8.dp))
                     Text(
                         text = "To ${
-                            endDate.LongMillisToNoralLong().toLocalDate().toDateWithDayName()
+                            endDate.LongMillisToNormalLong().toLocalDate().toDateWithDayName()
                         } (${
                             getDayDifference(
-                                startDate.LongMillisToNoralLong().toLocalDate(),
-                                endDate.LongMillisToNoralLong().toLocalDate()
+                                startDate.LongMillisToNormalLong().toLocalDate(),
+                                endDate.LongMillisToNormalLong().toLocalDate()
                             )
                         } days)",
                         modifier = Modifier
@@ -382,7 +485,7 @@ fun BottomSheetBudgetContent(
                         )
                     }
                     Text(
-                        text = " Days",
+                        text = "${restDistributionValue.type}",
                         modifier = Modifier
                             .weight(1f),
                         textAlign = TextAlign.End,
@@ -450,8 +553,8 @@ fun BottomSheetBudgetContent(
                 onClick = {
                     saveButtonClicked(
                         totalAmountText.text,
-                        startDate.LongMillisToNoralLong().toLocalDate().toLong(),
-                        endDate.LongMillisToNoralLong().toLocalDate().toLong(),
+                        startDate.LongMillisToNormalLong().toLocalDate().toLong(),
+                        endDate.LongMillisToNormalLong().toLocalDate().toLong(),
                         totalDaysRemaining,
                         restDistributionValue,
                         notificationUsageValue,
@@ -460,7 +563,7 @@ fun BottomSheetBudgetContent(
                 },
                 colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
-                Text(text = "Create Budget", color = MaterialTheme.colorScheme.onPrimary)
+                Text(text = buttonTitle, color = MaterialTheme.colorScheme.onPrimary)
             }
         }
     }

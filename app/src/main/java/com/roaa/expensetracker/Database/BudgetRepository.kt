@@ -3,6 +3,7 @@ package com.roaa.expensetracker.Database
 import android.content.Context
 import com.roaa.expensetracker.Database.AppDatabase.Companion.getInstance
 import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
+import com.roaa.expensetracker.Model.BudgetDayModelClass
 import com.roaa.expensetracker.Model.BudgetModelClass
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
@@ -33,6 +34,14 @@ class BudgetRepository(@ApplicationContext applicationContext: Context) {
         validDatesListFromLong: List<Long>
     ) {
         budgetDao.insertWithDayDetails(budgetModelClass, validDatesListFromLong)
+    }
+
+    suspend fun updateWithDetails(
+        budgetModelClass: BudgetModelClass,
+        validDatesListFromLong: List<Long>,
+        validDatesListFromPreviousBudget: List<BudgetDayModelClass>
+    ) {
+        budgetDao.updateWithDayDetails(budgetModelClass, validDatesListFromLong,validDatesListFromPreviousBudget)
     }
 
     fun getBudgetWithDays(budgetId: Long): Flow<BudgetWithDayDetails?> {

@@ -1,5 +1,6 @@
 package com.roaa.expensetracker.Composables.Navigation
 
+import com.roaa.expensetracker.Composables.utils.ActionTypes
 import kotlinx.serialization.Serializable
 
 
@@ -52,7 +53,7 @@ sealed class Destinations(){
     data class DayScreen(val date: Long) : Destinations()
 
     @Serializable
-    data object BudgetSetupScreen : Destinations()
+    data class BudgetSetupScreen(val type:ActionTypes,val budgetId:Long) : Destinations()
 }
 
 

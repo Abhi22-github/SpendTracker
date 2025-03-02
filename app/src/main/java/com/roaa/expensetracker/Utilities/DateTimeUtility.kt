@@ -73,7 +73,7 @@ fun LocalDate.toLongMillis(): Long {
     return instant.toEpochMilli()
 }
 
-fun Long.LongMillisToNoralLong(): Long {
+fun Long.LongMillisToNormalLong(): Long {
     // Convert milliseconds to Instant
     val instant = Instant.ofEpochMilli(this)
     // Convert Instant to LocalDate (using UTC)

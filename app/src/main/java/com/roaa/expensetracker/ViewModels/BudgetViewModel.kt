@@ -55,6 +55,7 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
 
 
     fun createObjectAndStoreIt(
+        budgetSummaryWithDay: BudgetWithDayDetails,
         totalAMountForMonth: Float,
         totalAmountPerDay: Float,
         totalDaysRemaining: Long,
@@ -65,7 +66,7 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
         validDatesListFromLong: List<Long>
     ) {
         val budgeObject = BudgetModelClass(
-            budgetId = 0L,
+            budgetId = budgetSummaryWithDay.budgetSummary.budgetId,
             totalBudgetAmount = totalAMountForMonth,
             budgetAmountPerDay = totalAmountPerDay,
             budgetTotalDays = totalDaysRemaining,
@@ -78,10 +79,14 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
             notificationForBudgetUsage = notificationUsageValue,
             isActive = true
         )
-        saveBudget(budgeObject, validDatesListFromLong)
+        saveBudget(budgeObject, budgetSummaryWithDay, validDatesListFromLong)
     }
 
-    private fun saveBudget(budgetModelClass: BudgetModelClass, validDatesListFromLong: List<Long>) {
+    private fun saveBudget(
+        budgetModelClass: BudgetModelClass,
+        budgetSummaryWithDay: BudgetWithDayDetails,
+        validDatesListFromLong: List<Long>
+    ) {
         if (budgetModelClass.budgetId == 0L) {
             //adding new bank Accounts
             viewModelScope.launch {
@@ -90,7 +95,7 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
         } else {
             //updating existing account
             viewModelScope.launch {
-                budgetRepository.update(budgetModelClass)
+                budgetRepository.updateWithDetails(budgetModelClass,validDatesListFromLong,budgetSummaryWithDay.budgetAllDays)
             }
         }
     }

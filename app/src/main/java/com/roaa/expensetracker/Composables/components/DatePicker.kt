@@ -16,7 +16,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import com.roaa.expensetracker.Utilities.LongMillisToNoralLong
+import com.roaa.expensetracker.Utilities.LongMillisToNormalLong
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -29,7 +29,7 @@ fun DatePickerModal(
         onDismissRequest = onDismiss,
         confirmButton = {
             TextButton(onClick = {
-                onDateSelected(datePickerState.selectedDateMillis?.LongMillisToNoralLong())
+                onDateSelected(datePickerState.selectedDateMillis?.LongMillisToNormalLong())
                 onDismiss()
             }) {
                 Text("OK")

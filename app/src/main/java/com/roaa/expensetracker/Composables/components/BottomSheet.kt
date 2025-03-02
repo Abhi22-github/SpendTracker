@@ -1432,6 +1432,7 @@ fun BottomSheetContentItemDetailsContent(
                 }
             }
         }
+
         Spacer(Modifier.height(16.dp))
         AnimatedVisibility(showDeleteConfirmation) {
             ConfirmationAlertDialog(
