@@ -1,14 +1,17 @@
 package com.roaa.expensetracker.Composables.StatisticsComponent
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.toArgb
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
+import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.compose.common.fill
@@ -23,10 +26,13 @@ import com.patrykandpatrick.vico.core.cartesian.data.lineSeries
 import com.patrykandpatrick.vico.core.cartesian.layer.LineCartesianLayer
 import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
 import com.patrykandpatrick.vico.core.common.Fill
+import com.patrykandpatrick.vico.core.common.Insets
 import com.patrykandpatrick.vico.core.common.component.LineComponent
+import com.patrykandpatrick.vico.core.common.component.ShapeComponent
 import com.patrykandpatrick.vico.core.common.component.TextComponent
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shader.ShaderProvider
+import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import com.roaa.expensetracker.Composables.utils.HarmonizedColorPalette
 
 
@@ -82,7 +88,22 @@ fun LineChart(
                 itemPlacer = remember { HorizontalAxis.ItemPlacer.segmented() },
                 valueFormatter = BottomAxisValueFormatter,
                 size = BaseAxis.Size.Auto(),
-                label = TextComponent(lineCount = 2)
+                label = TextComponent(
+                    lineCount = 2,
+                    color = MaterialTheme.colorScheme.onSurface.toArgb()
+                )
+            ),
+            marker = rememberDefaultCartesianMarker(
+                TextComponent(
+                    color = MaterialTheme.colorScheme.onSurface.toArgb(),
+                    padding = Insets(8f),
+                    background = ShapeComponent(
+                        fill = fill(
+                            MaterialTheme.colorScheme.surfaceContainer
+                        ),
+                        shape = CorneredShape.rounded(40)
+                    )
+                )
             ),
         ),
         modelProducer,
