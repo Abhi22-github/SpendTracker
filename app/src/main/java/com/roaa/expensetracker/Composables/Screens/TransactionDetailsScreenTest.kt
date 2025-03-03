@@ -48,6 +48,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SuggestionChip
 import androidx.compose.material3.SuggestionChipDefaults
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -264,7 +265,7 @@ fun TransactionDetailsScreen(
 
                     }
 
-                    if (false)
+                    if (false) {
                         FlowRow(
                             horizontalArrangement = Arrangement.spacedBy(
                                 5.dp,
@@ -284,8 +285,9 @@ fun TransactionDetailsScreen(
                             TagChip("Paid by Hrishi")
                             TagChip("Pune")
                         }
-                    Spacer(Modifier.height(48.dp))
-                    Spacer(Modifier.height(20.dp))
+                        Spacer(Modifier.height(48.dp))
+                    }
+                    Spacer(Modifier.height(50.dp))
                     Row(
                         Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
                     ) {
@@ -352,6 +354,34 @@ fun TransactionDetailsScreen(
                                     23,
                                     Icons.Outlined.Payment
                                 )
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(20.dp))
+                    Row(
+                        Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(
+                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+                                    shape = RoundedCornerShape(20.dp)
+                                )
+                                .padding(16.dp),
+                        ) {
+                            val color = MaterialTheme.colorScheme.primary
+                            Spacer(Modifier.width(12.dp))
+                            Column {
+                                TitleWithCheckBox(
+                                    Modifier,
+                                    labelAndValueStyle,
+                                    "Exclude from budget",
+                                    singleTransaction.transaction.type,
+
+                                )
+
                             }
                         }
                     }
@@ -444,6 +474,50 @@ fun ValueLabelList(
                 maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 style = labelAndValueStyle
+            )
+        }
+    }
+}
+
+@Composable
+fun TitleWithCheckBox(
+    modifier: Modifier = Modifier,
+    labelAndValueStyle: TextStyle,
+    labelName: String,
+    labelValue: String,
+) {
+    var excludeTransactionFromBudget by remember { mutableStateOf(false) }
+    Row(
+        horizontalArrangement = Arrangement.Start,
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            Modifier.weight(0.8f),
+            horizontalArrangement = Arrangement.Start,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+
+            Text(
+                text = labelName,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha),
+                style = labelAndValueStyle
+            )
+        }
+        Row(
+            Modifier.weight(0.2f),
+            horizontalArrangement = valueArrangement,
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Switch(
+                checked = excludeTransactionFromBudget,
+                onCheckedChange = {
+                    excludeTransactionFromBudget = !excludeTransactionFromBudget
+                },
+                modifier = Modifier
+                    .align(Alignment.CenterVertically)
             )
         }
     }
