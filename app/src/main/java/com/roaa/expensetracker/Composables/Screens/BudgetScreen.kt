@@ -43,6 +43,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.State
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -208,12 +209,19 @@ fun BudgetScreen(
                             .wrapContentHeight()
                             .fillMaxWidth(), contentAlignment = Alignment.Center
                     ) {
+                        val dayValue = ((getDayDifference(
+                            LocalDate.now(),
+                            getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate()
+                        )).toFloat() / getCurrentBudget.budgetSummary.budgetTotalDays.toFloat())
                         IndeterminateCircularIndicator(
                             Modifier.size(180.dp),
-                            ((getDayDifference(
-                                LocalDate.now(),
-                                getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate()
-                            )).toFloat() / getCurrentBudget.budgetSummary.budgetTotalDays.toFloat()),
+                            animateFloatAsState(
+                                dayValue,
+                                animationSpec = tween(
+                                    durationMillis = 2000,
+                                    easing = FastOutSlowInEasing
+                                )
+                            ),
                             orangeColorPalette
                         )
                         Column {
@@ -235,7 +243,13 @@ fun BudgetScreen(
                         }
                         IndeterminateCircularIndicator(
                             Modifier.size(240.dp),
-                            (currentBudgetLocal - currentExpenseLocal) / currentBudgetLocal,
+                            animateFloatAsState(
+                                ((currentBudgetLocal - currentExpenseLocal) / currentBudgetLocal),
+                                animationSpec = tween(
+                                    durationMillis = 2000,
+                                    easing = FastOutSlowInEasing
+                                )
+                            ),
                             purpleColorPalette
                         )
 
@@ -515,12 +529,11 @@ fun BudgetScreen(
 @Composable
 fun IndeterminateCircularIndicator(
     modifier: Modifier,
-    progress: Float,
+    progress: State<Float>,
     harmonizedColor: HarmonizedColorPalette
 ) {
-val animateProgress by animateFloatAsState(targetValue = progress, animationSpec =  tween(durationMillis = 1000, easing = FastOutSlowInEasing),)
     CircularProgressIndicator(
-        progress = { animateProgress },
+        progress = { progress.value },
         modifier = modifier,
         color = harmonizedColor.main,
         trackColor = harmonizedColor.container.copy(alpha = 0.3f),

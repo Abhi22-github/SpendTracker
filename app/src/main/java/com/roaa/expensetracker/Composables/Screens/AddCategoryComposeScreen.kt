@@ -527,3 +527,100 @@ fun TextSwitch(
     }
 }
 
+@Composable
+fun ThreeOptionTextSwitch(
+    modifier: Modifier = Modifier,
+    selectedIndex: Int,
+    items: List<String>,
+    onSelectionChange: (Int) -> Unit
+) {
+    val surfaceColor = MaterialTheme.colorScheme.surfaceContainerLow
+    val selectedButtonColor = MaterialTheme.colorScheme.secondaryContainer
+    val selectedButtonTextColor = MaterialTheme.colorScheme.onSecondaryContainer
+
+    BoxWithConstraints(
+        modifier
+            .width(250.dp)
+            .height(50.dp)
+            .clip(RoundedCornerShape(35.dp))
+            .background(surfaceColor)
+
+    ) {
+        if (items.isNotEmpty()) {
+
+            val maxWidth = this.maxWidth
+            val tabWidth = maxWidth / items.size
+
+            val indicatorOffset by animateDpAsState(
+                targetValue = tabWidth * selectedIndex,
+                animationSpec = tween(durationMillis = 300, easing = LinearOutSlowInEasing),
+                label = "indicator offset"
+            )
+
+            // This is for shadow layer matching white background
+            Box(
+                modifier = Modifier
+                    .offset(x = indicatorOffset)
+                    .shadow(0.dp, RoundedCornerShape(25.dp))
+                    .width(tabWidth)
+                    .fillMaxHeight()
+
+            )
+
+            Row(modifier = Modifier
+                .fillMaxWidth()
+
+                .drawWithContent {
+
+                    //   This is for setting black text while drawing on white background
+                    val padding = 8.dp.toPx()
+                    drawRoundRect(
+                        topLeft = Offset(x = indicatorOffset.toPx() + padding, padding),
+                        size = Size(size.width / 3 - padding , size.height - padding * 2),
+                        color = selectedButtonTextColor,
+                        cornerRadius = CornerRadius(x = 35.dp.toPx(), y = 35.dp.toPx()),
+                    )
+
+                    drawWithLayer {
+                        drawContent()
+
+                        // This is white top rounded rectangle
+                        drawRoundRect(
+                            topLeft = Offset(x = indicatorOffset.toPx(), 0f),
+                            size = Size(size.width / 3, size.height),
+                            color = selectedButtonColor,
+                            cornerRadius = CornerRadius(x = 25.dp.toPx(), y = 25.dp.toPx()),
+                            blendMode = BlendMode.SrcOut
+                        )
+                    }
+
+                }
+            ) {
+                items.forEachIndexed { index, text ->
+                    Box(
+                        modifier = Modifier
+                            .width(tabWidth)
+                            .fillMaxHeight()
+                            .clickable(
+                                interactionSource = remember {
+                                    MutableInteractionSource()
+                                },
+                                indication = null,
+                                onClick = {
+                                    onSelectionChange(index)
+                                }
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = text,
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.80f),
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
