@@ -5,6 +5,7 @@ import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Model.BudgetDayModelClass
 import com.roaa.expensetracker.Model.BudgetModelClass
 import com.roaa.expensetracker.Model.CategoryClass
+import com.roaa.expensetracker.Model.TotalAmountClass
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Model.TransactionClass
 import com.roaa.expensetracker.Utilities.Constants.CASH
@@ -51,6 +52,8 @@ val emptyBudgetDayClass = BudgetDayModelClass(
     totalIncomeTransactionCount = 0L,
     budgetId = 0L
 )
+
+val emptyTotalAmountClass = TotalAmountClass(20250101L,0f)
 
 val emptyTotalExpenseIncomeClass = TotalExpenseIncomeClass(20250101L, 0f, 0f)
 

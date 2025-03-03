@@ -75,9 +75,11 @@ import com.roaa.expensetracker.Composables.utils.harmonize
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import com.roaa.expensetracker.Utilities.CalenderDayState
+import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.DayState
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBudgetClass
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBudgetDayClass
+import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTotalAmountClass
 import com.roaa.expensetracker.Utilities.datesListForMonth
 import com.roaa.expensetracker.Utilities.dayNameList
 import com.roaa.expensetracker.Utilities.getDayDifference
@@ -146,7 +148,10 @@ fun BudgetScreen(
     ) {
         Column(modifier = Modifier.padding(it)) {
             if (isBudgetSet) {
-                val getTotalAmountForRange by transactionsViewModel.getTotalExpenseAmountForRangeFlow.collectAsState()
+                val getTotalAmountForRange by transactionsViewModel.getTotalAmountByDateRangeCategoryTypeAndBudgetStatus(
+                    getCurrentBudget.budgetSummary.budgetStartDate,
+                    getCurrentBudget.budgetSummary.budgetEndDate, EXPENSE, true
+                ).collectAsState(emptyTotalAmountClass)
                 var currentBudgetLocal by remember { mutableStateOf(1f) }
                 var currentExpenseLocal by remember { mutableStateOf(1f) }
                 var remainingDaysPercentage by remember { mutableStateOf(1f) }
@@ -154,10 +159,7 @@ fun BudgetScreen(
                 val orangeColorPalette = toPalette(orange)
 
                 LaunchedEffect(getCurrentBudget, getTotalAmountForRange) {
-                    transactionsViewModel.getTotalExpenseForRange(
-                        getCurrentBudget.budgetSummary.budgetStartDate,
-                        getCurrentBudget.budgetSummary.budgetEndDate
-                    )
+
                     if (getCurrentBudget.budgetSummary.totalBudgetAmount == 0f) {
                         currentBudgetLocal = getCurrentBudget.budgetSummary.totalBudgetAmount
                     } else {

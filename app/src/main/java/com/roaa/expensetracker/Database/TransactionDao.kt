@@ -46,6 +46,14 @@ interface TransactionDao {
         type: String
     ): Flow<TotalAmountClass>
 
+    @Query("SELECT date,SUM(amount) AS totalAmount FROM transaction_table where date >= :startDate and date <= :endDate and type == :type and includeInRespectiveBudget ==:budgetStatus")
+    fun getTotalAmountByDateRangeCategoryTypeAndBudgetStatus(
+        startDate: Long,
+        endDate: Long,
+        type: String,
+        budgetStatus:Boolean
+    ): Flow<TotalAmountClass>
+
     @Query("SELECT date,SUM(CASE WHEN type == \"Expense\" then amount else 0 END) AS totalExpense,SUM(CASE WHEN type == \"Income\" then amount else 0 END) AS totalIncome from transaction_table where date >= :startDate and date <= :endDate group by date")
     fun getListOfTotalAmountPerDayForRange(
         startDate: Long,

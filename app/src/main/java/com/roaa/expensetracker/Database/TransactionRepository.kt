@@ -65,6 +65,19 @@ class TransactionRepository(@ApplicationContext applicationContext: Context) {
             categoryType
         )
     }
+    fun getTotalAmountByDateRangeCategoryTypeAndBudgetStatus(
+        startDate: Long,
+        endDate: Long,
+        categoryType: String,
+        budgetStatus:Boolean
+    ): Flow<TotalAmountClass> {
+        return transactionDao.getTotalAmountByDateRangeCategoryTypeAndBudgetStatus(
+            startDate,
+            endDate,
+            categoryType,
+            budgetStatus
+        )
+    }
 
     fun getTotalAmountForDate(date: Long, type: String): Flow<Float> {
         return transactionDao.getTotalAmountForDate(date, type).map { it ?: 0f }

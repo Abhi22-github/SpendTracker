@@ -207,6 +207,15 @@ class TransactionsViewModel @Inject constructor(
         )
     }
 
+    fun getTotalAmountByDateRangeCategoryTypeAndBudgetStatus(
+        startDate: Long, endDate: Long, categoryType: String,budgetStatus:Boolean
+    ): Flow<TotalAmountClass> {
+        return transactionRepository.getTotalAmountByDateRangeCategoryTypeAndBudgetStatus(
+            startDate, endDate, categoryType,budgetStatus
+        )
+    }
+
+
 
     fun getListOfTotalAmountPerDayForRange(
         startDate: Long, endDate: Long

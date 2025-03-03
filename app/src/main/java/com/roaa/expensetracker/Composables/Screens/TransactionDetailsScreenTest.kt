@@ -117,7 +117,7 @@ fun TransactionDetailsScreen(
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var showEdit by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
-    var excludeTransactionFromBudget by remember { mutableStateOf(false) }
+    var excludeTransactionFromBudget by remember { mutableStateOf(!singleTransaction.transaction.includeInRespectiveBudget) }
 
     Scaffold(topBar = {
         TopBarForTransactionDetailsScreen("", false, {
