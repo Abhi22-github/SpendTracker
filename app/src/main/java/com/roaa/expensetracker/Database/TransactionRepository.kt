@@ -31,6 +31,9 @@ class TransactionRepository(@ApplicationContext applicationContext: Context) {
     suspend fun updateAndPropagateChanges(transactionClass: TransactionClass) {
         transactionDao.updateTransactionAndPropagateChanges(transactionClass)
     }
+    suspend fun updateForBudgetSwitchAndPropagateChanges(transactionClass: TransactionClass) {
+        transactionDao.updateTransactionOnlyForBudgetSwitchAndPropagateChanges(transactionClass)
+    }
 
     suspend fun deleteAndPropagateChanges(transactionClass: TransactionClass) {
         transactionDao.deleteTransactionAndPropagateChanges(transactionClass)

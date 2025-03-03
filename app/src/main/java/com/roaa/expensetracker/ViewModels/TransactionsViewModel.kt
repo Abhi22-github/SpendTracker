@@ -135,6 +135,7 @@ class TransactionsViewModel @Inject constructor(
             note = note.trim { it <= ' ' },
             dateWithTime = System.currentTimeMillis(),
             date = date,
+            includeInRespectiveBudget = true,
             categoryId = selectedCategoryId,
             bankAccountId = selectedBankAccountId
         )
@@ -144,6 +145,14 @@ class TransactionsViewModel @Inject constructor(
 
     fun updateFormDataInDatabase(transactionClass: TransactionClass) {
         viewModelScope.launch { transactionRepository.updateAndPropagateChanges(transactionClass) }
+    }
+
+    fun updateForBudgetSwitchDataInDatabase(transactionClass: TransactionClass) {
+        viewModelScope.launch {
+            transactionRepository.updateForBudgetSwitchAndPropagateChanges(
+                transactionClass
+            )
+        }
     }
 
     fun saveSelectedDate(date: Long) {
@@ -217,10 +226,15 @@ class TransactionsViewModel @Inject constructor(
     ): Flow<List<TotalExpenseIncomeClass>> {
         return transactionRepository.getListOfTotalAmountPerDayForRange(startDate, endDate)
     }
+
     fun getListOfTotalAmountPerDayForRangeForComposeForBankAccountId(
-        startDate: Long, endDate: Long,bankAccountId: Long
+        startDate: Long, endDate: Long, bankAccountId: Long
     ): Flow<List<TotalExpenseIncomeClass>> {
-        return transactionRepository.getListOfTotalAmountPerDayForRangeForBankAccountId(startDate, endDate, bankAccountId)
+        return transactionRepository.getListOfTotalAmountPerDayForRangeForBankAccountId(
+            startDate,
+            endDate,
+            bankAccountId
+        )
     }
 
     fun deleteSingleTransaction(transactionClass: TransactionClass) {
@@ -266,7 +280,7 @@ class TransactionsViewModel @Inject constructor(
         }
     }
 
-    fun getTransactionsListForBankAccountId(bankAccountId:Long): Flow<List<TransactionWithDetails>> {
+    fun getTransactionsListForBankAccountId(bankAccountId: Long): Flow<List<TransactionWithDetails>> {
         return transactionRepository.getTransactionListForBankAccountId(bankAccountId)
     }
 

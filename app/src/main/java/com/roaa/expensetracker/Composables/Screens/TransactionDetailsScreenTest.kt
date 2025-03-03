@@ -29,6 +29,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.outlined.AccountBalanceWallet
 import androidx.compose.material.icons.outlined.Cable
 import androidx.compose.material.icons.outlined.Category
 import androidx.compose.material.icons.outlined.DateRange
@@ -60,6 +61,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
@@ -115,6 +117,8 @@ fun TransactionDetailsScreen(
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var showEdit by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+    var excludeTransactionFromBudget by remember { mutableStateOf(false) }
+
     Scaffold(topBar = {
         TopBarForTransactionDetailsScreen("", false, {
             rootNavController.onBackPressed()
@@ -369,17 +373,29 @@ fun TransactionDetailsScreen(
                                     color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
                                     shape = RoundedCornerShape(20.dp)
                                 )
-                                .padding(16.dp),
+                                .padding(horizontal = 16.dp),
                         ) {
                             val color = MaterialTheme.colorScheme.primary
-                            Spacer(Modifier.width(12.dp))
+
                             Column {
                                 TitleWithCheckBox(
                                     Modifier,
                                     labelAndValueStyle,
                                     "Exclude from budget",
-                                    singleTransaction.transaction.type,
+                                    excludeTransactionFromBudget,
+                                    {
+                                        excludeTransactionFromBudget = it
+                                        scope.launch {
+                                            singleTransaction.transaction.let {
+                                                val temp =
+                                                    it.copy(includeInRespectiveBudget = !excludeTransactionFromBudget)
+                                                transactionsViewModel.updateForBudgetSwitchDataInDatabase(
+                                                    temp
+                                                )
+                                            }
 
+                                        }
+                                    }
                                 )
 
                             }
@@ -484,9 +500,9 @@ fun TitleWithCheckBox(
     modifier: Modifier = Modifier,
     labelAndValueStyle: TextStyle,
     labelName: String,
-    labelValue: String,
+    excludeTransactionFromBudget: Boolean,
+    excludeTransactionFromBudgetSetter: (Boolean) -> Unit
 ) {
-    var excludeTransactionFromBudget by remember { mutableStateOf(false) }
     Row(
         horizontalArrangement = Arrangement.Start,
         verticalAlignment = Alignment.CenterVertically,
@@ -498,9 +514,16 @@ fun TitleWithCheckBox(
             verticalAlignment = Alignment.CenterVertically,
         ) {
 
+            Icon(
+                Icons.Outlined.AccountBalanceWallet,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
+            )
+
             Text(
                 text = labelName,
-                maxLines = 3,
+                modifier = Modifier.padding(start = 8.dp),
+                maxLines = 1,
                 overflow = TextOverflow.Ellipsis,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha),
                 style = labelAndValueStyle
@@ -514,11 +537,16 @@ fun TitleWithCheckBox(
             Switch(
                 checked = excludeTransactionFromBudget,
                 onCheckedChange = {
-                    excludeTransactionFromBudget = !excludeTransactionFromBudget
+                    excludeTransactionFromBudgetSetter(it)
                 },
                 modifier = Modifier
                     .align(Alignment.CenterVertically)
+                    .scale(0.7f)
             )
+//            Checkbox(
+//                checked = excludeTransactionFromBudget,
+//                onCheckedChange = { excludeTransactionFromBudget = it }
+//            )
         }
     }
 }

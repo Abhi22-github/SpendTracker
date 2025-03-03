@@ -26,7 +26,7 @@ interface BudgetDao {
     @Update
     suspend fun update(budgetModelClass: BudgetModelClass)
 
-    @Query("SELECT SUM(amount) FROM transaction_table where date == :date and type == :type")
+    @Query("SELECT SUM(amount) FROM transaction_table where date = :date and type = :type")
     suspend fun getTotalAmountForDate(date: Long, type: String): Float?
 
     @Query("DELETE FROM budget_table")
@@ -86,7 +86,7 @@ interface BudgetDao {
         val difference =
             validDatesListFromPreviousBudget.filterNot { it.date in validDatesListFromLong }
         difference.forEach {
-            var tempObj = it.copy(budgetId = 0L)
+            val tempObj = it.copy(budgetId = 0L)
             updateDays(tempObj)
         }
 

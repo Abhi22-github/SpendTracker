@@ -18,10 +18,11 @@ import com.roaa.expensetracker.Model.TransactionClass
 
 @Database(
     entities = [TransactionClass::class, CategoryClass::class, BankAccountsClass::class, BudgetModelClass::class, BudgetDayModelClass::class],
-    version = 3,
+    version = 4,
     exportSchema = true,
     autoMigrations = [
-        AutoMigration(from = 2, to = 3, spec = AppDatabase.AutoMigrationSpecVersion2To3::class)
+        AutoMigration(from = 2, to = 3, spec = AppDatabase.AutoMigrationSpecVersion2To3::class),
+        AutoMigration(from = 3, to = 4)
     ]
 )
 abstract class AppDatabase : RoomDatabase() {

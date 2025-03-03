@@ -1,5 +1,6 @@
 package com.roaa.expensetracker.Model
 
+import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import kotlinx.serialization.Serializable
@@ -14,6 +15,8 @@ data class TransactionClass(
     var note: String ,
     var dateWithTime: Long ,
     var date: Long,
+    @ColumnInfo(defaultValue = "1")
+    var includeInRespectiveBudget:Boolean,
     var categoryId: Long = 0, // foreign key for category
     var bankAccountId: Long = 0 ,// foreign key with bank
 )

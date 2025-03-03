@@ -14,6 +14,7 @@ import com.roaa.expensetracker.Model.TotalAmountClass
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Model.TransactionClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
+import com.roaa.expensetracker.Utilities.Constants.INCOME
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -78,6 +79,13 @@ interface TransactionDao {
     @Query("SELECT SUM(amount) FROM transaction_table where date == :date and type == :type")
     fun getTotalAmountForDateWithoutFlow(date: Long, type: String): Float?
 
+    @Query("SELECT SUM(amount) FROM transaction_table where date == :date and type == :type and includeInRespectiveBudget ==:includeInBudget")
+    fun getTotalAmountForDateForBudgetOptTransactionWithoutFlow(
+        date: Long,
+        type: String,
+        includeInBudget: Boolean
+    ): Float?
+
     @get:Query("SELECT * FROM budget_table WHERE isActive = 1")
     val getCurrentBudget: BudgetModelClass?
 
@@ -92,7 +100,7 @@ interface TransactionDao {
     suspend fun addTransactionAndPropagateChanges(transactionClass: TransactionClass) {
         insert(transactionClass)
         val expense = getTotalAmountForDateWithoutFlow(transactionClass.date, EXPENSE)
-        val income = getTotalAmountForDateWithoutFlow(transactionClass.date, EXPENSE)
+        val income = getTotalAmountForDateWithoutFlow(transactionClass.date, INCOME)
 
         val currentBudget = getCurrentBudget
 
@@ -113,7 +121,37 @@ interface TransactionDao {
     suspend fun updateTransactionAndPropagateChanges(transactionClass: TransactionClass) {
         update(transactionClass)
         val expense = getTotalAmountForDateWithoutFlow(transactionClass.date, EXPENSE)
-        val income = getTotalAmountForDateWithoutFlow(transactionClass.date, EXPENSE)
+        val income = getTotalAmountForDateWithoutFlow(transactionClass.date, INCOME)
+
+        val currentBudget = getCurrentBudget
+
+        Log.d("TransactionDao", "$expense $income ${currentBudget?.budgetId}")
+        currentBudget?.let {
+            if (transactionClass.date >= it.budgetStartDate && transactionClass.date <= it.budgetEndDate) {
+                var singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
+                singleDay?.let {
+                    it.totalExpense = expense ?: 0f
+                    it.totalIncome = income ?: 0f
+                }
+                singleDay?.let { updateSingleDay(it) }
+            }
+        }
+    }
+
+    @Transaction
+    suspend fun updateTransactionOnlyForBudgetSwitchAndPropagateChanges(transactionClass: TransactionClass) {
+        update(transactionClass)
+        val expense = getTotalAmountForDateForBudgetOptTransactionWithoutFlow(
+            transactionClass.date,
+            EXPENSE,
+            true
+        )
+        val income =
+            getTotalAmountForDateForBudgetOptTransactionWithoutFlow(
+                transactionClass.date,
+                INCOME,
+                true
+            )
 
         val currentBudget = getCurrentBudget
 
