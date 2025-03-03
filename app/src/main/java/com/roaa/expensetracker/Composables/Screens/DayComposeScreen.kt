@@ -3,7 +3,9 @@ package com.roaa.expensetracker.Composables.Screens
 import android.annotation.SuppressLint
 import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.TweenSpec
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -189,9 +191,9 @@ fun DayViewScreen(
     ).collectAsState(0f)
     var isBudgetSet by remember { mutableStateOf(false) }
     LaunchedEffect(getCurrentBudgetFromRoom) {
-        getCurrentBudgetFromRoom?.let {
-            isBudgetSet = it?.budgetSummary?.isActive ?: false
-        }
+//        getCurrentBudgetFromRoom?.let {
+//            isBudgetSet = it?.budgetSummary?.isActive ?: false
+//        }
         getCurrentBudget = getCurrentBudgetFromRoom ?: BudgetWithDayDetails(
             emptyBudgetClass, listOf(emptyBudgetDayClass)
         )
@@ -211,8 +213,16 @@ fun DayViewScreen(
         0f  // or use another default value, depending on your requirements
     }
 
-    LaunchedEffect(pagerState.currentPage) {
+    LaunchedEffect(pagerState.currentPage,getCurrentBudget) {
+
         currentDay = calculateCurrentPageDay(pagerState.currentPage, 250, date.toLocalDate())
+        if (currentDay.toLong() <= getCurrentBudget.budgetSummary.budgetEndDate && currentDay.toLong() >= getCurrentBudget.budgetSummary.budgetStartDate
+        ) {
+            isBudgetSet = true
+        } else {
+            isBudgetSet = false
+        }
+        Log.d("Tetff","$currentDay $isBudgetSet ${getCurrentBudget.budgetSummary}")
     }
 
     Column {
@@ -249,12 +259,12 @@ fun DayViewScreen(
                 getTotalExpenseAmountForDate,
                 getTotalIncomeAmountForDate,
                 isBudgetSet,
-                1-oldPercent,
-                1-percent,
+                1 - oldPercent,
+                1 - percent,
                 getCurrentBudget.budgetSummary.budgetAmountPerDay
             )
         }
-Spacer(Modifier.height(8.dp))
+        Spacer(Modifier.height(8.dp))
         HorizontalPager(
             state = pagerState,
             modifier = Modifier.padding(top = 0.dp)
@@ -415,7 +425,7 @@ fun DayStatCard(
                     bottom.linkTo(parent.bottom)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
-                }
+                }.animateContentSize()
                 .zIndex(1f)) {
                 Box(Modifier.clickable { mainContentVisibility = !mainContentVisibility }) {
                     Row(
@@ -453,7 +463,9 @@ fun DayStatCard(
                         }
                         IconButton(
                             onClick = { mainContentVisibility = !mainContentVisibility },
-                            modifier = Modifier.weight(0.1f).aspectRatio(1f)
+                            modifier = Modifier
+                                .weight(0.1f)
+                                .aspectRatio(1f)
                         ) {
                             Icon(
                                 Icons.Rounded.KeyboardArrowDown,
@@ -472,7 +484,7 @@ fun DayStatCard(
                             .padding(horizontal = 12.dp)
                     )
                 BoxWithConstraints {
-                    val width = if (isBudgetSet) maxWidth / 3 else maxWidth / 2
+                    val width by animateDpAsState(if (isBudgetSet) maxWidth / 3 else maxWidth / 2)
                     Row(
                         Modifier
                     ) {
