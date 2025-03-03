@@ -1,8 +1,10 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -154,6 +156,7 @@ fun BudgetScreen(
                 ).collectAsState(emptyTotalAmountClass)
                 var currentBudgetLocal by remember { mutableStateOf(1f) }
                 var currentExpenseLocal by remember { mutableStateOf(1f) }
+                var remainingBudget by remember { mutableStateOf(currentBudgetLocal - currentExpenseLocal) }
                 var remainingDaysPercentage by remember { mutableStateOf(1f) }
                 val purpleColorPalette = toPalette(purpleColor)
                 val orangeColorPalette = toPalette(orange)
@@ -170,6 +173,7 @@ fun BudgetScreen(
                     } else {
                         currentExpenseLocal = getTotalAmountForRange.totalAmount
                     }
+                    remainingBudget = currentBudgetLocal - currentExpenseLocal
                 }
 
                 LaunchedEffect(getCurrentBudget) {
@@ -199,7 +203,6 @@ fun BudgetScreen(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                     Spacer(Modifier.height(24.dp))
-                    Log.d("Test1413", "${currentExpenseLocal} ${currentBudgetLocal}")
                     Box(
                         Modifier
                             .wrapContentHeight()
@@ -216,15 +219,15 @@ fun BudgetScreen(
                         Column {
 
                             Text(
-                                text = "₹${(currentBudgetLocal - currentExpenseLocal).toInt()}",
-                                style = MaterialTheme.typography.headlineSmall.copy(fontFamily = CustomFonts.numberFont),
+                                text = "₹${if (remainingBudget.toInt() < 0) 0 else remainingBudget}",
+                                style = typography.headlineSmall.copy(fontFamily = CustomFonts.numberFont),
                                 textAlign = TextAlign.Center,
                                 color = purpleColorPalette.main,
                                 modifier = Modifier.width(130.dp)
                             )
                             Text(
                                 text = "${getDaysRemaining(getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate())} days",
-                                style = MaterialTheme.typography.titleLarge.copy(fontFamily = CustomFonts.numberFont),
+                                style = typography.titleLarge.copy(fontFamily = CustomFonts.numberFont),
                                 textAlign = TextAlign.Center,
                                 color = orangeColorPalette.main,
                                 modifier = Modifier.width(130.dp)
@@ -251,7 +254,7 @@ fun BudgetScreen(
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 text = "Budget Remaining",
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = typography.bodyMedium,
                                 textAlign = TextAlign.Start,
                                 color = purpleColorPalette.main,
                                 modifier = Modifier
@@ -267,7 +270,7 @@ fun BudgetScreen(
                             Spacer(Modifier.width(8.dp))
                             Text(
                                 text = "Days Remaining",
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = typography.bodyMedium,
                                 textAlign = TextAlign.Start,
                                 color = orangeColorPalette.main,
                                 modifier = Modifier
@@ -294,7 +297,7 @@ fun BudgetScreen(
                             Column {
                                 ValueLabelList(
                                     modifier = Modifier,
-                                    labelAndValueStyle = MaterialTheme.typography.bodyMedium,
+                                    labelAndValueStyle = typography.bodyMedium,
                                     labelName = "Amount Per day",
                                     labelValue = "₹ ${getCurrentBudget.budgetSummary.budgetAmountPerDay}",
                                     iconNumber = 12,
@@ -310,9 +313,9 @@ fun BudgetScreen(
 
                                 ValueLabelList(
                                     modifier = Modifier,
-                                    labelAndValueStyle = MaterialTheme.typography.bodyMedium,
+                                    labelAndValueStyle = typography.bodyMedium,
                                     labelName = "Budget Remaining",
-                                    labelValue = "₹ ${currentBudgetLocal - currentExpenseLocal}",
+                                    labelValue = "₹ ${if (remainingBudget.toInt() < 0) 0 else remainingBudget}",
                                     iconNumber = 12,
                                     image = Icons.Rounded.AttachMoney,
                                 )
@@ -324,7 +327,7 @@ fun BudgetScreen(
                                 Spacer(Modifier.height(spaceHeightInDetail))
                                 ValueLabelList(
                                     modifier = Modifier,
-                                    labelAndValueStyle = MaterialTheme.typography.bodyMedium,
+                                    labelAndValueStyle = typography.bodyMedium,
                                     labelName = "Total Budget Days",
                                     labelValue = "${getCurrentBudget.budgetSummary.budgetTotalDays} Days",
                                     iconNumber = 12,
@@ -352,7 +355,7 @@ fun BudgetScreen(
                             Column {
                                 ValueLabelList(
                                     modifier = Modifier,
-                                    labelAndValueStyle = MaterialTheme.typography.bodyMedium,
+                                    labelAndValueStyle = typography.bodyMedium,
                                     labelName = "Budget Start Date",
                                     labelValue = getCurrentBudget.budgetSummary.budgetStartDate.toLocalDate()
                                         .toDisplayDate(),
@@ -369,7 +372,7 @@ fun BudgetScreen(
 
                                 ValueLabelList(
                                     modifier = Modifier,
-                                    labelAndValueStyle = MaterialTheme.typography.bodyMedium,
+                                    labelAndValueStyle = typography.bodyMedium,
                                     labelName = "Budget End Date",
                                     labelValue = getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate()
                                         .toDisplayDate(),
@@ -385,7 +388,7 @@ fun BudgetScreen(
                                 Spacer(Modifier.height(spaceHeightInDetail))
                                 ValueLabelList(
                                     modifier = Modifier,
-                                    labelAndValueStyle = MaterialTheme.typography.bodyMedium,
+                                    labelAndValueStyle = typography.bodyMedium,
                                     labelName = "Distribution Method",
                                     labelValue = "${DistributionMethod.fromNumber(getCurrentBudget.budgetSummary.restDistributionType)}",
                                     iconNumber = 12,
@@ -399,7 +402,7 @@ fun BudgetScreen(
                                 Spacer(Modifier.height(spaceHeightInDetail))
                                 ValueLabelList(
                                     modifier = Modifier,
-                                    labelAndValueStyle = MaterialTheme.typography.bodyMedium,
+                                    labelAndValueStyle = typography.bodyMedium,
                                     labelName = "Usage Notification",
                                     labelValue = "below ${getCurrentBudget.budgetSummary.notificationForBudgetUsage}%",
                                     iconNumber = 12,
@@ -515,9 +518,9 @@ fun IndeterminateCircularIndicator(
     progress: Float,
     harmonizedColor: HarmonizedColorPalette
 ) {
-
+val animateProgress by animateFloatAsState(targetValue = progress, animationSpec =  tween(durationMillis = 1000, easing = FastOutSlowInEasing),)
     CircularProgressIndicator(
-        progress = { progress },
+        progress = { animateProgress },
         modifier = modifier,
         color = harmonizedColor.main,
         trackColor = harmonizedColor.container.copy(alpha = 0.3f),
@@ -546,13 +549,13 @@ fun SingleInfoBox(modifier: Modifier, label: String, value: String) {
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Text(
-                text = label, style = MaterialTheme.typography.labelLarge,
+                text = label, style = typography.labelLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurface.copy(0.38f)
             )
             Spacer(Modifier.height(5.dp))
             Text(
-                text = value, style = MaterialTheme.typography.bodyMedium,
+                text = value, style = typography.bodyMedium,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -591,13 +594,13 @@ fun SpendCalender(
 
             Text(
                 text = "This table shows how much you spent every day relative to your daily budge",
-                style = MaterialTheme.typography.labelMedium,
+                style = typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
             )
             Spacer(Modifier.height(10.dp))
             Text(
                 text = "February",
-                style = MaterialTheme.typography.titleMedium,
+                style = typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Row(
@@ -663,7 +666,7 @@ fun SpendCalender(
 fun DayName(modifier: Modifier = Modifier, text: String) {
     Text(
         text = text,
-        style = MaterialTheme.typography.labelMedium,
+        style = typography.labelMedium,
         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
         textAlign = TextAlign.Center,
         modifier = modifier
@@ -700,7 +703,7 @@ fun DayBox(modifier: Modifier = Modifier, text: Int, inBudget: Boolean, dayState
     ) {
         Text(
             text = if (text != -1) text.toString() else "",
-            style = MaterialTheme.typography.labelMedium,
+            style = typography.labelMedium,
             color = textColor,
             textAlign = TextAlign.Center,
             modifier = modifier

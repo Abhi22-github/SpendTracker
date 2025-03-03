@@ -151,7 +151,9 @@ fun TransactionsListCompose(
     }
 
     var bottomSheet by remember { mutableStateOf(false) }
-    val showExperimentalComponents by preferencesViewModel.showExperimentalComponent.collectAsState(false)
+    val showExperimentalComponents by preferencesViewModel.showExperimentalComponent.collectAsState(
+        false
+    )
     Scaffold(floatingActionButton = {
         ExtendedFloatingActionButton(
             onClick = {
@@ -310,96 +312,118 @@ fun SingleTransaction(
     item: TransactionWithDetails,
     onSingleItemClick: (TransactionWithDetails) -> Unit
 ) {
-    Card(
-        shape = RoundedCornerShape(12.dp), modifier = Modifier
-            .padding(16.dp, 4.dp)
-            .clip(RoundedCornerShape(12.dp))
-            .clickable {
-                onSingleItemClick(item)
-            }, colors = CardDefaults.cardColors(
-            containerColor = combineColors(
-                MaterialTheme.colorScheme.surface,
-                MaterialTheme.colorScheme.surfaceVariant,
-                angle = 0.3f,
-            )
-        )
-    ) {
-
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(16.dp, 12.dp)
-        ) {
-            var amount = parseAmount(item.transaction.amount)
-            var amountColor = successColor
-            if (item.category.categoryType.equals(EXPENSE)) {
-                amount = "-₹" + amount
-                amountColor = failureColor
-            } else {
-                amount = "+₹" + amount
-                amountColor = successColor
-            }
-            Surface(
-                shape = CircleShape,
-                modifier = Modifier
-                    .size(36.dp)
-                    .fillMaxSize(),
-                color = MaterialTheme.colorScheme.surfaceVariant
-            ) {
-                Box(
-                    modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
-                ) {
-                    val image =
-                        rememberAsyncImagePainter(IconState.fromNumber(item.category.categoryIconNumber))
-                    Image(
-                        painter = image,
-                        contentDescription = "Test Image",
-                        modifier = Modifier.size(24.dp),
-                    )
+    ConstraintLayout() {
+        val (content, excludeFromBudgetStatus) = createRefs()
+//        Box(
+//            modifier = Modifier
+//                .constrainAs(excludeFromBudgetStatus) {
+//                    start.linkTo(parent.start, 40.dp)
+//                    bottom.linkTo(parent.bottom,20.dp)
+//                }
+//                .clip(RoundedCornerShape(25.dp))
+//                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(25.dp))
+//                .zIndex(1f),
+//            contentAlignment = Alignment.Center
+//        ) {
+//            Icon(Icons.Rounded.Block, contentDescription = null, modifier = Modifier.size(16.dp))
+//        }
+        Card(
+            shape = RoundedCornerShape(12.dp), modifier = Modifier
+                .padding(16.dp, 4.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .clickable {
+                    onSingleItemClick(item)
                 }
-            }
+                .constrainAs(content) {
+                    top.linkTo(parent.top)
+                    bottom.linkTo(parent.bottom)
+                    start.linkTo(parent.start)
+                    end.linkTo(parent.end)
+                }, colors = CardDefaults.cardColors(
+                containerColor = combineColors(
+                    MaterialTheme.colorScheme.surface,
+                    MaterialTheme.colorScheme.surfaceVariant,
+                    angle = 0.3f,
+                )
+            )
+        ) {
 
-
-            Spacer(modifier = Modifier.width(16.dp))
-            Column(
+            Row(
                 modifier = Modifier
-                    .align(Alignment.CenterVertically)
-                    .fillMaxWidth(0.60f)
-
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(16.dp, 12.dp)
             ) {
+                var amount = parseAmount(item.transaction.amount)
+                var amountColor = successColor
+                if (item.category.categoryType.equals(EXPENSE)) {
+                    amount = "-₹" + amount
+                    amountColor = failureColor
+                } else {
+                    amount = "+₹" + amount
+                    amountColor = successColor
+                }
+                Surface(
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .fillMaxSize(),
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+                    ) {
+                        val image =
+                            rememberAsyncImagePainter(IconState.fromNumber(item.category.categoryIconNumber))
+                        Image(
+                            painter = image,
+                            contentDescription = "Test Image",
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
+                }
+
+
+                Spacer(modifier = Modifier.width(16.dp))
+                Column(
+                    modifier = Modifier
+                        .align(Alignment.CenterVertically)
+                        .fillMaxWidth(0.60f)
+
+                ) {
+                    Text(
+                        text = item.transaction.note.replaceFirstChar { it.uppercase() },
+                        style = typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    if (true) {
+                        Text(
+                            text = item.category.categoryName,
+                            style = typography.labelMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
+                        )
+                    }
+                }
+                Spacer(modifier = Modifier.width(16.dp))
+
                 Text(
-                    text = item.transaction.note.replaceFirstChar { it.uppercase() },
-                    style = typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onSurface,
+                    text = amount,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .align(Alignment.CenterVertically),
+                    style = typography.titleMedium,
+                    fontFamily = CustomFonts.numberFont,
+                    color = amountColor,
+                    textAlign = TextAlign.End,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis
                 )
-                if (true) {
-                    Text(
-                        text = item.category.categoryName,
-                        style = typography.labelMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                    )
-                }
-            }
-            Spacer(modifier = Modifier.width(16.dp))
 
-            Text(
-                text = amount,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .align(Alignment.CenterVertically),
-                style = typography.titleMedium,
-                fontFamily = CustomFonts.numberFont,
-                color = amountColor,
-                textAlign = TextAlign.End,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            }
 
         }
-
     }
 }
 

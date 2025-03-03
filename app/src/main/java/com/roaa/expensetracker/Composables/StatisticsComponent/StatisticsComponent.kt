@@ -16,13 +16,14 @@ import kotlinx.coroutines.launch
 
 data class ArcsData(
     val animation: Animatable<Float, AnimationVector1D>,
-    val sweepAngle: Float, val color: Color)
+    val sweepAngle: Float, val color: Color
+)
 
 @Composable
 fun AnimatedPieChart(modifier: Modifier = Modifier, pieDatePoints: List<PieData>) {
     val localModifier = modifier.size(200.dp)
-    val total = pieDatePoints.fold(0f){acc,pieData->
-        acc+pieData.value
+    val total = pieDatePoints.fold(0f) { acc, pieData ->
+        acc + pieData.value
     }.div(360)
     var currentSum = 0
 
@@ -35,7 +36,7 @@ fun AnimatedPieChart(modifier: Modifier = Modifier, pieDatePoints: List<PieData>
         )
     }
 
-    LaunchedEffect (arcs){
+    LaunchedEffect(arcs) {
         arcs.map {
             launch {
                 it.animation.animateTo(
@@ -57,7 +58,5 @@ fun AnimatedPieChart(modifier: Modifier = Modifier, pieDatePoints: List<PieData>
                 style = stroke
             )
         }
-
     }
-
 }
