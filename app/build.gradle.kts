@@ -144,4 +144,7 @@ dependencies {
     // For Material 3 theming in Jetpack Compose.
     implementation("com.patrykandpatrick.vico:compose-m3:$vicoVersion")
 
+    implementation("io.github.ehsannarmani:compose-charts:0.1.2")
+
+
 }

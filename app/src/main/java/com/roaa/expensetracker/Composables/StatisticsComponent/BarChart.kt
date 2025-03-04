@@ -129,7 +129,7 @@ fun BarChart(
                     lineCount = 2,
                     textAlignment = Layout.Alignment.ALIGN_CENTER,
                     color = MaterialTheme.colorScheme.onSurface.toArgb()
-                )
+                ), line = LineComponent(fill = fill(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
             ),
             marker = rememberDefaultCartesianMarker(
                 TextComponent(
