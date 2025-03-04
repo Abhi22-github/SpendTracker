@@ -11,18 +11,21 @@ import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
 import java.time.temporal.ChronoUnit
+import java.time.temporal.TemporalAdjusters
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
 
 val monthWithYearFormat = DateTimeFormatter.ofPattern("MMM uuuu", Locale.getDefault())
+val monthWithYearCommaFormat = DateTimeFormatter.ofPattern("MMM,uuuu", Locale.getDefault())
 val fullMonthNameWithYearFormat = DateTimeFormatter.ofPattern("MMMM uuuu", Locale.getDefault())
 val fullMonthNameFormat = DateTimeFormatter.ofPattern("MMMM", Locale.getDefault())
 val yearMonthDateLongFormat = DateTimeFormatter.ofPattern("yyyyMMdd", Locale.getDefault())
-val showDateFormat = DateTimeFormatter.ofPattern("dd MMM,yyyy",Locale.getDefault())
-val onlyDayName = DateTimeFormatter.ofPattern("EEE",Locale.getDefault())
-val only2LetterDate = DateTimeFormatter.ofPattern("dd",Locale.getDefault())
+val showDateFormat = DateTimeFormatter.ofPattern("dd MMM,yyyy", Locale.getDefault())
+val onlyDayName = DateTimeFormatter.ofPattern("EEE", Locale.getDefault())
+val only2LetterDate = DateTimeFormatter.ofPattern("dd", Locale.getDefault())
+val dayMonthFormat = DateTimeFormatter.ofPattern("dd MMM", Locale.getDefault())
 
 fun getFirstAndLastDateOfGivenPeriod(prevMonth: LocalDate, nextMonth: LocalDate): Pair<Long, Long> {
 
@@ -30,8 +33,12 @@ fun getFirstAndLastDateOfGivenPeriod(prevMonth: LocalDate, nextMonth: LocalDate)
 
     val lastDate = nextMonth.withDayOfMonth(nextMonth.lengthOfMonth())
 
-    return Pair(firstDate.format(yearMonthDateLongFormat).toLong(), lastDate.format(yearMonthDateLongFormat).toLong())
+    return Pair(
+        firstDate.format(yearMonthDateLongFormat).toLong(),
+        lastDate.format(yearMonthDateLongFormat).toLong()
+    )
 }
+
 /*
 * Extension Functions for Local Date
 */
@@ -52,6 +59,7 @@ fun LocalDate.toDisplayStringForMonth(): String {
 fun LocalDate.toDisplayStringForMonthWithYear(): String {
     return this.format(showDateFormat).toString()
 }
+
 fun Long.toDisplayDate(): String {
     // Create a DateFormatter object for displaying date in specified format.
     val formatter: SimpleDateFormat = SimpleDateFormat("MMM dd,yyyy")
@@ -124,6 +132,25 @@ fun getPrev10Dates(date: LocalDate): List<String> {
     return prev10Dates
 }
 
+fun getPreviousAndNext100Months(date: LocalDate): List<String> {
+    val allMonths = mutableListOf<String>()
+    for (i in 50 downTo 1) {
+        val previousMonth = date.minusMonths(i.toLong())  // Subtract days for previous dates
+        val formattedPrevMonth =
+            previousMonth.format(monthWithYearCommaFormat)
+        allMonths.add(formattedPrevMonth)
+    }
+
+    allMonths.add(date.format(monthWithYearCommaFormat))
+
+    for (i in 1..50) {
+        val nextMonth = date.plusMonths(i.toLong())  // Add days for next dates
+        val formattedNextMonth = nextMonth.format(monthWithYearCommaFormat)
+        allMonths.add(formattedNextMonth)
+    }
+    return allMonths
+}
+
 fun getPreviousAndNext500Months(date: LocalDate): List<String> {
     val allMonths = mutableListOf<String>()
     for (i in 250 downTo 1) {
@@ -143,24 +170,42 @@ fun getPreviousAndNext500Months(date: LocalDate): List<String> {
     return allMonths
 }
 
-fun getDayDifference(startDate: LocalDate,endDate: LocalDate): Long {
-return ChronoUnit.DAYS.between(startDate, endDate)+1
+fun getDayDifference(startDate: LocalDate, endDate: LocalDate): Long {
+    return ChronoUnit.DAYS.between(startDate, endDate) + 1
 }
 
-fun getPreviousAndNext10Days(date: LocalDate): List<String> {
+fun getPreviousAndNext100Weeks(): List<String> {
+    val currentDate = LocalDate.now()
+
+    val currentWeekStart =
+        currentDate.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.MONDAY))
+
+    val weekList = mutableListOf<String>()
+
+    for (i in -50..49) {
+        val startOfWeek = currentWeekStart.plus(i.toLong(), ChronoUnit.WEEKS)
+        val endOfWeek = startOfWeek.plus(6, ChronoUnit.DAYS)
+
+        weekList.add("${startOfWeek.format(dayMonthFormat)} - ${endOfWeek.format(showDateFormat)}")
+    }
+
+    return weekList
+}
+
+fun getPreviousAndNext500DaysForFilter(date: LocalDate): List<String> {
     val allDates = mutableListOf<String>()
-    for (i in 5 downTo 1) {
+    for (i in 250 downTo 1) {
         val previousDate = date.minusDays(i.toLong())  // Subtract days for previous dates
         val formattedPrevDate =
-            "${previousDate.format(onlyDayName)},${previousDate.format(only2LetterDate)}"
+            previousDate.format(showDateFormat)
         allDates.add(formattedPrevDate)
     }
 
-    allDates.add("${date.format(onlyDayName)},${date.format(only2LetterDate)}")
+    allDates.add(date.format(showDateFormat))
 
-    for (i in 1..5) {
+    for (i in 1..250) {
         val nextDate = date.plusDays(i.toLong())  // Add days for next dates
-        val formattedNextDate = "${nextDate.format(onlyDayName)},${nextDate.format(only2LetterDate)}"
+        val formattedNextDate = nextDate.format(showDateFormat)
         allDates.add(formattedNextDate)
     }
     return allDates
@@ -179,10 +224,19 @@ fun getPreviousAndNext500Days(date: LocalDate): List<String> {
 
     for (i in 1..250) {
         val nextDate = date.plusDays(i.toLong())  // Add days for next dates
-        val formattedNextDate = "${nextDate.format(onlyDayName)},${nextDate.format(only2LetterDate)}"
+        val formattedNextDate =
+            "${nextDate.format(onlyDayName)},${nextDate.format(only2LetterDate)}"
         allDates.add(formattedNextDate)
     }
     return allDates
+}
+
+fun getFirstAndLastDayOfGivenMonthDate(localDate: LocalDate): Pair<Long, Long> {
+    val firstDayOfMonth = localDate.withDayOfMonth(1)
+    // Get the last day of the month
+    val lastDayOfMonth = firstDayOfMonth.withDayOfMonth(firstDayOfMonth.lengthOfMonth())
+
+    return Pair(firstDayOfMonth.toLong(), lastDayOfMonth.toLong())
 }
 
 fun getCalendarForMonthFromDate(localDate: LocalDate): List<LocalDate> {

@@ -63,6 +63,7 @@ import com.roaa.expensetracker.Utilities.Constants.MAX_PAGES
 import com.roaa.expensetracker.Utilities.calculateEffectivePage
 import com.roaa.expensetracker.Utilities.convertTotalExpenseIncomeClassToMap
 import com.roaa.expensetracker.Utilities.getCalendarForMonthFromDate
+import com.roaa.expensetracker.Utilities.getFirstAndLastDayOfGivenMonthDate
 import com.roaa.expensetracker.Utilities.getMonthFromLocalDate
 import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toLong
@@ -130,6 +131,7 @@ fun MonthViewScreen(
     ) { page ->
 
         val currentMonthStart = calculateMonthStartDate(page, MAX_PAGES / 2)
+        val currentMonthFirstAndLastDate = getFirstAndLastDayOfGivenMonthDate(currentMonthStart)
         val allDays = remember(currentMonthStart) {
             getCalendarForMonthFromDate(currentMonthStart)
         }
@@ -141,8 +143,10 @@ fun MonthViewScreen(
         var totalIncome by remember { mutableFloatStateOf(0f) }
         LaunchedEffect(totalExpenseList) {
             totalExpenseList.forEach {
-                totalExpense += it.totalExpense
-                totalIncome += it.totalIncome
+                if (it.date >= currentMonthFirstAndLastDate.first && it.date <= currentMonthFirstAndLastDate.second) {
+                    totalExpense += it.totalExpense
+                    totalIncome += it.totalIncome
+                }
             }
         }
         val totalValuesPerDayForMonthMap = remember(totalExpenseList) {
