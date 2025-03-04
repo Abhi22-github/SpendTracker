@@ -109,8 +109,8 @@ fun FontCard(family: String, size: String, style: TextStyle) {
     }
 }
 
-object CustomFonts{
-    val numberFont = FontFamily(Font(R.font.googlesansmedium))
+object CustomFonts {
+    val numberFont = FontFamily(Font(R.font.outfitmedium))
 }
 
 val secondaryAlpha = 0.38f
