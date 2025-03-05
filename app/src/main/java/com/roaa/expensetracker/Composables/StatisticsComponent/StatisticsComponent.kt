@@ -93,14 +93,14 @@ fun AnimatedGapPieChart(modifier: Modifier = Modifier, pieDatePoints: List<PieDa
     }.div(remainingDegree)
     var currentSum = 0f
 
-    val arcs = pieDatePoints.mapIndexed {index,pieDataPoint->
-        val startAngle = currentSum +(index * gapDegree)
-        currentSum += pieDataPoint.value/total
+    val arcs = pieDatePoints.mapIndexed { index, pieDataPoint ->
+        val startAngle = currentSum + (index * gapDegree)
+        currentSum += pieDataPoint.value / total
         GapArcsData(
             animation = Animatable(0f),
-            sweepAngle = pieDataPoint.value/total,
+            sweepAngle = pieDataPoint.value / total,
             color = pieDataPoint.color,
-            startAngle = -90+ startAngle
+            startAngle = -90 + startAngle
         )
     }
 

@@ -547,11 +547,7 @@ fun HomeStatCardNew(
                         BoxWithConstraints {
                             BarChart(
                                 Modifier.fillMaxSize(),
-                                currentSelectedMonth,
-                                maxWidth,
-                                maxHeight,
                                 currentMontAllDayList,
-                                maxExpense,
                                 palette
                             )
                         }
