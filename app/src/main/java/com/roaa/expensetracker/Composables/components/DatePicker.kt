@@ -55,7 +55,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.roaa.expensetracker.Composables.Screens.BankChips
 import com.roaa.expensetracker.Utilities.LongMillisToNormalLong
 import com.roaa.expensetracker.Utilities.getDayDifference
-import com.roaa.expensetracker.Utilities.toDisplayDate
+import com.roaa.expensetracker.Utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.Utilities.toLongMillis
@@ -235,7 +235,7 @@ fun FilterBottomSheetContent(
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            text = startDate.toLocalDate().toDisplayDate(),
+                            text = startDate.toLocalDate().toDisplayStringForMonthWithYear(),
                             textAlign = TextAlign.Center,
                             style = typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface
@@ -270,7 +270,7 @@ fun FilterBottomSheetContent(
                         )
                         Spacer(Modifier.width(8.dp))
                         Text(
-                            text = endDate.toLocalDate().toDisplayDate(),
+                            text = endDate.toLocalDate().toDisplayStringForMonthWithYear(),
                             textAlign = TextAlign.Center,
                             style = typography.bodyMedium,
                             color = MaterialTheme.colorScheme.onSurface.copy()

@@ -29,6 +29,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.Tune
 import androidx.compose.material3.ButtonDefaults
@@ -81,6 +82,9 @@ import com.roaa.expensetracker.Utilities.getPreviousAndNext100Weeks
 import com.roaa.expensetracker.Utilities.getPreviousAndNext500Days
 import com.roaa.expensetracker.Utilities.getPreviousAndNext500DaysForFilter
 import com.roaa.expensetracker.Utilities.parseAmount
+import com.roaa.expensetracker.Utilities.toDisplayStringForMonthWithYear
+import com.roaa.expensetracker.Utilities.toLocalDate
+import com.roaa.expensetracker.Utilities.toLong
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -352,7 +356,7 @@ fun BankChips(
 ) {
     FilterChip(onClick = { selectChip(index) },
         label = {
-            Text(text = text)
+            Text(text = text, modifier = Modifier.padding(vertical = 8.dp))
         },
         selected = index == selectedIndexForFilterChip,
         leadingIcon = if (index == selectedIndexForFilterChip) {
@@ -452,8 +456,10 @@ fun StatisticsScreenTest(
 ) {
     val options = listOf("Expense", "Income")
     var selectedIndex by remember { mutableIntStateOf(0) }
+    var startDate by remember { mutableStateOf<Long>(LocalDate.now().minusMonths(1).toLong()) }
+    var endDate by remember { mutableStateOf<Long>(LocalDate.now().toLong()) }
     val scrollState = rememberScrollState()
-    var showBottomSheetForDatePicker by remember { mutableStateOf(false) }
+    var showFilterBottomSheet by remember { mutableStateOf(false) }
 
     BackHandler() {
         handleBackNavigation(navigationManager)
@@ -476,7 +482,7 @@ fun StatisticsScreenTest(
             Row {
                 Column {
                     FilledTonalButton(
-                        onClick = { showBottomSheetForDatePicker = !showBottomSheetForDatePicker },
+                        onClick = { showFilterBottomSheet = !showFilterBottomSheet },
                         contentPadding = PaddingValues(
                             start = 24.dp, top = 12.dp, end = 20.dp, bottom = 12.dp
                         ),
@@ -486,15 +492,20 @@ fun StatisticsScreenTest(
                         )
                     ) {
                         Text(
-                            text = "last 1 month", style = MaterialTheme.typography.titleMedium
+                            text = "${
+                                startDate.toLocalDate().toDisplayStringForMonthWithYear()
+                                    .split(",")[0]
+                            }-${endDate.toLocalDate().toDisplayStringForMonthWithYear()}",
+                            style = MaterialTheme.typography.titleMedium
                         )
-                        Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = "Settings")
+                        Spacer(Modifier.width(4.dp))
+                        Icon(Icons.Rounded.FilterList, contentDescription = "Settings")
 
                     }
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(8.dp))
             Row {
                 Column {
                     TextSwitch(selectedIndex = selectedIndex, items = options, onSelectionChange = {
@@ -503,7 +514,22 @@ fun StatisticsScreenTest(
                 }
             }
 
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(16.dp))
+            Column(
+                Modifier.padding(horizontal = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    SingleInfoBox(Modifier.weight(1f), "Total Expense", "₹ 3,89,464")
+                    SingleInfoBox(Modifier.weight(1f), "Total Expense", "₹ 3,89,464")
+                }
+                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                    SingleInfoBox(Modifier.weight(1f), "Total Expense", "₹ 3,89,464")
+                    SingleInfoBox(Modifier.weight(1f), "Total Expense", "₹ 3,89,464")
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
             Column {
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -541,7 +567,7 @@ fun StatisticsScreenTest(
                         modifier = Modifier.padding(horizontal = 16.dp)
                     ) {
                         Text(
-                            text = "Day", style = MaterialTheme.typography.titleMedium
+                            text = "Daily", style = MaterialTheme.typography.bodyMedium
                         )
                         Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = "Settings")
 
@@ -576,12 +602,15 @@ fun StatisticsScreenTest(
         }
     }
 
-    if (showBottomSheetForDatePicker) {
+    if (showFilterBottomSheet) {
         FilterBottomSheet(Modifier,
-            { showBottomSheetForDatePicker = !showBottomSheetForDatePicker },
-            { startDate, endDate, Duration ->
-
-            })
+            { showFilterBottomSheet = !showFilterBottomSheet },
+            { startDateFinal, endDateFinal, DurationFinal ->
+                startDate = startDateFinal
+                endDate = endDateFinal
+                showFilterBottomSheet = !showFilterBottomSheet
+            }
+        )
     }
 
 
@@ -626,26 +655,24 @@ fun CategoryStatEntryTest(modifier: Modifier = Modifier, title: String, iconNumb
                 Row() {
                     Text(
                         text = "$title X5",
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
                         text = "(60%)",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontFamily = CustomFonts.numberFont),
+                        style = MaterialTheme.typography.bodyMedium.copy(fontFamily = CustomFonts.numberFont),
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                 }
 
-
-//                Spacer(modifier = Modifier.width(16.dp))
             }
             Text(
                 text = parseAmount(34735f),
-                style = MaterialTheme.typography.bodyLarge.copy(fontFamily = CustomFonts.numberFont)
+                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = CustomFonts.numberFont)
             )
         }
     }

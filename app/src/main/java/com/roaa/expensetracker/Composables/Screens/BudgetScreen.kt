@@ -553,7 +553,7 @@ fun SingleInfoBox(modifier: Modifier, label: String, value: String) {
         ),
         modifier = modifier
             .fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp)
+        shape = RoundedCornerShape(25.dp)
     ) {
         Column(
             Modifier
@@ -568,9 +568,10 @@ fun SingleInfoBox(modifier: Modifier, label: String, value: String) {
             )
             Spacer(Modifier.height(5.dp))
             Text(
-                text = value, style = typography.bodyMedium,
+                text = value, style = typography.titleMedium,
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.onSurface
+                color = MaterialTheme.colorScheme.onSurface,
+
             )
         }
     }
