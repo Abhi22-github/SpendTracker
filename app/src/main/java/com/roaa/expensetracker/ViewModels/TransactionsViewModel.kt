@@ -162,11 +162,11 @@ class TransactionsViewModel @Inject constructor(
     val allTransactions: Flow<List<TransactionWithDetails>>
         get() = transactionRepository.allTransactions
 
-    fun getTotalTransactionForMonth(
+    fun getTotalTransactionForPeriod(
         startDate: Long,
         endDate: Long
     ): Flow<List<TransactionWithDetails>> {
-        return transactionRepository.getTotalTransactionForMonth(startDate, endDate)
+        return transactionRepository.getTotalTransactionForPeriod(startDate, endDate)
     }
 
 

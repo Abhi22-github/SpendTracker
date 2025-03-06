@@ -192,7 +192,7 @@ fun TransactionsListCompose(
             if (!showSingleDateTransactions) {
                 HorizontalPager(state = pagerState, userScrollEnabled = false) {
                     val (firstDate, lastDate) = getFirstAndLastMonth(selectedMonth)
-                    val transactionListOfMonth by transactionViewModel.getTotalTransactionForMonth(
+                    val transactionListOfMonth by transactionViewModel.getTotalTransactionForPeriod(
                         firstDate,
                         lastDate
                     ).collectAsState(emptyList())
