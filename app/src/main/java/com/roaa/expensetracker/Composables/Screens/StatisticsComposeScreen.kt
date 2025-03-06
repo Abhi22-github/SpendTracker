@@ -70,6 +70,7 @@ import com.roaa.expensetracker.Composables.color1
 import com.roaa.expensetracker.Composables.color2
 import com.roaa.expensetracker.Composables.color3
 import com.roaa.expensetracker.Composables.color4
+import com.roaa.expensetracker.Composables.components.FilterBottomSheet
 import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.IconState
@@ -130,16 +131,15 @@ fun StatisticsScreen(
             Row {
                 Column {
                     FilledTonalButton(
-                        onClick = {},
-                        contentPadding = PaddingValues(start = 24.dp, top = 12.dp,end = 20.dp, bottom = 12.dp),
-                        colors = ButtonDefaults.filledTonalButtonColors(
+                        onClick = {}, contentPadding = PaddingValues(
+                            start = 24.dp, top = 12.dp, end = 20.dp, bottom = 12.dp
+                        ), colors = ButtonDefaults.filledTonalButtonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainer,
                             contentColor = MaterialTheme.colorScheme.onSurface
                         )
                     ) {
                         Text(
-                            text = "last 1 month",
-                            style = MaterialTheme.typography.titleMedium
+                            text = "last 1 month", style = MaterialTheme.typography.titleMedium
                         )
                         Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = "Settings")
 
@@ -149,7 +149,8 @@ fun StatisticsScreen(
             Spacer(Modifier.height(10.dp))
             Row {
                 Column {
-                    ThreeOptionTextSwitch(selectedIndex = selectedIndex,
+                    ThreeOptionTextSwitch(
+                        selectedIndex = selectedIndex,
                         items = options,
                         onSelectionChange = {
                             selectedIndex = it
@@ -231,7 +232,8 @@ fun StatisticsScreen(
             Spacer(Modifier.height(48.dp))
             Row {
                 Column {
-                    ThreeOptionTextSwitch(selectedIndex = selectedIndex,
+                    ThreeOptionTextSwitch(
+                        selectedIndex = selectedIndex,
                         items = options,
                         onSelectionChange = {
                             selectedIndex = it
@@ -345,6 +347,31 @@ fun ChipsForFilter(
 }
 
 @Composable
+fun BankChips(
+    index: Int, selectedIndexForFilterChip: Int, text: String, selectChip: (Int) -> Unit
+) {
+    FilterChip(onClick = { selectChip(index) },
+        label = {
+            Text(text = text)
+        },
+        selected = index == selectedIndexForFilterChip,
+        leadingIcon = if (index == selectedIndexForFilterChip) {
+            {
+                Icon(
+                    imageVector = Icons.Filled.Done,
+                    contentDescription = "Done icon",
+                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                )
+            }
+        } else {
+            null
+        },
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(0.1.dp, MaterialTheme.colorScheme.outline),
+        colors = FilterChipDefaults.filterChipColors())
+}
+
+@Composable
 fun CategoryStatEntry(modifier: Modifier = Modifier, color: Color) {
     Box(
         Modifier
@@ -414,3 +441,213 @@ fun CategoryStatEntry(modifier: Modifier = Modifier, color: Color) {
 private fun CategoryStatEntryPreview() {
     CategoryStatEntry(Modifier, color1)
 }
+
+
+@OptIn(ExperimentalMaterial3Api::class)
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@Composable
+fun StatisticsScreenTest(
+    navHostController: NavHostController,
+    navigationManager: NavigationManager,
+) {
+    val options = listOf("Expense", "Income")
+    var selectedIndex by remember { mutableIntStateOf(0) }
+    val scrollState = rememberScrollState()
+    var showBottomSheetForDatePicker by remember { mutableStateOf(false) }
+
+    BackHandler() {
+        handleBackNavigation(navigationManager)
+    }
+    Scaffold(
+        topBar = {
+            TopBar(title = "Statistics",
+                showDelete = false,
+                sendUserBackToPreviousActivity = { handleBackNavigation(navigationManager) },
+                delete = {})
+        },
+    ) {
+        Column(
+            modifier = Modifier
+                .padding(it)
+                .fillMaxSize()
+                .verticalScroll(scrollState)
+                .animateContentSize(), horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row {
+                Column {
+                    FilledTonalButton(
+                        onClick = { showBottomSheetForDatePicker = !showBottomSheetForDatePicker },
+                        contentPadding = PaddingValues(
+                            start = 24.dp, top = 12.dp, end = 20.dp, bottom = 12.dp
+                        ),
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        )
+                    ) {
+                        Text(
+                            text = "last 1 month", style = MaterialTheme.typography.titleMedium
+                        )
+                        Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = "Settings")
+
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+            Row {
+                Column {
+                    TextSwitch(selectedIndex = selectedIndex, items = options, onSelectionChange = {
+                        selectedIndex = it
+                    })
+                }
+            }
+
+            Spacer(Modifier.height(32.dp))
+            Column {
+                Row(
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Column(
+                        modifier = Modifier
+                    ) {
+                        Text(
+                            text = "Total Expense",
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                        Text(
+                            text = "₹ 3,89,464",
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp),
+                            style = MaterialTheme.typography.headlineMedium.copy(fontFamily = CustomFonts.numberFont)
+                        )
+                        Text(
+                            text = "342 Transaction",
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                        )
+                    }
+                    FilledTonalButton(
+                        onClick = {}, contentPadding = PaddingValues(
+                            start = 24.dp, top = 12.dp, end = 20.dp, bottom = 12.dp
+                        ), colors = ButtonDefaults.filledTonalButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        ),
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    ) {
+                        Text(
+                            text = "Day", style = MaterialTheme.typography.titleMedium
+                        )
+                        Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = "Settings")
+
+                    }
+                }
+
+                Column {
+                    val palette = toPalette(orange)
+                    BarChartTest(
+                        modifier = Modifier, palette = palette
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(24.dp))
+            Column(
+                verticalArrangement = Arrangement.Top,
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.Start
+            ) {
+                Text(
+                    text = "Category",
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                )
+                CategoryStatEntryTest(Modifier, "Food & Expense", 1)
+                CategoryStatEntryTest(Modifier, "Entertainment", 2)
+                CategoryStatEntryTest(Modifier, "Groceries", 3)
+                CategoryStatEntryTest(Modifier, "Insurance", 4)
+            }
+        }
+    }
+
+    if (showBottomSheetForDatePicker) {
+        FilterBottomSheet(Modifier,
+            { showBottomSheetForDatePicker = !showBottomSheetForDatePicker },
+            { startDate, endDate, Duration ->
+
+            })
+    }
+
+
+}
+
+@Composable
+fun CategoryStatEntryTest(modifier: Modifier = Modifier, title: String, iconNumber: Int) {
+    Box(
+        Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp)
+    ) {
+        Row(Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(10.dp))
+            .clickable { }
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+            verticalAlignment = Alignment.CenterVertically) {
+            Row(modifier = Modifier.weight(0.8f), verticalAlignment = Alignment.CenterVertically) {
+                Surface(
+                    shape = CircleShape,
+                    modifier = Modifier
+                        .size(36.dp)
+                        .fillMaxSize(),
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                ) {
+                    Box(
+                        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+                    ) {
+                        val image = rememberAsyncImagePainter(IconState.fromNumber(iconNumber))
+                        Image(
+                            painter = image,
+                            contentDescription = "Image 1",
+                            modifier = Modifier.size(24.dp),
+                        )
+                    }
+                }
+
+
+                Spacer(modifier = Modifier.width(16.dp))
+
+                Row() {
+                    Text(
+                        text = "$title X5",
+                        style = MaterialTheme.typography.bodyLarge,
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                    Text(
+                        text = "(60%)",
+                        style = MaterialTheme.typography.bodyLarge.copy(fontFamily = CustomFonts.numberFont),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
+
+
+//                Spacer(modifier = Modifier.width(16.dp))
+            }
+            Text(
+                text = parseAmount(34735f),
+                style = MaterialTheme.typography.bodyLarge.copy(fontFamily = CustomFonts.numberFont)
+            )
+        }
+    }
+}
+

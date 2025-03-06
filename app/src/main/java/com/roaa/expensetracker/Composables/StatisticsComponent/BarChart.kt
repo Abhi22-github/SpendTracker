@@ -14,6 +14,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
 import com.patrykandpatrick.vico.compose.cartesian.axis.rememberBottom
+import com.patrykandpatrick.vico.compose.cartesian.axis.rememberStart
 import com.patrykandpatrick.vico.compose.cartesian.cartesianLayerPadding
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
@@ -21,9 +22,11 @@ import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
 import com.patrykandpatrick.vico.compose.common.fill
+import com.patrykandpatrick.vico.compose.common.shape.dashedShape
 import com.patrykandpatrick.vico.core.cartesian.Zoom
 import com.patrykandpatrick.vico.core.cartesian.axis.BaseAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
+import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
@@ -102,7 +105,8 @@ fun BarChart(
                     lineCount = 2,
                     textAlignment = Layout.Alignment.ALIGN_CENTER,
                     color = MaterialTheme.colorScheme.onSurface.toArgb()
-                ), line = LineComponent(fill = fill(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
+                ),
+                line = LineComponent(fill = fill(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
             ),
             marker = rememberDefaultCartesianMarker(
                 TextComponent(
@@ -134,7 +138,7 @@ fun BarChartTest(
     LaunchedEffect(Unit) {
         modelProducer.runTransaction {
             // Learn more: https://patrykandpatrick.com/eji9zq.
-            columnSeries { series(1,2,3,5,6,7,8,34,2,4,6,8,9,13,1,4,5,7,) }
+            columnSeries { series(1, 2, 3, 5, 6, 7, 8, 34, 2, 4, 6, 8, 9, 13, 1, 4, 5, 7) }
         }
     }
 
@@ -146,20 +150,23 @@ fun BarChartTest(
                     rememberLineComponent(
                         fill = fill(palette.main),
                         thickness = 24.dp,
-                        shape = CorneredShape.rounded(topLeftPercent = 40, topRightPercent = 40)
+                        shape = CorneredShape.rounded(topLeftPercent = 60, topRightPercent = 60)
                     )
                 )
             ),
-            // startAxis = VerticalAxis.rememberStart(),
+            startAxis = VerticalAxis.rememberStart(itemPlacer = VerticalAxis.ItemPlacer.count({ 3 })),
             bottomAxis = HorizontalAxis.rememberBottom(
-                guideline = LineComponent(fill = Fill.Transparent),
+                guideline = LineComponent(fill = fill(MaterialTheme.colorScheme.onSurface.copy(0.1f)),
+                    shape = dashedShape(gapLength = 2.dp,)
+                ),
                 itemPlacer = remember { HorizontalAxis.ItemPlacer.segmented() },
                 size = BaseAxis.Size.Auto(),
                 label = TextComponent(
                     lineCount = 2,
                     textAlignment = Layout.Alignment.ALIGN_CENTER,
                     color = MaterialTheme.colorScheme.onSurface.toArgb()
-                ), line = LineComponent(fill = fill(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
+                ),
+                line = LineComponent(fill = fill(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
             ),
             marker = rememberDefaultCartesianMarker(
                 TextComponent(
@@ -176,8 +183,8 @@ fun BarChartTest(
             layerPadding = { cartesianLayerPadding(scalableStart = 8.dp, scalableEnd = 8.dp) },
         ),
         modelProducer = modelProducer,
-        modifier = modifier.height(224.dp),
-        zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.x(7.0))
+        modifier = modifier.height(300.dp),
+        zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.x(15.0))
         //scrollState = rememberVicoScrollState(scrollEnabled = false),
     )
 }

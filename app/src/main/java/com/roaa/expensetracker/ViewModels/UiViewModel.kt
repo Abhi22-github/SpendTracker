@@ -18,6 +18,7 @@ class UiViewModel @Inject constructor() : ViewModel() {
     var errorStatusInBankAccountAdd = MutableStateFlow<Boolean>(false)
     var errorStatusInBudgetAdd = MutableStateFlow<Boolean>(false)
     var errorStatusInSetupBudget = MutableStateFlow<Boolean>(false)
+    var errorStatusInStatisticsFilter = MutableStateFlow(false)
     var errorStatusMessage = MutableStateFlow<String>("")
 
 

@@ -304,6 +304,7 @@ fun LocalDate.toNormalString() = run { this.format(DateTimeFormatter.ISO_LOCAL_D
 
 fun LocalDate.toDisplayDate() = run { this.format(DateTimeFormatter.ofPattern("MMM dd,YYYY")) }
 
+//to convert System.currentTimeMillis() to date string
 fun convertMillisToDateString(millis: Long): String {
     val format = SimpleDateFormat("dd MMM YYYY", Locale.getDefault())
     val date = Date(millis)
