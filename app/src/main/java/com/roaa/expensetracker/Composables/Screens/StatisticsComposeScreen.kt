@@ -8,10 +8,13 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -30,6 +33,10 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Done
+import androidx.compose.material.icons.rounded.AccessTime
+import androidx.compose.material.icons.rounded.ArrowForward
+import androidx.compose.material.icons.rounded.BarChart
+import androidx.compose.material.icons.rounded.BubbleChart
 import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.Tune
@@ -40,12 +47,17 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberDatePickerState
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -54,11 +66,13 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -76,7 +90,8 @@ import com.roaa.expensetracker.Composables.color1
 import com.roaa.expensetracker.Composables.color2
 import com.roaa.expensetracker.Composables.color3
 import com.roaa.expensetracker.Composables.color4
-import com.roaa.expensetracker.Composables.components.FilterBottomSheet
+import com.roaa.expensetracker.Composables.components.DatePickerModal
+import com.roaa.expensetracker.Composables.components.ErrorRow
 import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.IconState
@@ -91,6 +106,7 @@ import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTransactionWithD
 import com.roaa.expensetracker.Utilities.createListForBarGraph
 import com.roaa.expensetracker.Utilities.currentYear
 import com.roaa.expensetracker.Utilities.getDatesBetween
+import com.roaa.expensetracker.Utilities.getDayDifference
 import com.roaa.expensetracker.Utilities.getPreviousAndNext100Months
 import com.roaa.expensetracker.Utilities.getPreviousAndNext100Weeks
 import com.roaa.expensetracker.Utilities.getPreviousAndNext500Days
@@ -99,8 +115,11 @@ import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
+import com.roaa.expensetracker.Utilities.toLongMillis
 import com.roaa.expensetracker.ViewModels.BankAccountsViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
+import com.roaa.expensetracker.ViewModels.UiViewModel
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -375,7 +394,8 @@ fun BankChips(
         label = {
             Text(
                 text = if (bankAccountsClass.bankName == "Cash") "All accounts" else bankAccountsClass.bankName,
-                modifier = Modifier.padding(vertical = 8.dp)
+                modifier = Modifier.padding(vertical = 8.dp),
+                style = MaterialTheme.typography.bodyMedium
             )
         },
         selected = selectedBankAccountsClass.bankAccountId == bankAccountsClass.bankAccountId,
@@ -390,8 +410,11 @@ fun BankChips(
         } else {
             null
         },
-        shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(0.1.dp, MaterialTheme.colorScheme.outline),
+        shape = RoundedCornerShape(25.dp),
+        border = if (selectedBankAccountsClass.bankAccountId == bankAccountsClass.bankAccountId) BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+        ) else BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)),
         colors = FilterChipDefaults.filterChipColors())
 }
 
@@ -482,6 +505,8 @@ fun StatisticsScreenTest(
     var endDate by remember { mutableStateOf<Long>(LocalDate.now().toLong()) }
     val scrollState = rememberScrollState()
     var showFilterBottomSheet by remember { mutableStateOf(false) }
+    var showBankAccountAnalysisBottomSheet by remember { mutableStateOf(false) }
+    var showCategoryAnalysisBottomSheet by remember { mutableStateOf(false) }
 
     //Flows
     val transactionsForTimePeriodFromRoom by transactionsViewModel.getTotalTransactionForPeriod(
@@ -706,8 +731,75 @@ fun StatisticsScreenTest(
 
                     }
                 }
-
             }
+            //bottom statistics
+            Spacer(Modifier.height(24.dp))
+            Row(Modifier.padding(horizontal = 16.dp)) {
+                FilledTonalButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        showBankAccountAnalysisBottomSheet = !showBankAccountAnalysisBottomSheet
+                    },
+                    contentPadding = PaddingValues(
+                        start = 24.dp, top = 12.dp, end = 20.dp, bottom = 12.dp
+                    ),
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    )
+                ) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Row {
+                            Icon(
+                                Icons.Rounded.BarChart,
+                                contentDescription = "Settings",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = "Bank Account Analysis",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+
+                        Icon(Icons.Rounded.ArrowForward, contentDescription = "Settings")
+                    }
+                }
+            }
+            Spacer(Modifier.height(8.dp))
+            Row(Modifier.padding(horizontal = 16.dp)) {
+                FilledTonalButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = {
+                        showCategoryAnalysisBottomSheet = !showCategoryAnalysisBottomSheet
+                    },
+                    contentPadding = PaddingValues(
+                        start = 24.dp, top = 12.dp, end = 20.dp, bottom = 12.dp
+                    ),
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                        contentColor = MaterialTheme.colorScheme.onSurface
+                    )
+                ) {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+                        Row {
+                            Icon(
+                                Icons.Rounded.BubbleChart,
+                                contentDescription = "pie chart",
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(Modifier.width(8.dp))
+                            Text(
+                                text = "Category Wise Analysis",
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                        }
+
+                        Icon(Icons.Rounded.ArrowForward, contentDescription = "Settings")
+                    }
+                }
+            }
+            Spacer(Modifier.height(32.dp))
         }
     }
 
@@ -721,6 +813,18 @@ fun StatisticsScreenTest(
                 showFilterBottomSheet = !showFilterBottomSheet
                 selectedBankAccountClass = bankAccountClassFinal
             })
+    }
+
+    if (showBankAccountAnalysisBottomSheet) {
+        BankAnalysisBottomSheet(
+            Modifier,
+            { showBankAccountAnalysisBottomSheet = !showBankAccountAnalysisBottomSheet },
+            bankAccountList
+        )
+    }
+
+    if (showCategoryAnalysisBottomSheet) {
+        // BankAnalysisBottomSheet()
     }
 
 
@@ -789,5 +893,327 @@ fun CategoryStatEntryTest(
             )
         }
     }
+}
+
+
+//Filter Bottom sheet
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun FilterBottomSheet(
+    modifier: Modifier = Modifier,
+    closeBottomSheet: () -> Unit,
+    bankAccountList: List<BankAccountsClass>,
+    saveButtonClicked: (Long, Long, Long, BankAccountsClass) -> Unit,
+    uiViewModel: UiViewModel = hiltViewModel()
+) {
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var selectedBankAccount by remember { mutableStateOf(bankAccountList.get(0)) }
+    var startDate by remember { mutableStateOf<Long>(LocalDate.now().minusMonths(1).toLong()) }
+    var endDate by remember { mutableStateOf<Long>(LocalDate.now().toLong()) }
+    var selectedDuration by remember {
+        mutableStateOf(
+            getDayDifference(
+                startDate.toLocalDate(),
+                endDate.toLocalDate()
+            )
+        )
+    }
+    val showErrorStatus by uiViewModel.errorStatusInStatisticsFilter.collectAsState(false)
+    val scope = rememberCoroutineScope()
+
+    LaunchedEffect(startDate, endDate) {
+        if (endDate < startDate) {
+            scope.launch {
+                uiViewModel.errorStatusInStatisticsFilter.emit(true)
+                uiViewModel.errorStatusMessage.emit("End Date should be greater than Start Date")
+            }
+        } else {
+            uiViewModel.errorStatusInStatisticsFilter.emit(false)
+        }
+        selectedDuration = getDayDifference(startDate.toLocalDate(), endDate.toLocalDate())
+    }
+    ModalBottomSheet(onDismissRequest = closeBottomSheet, sheetState = bottomSheetState) {
+        FilterBottomSheetContent(
+            Modifier.padding(horizontal = 16.dp),
+            closeBottomSheet,
+            bankAccountList,
+            selectedBankAccount,
+            { selectedBankAccount = it },
+            startDate,
+            { startDate = it },
+            endDate,
+            { endDate = it },
+            selectedDuration,
+            showErrorStatus,
+            { saveButtonClicked(startDate, endDate, selectedDuration, selectedBankAccount) }
+        )
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class, ExperimentalMaterial3Api::class)
+@Composable
+fun FilterBottomSheetContent(
+    modifier: Modifier = Modifier,
+    closeBottomSheet: () -> Unit,
+    bankAccountList: List<BankAccountsClass>,
+    selectedBankAccount: BankAccountsClass,
+    setSelectedChip: (BankAccountsClass) -> Unit,
+    startDate: Long,
+    setStartDate: (Long) -> Unit,
+    endDate: Long,
+    setEndDate: (Long) -> Unit,
+    selectedDuration: Long,
+    showErrorStatus: Boolean,
+    saveButtonClicked: () -> Unit
+) {
+    val startDatePickerState =
+        rememberDatePickerState(initialSelectedDateMillis = startDate.toLocalDate().toLongMillis())
+    val endDatePickerState =
+        rememberDatePickerState(initialSelectedDateMillis = endDate.toLocalDate().toLongMillis())
+    var showStartDateDayPicker by remember { mutableStateOf(false) }
+    var showEndDateDayPicker by remember { mutableStateOf(false) }
+    Column(Modifier) {
+        Column(
+            verticalArrangement = Arrangement.Top, modifier = Modifier
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                Box(Modifier
+                    .weight(1f)
+                    .background(
+                        Color.Transparent, shape = RoundedCornerShape(25.dp)
+                    )
+                    .padding(start = 16.dp)
+                    .border(
+                        BorderStroke(
+                            1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+                        ), RoundedCornerShape(25.dp)
+                    )
+                    .clip(RoundedCornerShape(25.dp))
+                    .clickable {
+                        showStartDateDayPicker = !showStartDateDayPicker
+                    }) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Rounded.AccessTime,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = startDate.toLocalDate().toDisplayStringForMonthWithYear(),
+                            textAlign = TextAlign.Center,
+                            style = typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                }
+                Box(Modifier
+                    .weight(1f)
+                    .background(
+                        Color.Transparent, shape = RoundedCornerShape(25.dp)
+                    )
+                    .padding(end = 16.dp)
+                    .border(
+                        BorderStroke(
+                            1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+                        ), RoundedCornerShape(25.dp)
+                    )
+                    .clip(RoundedCornerShape(25.dp))
+                    .clickable {
+                        showEndDateDayPicker = !showEndDateDayPicker
+                    }) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            Icons.Rounded.AccessTime,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(Modifier.width(8.dp))
+                        Text(
+                            text = endDate.toLocalDate().toDisplayStringForMonthWithYear(),
+                            textAlign = TextAlign.Center,
+                            style = typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy()
+                        )
+                    }
+                }
+            }
+            Text(
+                modifier = modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                text = "Selected duration ${selectedDuration} days",
+                style = typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+            )
+            Spacer(Modifier.height(24.dp))
+            Text(
+                modifier = modifier,
+                text = "Account",
+                style = typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = modifier
+            ) {
+                bankAccountList.forEachIndexed { index, bankAccountsClass ->
+                    BankChips(
+                        index, selectedBankAccount, bankAccountsClass
+                    ) { setSelectedChip(it) }
+                }
+            }
+            Spacer(Modifier.height(12.dp))
+            ErrorRow(showErrorStatus)
+            Spacer(Modifier.height(12.dp))
+            FilledTonalButton(
+                enabled = !showErrorStatus,
+                onClick = { saveButtonClicked() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                )
+            ) {
+                Text(
+                    text = "Apply",
+                    modifier = modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    textAlign = TextAlign.Center
+                )
+
+            }
+        }
+    }
+    if (showStartDateDayPicker) {
+        DatePickerModal(startDatePickerState, { setStartDate(it ?: LocalDate.now().toLong()) }) {
+            showStartDateDayPicker = !showStartDateDayPicker
+        }
+    }
+    if (showEndDateDayPicker) {
+        DatePickerModal(endDatePickerState, { setEndDate(it ?: LocalDate.now().toLong()) }) {
+            showEndDateDayPicker = !showEndDateDayPicker
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun FilterBottomSheetContentPreview() {
+    FilterBottomSheetContent(
+        Modifier.padding(horizontal = 16.dp),
+        { },
+        listOf(),
+        emptyBank,
+        {},
+        0L,
+        {},
+        0L,
+        {}, 3L,
+        false, {}
+    )
+}
+
+//Bank Analysis Bottom sheet
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BankAnalysisBottomSheet(
+    modifier: Modifier = Modifier,
+    dismissBottomSheet: () -> Unit,
+    bankAccountList: List<BankAccountsClass>
+) {
+    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var selectedBankAccount by remember { mutableStateOf(bankAccountList.get(0)) }
+    ModalBottomSheet(sheetState = bottomSheetState, onDismissRequest = { dismissBottomSheet() }) {
+        BankAnalysisBottomSheetContent(
+            Modifier.padding(horizontal = 16.dp),
+            bankAccountList,
+            selectedBankAccount
+        ) {
+            selectedBankAccount = it
+        }
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun BankAnalysisBottomSheetContent(
+    modifier: Modifier = Modifier,
+    bankAccountList: List<BankAccountsClass>,
+    selectedBankAccount: BankAccountsClass,
+    setSelectedBankAccount: (BankAccountsClass) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(modifier) {
+            Text(
+                modifier = Modifier,
+                text = "Account",
+                style = typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+        }
+        Spacer(Modifier.height(16.dp))
+        FlowRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = modifier.fillMaxWidth()
+        ) {
+            bankAccountList.forEachIndexed { index, bankAccountsClass ->
+                BankChips(
+                    index, selectedBankAccount, bankAccountsClass
+                ) { setSelectedBankAccount(it) }
+            }
+        }
+        Spacer(Modifier.height(12.dp))
+        HorizontalDivider(
+            modifier = modifier,
+            thickness = 1.dp,
+            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+        )
+        Spacer(Modifier.height(12.dp))
+        Column(
+            Modifier.padding(horizontal = 16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                SingleInfoBox(
+                    Modifier.weight(1f),
+                    "Minimum Spend",
+                    "₹ 3000",
+                )
+                SingleInfoBox(
+                    Modifier.weight(1f),
+                    "Maximum Spend",
+                    "₹ 3000",
+                )
+            }
+            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                SingleInfoBox(
+                    Modifier.weight(1f),
+                    "Total Transactions",
+                    "39",
+                )
+            }
+        }
+        BarChartTest(Modifier, palette = toPalette(orange))
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BankAnalysisBottomSheetContentPreview() {
+    BankAnalysisBottomSheetContent(
+        modifier = Modifier.padding(horizontal = 16.dp),
+        bankAccountList = listOf(emptyBank, emptyBank, emptyBank),
+        selectedBankAccount = emptyBank,
+        setSelectedBankAccount = { })
 }
 

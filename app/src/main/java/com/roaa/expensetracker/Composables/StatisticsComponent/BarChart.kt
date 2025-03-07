@@ -262,3 +262,74 @@ fun BarChartStatisticsScreen(
         //scrollState = rememberVicoScrollState(scrollEnabled = false),
     )
 }
+
+@Composable
+fun BarChartStatisticsScreenBanks(
+    modifier: Modifier = Modifier,
+    currentMonthAllDayAndDates: List<BarChartExpenseModel>,
+    palette: HarmonizedColorPalette,
+    selectedIndex: Int
+) {
+    val modelProducer = remember { CartesianChartModelProducer() }
+    LaunchedEffect(selectedIndex) {
+        modelProducer.runTransaction {
+            columnSeries { series(currentMonthAllDayAndDates.map { if (selectedIndex == 0) it.expenseAmount else it.incomeAmount }) }
+            extras {
+                it[BottomAxisLabelKey] =
+                    currentMonthAllDayAndDates.map { it.dayName }.toList()
+            }
+
+        }
+    }
+
+    CartesianChartHost(
+        chart =
+        rememberCartesianChart(
+            rememberColumnCartesianLayer(
+                ColumnCartesianLayer.ColumnProvider.series(
+                    rememberLineComponent(
+                        fill = fill(if (selectedIndex == 0) palette.main else MaterialTheme.colorScheme.primary),
+                        thickness = 24.dp,
+                        shape = CorneredShape.rounded(topLeftPercent = 60, topRightPercent = 60)
+                    )
+                )
+            ),
+            startAxis = VerticalAxis.rememberStart(itemPlacer = VerticalAxis.ItemPlacer.count({ 3 }), line = LineComponent(
+                fill(Color.Transparent)
+            )
+            ),
+            bottomAxis = HorizontalAxis.rememberBottom(
+                guideline = LineComponent(
+                    fill = fill(MaterialTheme.colorScheme.onSurface.copy(0.1f)),
+                    shape = dashedShape(gapLength = 2.dp)
+                ),
+                valueFormatter = BottomAxisValueFormatter,
+                itemPlacer = remember { HorizontalAxis.ItemPlacer.segmented() },
+                size = BaseAxis.Size.Auto(),
+                label = TextComponent(
+                    lineCount = 2,
+                    textAlignment = Layout.Alignment.ALIGN_CENTER,
+                    color = MaterialTheme.colorScheme.onSurface.toArgb()
+                ),
+                line = LineComponent(fill = fill(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
+            ),
+            marker = rememberDefaultCartesianMarker(
+                TextComponent(
+                    color = MaterialTheme.colorScheme.onSurface.toArgb(),
+                    padding = Insets(8f),
+                    background = ShapeComponent(
+                        fill = fill(
+                            MaterialTheme.colorScheme.surfaceContainer
+                        ),
+                        shape = CorneredShape.rounded(40)
+                    )
+                )
+            ),
+            layerPadding = { cartesianLayerPadding(scalableStart = 8.dp, scalableEnd = 8.dp) },
+        ),
+        modelProducer = modelProducer,
+        modifier = modifier.height(300.dp),
+        zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.x(9.0))
+        //scrollState = rememberVicoScrollState(scrollEnabled = false),
+    )
+}

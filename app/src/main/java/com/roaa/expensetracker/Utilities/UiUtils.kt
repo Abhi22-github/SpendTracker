@@ -24,7 +24,6 @@ fun createListForBarGraph(
             }
 
         }
-
         list.add(BarChartExpenseModel(it.second, it.first, totalExpense, totalIncome))
     }
     return Pair(list, maxExpense)

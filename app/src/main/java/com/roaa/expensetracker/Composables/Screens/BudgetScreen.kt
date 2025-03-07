@@ -568,7 +568,7 @@ fun SingleInfoBox(modifier: Modifier, label: String, value: String) {
             )
             Spacer(Modifier.height(5.dp))
             Text(
-                text = value, style = typography.titleMedium,
+                text = value, style = typography.titleLarge,
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurface,
 
