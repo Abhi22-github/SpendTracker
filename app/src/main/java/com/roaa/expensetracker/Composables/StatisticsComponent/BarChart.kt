@@ -10,6 +10,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.unit.dp
 import com.patrykandpatrick.vico.compose.cartesian.CartesianChartHost
@@ -91,7 +92,7 @@ fun BarChart(
                     rememberLineComponent(
                         fill = fill(palette.main),
                         thickness = 24.dp,
-                        shape = CorneredShape.rounded(topLeftPercent = 40, topRightPercent = 40)
+                        shape = CorneredShape.rounded(topLeftPercent = 60, topRightPercent = 60)
                     )
                 )
             ),
@@ -222,7 +223,10 @@ fun BarChartStatisticsScreen(
                     )
                 )
             ),
-            startAxis = VerticalAxis.rememberStart(itemPlacer = VerticalAxis.ItemPlacer.count({ 3 })),
+            startAxis = VerticalAxis.rememberStart(itemPlacer = VerticalAxis.ItemPlacer.count({ 3 }), line = LineComponent(
+                fill(Color.Transparent)
+            )
+            ),
             bottomAxis = HorizontalAxis.rememberBottom(
                 guideline = LineComponent(
                     fill = fill(MaterialTheme.colorScheme.onSurface.copy(0.1f)),
