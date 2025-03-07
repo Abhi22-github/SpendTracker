@@ -2,6 +2,7 @@ package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.BorderStroke
@@ -47,7 +48,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -59,11 +62,13 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
+import com.roaa.expensetracker.Composables.StatisticsComponent.BarChartStatisticsScreen
 import com.roaa.expensetracker.Composables.StatisticsComponent.BarChartTest
 import com.roaa.expensetracker.Composables.StatisticsComponent.Test
 import com.roaa.expensetracker.Composables.cardBackgroundColor
@@ -76,7 +81,14 @@ import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.toPalette
+import com.roaa.expensetracker.Utilities.Constants.EXPENSE
+import com.roaa.expensetracker.Utilities.Constants.INCOME
+import com.roaa.expensetracker.Utilities.UtilityModalClass.CategorySummaryClass
+import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTotalExpenseIncomeClass
+import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTransactionWithDetailsClass
+import com.roaa.expensetracker.Utilities.createListForBarGraph
 import com.roaa.expensetracker.Utilities.currentYear
+import com.roaa.expensetracker.Utilities.getDatesBetween
 import com.roaa.expensetracker.Utilities.getPreviousAndNext100Months
 import com.roaa.expensetracker.Utilities.getPreviousAndNext100Weeks
 import com.roaa.expensetracker.Utilities.getPreviousAndNext500Days
@@ -85,6 +97,7 @@ import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
+import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -453,6 +466,7 @@ private fun CategoryStatEntryPreview() {
 fun StatisticsScreenTest(
     navHostController: NavHostController,
     navigationManager: NavigationManager,
+    transactionsViewModel: TransactionsViewModel = hiltViewModel()
 ) {
     val options = listOf("Expense", "Income")
     var selectedIndex by remember { mutableIntStateOf(0) }
@@ -460,6 +474,57 @@ fun StatisticsScreenTest(
     var endDate by remember { mutableStateOf<Long>(LocalDate.now().toLong()) }
     val scrollState = rememberScrollState()
     var showFilterBottomSheet by remember { mutableStateOf(false) }
+
+    //Flows
+    val transactionsForTimePeriodFromRoom by transactionsViewModel.getTotalTransactionForPeriod(
+        startDate,
+        endDate
+    ).collectAsState(
+        listOf(emptyTransactionWithDetailsClass)
+    )
+    val totalAmountListForTimePeriodFromRoom by transactionsViewModel.getListOfTotalAmountPerDayForRangeForCompose(
+        startDate,
+        endDate
+    ).collectAsState(listOf(emptyTotalExpenseIncomeClass))
+
+    val totalAmountMap = totalAmountListForTimePeriodFromRoom.associateBy { it.date }
+
+    val expenseTransactions =
+        transactionsForTimePeriodFromRoom.filter { it.transaction.type == EXPENSE }
+    val totalExpense =
+        expenseTransactions.sumOf { it.transaction.amount.toDouble() }.toFloat()
+    val incomeTransaction =
+        transactionsForTimePeriodFromRoom.filter { it.transaction.type == INCOME }
+    val totalIncome =
+        incomeTransaction.sumOf { it.transaction.amount.toDouble() }.toFloat()
+
+    val title = if (selectedIndex == 0) "Total Expense" else "Total Income"
+    val amount = if (selectedIndex == 0) totalExpense else totalIncome
+    val transactionCount =
+        if (selectedIndex == 0) expenseTransactions.size else incomeTransaction.size
+
+
+    var currentTimePeriodExpenseAllDayAndDatesListAndMaxValue =
+        createListForBarGraph(
+            getDatesBetween(
+                startDate.toLocalDate(),
+                endDate.toLocalDate()
+            ),
+            totalAmountMap
+        )
+
+
+    val categoryListData =
+        (if (selectedIndex == 0) expenseTransactions else incomeTransaction).groupBy { it.category }
+            .mapValues { (category, list) ->
+                CategorySummaryClass(
+                    category,
+                    list.size,
+                    ((list.size.toFloat()/transactionCount.toFloat())*100),
+                    list.sumOf { it.transaction.amount.toDouble() }.toFloat()
+                )
+            }
+
 
     BackHandler() {
         handleBackNavigation(navigationManager)
@@ -514,20 +579,46 @@ fun StatisticsScreenTest(
                 }
             }
 
-            Spacer(Modifier.height(16.dp))
-            Column(
-                Modifier.padding(horizontal = 16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    SingleInfoBox(Modifier.weight(1f), "Total Expense", "₹ 3,89,464")
-                    SingleInfoBox(Modifier.weight(1f), "Total Expense", "₹ 3,89,464")
-                }
-                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                    SingleInfoBox(Modifier.weight(1f), "Total Expense", "₹ 3,89,464")
-                    SingleInfoBox(Modifier.weight(1f), "Total Expense", "₹ 3,89,464")
-                }
-            }
+            //          Spacer(Modifier.height(16.dp))
+//            Column(
+//                Modifier.padding(horizontal = 16.dp),
+//                verticalArrangement = Arrangement.spacedBy(8.dp)
+//            ) {
+//                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+//                    SingleInfoBox(
+//                        Modifier.weight(1f),
+//                        "Total Expense",
+//                        "₹ ${parseAmount(totalExpense)}"
+//                    )
+//                    SingleInfoBox(
+//                        Modifier.weight(1f),
+//                        "Total Income",
+//                        "₹ ${parseAmount(totalIncome)}"
+//                    )
+//                }
+//                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+//                    SingleInfoBox(
+//                        Modifier.weight(1f),
+//                        "Average Expense",
+//                        "₹ ${
+//                            parseAmount(
+//                                totalExpense /
+//                                        expenseTransactions.size
+//                            )
+//                        }"
+//                    )
+//                    SingleInfoBox(
+//                        Modifier.weight(1f),
+//                        "Average Income",
+//                        "₹ ${
+//                            parseAmount(
+//                                totalIncome /
+//                                        incomeTransaction.size
+//                            )
+//                        }"
+//                    )
+//                }
+//            }
 
             Spacer(Modifier.height(24.dp))
             Column {
@@ -539,23 +630,32 @@ fun StatisticsScreenTest(
                     Column(
                         modifier = Modifier
                     ) {
-                        Text(
-                            text = "Total Expense",
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                        )
-                        Text(
-                            text = "₹ 3,89,464",
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp),
-                            style = MaterialTheme.typography.headlineMedium.copy(fontFamily = CustomFonts.numberFont)
-                        )
-                        Text(
-                            text = "342 Transaction",
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                            style = MaterialTheme.typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                        )
+                        AnimatedContent(targetState = title) {
+                            Text(
+                                text = it,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
+                        AnimatedContent(targetState = amount) {
+                            Text(
+                                text = "₹ ${parseAmount(it)}",
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp),
+                                style = MaterialTheme.typography.headlineMedium.copy(fontFamily = CustomFonts.numberFont)
+                            )
+                        }
+                        AnimatedContent(targetState = transactionCount) {
+                            Text(
+                                text = "${it} Transaction",
+                                modifier = Modifier.padding(
+                                    horizontal = 16.dp,
+                                    vertical = 8.dp
+                                ),
+                                style = MaterialTheme.typography.labelLarge,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                            )
+                        }
                     }
                     FilledTonalButton(
                         onClick = {}, contentPadding = PaddingValues(
@@ -574,11 +674,16 @@ fun StatisticsScreenTest(
                     }
                 }
 
-                Column {
-                    val palette = toPalette(orange)
-                    BarChartTest(
-                        modifier = Modifier, palette = palette
-                    )
+                key(currentTimePeriodExpenseAllDayAndDatesListAndMaxValue.first) {
+                    Column {
+                        val palette = toPalette(orange)
+                        BarChartStatisticsScreen(
+                            modifier = Modifier,
+                            currentTimePeriodExpenseAllDayAndDatesListAndMaxValue.first,
+                            palette = palette,
+                            selectedIndex = selectedIndex
+                        )
+                    }
                 }
             }
 
@@ -594,10 +699,13 @@ fun StatisticsScreenTest(
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )
-                CategoryStatEntryTest(Modifier, "Food & Expense", 1)
-                CategoryStatEntryTest(Modifier, "Entertainment", 2)
-                CategoryStatEntryTest(Modifier, "Groceries", 3)
-                CategoryStatEntryTest(Modifier, "Insurance", 4)
+                Column {
+                    categoryListData.values.toList().forEach {
+                        CategoryStatEntryTest(Modifier, it)
+
+                    }
+                }
+
             }
         }
     }
@@ -617,7 +725,10 @@ fun StatisticsScreenTest(
 }
 
 @Composable
-fun CategoryStatEntryTest(modifier: Modifier = Modifier, title: String, iconNumber: Int) {
+fun CategoryStatEntryTest(
+    modifier: Modifier = Modifier,
+    categorySummaryClass: CategorySummaryClass
+) {
     Box(
         Modifier
             .fillMaxWidth()
@@ -640,7 +751,8 @@ fun CategoryStatEntryTest(modifier: Modifier = Modifier, title: String, iconNumb
                     Box(
                         modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                     ) {
-                        val image = rememberAsyncImagePainter(IconState.fromNumber(iconNumber))
+                        val image =
+                            rememberAsyncImagePainter(IconState.fromNumber(categorySummaryClass.categoryClass.categoryIconNumber))
                         Image(
                             painter = image,
                             contentDescription = "Image 1",
@@ -654,24 +766,24 @@ fun CategoryStatEntryTest(modifier: Modifier = Modifier, title: String, iconNumb
 
                 Row() {
                     Text(
-                        text = "$title X5",
+                        text = "${categorySummaryClass.categoryClass.categoryName} X${categorySummaryClass.transactionCount}",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
-                    Text(
-                        text = "(60%)",
-                        style = MaterialTheme.typography.bodyMedium.copy(fontFamily = CustomFonts.numberFont),
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+//                    Text(
+//                        text = "(${categorySummaryClass.percentage.toInt()}%)",
+//                        style = MaterialTheme.typography.bodyMedium.copy(fontFamily = CustomFonts.numberFont),
+//                        color = MaterialTheme.colorScheme.onSurface,
+//                        maxLines = 1,
+//                        overflow = TextOverflow.Ellipsis,
+//                    )
                 }
 
             }
             Text(
-                text = parseAmount(34735f),
+                text = "₹ ${parseAmount(categorySummaryClass.totalAmount)}",
                 style = MaterialTheme.typography.bodyMedium.copy(fontFamily = CustomFonts.numberFont)
             )
         }

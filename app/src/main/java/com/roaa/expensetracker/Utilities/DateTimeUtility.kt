@@ -469,3 +469,17 @@ fun calculateEffectivePage(month: String) = run {
     val currentMonth: YearMonth = YearMonth.now()
     currentMonth.until(yearMonth, ChronoUnit.MONTHS)
 }
+
+// to get all dates in between 2 Local dates
+fun getDatesBetween(startDate: LocalDate, endDate: LocalDate): List<Pair<String, Long>> {
+    return generateSequence(startDate) { date ->
+        date.plusDays(1).takeIf { it <= endDate }
+    }.map {
+        val dayOfMonth = it.dayOfMonth // Get the day of the month (e.g., 1, 2, 3)
+        val dayName = it.dayOfWeek.getDisplayName(
+            TextStyle.SHORT,
+            Locale.getDefault()
+        ) // Full day name (e.g., "Thursday")
+        "$dayOfMonth $dayName" to it.toLong() // Pair<String, Long>
+    }.toList()
+}
