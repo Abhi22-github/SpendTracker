@@ -220,7 +220,7 @@ fun TransactionsListCompose(
                                             Modifier,
                                             parseAmount(totalIncomeForMonth.totalAmount),
                                             parseAmount(totalExpenseForMonth.totalAmount),
-                                            currentSelectedMonth,
+                                            transactionListOfMonth.size,
                                             selectedMonthString,
                                             currentMonthAllDayAndDatesListAndMaxValue,
                                         )
@@ -434,7 +434,7 @@ fun HomeStatCardNew(
     modifier: Modifier = Modifier,
     income: String,
     expense: String,
-    currentSelectedMonth: String,
+    totalTransactionsCount: Int,
     selectedMonthShort: String,
     currentMonthAllDayAndDatesListAndMaxValue: Pair<List<BarChartExpenseModel>, Float>
 ) {
@@ -503,7 +503,7 @@ fun HomeStatCardNew(
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                             Text(
-                                text = "234 transactions",
+                                text = "${totalTransactionsCount} transactions",
                                 textAlign = TextAlign.Start,
                                 modifier = Modifier.fillMaxWidth(),
                                 style = typography.labelLarge,
