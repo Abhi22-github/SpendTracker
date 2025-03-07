@@ -81,9 +81,11 @@ import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.toPalette
+import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
 import com.roaa.expensetracker.Utilities.UtilityModalClass.CategorySummaryClass
+import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBank
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTotalExpenseIncomeClass
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTransactionWithDetailsClass
 import com.roaa.expensetracker.Utilities.createListForBarGraph
@@ -97,6 +99,7 @@ import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
+import com.roaa.expensetracker.ViewModels.BankAccountsViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import java.time.LocalDate
 
@@ -166,8 +169,7 @@ fun StatisticsScreen(
             Spacer(Modifier.height(10.dp))
             Row {
                 Column {
-                    ThreeOptionTextSwitch(
-                        selectedIndex = selectedIndex,
+                    ThreeOptionTextSwitch(selectedIndex = selectedIndex,
                         items = options,
                         onSelectionChange = {
                             selectedIndex = it
@@ -249,8 +251,7 @@ fun StatisticsScreen(
             Spacer(Modifier.height(48.dp))
             Row {
                 Column {
-                    ThreeOptionTextSwitch(
-                        selectedIndex = selectedIndex,
+                    ThreeOptionTextSwitch(selectedIndex = selectedIndex,
                         items = options,
                         onSelectionChange = {
                             selectedIndex = it
@@ -365,14 +366,20 @@ fun ChipsForFilter(
 
 @Composable
 fun BankChips(
-    index: Int, selectedIndexForFilterChip: Int, text: String, selectChip: (Int) -> Unit
+    index: Int,
+    selectedBankAccountsClass: BankAccountsClass,
+    bankAccountsClass: BankAccountsClass,
+    selectChip: (BankAccountsClass) -> Unit
 ) {
-    FilterChip(onClick = { selectChip(index) },
+    FilterChip(onClick = { selectChip(bankAccountsClass) },
         label = {
-            Text(text = text, modifier = Modifier.padding(vertical = 8.dp))
+            Text(
+                text = if (bankAccountsClass.bankName == "Cash") "All accounts" else bankAccountsClass.bankName,
+                modifier = Modifier.padding(vertical = 8.dp)
+            )
         },
-        selected = index == selectedIndexForFilterChip,
-        leadingIcon = if (index == selectedIndexForFilterChip) {
+        selected = selectedBankAccountsClass.bankAccountId == bankAccountsClass.bankAccountId,
+        leadingIcon = if (selectedBankAccountsClass.bankAccountId == bankAccountsClass.bankAccountId) {
             {
                 Icon(
                     imageVector = Icons.Filled.Done,
@@ -466,7 +473,8 @@ private fun CategoryStatEntryPreview() {
 fun StatisticsScreenTest(
     navHostController: NavHostController,
     navigationManager: NavigationManager,
-    transactionsViewModel: TransactionsViewModel = hiltViewModel()
+    transactionsViewModel: TransactionsViewModel = hiltViewModel(),
+    bankAccountsViewModel: BankAccountsViewModel = hiltViewModel()
 ) {
     val options = listOf("Expense", "Income")
     var selectedIndex by remember { mutableIntStateOf(0) }
@@ -477,26 +485,24 @@ fun StatisticsScreenTest(
 
     //Flows
     val transactionsForTimePeriodFromRoom by transactionsViewModel.getTotalTransactionForPeriod(
-        startDate,
-        endDate
+        startDate, endDate
     ).collectAsState(
         listOf(emptyTransactionWithDetailsClass)
     )
+    val bankAccountList by bankAccountsViewModel.allBankAccountList.collectAsState()
+    var selectedBankAccountClass by remember { mutableStateOf(emptyBank) }
     val totalAmountListForTimePeriodFromRoom by transactionsViewModel.getListOfTotalAmountPerDayForRangeForCompose(
-        startDate,
-        endDate
+        startDate, endDate
     ).collectAsState(listOf(emptyTotalExpenseIncomeClass))
 
     val totalAmountMap = totalAmountListForTimePeriodFromRoom.associateBy { it.date }
 
     val expenseTransactions =
         transactionsForTimePeriodFromRoom.filter { it.transaction.type == EXPENSE }
-    val totalExpense =
-        expenseTransactions.sumOf { it.transaction.amount.toDouble() }.toFloat()
+    val totalExpense = expenseTransactions.sumOf { it.transaction.amount.toDouble() }.toFloat()
     val incomeTransaction =
         transactionsForTimePeriodFromRoom.filter { it.transaction.type == INCOME }
-    val totalIncome =
-        incomeTransaction.sumOf { it.transaction.amount.toDouble() }.toFloat()
+    val totalIncome = incomeTransaction.sumOf { it.transaction.amount.toDouble() }.toFloat()
 
     val title = if (selectedIndex == 0) "Total Expense" else "Total Income"
     val amount = if (selectedIndex == 0) totalExpense else totalIncome
@@ -504,14 +510,11 @@ fun StatisticsScreenTest(
         if (selectedIndex == 0) expenseTransactions.size else incomeTransaction.size
 
 
-    var currentTimePeriodExpenseAllDayAndDatesListAndMaxValue =
-        createListForBarGraph(
-            getDatesBetween(
-                startDate.toLocalDate(),
-                endDate.toLocalDate()
-            ),
-            totalAmountMap
-        )
+    var currentTimePeriodExpenseAllDayAndDatesListAndMaxValue = createListForBarGraph(
+        getDatesBetween(
+            startDate.toLocalDate(), endDate.toLocalDate()
+        ), totalAmountMap
+    )
 
 
     val categoryListData =
@@ -520,7 +523,7 @@ fun StatisticsScreenTest(
                 CategorySummaryClass(
                     category,
                     list.size,
-                    ((list.size.toFloat()/transactionCount.toFloat())*100),
+                    ((list.size.toFloat() / transactionCount.toFloat()) * 100),
                     list.sumOf { it.transaction.amount.toDouble() }.toFloat()
                 )
             }
@@ -649,8 +652,7 @@ fun StatisticsScreenTest(
                             Text(
                                 text = "${it} Transaction",
                                 modifier = Modifier.padding(
-                                    horizontal = 16.dp,
-                                    vertical = 8.dp
+                                    horizontal = 16.dp, vertical = 8.dp
                                 ),
                                 style = MaterialTheme.typography.labelLarge,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
@@ -663,8 +665,7 @@ fun StatisticsScreenTest(
                         ), colors = ButtonDefaults.filledTonalButtonColors(
                             containerColor = MaterialTheme.colorScheme.surfaceContainer,
                             contentColor = MaterialTheme.colorScheme.onSurface
-                        ),
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        ), modifier = Modifier.padding(horizontal = 16.dp)
                     ) {
                         Text(
                             text = "Daily", style = MaterialTheme.typography.bodyMedium
@@ -713,12 +714,13 @@ fun StatisticsScreenTest(
     if (showFilterBottomSheet) {
         FilterBottomSheet(Modifier,
             { showFilterBottomSheet = !showFilterBottomSheet },
-            { startDateFinal, endDateFinal, DurationFinal ->
+            bankAccountList,
+            { startDateFinal, endDateFinal, DurationFinal, bankAccountClassFinal ->
                 startDate = startDateFinal
                 endDate = endDateFinal
                 showFilterBottomSheet = !showFilterBottomSheet
-            }
-        )
+                selectedBankAccountClass = bankAccountClassFinal
+            })
     }
 
 
@@ -726,8 +728,7 @@ fun StatisticsScreenTest(
 
 @Composable
 fun CategoryStatEntryTest(
-    modifier: Modifier = Modifier,
-    categorySummaryClass: CategorySummaryClass
+    modifier: Modifier = Modifier, categorySummaryClass: CategorySummaryClass
 ) {
     Box(
         Modifier

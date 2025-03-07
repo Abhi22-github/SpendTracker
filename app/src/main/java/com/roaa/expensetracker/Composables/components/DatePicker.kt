@@ -53,7 +53,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.roaa.expensetracker.Composables.Screens.BankChips
+import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Utilities.LongMillisToNormalLong
+import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBank
 import com.roaa.expensetracker.Utilities.getDayDifference
 import com.roaa.expensetracker.Utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.Utilities.toLocalDate
@@ -134,11 +136,12 @@ fun DateRangePickerModal(
 fun FilterBottomSheet(
     modifier: Modifier = Modifier,
     closeBottomSheet: () -> Unit,
-    saveButtonClicked: (Long,Long,Long) -> Unit,
+    bankAccountList: List<BankAccountsClass>,
+    saveButtonClicked: (Long, Long, Long,BankAccountsClass) -> Unit,
     uiViewModel: UiViewModel = hiltViewModel()
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var selectedIndexForFilterChip by remember { mutableStateOf(0) }
+    var selectedBankAccount by remember { mutableStateOf(bankAccountList.get(0)) }
     var startDate by remember { mutableStateOf<Long>(LocalDate.now().minusMonths(1).toLong()) }
     var endDate by remember { mutableStateOf<Long>(LocalDate.now().toLong()) }
     var selectedDuration by remember {
@@ -167,15 +170,16 @@ fun FilterBottomSheet(
         FilterBottomSheetContent(
             Modifier.padding(horizontal = 16.dp),
             closeBottomSheet,
-            selectedIndexForFilterChip,
-            { selectedIndexForFilterChip = it },
+            bankAccountList,
+            selectedBankAccount,
+            { selectedBankAccount = it },
             startDate,
             { startDate = it },
             endDate,
             { endDate = it },
             selectedDuration,
             showErrorStatus,
-            {saveButtonClicked(startDate,endDate,selectedDuration)}
+            { saveButtonClicked(startDate, endDate, selectedDuration,selectedBankAccount) }
         )
     }
 }
@@ -185,15 +189,16 @@ fun FilterBottomSheet(
 fun FilterBottomSheetContent(
     modifier: Modifier = Modifier,
     closeBottomSheet: () -> Unit,
-    selectedIndexForFilterChip: Int,
-    setSelectedChip: (Int) -> Unit,
+    bankAccountList: List<BankAccountsClass>,
+    selectedBankAccount: BankAccountsClass,
+    setSelectedChip: (BankAccountsClass) -> Unit,
     startDate: Long,
     setStartDate: (Long) -> Unit,
     endDate: Long,
     setEndDate: (Long) -> Unit,
     selectedDuration: Long,
     showErrorStatus: Boolean,
-    saveButtonClicked:() ->Unit
+    saveButtonClicked: () -> Unit
 ) {
     var filterRowContent = listOf("All Accounts", "HDFC Bank", "Bank of Maharashtra")
     val startDatePickerState =
@@ -294,9 +299,9 @@ fun FilterBottomSheetContent(
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = modifier
             ) {
-                filterRowContent.forEachIndexed { index, text ->
+                bankAccountList.forEachIndexed { index, bankAccountsClass ->
                     BankChips(
-                        index, selectedIndexForFilterChip, text
+                        index, selectedBankAccount, bankAccountsClass
                     ) { setSelectedChip(it) }
                 }
             }
@@ -305,7 +310,7 @@ fun FilterBottomSheetContent(
             Spacer(Modifier.height(12.dp))
             FilledTonalButton(
                 enabled = !showErrorStatus,
-                onClick = {saveButtonClicked()},
+                onClick = { saveButtonClicked() },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
@@ -344,13 +349,14 @@ private fun FilterBottomSheetContentPreview() {
     FilterBottomSheetContent(
         Modifier.padding(horizontal = 16.dp),
         { },
-        0,
+        listOf(),
+        emptyBank,
         {},
         0L,
         {},
         0L,
         {}, 3L,
-        false,{}
+        false, {}
     )
 }
 
