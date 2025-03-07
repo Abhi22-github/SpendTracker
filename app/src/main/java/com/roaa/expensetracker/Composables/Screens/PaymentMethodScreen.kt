@@ -890,21 +890,41 @@ fun PaymentDetailsScreen(
                                 )
                             }
                         }
-                        if (showExperimentalComponent) {
-                            Spacer(Modifier.height(8.dp))
-                            StatisticsCardForCardStats(
-                                modifier = modifierWithHorizontalPadding,
-                                expenseListPerDayHashMap,
-                                incomeListPerDayHashMap,
-                                EXPENSE, totalExpense, totalIncome
-                            )
-                            Spacer(Modifier.height(8.dp))
-                            StatisticsCardForCardStats(
-                                modifier = modifierWithHorizontalPadding,
-                                expenseListPerDayHashMap,
-                                incomeListPerDayHashMap,
-                                INCOME, totalExpense, totalIncome
-                            )
+                        Column(
+                            Modifier.padding(horizontal = 16.dp),
+                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                SingleInfoBox(
+                                    Modifier.weight(1f),
+                                    "Total Expense",
+                                    "₹ ${parseAmount(totalExpense)}",
+                                )
+                                SingleInfoBox(
+                                    Modifier.weight(1f),
+                                    "Maximum Spend",
+                                    "₹ 3000",
+                                )
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                SingleInfoBox(
+                                    Modifier.weight(1f),
+                                    "Minimum Spend",
+                                    "₹ 3000",
+                                )
+                                SingleInfoBox(
+                                    Modifier.weight(1f),
+                                    "Maximum Spend",
+                                    "₹ 3000",
+                                )
+                            }
+                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                                SingleInfoBox(
+                                    Modifier.weight(1f),
+                                    "Total Transactions",
+                                    "39",
+                                )
+                            }
                         }
                         Spacer(Modifier.height(16.dp))
                     }

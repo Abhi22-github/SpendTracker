@@ -24,7 +24,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
@@ -82,20 +84,28 @@ import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
+import com.roaa.expensetracker.Composables.StatisticsComponent.AnimatedPieChart
 import com.roaa.expensetracker.Composables.StatisticsComponent.BarChartStatisticsScreen
 import com.roaa.expensetracker.Composables.StatisticsComponent.BarChartTest
+import com.roaa.expensetracker.Composables.StatisticsComponent.PieData
 import com.roaa.expensetracker.Composables.StatisticsComponent.Test
 import com.roaa.expensetracker.Composables.cardBackgroundColor
 import com.roaa.expensetracker.Composables.color1
 import com.roaa.expensetracker.Composables.color2
 import com.roaa.expensetracker.Composables.color3
 import com.roaa.expensetracker.Composables.color4
+import com.roaa.expensetracker.Composables.color5
+import com.roaa.expensetracker.Composables.color6
+import com.roaa.expensetracker.Composables.color7
+import com.roaa.expensetracker.Composables.color8
 import com.roaa.expensetracker.Composables.components.DatePickerModal
 import com.roaa.expensetracker.Composables.components.ErrorRow
+import com.roaa.expensetracker.Composables.components.SingleTransaction
 import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.toPalette
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
@@ -103,6 +113,7 @@ import com.roaa.expensetracker.Utilities.UtilityModalClass.CategorySummaryClass
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBank
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTotalExpenseIncomeClass
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTransactionWithDetailsClass
+import com.roaa.expensetracker.Utilities.colorList
 import com.roaa.expensetracker.Utilities.createListForBarGraph
 import com.roaa.expensetracker.Utilities.currentYear
 import com.roaa.expensetracker.Utilities.getDatesBetween
@@ -154,7 +165,8 @@ fun StatisticsScreen(
     }
     Scaffold(
         topBar = {
-            TopBar(title = "Statistics",
+            TopBar(
+                title = "Statistics",
                 showDelete = false,
                 sendUserBackToPreviousActivity = { handleBackNavigation(navigationManager) },
                 delete = {})
@@ -188,7 +200,8 @@ fun StatisticsScreen(
             Spacer(Modifier.height(10.dp))
             Row {
                 Column {
-                    ThreeOptionTextSwitch(selectedIndex = selectedIndex,
+                    ThreeOptionTextSwitch(
+                        selectedIndex = selectedIndex,
                         items = options,
                         onSelectionChange = {
                             selectedIndex = it
@@ -242,19 +255,19 @@ fun StatisticsScreen(
                                 contentAlignment = Alignment.Center,
                                 modifier = Modifier.fillMaxWidth()
                             ) {
-//                AnimatedPieChart(
-//                    Modifier.size(240.dp), listOf(
-//                        PieData("Food", 40, color1),
-//                        PieData("Transportation", 62, color2),
-//                        PieData("Fuel", 50, color3),
-//                        PieData("Other", 100, color4),
-//                        PieData("Food", 40, color5),
-//                        PieData("Transportation", 62, color6),
-//                        PieData("Fuel", 50, color7),
-//                        PieData("Other", 100, color8)
-//                    )
-//                )
-                                Test(Modifier)
+                                AnimatedPieChart(
+                                    Modifier.size(240.dp), listOf(
+                                        PieData("Food", 40, color1),
+                                        PieData("Transportation", 62, color2),
+                                        PieData("Fuel", 50, color3),
+                                        PieData("Other", 100, color4),
+                                        PieData("Food", 40, color5),
+                                        PieData("Transportation", 62, color6),
+                                        PieData("Fuel", 50, color7),
+                                        PieData("Other", 100, color8)
+                                    )
+                                )
+                                //Test(Modifier, pieDataList)
                                 Text("Testing")
                             }
                             Spacer(Modifier.height(8.dp))
@@ -270,7 +283,8 @@ fun StatisticsScreen(
             Spacer(Modifier.height(48.dp))
             Row {
                 Column {
-                    ThreeOptionTextSwitch(selectedIndex = selectedIndex,
+                    ThreeOptionTextSwitch(
+                        selectedIndex = selectedIndex,
                         items = options,
                         onSelectionChange = {
                             selectedIndex = it
@@ -362,7 +376,8 @@ fun ChipsForFilter(
     index: Int, selectedIndexForFilterChip: Int, text: String, selectChip: (Int) -> Unit
 ) {
     val temp = if (text.split(",").get(1) == currentYear) text.split(",")[0] else text
-    FilterChip(onClick = { selectChip(index) },
+    FilterChip(
+        onClick = { selectChip(index) },
         label = {
             Text(text = temp)
         },
@@ -390,7 +405,8 @@ fun BankChips(
     bankAccountsClass: BankAccountsClass,
     selectChip: (BankAccountsClass) -> Unit
 ) {
-    FilterChip(onClick = { selectChip(bankAccountsClass) },
+    FilterChip(
+        onClick = { selectChip(bankAccountsClass) },
         label = {
             Text(
                 text = if (bankAccountsClass.bankName == "Cash") "All accounts" else bankAccountsClass.bankName,
@@ -425,12 +441,13 @@ fun CategoryStatEntry(modifier: Modifier = Modifier, color: Color) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp)
     ) {
-        Row(Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
-            .clickable { }
-            .background(color.copy(alpha = 0.4f), RoundedCornerShape(20.dp))
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(20.dp))
+                .clickable { }
+                .background(color.copy(alpha = 0.4f), RoundedCornerShape(20.dp))
+                .padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically) {
             Row(modifier = Modifier.weight(0.8f), verticalAlignment = Alignment.CenterVertically) {
                 Surface(
@@ -549,7 +566,8 @@ fun StatisticsScreenTest(
                     category,
                     list.size,
                     ((list.size.toFloat() / transactionCount.toFloat()) * 100),
-                    list.sumOf { it.transaction.amount.toDouble() }.toFloat()
+                    list.sumOf { it.transaction.amount.toDouble() }.toFloat(),
+                    colorList.random()
                 )
             }
 
@@ -559,7 +577,8 @@ fun StatisticsScreenTest(
     }
     Scaffold(
         topBar = {
-            TopBar(title = "Statistics",
+            TopBar(
+                title = "Statistics",
                 showDelete = false,
                 sendUserBackToPreviousActivity = { handleBackNavigation(navigationManager) },
                 delete = {})
@@ -720,15 +739,30 @@ fun StatisticsScreenTest(
                 horizontalAlignment = Alignment.Start
             ) {
                 Text(
-                    text = "Category",
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                    text = "Category",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface
                 )
                 Column {
-                    categoryListData.values.toList().forEach {
-                        CategoryStatEntryTest(Modifier, it)
+                    Spacer(Modifier.height(16.dp))
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+//                        AnimatedPieChart(
+//                            Modifier.size(240.dp), pieDataList
+//                        )
 
+                        Test(Modifier, categoryListData)
+
+                        // Text("Testing")
+                    }
+                    Spacer(Modifier.height(24.dp))
+                    Column {
+                        categoryListData.values.toList().forEach {
+                            CategoryStatEntryTest(Modifier, it)
+                        }
                     }
                 }
             }
@@ -804,7 +838,8 @@ fun StatisticsScreenTest(
     }
 
     if (showFilterBottomSheet) {
-        FilterBottomSheet(Modifier,
+        FilterBottomSheet(
+            Modifier,
             { showFilterBottomSheet = !showFilterBottomSheet },
             bankAccountList,
             { startDateFinal, endDateFinal, DurationFinal, bankAccountClassFinal ->
@@ -819,7 +854,8 @@ fun StatisticsScreenTest(
         BankAnalysisBottomSheet(
             Modifier,
             { showBankAccountAnalysisBottomSheet = !showBankAccountAnalysisBottomSheet },
-            bankAccountList
+            bankAccountList,
+            transactionsForTimePeriodFromRoom
         )
     }
 
@@ -839,11 +875,12 @@ fun CategoryStatEntryTest(
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp)
     ) {
-        Row(Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .clickable { }
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .clickable { }
+                .padding(horizontal = 8.dp, vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically) {
             Row(modifier = Modifier.weight(0.8f), verticalAlignment = Alignment.CenterVertically) {
                 Surface(
@@ -868,24 +905,50 @@ fun CategoryStatEntryTest(
 
 
                 Spacer(modifier = Modifier.width(16.dp))
-
                 Row() {
-                    Text(
-                        text = "${categorySummaryClass.categoryClass.categoryName} X${categorySummaryClass.transactionCount}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
-//                    Text(
-//                        text = "(${categorySummaryClass.percentage.toInt()}%)",
-//                        style = MaterialTheme.typography.bodyMedium.copy(fontFamily = CustomFonts.numberFont),
-//                        color = MaterialTheme.colorScheme.onSurface,
-//                        maxLines = 1,
-//                        overflow = TextOverflow.Ellipsis,
-//                    )
+                    Box(
+                        Modifier.background(
+                            categorySummaryClass.color, RoundedCornerShape(
+                                topEnd = 0.dp,
+                                topStart = 15.dp,
+                                bottomEnd = 0.dp,
+                                bottomStart = 15.dp
+                            )
+                        )
+                    ) {
+                        Row(Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+                            Text(
+                                text = String.format("%.2f", categorySummaryClass.percentage),
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
+                    Spacer(Modifier.width(5.dp))
+                    Box(
+                        Modifier.background(
+                            categorySummaryClass.color.copy(alpha = 0.5f),
+                            RoundedCornerShape(
+                                topEnd = 15.dp,
+                                topStart = 0.dp,
+                                bottomEnd = 15.dp,
+                                bottomStart = 0.dp
+                            )
+                        )
+                    ) {
+                        Row(Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
+                            Text(
+                                text = "${categorySummaryClass.categoryClass.categoryName} X${categorySummaryClass.transactionCount}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis,
+                            )
+                        }
+                    }
                 }
-
             }
             Text(
                 text = "₹ ${parseAmount(categorySummaryClass.totalAmount)}",
@@ -977,21 +1040,22 @@ fun FilterBottomSheetContent(
             verticalArrangement = Arrangement.Top, modifier = Modifier
         ) {
             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                Box(Modifier
-                    .weight(1f)
-                    .background(
-                        Color.Transparent, shape = RoundedCornerShape(25.dp)
-                    )
-                    .padding(start = 16.dp)
-                    .border(
-                        BorderStroke(
-                            1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
-                        ), RoundedCornerShape(25.dp)
-                    )
-                    .clip(RoundedCornerShape(25.dp))
-                    .clickable {
-                        showStartDateDayPicker = !showStartDateDayPicker
-                    }) {
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .background(
+                            Color.Transparent, shape = RoundedCornerShape(25.dp)
+                        )
+                        .padding(start = 16.dp)
+                        .border(
+                            BorderStroke(
+                                1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+                            ), RoundedCornerShape(25.dp)
+                        )
+                        .clip(RoundedCornerShape(25.dp))
+                        .clickable {
+                            showStartDateDayPicker = !showStartDateDayPicker
+                        }) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1012,21 +1076,22 @@ fun FilterBottomSheetContent(
                         )
                     }
                 }
-                Box(Modifier
-                    .weight(1f)
-                    .background(
-                        Color.Transparent, shape = RoundedCornerShape(25.dp)
-                    )
-                    .padding(end = 16.dp)
-                    .border(
-                        BorderStroke(
-                            1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
-                        ), RoundedCornerShape(25.dp)
-                    )
-                    .clip(RoundedCornerShape(25.dp))
-                    .clickable {
-                        showEndDateDayPicker = !showEndDateDayPicker
-                    }) {
+                Box(
+                    Modifier
+                        .weight(1f)
+                        .background(
+                            Color.Transparent, shape = RoundedCornerShape(25.dp)
+                        )
+                        .padding(end = 16.dp)
+                        .border(
+                            BorderStroke(
+                                1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+                            ), RoundedCornerShape(25.dp)
+                        )
+                        .clip(RoundedCornerShape(25.dp))
+                        .clickable {
+                            showEndDateDayPicker = !showEndDateDayPicker
+                        }) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -1130,15 +1195,16 @@ private fun FilterBottomSheetContentPreview() {
 fun BankAnalysisBottomSheet(
     modifier: Modifier = Modifier,
     dismissBottomSheet: () -> Unit,
-    bankAccountList: List<BankAccountsClass>
+    bankAccountList: List<BankAccountsClass>,
+    transactionsForTimePeriodFromRoom: List<TransactionWithDetails>
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var selectedBankAccount by remember { mutableStateOf(bankAccountList.get(0)) }
     ModalBottomSheet(sheetState = bottomSheetState, onDismissRequest = { dismissBottomSheet() }) {
         BankAnalysisBottomSheetContent(
             Modifier.padding(horizontal = 16.dp),
-            bankAccountList,
-            selectedBankAccount
+            bankAccountList, transactionsForTimePeriodFromRoom,
+            selectedBankAccount,
         ) {
             selectedBankAccount = it
         }
@@ -1150,6 +1216,7 @@ fun BankAnalysisBottomSheet(
 fun BankAnalysisBottomSheetContent(
     modifier: Modifier = Modifier,
     bankAccountList: List<BankAccountsClass>,
+    transactionsForTimePeriodFromRoom: List<TransactionWithDetails>,
     selectedBankAccount: BankAccountsClass,
     setSelectedBankAccount: (BankAccountsClass) -> Unit
 ) {
@@ -1179,31 +1246,52 @@ fun BankAnalysisBottomSheetContent(
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
         )
         Spacer(Modifier.height(12.dp))
-        Column(
-            Modifier.padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                SingleInfoBox(
-                    Modifier.weight(1f),
-                    "Minimum Spend",
-                    "₹ 3000",
-                )
-                SingleInfoBox(
-                    Modifier.weight(1f),
-                    "Maximum Spend",
-                    "₹ 3000",
-                )
+
+        LazyColumn() {
+            item {
+                Column(
+                    Modifier.padding(horizontal = 16.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        SingleInfoBox(
+                            Modifier.weight(1f),
+                            "Minimum Spend",
+                            "₹ 3000",
+                        )
+                        SingleInfoBox(
+                            Modifier.weight(1f),
+                            "Maximum Spend",
+                            "₹ 3000",
+                        )
+                    }
+                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+                        SingleInfoBox(
+                            Modifier.weight(1f),
+                            "Total Transactions",
+                            "39",
+                        )
+                    }
+                }
+                BarChartTest(Modifier, palette = toPalette(orange))
             }
-            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                SingleInfoBox(
-                    Modifier.weight(1f),
-                    "Total Transactions",
-                    "39",
-                )
+            item {
+                if (transactionsForTimePeriodFromRoom.isNotEmpty()) {
+                    Text(
+                        modifier = modifier.padding(vertical = 8.dp),
+                        text = "Transactions",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+            items(transactionsForTimePeriodFromRoom, key = { it.transaction.id }) {
+                SingleTransaction(it) {
+//                    singleTransaction = it
+//                    bottomSheet = !bottomSheet
+                }
             }
         }
-        BarChartTest(Modifier, palette = toPalette(orange))
     }
 }
 
@@ -1212,6 +1300,7 @@ fun BankAnalysisBottomSheetContent(
 private fun BankAnalysisBottomSheetContentPreview() {
     BankAnalysisBottomSheetContent(
         modifier = Modifier.padding(horizontal = 16.dp),
+        transactionsForTimePeriodFromRoom = listOf(),
         bankAccountList = listOf(emptyBank, emptyBank, emptyBank),
         selectedBankAccount = emptyBank,
         setSelectedBankAccount = { })

@@ -21,11 +21,8 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.unit.dp
 import com.roaa.expensetracker.Composables.color1
-import com.roaa.expensetracker.Composables.color2
-import com.roaa.expensetracker.Composables.color3
-import com.roaa.expensetracker.Composables.color4
-import com.roaa.expensetracker.Composables.color5
-import com.roaa.expensetracker.Composables.color6
+import com.roaa.expensetracker.Model.CategoryClass
+import com.roaa.expensetracker.Utilities.UtilityModalClass.CategorySummaryClass
 import ir.ehsannarmani.compose_charts.PieChart
 import ir.ehsannarmani.compose_charts.models.Pie
 import kotlinx.coroutines.launch
@@ -63,7 +60,7 @@ fun AnimatedPieChart(modifier: Modifier = Modifier, pieDatePoints: List<PieData>
     }
 
     Canvas(modifier) {
-        val stroke = Stroke(width = 90f, cap = StrokeCap.Butt)
+        val stroke = Stroke(width = 90f, cap = StrokeCap.Round)
         arcs.reversed().map {
             drawArc(
                 startAngle = -90f,
@@ -131,19 +128,30 @@ fun AnimatedGapPieChart(modifier: Modifier = Modifier, pieDatePoints: List<PieDa
 }
 
 @Composable
-fun Test(modifier: Modifier = Modifier) {
+fun Test(
+    modifier: Modifier = Modifier,
+    categoryListData: Map<CategoryClass, CategorySummaryClass>
+) {
 
     var data by remember {
         mutableStateOf(
-            listOf(
-                Pie(label = "Android", data = 20.0, color = color1),
-                Pie(label = "Windows", data = 45.0, color = color2),
-                Pie(label = "Linux", data = 35.0, color = color3),
-                Pie(label = "Android", data = 20.0, color = color4),
-                Pie(label = "Windows", data = 45.0, color = color5),
-                Pie(label = "Linux", data = 35.0, color = color6),
-            )
+            categoryListData.map { (categoryClass, categorySummaryClass) ->
+                Pie(
+                    categoryClass.categoryName,
+                    categorySummaryClass.totalAmount.toDouble(),
+                    color1
+                )
+            }
         )
+    }
+    LaunchedEffect(categoryListData) {
+        data = categoryListData.map { (categoryClass, categorySummaryClass) ->
+            Pie(
+                categoryClass.categoryName,
+                categorySummaryClass.totalAmount.toDouble(),
+                categorySummaryClass.color
+            )
+        }
     }
     PieChart(
         modifier = Modifier.size(250.dp),

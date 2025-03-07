@@ -2,6 +2,13 @@ package com.roaa.expensetracker.Utilities
 
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.roaa.expensetracker.Composables.color1
+import com.roaa.expensetracker.Composables.color2
+import com.roaa.expensetracker.Composables.color3
+import com.roaa.expensetracker.Composables.color4
+import com.roaa.expensetracker.Composables.color5
+import com.roaa.expensetracker.Composables.color6
+import com.roaa.expensetracker.Composables.color7
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Model.UiDateModels.BarChartExpenseModel
 import com.roaa.expensetracker.Utilities.UtilityModalClass.DeleteActionsModelClass
@@ -29,12 +36,17 @@ fun createListForBarGraph(
     return Pair(list, maxExpense)
 }
 
+val colorList = listOf(
+    color1,
+    color2, color3, color4, color5, color6, color7,
+)
+
 fun convertDataToSeries(
     allDays: List<LocalDate>,
     totalValuesPerDayForMonthMap: HashMap<Long, Pair<Float, Float>>
 ): Pair<LinkedHashMap<String, Int>, LinkedHashMap<String, Int>> {
-    val expenseListPerDayHashMap = LinkedHashMap<String,Int>()
-    val incomeListPerDayHashMap = LinkedHashMap<String,Int>()
+    val expenseListPerDayHashMap = LinkedHashMap<String, Int>()
+    val incomeListPerDayHashMap = LinkedHashMap<String, Int>()
     for (day in allDays) {
         val longDay = day.toLong()
         var expense = 0
@@ -46,7 +58,7 @@ fun convertDataToSeries(
         expenseListPerDayHashMap[day.toDateWithDayName()] = expense
         incomeListPerDayHashMap[day.toDateWithDayName()] = income
     }
-    return Pair(expenseListPerDayHashMap,incomeListPerDayHashMap)
+    return Pair(expenseListPerDayHashMap, incomeListPerDayHashMap)
 }
 
 fun calculateBarPercentageHeight(maxHeight: Dp, maxExpense: Float, expenseAmount: Float): Dp {
@@ -63,7 +75,6 @@ enum class DeleteAction {
     DELETE_AND_MIGRATE,
     DELETE_ALL
 }
-
 
 val deleteActionList = listOf(
     DeleteActionsModelClass(
