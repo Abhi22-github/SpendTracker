@@ -7,7 +7,7 @@ import com.roaa.expensetracker.Model.CategoryClass
 data class CategorySummaryClass(
     val categoryClass: CategoryClass,
     val transactionCount: Int,
-    val percentage: Float,
+    var percentage: Float,
     val totalAmount: Float,
-    val color: Color
+    var color: Color
 )

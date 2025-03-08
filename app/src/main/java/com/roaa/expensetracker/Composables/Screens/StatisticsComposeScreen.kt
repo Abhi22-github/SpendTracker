@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -81,6 +82,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.aay.compose.donutChart.model.PieChartData
 import com.roaa.expensetracker.Composables.CustomFonts
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
@@ -89,6 +91,7 @@ import com.roaa.expensetracker.Composables.StatisticsComponent.BarChartStatistic
 import com.roaa.expensetracker.Composables.StatisticsComponent.BarChartTest
 import com.roaa.expensetracker.Composables.StatisticsComponent.PieData
 import com.roaa.expensetracker.Composables.StatisticsComponent.Test
+import com.roaa.expensetracker.Composables.StatisticsComponent.generateDynamicColors
 import com.roaa.expensetracker.Composables.cardBackgroundColor
 import com.roaa.expensetracker.Composables.color1
 import com.roaa.expensetracker.Composables.color2
@@ -257,14 +260,14 @@ fun StatisticsScreen(
                             ) {
                                 AnimatedPieChart(
                                     Modifier.size(240.dp), listOf(
-                                        PieData("Food", 40, color1),
-                                        PieData("Transportation", 62, color2),
-                                        PieData("Fuel", 50, color3),
-                                        PieData("Other", 100, color4),
-                                        PieData("Food", 40, color5),
-                                        PieData("Transportation", 62, color6),
-                                        PieData("Fuel", 50, color7),
-                                        PieData("Other", 100, color8)
+                                        PieData("Food", 40f, color1),
+                                        PieData("Transportation", 62f, color2),
+                                        PieData("Fuel", 50f, color3),
+                                        PieData("Other", 100f, color4),
+                                        PieData("Food", 40f, color5),
+                                        PieData("Transportation", 62f, color6),
+                                        PieData("Fuel", 50f, color7),
+                                        PieData("Other", 100f, color8)
                                     )
                                 )
                                 //Test(Modifier, pieDataList)
@@ -409,7 +412,7 @@ fun BankChips(
         onClick = { selectChip(bankAccountsClass) },
         label = {
             Text(
-                text = if (bankAccountsClass.bankName == "Cash") "All accounts" else bankAccountsClass.bankName,
+                text = bankAccountsClass.bankName,
                 modifier = Modifier.padding(vertical = 8.dp),
                 style = MaterialTheme.typography.bodyMedium
             )
@@ -508,7 +511,7 @@ private fun CategoryStatEntryPreview() {
 
 
 @OptIn(ExperimentalMaterial3Api::class)
-@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
+@SuppressLint("UnusedMaterial3ScaffoldPaddingParameter", "UnusedBoxWithConstraintsScope")
 @Composable
 fun StatisticsScreenTest(
     navHostController: NavHostController,
@@ -558,10 +561,12 @@ fun StatisticsScreenTest(
         ), totalAmountMap
     )
 
+    var totalAmount = 0f
 
     val categoryListData =
         (if (selectedIndex == 0) expenseTransactions else incomeTransaction).groupBy { it.category }
             .mapValues { (category, list) ->
+                totalAmount += list.fold(0f) { acc, i -> acc + i.transaction.amount }
                 CategorySummaryClass(
                     category,
                     list.size,
@@ -570,6 +575,15 @@ fun StatisticsScreenTest(
                     colorList.random()
                 )
             }
+    categoryListData.onEachIndexed { index, entry ->
+        entry.value.color = colorList[index]
+        entry.value.percentage =
+            ((entry.value.totalAmount / if (totalAmount == 0f) 1f else totalAmount) * 100)
+    }
+    val sortedCategoryListData = categoryListData.toList()
+        .sortedByDescending { it.second.totalAmount } // Sort by value
+        .toMap()
+
 
 
     BackHandler() {
@@ -748,92 +762,118 @@ fun StatisticsScreenTest(
                     Spacer(Modifier.height(16.dp))
                     Box(
                         contentAlignment = Alignment.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f)
                     ) {
-//                        AnimatedPieChart(
-//                            Modifier.size(240.dp), pieDataList
+                        val pieDataList = sortedCategoryListData.map {
+                            PieChartData(
+                                partName = it.key.categoryName,
+                                data = if (it.value.totalAmount == 0f) 1.0 else it.value.totalAmount.toDouble(),
+                                color = it.value.color,
+                            )
+                        }
+                        val colors = generateDynamicColors(6)
+//                        AnimatedGapPieChart(
+//                            Modifier.size(240.dp),pieDataList
 //                        )
-
-                        Test(Modifier, categoryListData)
-
+//                        Box(Modifier) {
+//                            DonutChartSample(pieDataList)
+//                        }
+                        key(sortedCategoryListData) {
+                            Test(
+                                Modifier,
+                                sortedCategoryListData,
+                                MaterialTheme.colorScheme.onSurface,
+                                MaterialTheme.colorScheme.surface
+                            )
+                        }
                         // Text("Testing")
                     }
                     Spacer(Modifier.height(24.dp))
                     Column {
-                        categoryListData.values.toList().forEach {
+                        sortedCategoryListData.values.toList().forEach {
                             CategoryStatEntryTest(Modifier, it)
                         }
                     }
                 }
             }
             //bottom statistics
-            Spacer(Modifier.height(24.dp))
-            Row(Modifier.padding(horizontal = 16.dp)) {
-                FilledTonalButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        showBankAccountAnalysisBottomSheet = !showBankAccountAnalysisBottomSheet
-                    },
-                    contentPadding = PaddingValues(
-                        start = 24.dp, top = 12.dp, end = 20.dp, bottom = 12.dp
-                    ),
-                    colors = ButtonDefaults.filledTonalButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                        contentColor = MaterialTheme.colorScheme.onSurface
-                    )
-                ) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Row {
-                            Icon(
-                                Icons.Rounded.BarChart,
-                                contentDescription = "Settings",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                text = "Bank Account Analysis",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
+            if (false) {
+                Spacer(Modifier.height(24.dp))
+                Row(Modifier.padding(horizontal = 16.dp)) {
+                    FilledTonalButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            showBankAccountAnalysisBottomSheet = !showBankAccountAnalysisBottomSheet
+                        },
+                        contentPadding = PaddingValues(
+                            start = 24.dp, top = 12.dp, end = 20.dp, bottom = 12.dp
+                        ),
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        )
+                    ) {
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row {
+                                Icon(
+                                    Icons.Rounded.BarChart,
+                                    contentDescription = "Settings",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    text = "Bank Account Analysis",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                            }
 
-                        Icon(Icons.Rounded.ArrowForward, contentDescription = "Settings")
+                            Icon(Icons.Rounded.ArrowForward, contentDescription = "Settings")
+                        }
                     }
                 }
-            }
-            Spacer(Modifier.height(8.dp))
-            Row(Modifier.padding(horizontal = 16.dp)) {
-                FilledTonalButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = {
-                        showCategoryAnalysisBottomSheet = !showCategoryAnalysisBottomSheet
-                    },
-                    contentPadding = PaddingValues(
-                        start = 24.dp, top = 12.dp, end = 20.dp, bottom = 12.dp
-                    ),
-                    colors = ButtonDefaults.filledTonalButtonColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                        contentColor = MaterialTheme.colorScheme.onSurface
-                    )
-                ) {
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-                        Row {
-                            Icon(
-                                Icons.Rounded.BubbleChart,
-                                contentDescription = "pie chart",
-                                tint = MaterialTheme.colorScheme.primary
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                text = "Category Wise Analysis",
-                                style = MaterialTheme.typography.titleMedium
-                            )
-                        }
+                Spacer(Modifier.height(8.dp))
+                Row(Modifier.padding(horizontal = 16.dp)) {
+                    FilledTonalButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            showCategoryAnalysisBottomSheet = !showCategoryAnalysisBottomSheet
+                        },
+                        contentPadding = PaddingValues(
+                            start = 24.dp, top = 12.dp, end = 20.dp, bottom = 12.dp
+                        ),
+                        colors = ButtonDefaults.filledTonalButtonColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                            contentColor = MaterialTheme.colorScheme.onSurface
+                        )
+                    ) {
+                        Row(
+                            Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
+                            Row {
+                                Icon(
+                                    Icons.Rounded.BubbleChart,
+                                    contentDescription = "pie chart",
+                                    tint = MaterialTheme.colorScheme.primary
+                                )
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    text = "Category Wise Analysis",
+                                    style = MaterialTheme.typography.titleMedium
+                                )
+                            }
 
-                        Icon(Icons.Rounded.ArrowForward, contentDescription = "Settings")
+                            Icon(Icons.Rounded.ArrowForward, contentDescription = "Settings")
+                        }
                     }
                 }
+                Spacer(Modifier.height(32.dp))
             }
-            Spacer(Modifier.height(32.dp))
         }
     }
 
@@ -918,7 +958,7 @@ fun CategoryStatEntryTest(
                     ) {
                         Row(Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
                             Text(
-                                text = String.format("%.2f", categorySummaryClass.percentage),
+                                text = "${String.format("%.2f", categorySummaryClass.percentage)}%",
                                 style = MaterialTheme.typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 maxLines = 1,

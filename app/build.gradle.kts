@@ -145,6 +145,7 @@ dependencies {
     implementation("com.patrykandpatrick.vico:compose-m3:$vicoVersion")
 
     implementation("io.github.ehsannarmani:compose-charts:0.1.2")
-
-
+    implementation("com.github.PhilJay:MPAndroidChart:v3.1.0")
+    implementation("com.himanshoe:charty:2.1.0-beta03.1")
+    implementation("io.github.thechance101:chart:Beta-0.0.5")
 }

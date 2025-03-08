@@ -15,8 +15,7 @@ import com.roaa.expensetracker.Utilities.UtilityModalClass.DeleteActionsModelCla
 import java.time.LocalDate
 
 fun createListForBarGraph(
-    dateList: List<Pair<String, Long>>,
-    map: Map<Long, TotalExpenseIncomeClass>
+    dateList: List<Pair<String, Long>>, map: Map<Long, TotalExpenseIncomeClass>
 ): Pair<List<BarChartExpenseModel>, Float> {
     val list = mutableListOf<BarChartExpenseModel>()
     var maxExpense = 0f
@@ -37,13 +36,12 @@ fun createListForBarGraph(
 }
 
 val colorList = listOf(
-    color1,
-    color2, color3, color4, color5, color6, color7,
+    color1, color2, color3, color4, color5, color6, color7,
+    color1, color2, color3, color4, color5, color6, color7,
 )
 
 fun convertDataToSeries(
-    allDays: List<LocalDate>,
-    totalValuesPerDayForMonthMap: HashMap<Long, Pair<Float, Float>>
+    allDays: List<LocalDate>, totalValuesPerDayForMonthMap: HashMap<Long, Pair<Float, Float>>
 ): Pair<LinkedHashMap<String, Int>, LinkedHashMap<String, Int>> {
     val expenseListPerDayHashMap = LinkedHashMap<String, Int>()
     val incomeListPerDayHashMap = LinkedHashMap<String, Int>()
@@ -62,18 +60,14 @@ fun convertDataToSeries(
 }
 
 fun calculateBarPercentageHeight(maxHeight: Dp, maxExpense: Float, expenseAmount: Float): Dp {
-    if (maxExpense == 0f)
-        return 0.dp
-    if (expenseAmount == 0f)
-        return 0.dp
+    if (maxExpense == 0f) return 0.dp
+    if (expenseAmount == 0f) return 0.dp
 
     return (maxHeight.value * expenseAmount / maxExpense).dp
 }
 
 enum class DeleteAction {
-    DELETE_BANK_ACCOUNT,
-    DELETE_AND_MIGRATE,
-    DELETE_ALL
+    DELETE_BANK_ACCOUNT, DELETE_AND_MIGRATE, DELETE_ALL
 }
 
 val deleteActionList = listOf(
