@@ -17,9 +17,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Directions
 import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.rounded.Timelapse
-import androidx.compose.material.icons.rounded.TurnRight
+import androidx.compose.material.icons.rounded.Start
+import androidx.compose.material.icons.rounded.StopCircle
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
@@ -31,7 +32,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.rememberDateRangePickerState
+import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -67,7 +68,7 @@ import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
 import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
-import com.roaa.expensetracker.Composables.components.DateRangePickerModal
+import com.roaa.expensetracker.Composables.components.DatePickerModal
 import com.roaa.expensetracker.Composables.components.DistributionMethodPickerBottomSheet
 import com.roaa.expensetracker.Composables.components.ErrorRow
 import com.roaa.expensetracker.Composables.components.NotificationPercentChooserBottomSheet
@@ -168,6 +169,7 @@ fun BudgetContentController(
     var endDate by remember { mutableLongStateOf(0L) }
     var restDistributionValue by remember { mutableStateOf(DistributionMethod.DEFAULT) }
     var notificationUsageValue by remember { mutableFloatStateOf(20f) }
+
     BottomSheetBudgetContent(
         modifier,
         isBudgetSet,
@@ -222,7 +224,13 @@ fun BudgetContentController(
         errorStatus,
         {
             scope.launch {
-                viewModel.uiViewModel.errorStatusInSetupBudget.emit(false)
+                viewModel.uiViewModel.errorStatusInBudgetAdd.emit(false)
+            }
+        },
+        {
+            scope.launch {
+                viewModel.uiViewModel.setErrorMessage("End Date should be greater than Start Date")
+                viewModel.uiViewModel.errorStatusInBudgetAdd.emit(true)
             }
         }
     )
@@ -292,7 +300,8 @@ fun BottomSheetBudgetContent(
     budgetWithSummary: BudgetWithDayDetails,
     saveButtonClicked: (String, Long, Long, Long, DistributionMethod, Float, Float) -> Unit,
     errorStatus: Boolean,
-    removeError: () -> Unit
+    removeError: () -> Unit,
+    setError:() -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val focusRequester = remember {
@@ -301,21 +310,26 @@ fun BottomSheetBudgetContent(
     val buttonTitle by remember { mutableStateOf(if (isBudgetSet) "Save Budget" else "Create Budget") }
     var totalAmountText by remember { mutableStateOf(TextFieldValue(if (isBudgetSet) budgetWithSummary.budgetSummary.totalBudgetAmount.toString() else "")) }
     var totalAmountPerDay by remember { mutableFloatStateOf(if (isBudgetSet) budgetWithSummary.budgetSummary.budgetAmountPerDay else 0f) }
-    var showDateRangePicker by remember { mutableStateOf(false) }
-    val dateRangePickerState =
-        rememberDateRangePickerState(initialSelectedStartDateMillis = System.currentTimeMillis())
+    var showDateRangePickerForStartDate by remember { mutableStateOf(false) }
+    var showDateRangePickerForEndDate by remember { mutableStateOf(false) }
+
     var startDate by remember {
         mutableStateOf<Long>(
-            if (isBudgetSet) budgetWithSummary.budgetSummary.budgetStartDate.toLocalDate()
-                .toLongMillis() else System.currentTimeMillis()
+            if (isBudgetSet) budgetWithSummary.budgetSummary.budgetStartDate
+            else java.time.LocalDate.now().toLong()
         )
     }
     var endDate by remember {
         mutableStateOf<Long>(
-            if (isBudgetSet) budgetWithSummary.budgetSummary.budgetEndDate.toLocalDate()
-                .toLongMillis() else System.currentTimeMillis()
+            if (isBudgetSet) budgetWithSummary.budgetSummary.budgetEndDate
+            else java.time.LocalDate.now().toLong()
         )
     }
+    val startDatePickerState =
+        rememberDatePickerState(startDate.toLocalDate().toLongMillis())
+    val endDatePickerState =
+        rememberDatePickerState(endDate.toLocalDate().toLongMillis())
+
     var totalDaysRemaining = remember {
         if (isBudgetSet) budgetWithSummary.budgetSummary.budgetTotalDays
         else
@@ -341,28 +355,18 @@ fun BottomSheetBudgetContent(
     LaunchedEffect(totalAmountText, startDate, endDate) {
         focusRequester.requestFocus()
         totalDaysRemaining = getDayDifference(
-            startDate.LongMillisToNormalLong().toLocalDate(),
-            endDate.LongMillisToNormalLong().toLocalDate()
-        )
-        Log.d(
-            "Teshkfajk", "${
-                startDate.LongMillisToNormalLong().toLocalDate()
-            } ${
-                endDate.LongMillisToNormalLong().toLocalDate()
-            }"
-        )
-        Log.d(
-            "Teshkfajk", "${
-                getDayDifference(
-                    startDate.LongMillisToNormalLong().toLocalDate(),
-                    endDate.LongMillisToNormalLong().toLocalDate()
-                )
-            }"
+            startDate.toLocalDate(),
+            endDate.toLocalDate()
         )
         if (totalAmountText.text.isNotEmpty() && totalAmountText.text.toFloat() != 0f) {
             totalAmountPerDay = totalAmountText.text.toFloat() / totalDaysRemaining
         } else {
             totalAmountPerDay = 0f
+        }
+        if (endDate < startDate) {
+            setError()
+        } else {
+            removeError()
         }
     }
     ConstraintLayout(Modifier.fillMaxSize()) {
@@ -424,23 +428,47 @@ fun BottomSheetBudgetContent(
                 )
             }
             Spacer(Modifier.height(64.dp))
-            Box(Modifier
-                .fillMaxWidth()
-                .clickable { showDateRangePicker = !showDateRangePicker }) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .clickable {
+                        showDateRangePickerForStartDate = !showDateRangePickerForStartDate
+                    }) {
                 Row(
                     modifier
                         .padding(vertical = 16.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(Icons.Rounded.Timelapse, contentDescription = null)
+                    Icon(Icons.Rounded.Start, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        text = "To ${
-                            endDate.LongMillisToNormalLong().toLocalDate().toDateWithDayName()
+                        text = "From  -> ${startDate.toLocalDate().toDateWithDayName()}",
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                        textAlign = TextAlign.Start,
+                        style = typography.labelLarge,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+            }
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .clickable { showDateRangePickerForEndDate = !showDateRangePickerForEndDate }) {
+                Row(
+                    modifier
+                        .padding(vertical = 16.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(Icons.Rounded.StopCircle, contentDescription = null)
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        text = "To -> ${
+                            endDate.toLocalDate().toDateWithDayName()
                         } (${
                             getDayDifference(
-                                startDate.LongMillisToNormalLong().toLocalDate(),
-                                endDate.LongMillisToNormalLong().toLocalDate()
+                                startDate.toLocalDate(),
+                                endDate.toLocalDate()
                             )
                         } days)",
                         modifier = Modifier
@@ -451,9 +479,11 @@ fun BottomSheetBudgetContent(
                     )
                 }
             }
-            Box(Modifier
-                .fillMaxWidth()
-                .clickable { restDistribution = !restDistribution }) {
+
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .clickable { restDistribution = !restDistribution }) {
                 Row(
                     modifier = modifier
                         .fillMaxWidth()
@@ -461,7 +491,7 @@ fun BottomSheetBudgetContent(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Rounded.TurnRight, contentDescription = null)
+                        Icon(Icons.Rounded.Directions, contentDescription = null)
                         Spacer(Modifier.width(8.dp))
                         Text(
                             text = "Rest",
@@ -482,9 +512,10 @@ fun BottomSheetBudgetContent(
                     )
                 }
             }
-            Box(Modifier
-                .fillMaxWidth()
-                .clickable { showNotificationPicker = !showNotificationPicker }) {
+            Box(
+                Modifier
+                    .fillMaxWidth()
+                    .clickable { showNotificationPicker = !showNotificationPicker }) {
                 Row(
                     modifier = modifier
                         .fillMaxWidth()
@@ -548,6 +579,7 @@ fun BottomSheetBudgetContent(
                         totalAmountPerDay
                     )
                 },
+                enabled = !errorStatus,
                 colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.primary)
             ) {
                 Text(text = buttonTitle, color = MaterialTheme.colorScheme.onPrimary)
@@ -564,11 +596,18 @@ fun BottomSheetBudgetContent(
         )
     }
 
-    if (showDateRangePicker) {
-        DateRangePickerModal(dateRangePickerState, {
-            startDate = it.first ?: System.currentTimeMillis()
-            endDate = it.second ?: System.currentTimeMillis()
-        }) { showDateRangePicker = !showDateRangePicker }
+    if (showDateRangePickerForStartDate) {
+        DatePickerModal(startDatePickerState, {
+            startDate = it ?: System.currentTimeMillis()
+        }
+        ) { showDateRangePickerForStartDate = !showDateRangePickerForStartDate }
+    }
+    if (showDateRangePickerForEndDate) {
+        DatePickerModal(
+            endDatePickerState,
+            { endDate = it ?: System.currentTimeMillis() }) {
+            showDateRangePickerForEndDate = !showDateRangePickerForEndDate
+        }
     }
     if (showNotificationPicker) {
         NotificationPercentChooserBottomSheet(

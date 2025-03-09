@@ -61,10 +61,12 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
+import com.roaa.expensetracker.Composables.CustomFonts
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
+import com.roaa.expensetracker.Composables.StatisticsComponent.BarChartTest
 import com.roaa.expensetracker.Composables.StatisticsComponent.LineChart
 import com.roaa.expensetracker.Composables.color4
 import com.roaa.expensetracker.Composables.color8
@@ -75,14 +77,15 @@ import com.roaa.expensetracker.Composables.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.Composables.components.DropDownBankAccountOption
 import com.roaa.expensetracker.Composables.components.EditPaymentMethodBottomSheet
 import com.roaa.expensetracker.Composables.components.EmptyScreen
-import com.roaa.expensetracker.Composables.components.HomeStatCardSingleNew
 import com.roaa.expensetracker.Composables.components.SingleTransaction
 import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.orange
+import com.roaa.expensetracker.Composables.successColor
 import com.roaa.expensetracker.Composables.utils.ColorState
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.toPalette
+import com.roaa.expensetracker.Converters.TransactionConverter
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Hilt.AppViewModel
 import com.roaa.expensetracker.Model.BankAccountsClass
@@ -90,6 +93,7 @@ import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
 import com.roaa.expensetracker.Utilities.DeleteAction
+import com.roaa.expensetracker.Utilities.LongMillisToNormalLong
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBank
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyCategoryClass
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTransactionClass
@@ -97,6 +101,8 @@ import com.roaa.expensetracker.Utilities.convertDataToSeries
 import com.roaa.expensetracker.Utilities.convertTotalExpenseIncomeClassToMap
 import com.roaa.expensetracker.Utilities.getCalendarForMonthFromDate
 import com.roaa.expensetracker.Utilities.parseAmount
+import com.roaa.expensetracker.Utilities.toDisplayDate
+import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -135,7 +141,8 @@ fun PaymentMethodScreen(
     }
 
     Scaffold(topBar = {
-        TopBar(title = "Bank Accounts",
+        TopBar(
+            title = "Bank Accounts",
             showDelete = false,
             sendUserBackToPreviousActivity = { handleBackNavigation(navigationManager) },
             delete = {})
@@ -184,7 +191,8 @@ fun PaymentMethodScreen(
             { showEditBottomSheet = !showEditBottomSheet })
     }
     if (actionConfirmationFlag) {
-        ActionConfirmation(Modifier,
+        ActionConfirmation(
+            Modifier,
             bankAccountsList.size > 1,
             bankAccountsClass,
             bankAccountsList,
@@ -319,14 +327,16 @@ fun PaymentCard(
                 )
             }
 
-            Text(text = "₹${bankAccountsClass.currentAmount}",
+            Text(
+                text = "₹${bankAccountsClass.currentAmount}",
                 style = typography.headlineMedium.copy(fontFamily = numberFont),
                 modifier = Modifier.constrainAs(balanceText) {
                     top.linkTo(parent.top, margin = 24.dp)
                     start.linkTo(parent.start, margin = 24.dp)
                 })
 
-            Text(text = "Amount",
+            Text(
+                text = "Amount",
                 style = typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.60f),
                 modifier = Modifier.constrainAs(balanceLabel) {
@@ -337,7 +347,7 @@ fun PaymentCard(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.constrainAs(cardNumber) {
-                    top.linkTo(progress.bottom, margin = 24.dp)
+                    top.linkTo(balanceLabel.bottom, margin = 34.dp)
                     start.linkTo(parent.start, margin = 24.dp)
                     bottom.linkTo(parent.bottom, margin = 24.dp)
                 },
@@ -384,22 +394,22 @@ fun PaymentCard(
 
             }
 
-
-            LinearProgressIndicator(
-                progress = { Math.random().toFloat() },
-                modifier = Modifier
-                    .height(30.dp)
-                    .constrainAs(progress) {
-                        top.linkTo(balanceLabel.bottom, 20.dp)
-                        start.linkTo(parent.start, 24.dp)
-                        end.linkTo(parent.end, 24.dp)
-                        width = Dimension.fillToConstraints
-                    },
-                color = color.copy(alpha = 0.50f),
-                trackColor = color.copy(alpha = 0.10f),
-                strokeCap = StrokeCap.Round,
-                gapSize = -30.dp,
-            )
+            if (false)
+                LinearProgressIndicator(
+                    progress = { Math.random().toFloat() },
+                    modifier = Modifier
+                        .height(30.dp)
+                        .constrainAs(progress) {
+                            top.linkTo(balanceLabel.bottom, 20.dp)
+                            start.linkTo(parent.start, 24.dp)
+                            end.linkTo(parent.end, 24.dp)
+                            width = Dimension.fillToConstraints
+                        },
+                    color = color.copy(alpha = 0.50f),
+                    trackColor = color.copy(alpha = 0.10f),
+                    strokeCap = StrokeCap.Round,
+                    gapSize = -30.dp,
+                )
             Image(
                 painter = image,
                 contentDescription = "Test Image",
@@ -429,7 +439,8 @@ fun PaymentCard(
                 }
                 val colorPallet =
                     toPalette(ColorState.fromNumber(bankAccountsClass.cardColorNumber)!!)
-                if (showOptionMenu) DropDownBankAccountOption(menuExpanded = showOptionMenu,
+                if (showOptionMenu) DropDownBankAccountOption(
+                    menuExpanded = showOptionMenu,
                     colorPallet = colorPallet,
                     { showOptionMenu = false },
                     onPrimaryClicked = {
@@ -659,7 +670,8 @@ fun LivePaymentCard(
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(text = amount, style = typography.headlineMedium.copy(fontFamily = numberFont))
             }
-            Text(text = "Amount",
+            Text(
+                text = "Amount",
                 style = typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.60f),
                 modifier = Modifier.constrainAs(balanceLabel) {
@@ -765,6 +777,15 @@ fun PaymentDetailsScreen(
     ).collectAsState(
         listOf()
     )
+    val transactionsMap =
+        transactionListForBankAccount.sortedByDescending { it.transaction.date }
+            .groupBy { it.transaction.date }
+            .toSortedMap()
+
+    val transactionConverterList = transactionsMap.map {
+        TransactionConverter(it.key.toString(), it.value)
+    }.reversed()
+
     val bankAccountsList by viewModel.bankAccountsViewModel.getAllBankAccountsExceptCashCompose()
         .collectAsState(
             listOf(emptyBank)
@@ -815,7 +836,8 @@ fun PaymentDetailsScreen(
     BackHandler { handleBackNavigation(navigationManager) }
 
     Scaffold(topBar = {
-        TopBar(title = "",
+        TopBar(
+            title = "",
             showDelete = false,
             sendUserBackToPreviousActivity = { handleBackNavigation(navigationManager) },
             delete = {})
@@ -848,40 +870,33 @@ fun PaymentDetailsScreen(
                         Text(
                             modifier = modifierWithHorizontalPadding.padding(vertical = 8.dp),
                             text = "Card Statistics",
-                            style = typography.titleMedium,
+                            style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
-
-                        Card(
-                            modifier = modifierWithHorizontalPadding,
-                            shape = RoundedCornerShape(25.dp)
-                        ) {
-                            Row(
-                                Modifier
-                            ) {
-                                HomeStatCardSingleNew(
-                                    Modifier
-                                        .weight(1f)
-                                        .wrapContentHeight(),
-                                    "₹ ${parseAmount(totalExpense)}",
-                                    EXPENSE
-                                )
-                                HomeStatCardSingleNew(
-                                    Modifier
-                                        .weight(1f)
-                                        .wrapContentHeight(),
-                                    "₹ ${parseAmount(totalIncome)}",
-                                    INCOME
-                                )
-                                HomeStatCardSingleNew(
-                                    Modifier
-                                        .weight(1f)
-                                        .wrapContentHeight(),
-                                    "${transactionListForBankAccount.size}",
-                                    "Transactions"
-                                )
-                            }
-                        }
+//                        HorizontalDivider(
+//                            thickness = 0.7.dp,
+//                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+//                            modifier = Modifier
+//                                .padding()
+//                        )
+//                        Row(Modifier) {
+//                            MonthStatCard(
+//                                Modifier.weight(1f),
+//                                parseAmount(totalExpense),
+//                                "Total Expense"
+//                            )
+//                            MonthStatCard(
+//                                Modifier.weight(1f),
+//                                parseAmount(totalIncome),
+//                                "Total Income"
+//                            )
+//                        }
+//                        HorizontalDivider(
+//                            thickness = 0.7.dp,
+//                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+//                            modifier = Modifier
+//                                .padding(bottom = 8.dp)
+//                        )
                         Column(
                             Modifier.padding(horizontal = 16.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -894,29 +909,33 @@ fun PaymentDetailsScreen(
                                 )
                                 SingleInfoBox(
                                     Modifier.weight(1f),
-                                    "Maximum Spend",
-                                    "₹ 3000",
+                                    "Total Income",
+                                    "₹ ${parseAmount(totalIncome)}",
                                 )
                             }
+//                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+//                                SingleInfoBox(
+//                                    Modifier.weight(1f),
+//                                    "Minimum Spend",
+//                                    "₹ 3000",
+//                                )
+//                                SingleInfoBox(
+//                                    Modifier.weight(1f),
+//                                    "Maximum Spend",
+//                                    "₹ 3000",
+//                                )
+//                            }
                             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
                                 SingleInfoBox(
-                                    Modifier.weight(1f),
-                                    "Minimum Spend",
-                                    "₹ 3000",
-                                )
-                                SingleInfoBox(
-                                    Modifier.weight(1f),
-                                    "Maximum Spend",
-                                    "₹ 3000",
-                                )
-                            }
-                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                                SingleInfoBox(
-                                    Modifier.weight(1f),
+                                    Modifier
+                                        .weight(1f)
+                                        .clip(RoundedCornerShape(25.dp))
+                                        .clickable { },
                                     "Total Transactions",
-                                    "39",
+                                    "${transactionListForBankAccount.size}",
                                 )
                             }
+                            BarChartTest(Modifier, toPalette(orange))
                         }
                         Spacer(Modifier.height(16.dp))
                     }
@@ -930,10 +949,29 @@ fun PaymentDetailsScreen(
                             )
                         }
                     }
-                    items(transactionListForBankAccount, key = { it.transaction.id }) {
-                        SingleTransaction(it) {
-                            singleTransaction = it
-                            bottomSheet = !bottomSheet
+                    transactionConverterList.forEach { (date, transactionList) ->
+                        val date = transactionList.get(0).transaction.date
+                        val totalIncomeForDay = transactionList
+                            .filter { it.transaction.type == INCOME }
+                            .sumOf { it.transaction.amount.toDouble() }
+
+                        val totalExpenseForDay = transactionList
+                            .filter { it.transaction.type == EXPENSE }
+                            .sumOf { it.transaction.amount.toDouble() }
+
+                        item {
+                            HeaderNew(
+                                if (date == System.currentTimeMillis()
+                                        .LongMillisToNormalLong()
+                                ) "Today" else date.toLocalDate().toDisplayDate(),
+                                totalExpenseForDay, totalIncomeForDay
+                            )
+                        }
+                        items(transactionList, key = { it.transaction.id }) {
+                            SingleTransaction(it) {
+                                singleTransaction = it
+                                bottomSheet = !bottomSheet
+                            }
                         }
                     }
                 }
@@ -953,7 +991,8 @@ fun PaymentDetailsScreen(
                 { showEditBottomSheet = !showEditBottomSheet })
         }
         if (actionConfirmationFlag) {
-            ActionConfirmation(Modifier,
+            ActionConfirmation(
+                Modifier,
                 bankAccountsList.size > 1,
                 bankAccountsClass,
                 bankAccountsList,
@@ -987,6 +1026,59 @@ fun PaymentDetailsScreen(
             }
         }
     }
+}
+
+@Composable
+fun HeaderNew(date: String, totalExpenseForDay: Double, totalIncomeForDay: Double) {
+    Spacer(Modifier.height(16.dp))
+    Row(
+
+        modifier = Modifier
+            .fillMaxWidth()
+
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(Modifier.padding(12.dp)) {
+                Text(
+                    text = date,
+                    style = typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface.copy(0.6f),
+                    modifier = Modifier
+
+                )
+            }
+            Row {
+                Row {
+//                    Icon(
+//                        Icons.Rounded.ArrowDownward,
+//                        contentDescription = null,
+//                        tint = successColor
+//                    )
+                    Text(
+                        "₹ ${parseAmount(totalIncomeForDay.toFloat())}",
+                        style = typography.labelLarge.copy(fontFamily = CustomFonts.numberFont),
+                        color = successColor
+                    )
+                }
+                Spacer(Modifier.width(16.dp))
+                Row {
+//                    Icon(painterResource(R.drawable.expense_icon_new), contentDescription = null, tint = orange)
+                    Text(
+                        "₹ ${parseAmount(totalExpenseForDay.toFloat())}",
+                        style = typography.labelLarge.copy(fontFamily = CustomFonts.numberFont),
+                        color = Color.Red
+                    )
+                }
+            }
+        }
+    }
+    Spacer(Modifier.height(6.dp))
 }
 
 @Composable
