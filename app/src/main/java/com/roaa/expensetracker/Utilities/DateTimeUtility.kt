@@ -92,6 +92,11 @@ fun LocalDate.toDateWithDayName(): String {
     return "${this.format(showDateFormat)}"
 }
 
+fun LocalDate.toDayMonthFormat():String{
+    return this.format(dayMonthFormat)
+}
+
+
 fun parseAmount(amount: Float): String {
     val formatter = DecimalFormat("##,##,##,###")
     return formatter.format(amount)

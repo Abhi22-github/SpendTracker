@@ -22,19 +22,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Timelapse
-import androidx.compose.material.icons.rounded.AttachMoney
-import androidx.compose.material.icons.rounded.Notifications
-import androidx.compose.material.icons.rounded.Start
-import androidx.compose.material.icons.rounded.Stop
-import androidx.compose.material.icons.rounded.Timelapse
-import androidx.compose.material.icons.rounded.TurnRight
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
@@ -62,21 +55,23 @@ import com.roaa.expensetracker.Composables.CustomFonts
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
+import com.roaa.expensetracker.Composables.StatisticsComponent.BarChartBudgetUsage
+import com.roaa.expensetracker.Composables.StatisticsComponent.LineChartBudgetTotalUsage
+import com.roaa.expensetracker.Composables.color1
 import com.roaa.expensetracker.Composables.components.BudgetTopBar
 import com.roaa.expensetracker.Composables.components.EmptyScreen
 import com.roaa.expensetracker.Composables.components.SpendsBudgetCard
-import com.roaa.expensetracker.Composables.components.spaceHeightInDetail
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.purpleColor
 import com.roaa.expensetracker.Composables.utils.ActionTypes
-import com.roaa.expensetracker.Composables.utils.DistributionMethod
 import com.roaa.expensetracker.Composables.utils.HarmonizedColorPalette
 import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.harmonize
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import com.roaa.expensetracker.Hilt.AppViewModel
+import com.roaa.expensetracker.Model.UiDateModels.BarChartExpenseModel
 import com.roaa.expensetracker.Utilities.CalenderDayState
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.DayState
@@ -87,7 +82,7 @@ import com.roaa.expensetracker.Utilities.datesListForMonth
 import com.roaa.expensetracker.Utilities.dayNameList
 import com.roaa.expensetracker.Utilities.getDayDifference
 import com.roaa.expensetracker.Utilities.getDaysRemaining
-import com.roaa.expensetracker.Utilities.toDisplayDate
+import com.roaa.expensetracker.Utilities.toDayMonthFormat
 import com.roaa.expensetracker.Utilities.toLocalDate
 import java.time.LocalDate
 
@@ -104,11 +99,12 @@ fun BudgetScreen(
     viewModel: AppViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val getCurrentBudgetFromRoom by viewModel.budgetViewModel.getCurrentBudgetWithDetails().collectAsState(
-        BudgetWithDayDetails(
-            emptyBudgetClass, listOf(emptyBudgetDayClass)
+    val getCurrentBudgetFromRoom by viewModel.budgetViewModel.getCurrentBudgetWithDetails()
+        .collectAsState(
+            BudgetWithDayDetails(
+                emptyBudgetClass, listOf(emptyBudgetDayClass)
+            )
         )
-    )
     var getCurrentBudget by remember {
         mutableStateOf(
             BudgetWithDayDetails(
@@ -158,6 +154,23 @@ fun BudgetScreen(
                 var remainingDaysPercentage by remember { mutableStateOf(1f) }
                 val purpleColorPalette = toPalette(purpleColor)
                 val orangeColorPalette = toPalette(orange)
+
+                val barChartDataList = getCurrentBudget.budgetAllDays.map {
+                    BarChartExpenseModel(
+                        date = it.date,
+                        dayName = it.date.toLocalDate().toDayMonthFormat(),
+                        expenseAmount = it.totalExpense,
+                        incomeAmount = it.totalIncome
+                    )
+                }
+                val cumulativeBudgetList =
+                    getCurrentBudget.budgetAllDays.runningFold(0f) { sum, item -> sum + item.totalExpense }
+                        .drop(1)
+
+                val lineChartDataList = getCurrentBudget.budgetAllDays.mapIndexed { index, item ->
+                    item.date.toLocalDate().toDayMonthFormat() to
+                            cumulativeBudgetList[index]
+                }.toMap()
 
                 LaunchedEffect(getCurrentBudget, getTotalAmountForRange) {
 
@@ -291,138 +304,139 @@ fun BudgetScreen(
 
                     Spacer(Modifier.height(24.dp))
 
-                    Row(
-                        Modifier.padding(16.dp, 0.dp)
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(
-                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
-                                    shape = RoundedCornerShape(20.dp)
-                                )
-                                .padding(16.dp),
-                        ) {
-                            Spacer(Modifier.width(12.dp))
-                            Column {
-                                ValueLabelList(
-                                    modifier = Modifier,
-                                    labelAndValueStyle = typography.bodyMedium,
-                                    labelName = "Amount Per day",
-                                    labelValue = "₹ ${getCurrentBudget.budgetSummary.budgetAmountPerDay}",
-                                    iconNumber = 12,
-                                    image = Icons.Rounded.AttachMoney,
-                                )
-
-                                Spacer(Modifier.height(spaceHeightInDetail))
-                                HorizontalDivider(
-                                    color = MaterialTheme.colorScheme.surfaceContainer,
-                                    thickness = 1.dp
-                                )
-                                Spacer(Modifier.height(spaceHeightInDetail))
-
-                                ValueLabelList(
-                                    modifier = Modifier,
-                                    labelAndValueStyle = typography.bodyMedium,
-                                    labelName = "Budget Remaining",
-                                    labelValue = "₹ ${if (remainingBudget.toInt() < 0) 0 else remainingBudget}",
-                                    iconNumber = 12,
-                                    image = Icons.Rounded.AttachMoney,
-                                )
-                                Spacer(Modifier.height(spaceHeightInDetail))
-                                HorizontalDivider(
-                                    color = MaterialTheme.colorScheme.surfaceContainer,
-                                    thickness = 1.dp
-                                )
-                                Spacer(Modifier.height(spaceHeightInDetail))
-                                ValueLabelList(
-                                    modifier = Modifier,
-                                    labelAndValueStyle = typography.bodyMedium,
-                                    labelName = "Total Budget Days",
-                                    labelValue = "${getCurrentBudget.budgetSummary.budgetTotalDays} Days",
-                                    iconNumber = 12,
-                                    image = Icons.Rounded.Timelapse,
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(Modifier.height(24.dp))
-                    Row(
-                        Modifier.padding(16.dp, 0.dp)
-                    ) {
-                        Box(
-                            contentAlignment = Alignment.Center,
-                            modifier = Modifier
-                                .weight(1f)
-                                .background(
-                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
-                                    shape = RoundedCornerShape(20.dp)
-                                )
-                                .padding(16.dp),
-                        ) {
-                            Spacer(Modifier.width(12.dp))
-                            Column {
-                                ValueLabelList(
-                                    modifier = Modifier,
-                                    labelAndValueStyle = typography.bodyMedium,
-                                    labelName = "Budget Start Date",
-                                    labelValue = getCurrentBudget.budgetSummary.budgetStartDate.toLocalDate()
-                                        .toDisplayDate(),
-                                    iconNumber = 12,
-                                    image = Icons.Rounded.Start,
-                                )
-
-                                Spacer(Modifier.height(spaceHeightInDetail))
-                                HorizontalDivider(
-                                    color = MaterialTheme.colorScheme.surfaceContainer,
-                                    thickness = 1.dp
-                                )
-                                Spacer(Modifier.height(spaceHeightInDetail))
-
-                                ValueLabelList(
-                                    modifier = Modifier,
-                                    labelAndValueStyle = typography.bodyMedium,
-                                    labelName = "Budget End Date",
-                                    labelValue = getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate()
-                                        .toDisplayDate(),
-                                    iconNumber = 12,
-                                    image = Icons.Rounded.Stop,
-                                )
-
-                                Spacer(Modifier.height(spaceHeightInDetail))
-                                HorizontalDivider(
-                                    color = MaterialTheme.colorScheme.surfaceContainer,
-                                    thickness = 1.dp
-                                )
-                                Spacer(Modifier.height(spaceHeightInDetail))
-                                ValueLabelList(
-                                    modifier = Modifier,
-                                    labelAndValueStyle = typography.bodyMedium,
-                                    labelName = "Distribution Method",
-                                    labelValue = "${DistributionMethod.fromNumber(getCurrentBudget.budgetSummary.restDistributionType)}",
-                                    iconNumber = 12,
-                                    image = Icons.Rounded.TurnRight,
-                                )
-                                Spacer(Modifier.height(spaceHeightInDetail))
-                                HorizontalDivider(
-                                    color = MaterialTheme.colorScheme.surfaceContainer,
-                                    thickness = 1.dp
-                                )
-                                Spacer(Modifier.height(spaceHeightInDetail))
-                                ValueLabelList(
-                                    modifier = Modifier,
-                                    labelAndValueStyle = typography.bodyMedium,
-                                    labelName = "Usage Notification",
-                                    labelValue = "below ${getCurrentBudget.budgetSummary.notificationForBudgetUsage}%",
-                                    iconNumber = 12,
-                                    image = Icons.Rounded.Notifications,
-                                )
-
-                            }
-                        }
-                    }
+//                    Row(
+//                        Modifier.padding(16.dp, 0.dp)
+//                    ) {
+//                        Box(
+//                            contentAlignment = Alignment.Center,
+//                            modifier = Modifier
+//                                .weight(1f)
+//                                .background(
+//                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+//                                    shape = RoundedCornerShape(20.dp)
+//                                )
+//                                .padding(16.dp),
+//                        ) {
+//                            Spacer(Modifier.width(12.dp))
+//                            Column {
+//                                ValueLabelList(
+//                                    modifier = Modifier,
+//                                    labelAndValueStyle = typography.bodyMedium,
+//                                    labelName = "Amount Per day",
+//                                    labelValue = "₹ ${getCurrentBudget.budgetSummary.budgetAmountPerDay}",
+//                                    iconNumber = 12,
+//                                    image = Icons.Rounded.AttachMoney,
+//                                )
+//
+//                                Spacer(Modifier.height(spaceHeightInDetail))
+//                                HorizontalDivider(
+//                                    color = MaterialTheme.colorScheme.surfaceContainer,
+//                                    thickness = 1.dp
+//                                )
+//                                Spacer(Modifier.height(spaceHeightInDetail))
+//
+//                                ValueLabelList(
+//                                    modifier = Modifier,
+//                                    labelAndValueStyle = typography.bodyMedium,
+//                                    labelName = "Budget Remaining",
+//                                    labelValue = "₹ ${if (remainingBudget.toInt() < 0) 0 else remainingBudget}",
+//                                    iconNumber = 12,
+//                                    image = Icons.Rounded.AttachMoney,
+//                                )
+//                                Spacer(Modifier.height(spaceHeightInDetail))
+//                                HorizontalDivider(
+//                                    color = MaterialTheme.colorScheme.surfaceContainer,
+//                                    thickness = 1.dp
+//                                )
+//                                Spacer(Modifier.height(spaceHeightInDetail))
+//                                ValueLabelList(
+//                                    modifier = Modifier,
+//                                    labelAndValueStyle = typography.bodyMedium,
+//                                    labelName = "Total Budget Days",
+//                                    labelValue = "${getCurrentBudget.budgetSummary.budgetTotalDays} Days",
+//                                    iconNumber = 12,
+//                                    image = Icons.Rounded.Timelapse,
+//                                )
+//                            }
+//                        }
+//                    }
+//
+//                    Spacer(Modifier.height(24.dp))
+//                    Row(
+//                        Modifier.padding(16.dp, 0.dp)
+//                    ) {
+//                        Box(
+//                            contentAlignment = Alignment.Center,
+//                            modifier = Modifier
+//                                .weight(1f)
+//                                .background(
+//                                    color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.2f),
+//                                    shape = RoundedCornerShape(20.dp)
+//                                )
+//                                .padding(16.dp),
+//                        ) {
+//                            Spacer(Modifier.width(12.dp))
+//                            Column {
+//                                ValueLabelList(
+//                                    modifier = Modifier,
+//                                    labelAndValueStyle = typography.bodyMedium,
+//                                    labelName = "Budget Start Date",
+//                                    labelValue = getCurrentBudget.budgetSummary.budgetStartDate.toLocalDate()
+//                                        .toDisplayDate(),
+//                                    iconNumber = 12,
+//                                    image = Icons.Rounded.Start,
+//                                )
+//
+//                                Spacer(Modifier.height(spaceHeightInDetail))
+//                                HorizontalDivider(
+//                                    color = MaterialTheme.colorScheme.surfaceContainer,
+//                                    thickness = 1.dp
+//                                )
+//                                Spacer(Modifier.height(spaceHeightInDetail))
+//
+//                                ValueLabelList(
+//                                    modifier = Modifier,
+//                                    labelAndValueStyle = typography.bodyMedium,
+//                                    labelName = "Budget End Date",
+//                                    labelValue = getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate()
+//                                        .toDisplayDate(),
+//                                    iconNumber = 12,
+//                                    image = Icons.Rounded.Stop,
+//                                )
+//
+//                                Spacer(Modifier.height(spaceHeightInDetail))
+//                                HorizontalDivider(
+//                                    color = MaterialTheme.colorScheme.surfaceContainer,
+//                                    thickness = 1.dp
+//                                )
+//                                Spacer(Modifier.height(spaceHeightInDetail))
+//                                ValueLabelList(
+//                                    modifier = Modifier,
+//                                    labelAndValueStyle = typography.bodyMedium,
+//                                    labelName = "Distribution Method",
+//                                    labelValue = "${DistributionMethod.fromNumber(getCurrentBudget.budgetSummary.restDistributionType)}",
+//                                    iconNumber = 12,
+//                                    image = Icons.Rounded.TurnRight,
+//                                )
+//                                Spacer(Modifier.height(spaceHeightInDetail))
+//                                HorizontalDivider(
+//                                    color = MaterialTheme.colorScheme.surfaceContainer,
+//                                    thickness = 1.dp
+//                                )
+//                                Spacer(Modifier.height(spaceHeightInDetail))
+//                                ValueLabelList(
+//                                    modifier = Modifier,
+//                                    labelAndValueStyle = typography.bodyMedium,
+//                                    labelName = "Usage Notification",
+//                                    labelValue = "below ${getCurrentBudget.budgetSummary.notificationForBudgetUsage}%",
+//                                    iconNumber = 12,
+//                                    image = Icons.Rounded.Notifications,
+//                                )
+//
+//                            }
+//                        }
+//                    }
+                    //out of box
 //                    Box(
 //                        Modifier
 //                            .wrapContentHeight()
@@ -477,6 +491,55 @@ fun BudgetScreen(
 //                        }
 //
 //                    }
+                    Column(
+                        modifier = Modifier
+                    ) {
+                        Text(
+                            text = "Total Budget Analysis",
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "total cumulative expense by day for budget period",
+                            modifier = Modifier.padding(
+                                horizontal = 16.dp, vertical = 0.dp
+                            ),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                        )
+
+                    }
+                    LineChartBudgetTotalUsage(
+                        Modifier,
+                        toPalette(color1), lineChartDataList,
+                        getCurrentBudget.budgetSummary.totalBudgetAmount
+                    )
+                    Spacer(Modifier.height(42.dp))
+
+                    Column(
+                        modifier = Modifier
+                    ) {
+                        Text(
+                            text = "Expense Per Day Analysis",
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = "total cumulative expense by day for budget period",
+                            modifier = Modifier.padding(
+                                horizontal = 16.dp, vertical = 0.dp
+                            ),
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                        )
+
+                    }
+                    BarChartBudgetUsage(
+                        Modifier,
+                        toPalette(orange),
+                        barChartDataList,
+                        getCurrentBudget.budgetSummary.budgetAmountPerDay
+                    )
                     Spacer(Modifier.height(24.dp))
                     Row(
                         Modifier
@@ -569,7 +632,7 @@ fun SingleInfoBox(modifier: Modifier, label: String, value: String) {
                 textAlign = TextAlign.Center,
                 color = MaterialTheme.colorScheme.onSurface,
 
-            )
+                )
         }
     }
 

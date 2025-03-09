@@ -4,6 +4,7 @@ import android.text.Layout
 import android.text.Spannable
 import android.text.SpannableStringBuilder
 import android.text.style.ForegroundColorSpan
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -22,20 +23,27 @@ import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesi
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
+import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
+import com.patrykandpatrick.vico.compose.common.component.shapeComponent
 import com.patrykandpatrick.vico.compose.common.fill
+import com.patrykandpatrick.vico.compose.common.insets
 import com.patrykandpatrick.vico.compose.common.shape.dashedShape
+import com.patrykandpatrick.vico.compose.common.shape.rounded
 import com.patrykandpatrick.vico.core.cartesian.Zoom
 import com.patrykandpatrick.vico.core.cartesian.axis.BaseAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.VerticalAxis
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianChartModelProducer
+import com.patrykandpatrick.vico.core.cartesian.data.CartesianLayerRangeProvider
 import com.patrykandpatrick.vico.core.cartesian.data.CartesianValueFormatter
 import com.patrykandpatrick.vico.core.cartesian.data.columnSeries
+import com.patrykandpatrick.vico.core.cartesian.decoration.HorizontalLine
 import com.patrykandpatrick.vico.core.cartesian.layer.ColumnCartesianLayer
 import com.patrykandpatrick.vico.core.cartesian.marker.ColumnCartesianLayerMarkerTarget
 import com.patrykandpatrick.vico.core.cartesian.marker.DefaultCartesianMarker
 import com.patrykandpatrick.vico.core.common.Fill
 import com.patrykandpatrick.vico.core.common.Insets
+import com.patrykandpatrick.vico.core.common.Position
 import com.patrykandpatrick.vico.core.common.component.LineComponent
 import com.patrykandpatrick.vico.core.common.component.ShapeComponent
 import com.patrykandpatrick.vico.core.common.component.TextComponent
@@ -86,43 +94,43 @@ fun BarChart(
 
     CartesianChartHost(
         chart =
-        rememberCartesianChart(
-            rememberColumnCartesianLayer(
-                ColumnCartesianLayer.ColumnProvider.series(
-                    rememberLineComponent(
-                        fill = fill(palette.main),
-                        thickness = 24.dp,
-                        shape = CorneredShape.rounded(topLeftPercent = 60, topRightPercent = 60)
+            rememberCartesianChart(
+                rememberColumnCartesianLayer(
+                    ColumnCartesianLayer.ColumnProvider.series(
+                        rememberLineComponent(
+                            fill = fill(palette.main),
+                            thickness = 24.dp,
+                            shape = CorneredShape.rounded(topLeftPercent = 60, topRightPercent = 60)
+                        )
                     )
-                )
-            ),
-            // startAxis = VerticalAxis.rememberStart(),
-            bottomAxis = HorizontalAxis.rememberBottom(
-                guideline = LineComponent(fill = Fill.Transparent),
-                itemPlacer = remember { HorizontalAxis.ItemPlacer.segmented() },
-                valueFormatter = BottomAxisValueFormatter,
-                size = BaseAxis.Size.Auto(),
-                label = TextComponent(
-                    lineCount = 2,
-                    textAlignment = Layout.Alignment.ALIGN_CENTER,
-                    color = MaterialTheme.colorScheme.onSurface.toArgb()
                 ),
-                line = LineComponent(fill = fill(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
-            ),
-            marker = rememberDefaultCartesianMarker(
-                TextComponent(
-                    color = MaterialTheme.colorScheme.onSurface.toArgb(),
-                    padding = Insets(8f),
-                    background = ShapeComponent(
-                        fill = fill(
-                            MaterialTheme.colorScheme.surfaceContainer
-                        ),
-                        shape = CorneredShape.rounded(40)
+                // startAxis = VerticalAxis.rememberStart(),
+                bottomAxis = HorizontalAxis.rememberBottom(
+                    guideline = LineComponent(fill = Fill.Transparent),
+                    itemPlacer = remember { HorizontalAxis.ItemPlacer.segmented() },
+                    valueFormatter = BottomAxisValueFormatter,
+                    size = BaseAxis.Size.Auto(),
+                    label = TextComponent(
+                        lineCount = 2,
+                        textAlignment = Layout.Alignment.ALIGN_CENTER,
+                        color = MaterialTheme.colorScheme.onSurface.toArgb()
+                    ),
+                    line = LineComponent(fill = fill(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
+                ),
+                marker = rememberDefaultCartesianMarker(
+                    TextComponent(
+                        color = MaterialTheme.colorScheme.onSurface.toArgb(),
+                        padding = Insets(8f),
+                        background = ShapeComponent(
+                            fill = fill(
+                                MaterialTheme.colorScheme.surfaceContainer
+                            ),
+                            shape = CorneredShape.rounded(40)
+                        )
                     )
-                )
+                ),
+                layerPadding = { cartesianLayerPadding(scalableStart = 8.dp, scalableEnd = 8.dp) },
             ),
-            layerPadding = { cartesianLayerPadding(scalableStart = 8.dp, scalableEnd = 8.dp) },
-        ),
         modelProducer = modelProducer,
         modifier = modifier.height(224.dp),
         zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.x(7.0))
@@ -145,45 +153,45 @@ fun BarChartTest(
 
     CartesianChartHost(
         chart =
-        rememberCartesianChart(
-            rememberColumnCartesianLayer(
-                ColumnCartesianLayer.ColumnProvider.series(
-                    rememberLineComponent(
-                        fill = fill(palette.main),
-                        thickness = 24.dp,
-                        shape = CorneredShape.rounded(topLeftPercent = 60, topRightPercent = 60)
+            rememberCartesianChart(
+                rememberColumnCartesianLayer(
+                    ColumnCartesianLayer.ColumnProvider.series(
+                        rememberLineComponent(
+                            fill = fill(palette.main),
+                            thickness = 24.dp,
+                            shape = CorneredShape.rounded(topLeftPercent = 60, topRightPercent = 60)
+                        )
                     )
-                )
-            ),
-            startAxis = VerticalAxis.rememberStart(itemPlacer = VerticalAxis.ItemPlacer.count({ 3 })),
-            bottomAxis = HorizontalAxis.rememberBottom(
-                guideline = LineComponent(
-                    fill = fill(MaterialTheme.colorScheme.onSurface.copy(0.1f)),
-                    shape = dashedShape(gapLength = 2.dp)
                 ),
-                itemPlacer = remember { HorizontalAxis.ItemPlacer.segmented() },
-                size = BaseAxis.Size.Auto(),
-                label = TextComponent(
-                    lineCount = 2,
-                    textAlignment = Layout.Alignment.ALIGN_CENTER,
-                    color = MaterialTheme.colorScheme.onSurface.toArgb()
+                startAxis = VerticalAxis.rememberStart(itemPlacer = VerticalAxis.ItemPlacer.count({ 3 })),
+                bottomAxis = HorizontalAxis.rememberBottom(
+                    guideline = LineComponent(
+                        fill = fill(MaterialTheme.colorScheme.onSurface.copy(0.1f)),
+                        shape = dashedShape(gapLength = 2.dp)
+                    ),
+                    itemPlacer = remember { HorizontalAxis.ItemPlacer.segmented() },
+                    size = BaseAxis.Size.Auto(),
+                    label = TextComponent(
+                        lineCount = 2,
+                        textAlignment = Layout.Alignment.ALIGN_CENTER,
+                        color = MaterialTheme.colorScheme.onSurface.toArgb()
+                    ),
+                    line = LineComponent(fill = fill(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
                 ),
-                line = LineComponent(fill = fill(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
-            ),
-            marker = rememberDefaultCartesianMarker(
-                TextComponent(
-                    color = MaterialTheme.colorScheme.onSurface.toArgb(),
-                    padding = Insets(8f),
-                    background = ShapeComponent(
-                        fill = fill(
-                            MaterialTheme.colorScheme.surfaceContainer
-                        ),
-                        shape = CorneredShape.rounded(40)
+                marker = rememberDefaultCartesianMarker(
+                    TextComponent(
+                        color = MaterialTheme.colorScheme.onSurface.toArgb(),
+                        padding = Insets(8f),
+                        background = ShapeComponent(
+                            fill = fill(
+                                MaterialTheme.colorScheme.surfaceContainer
+                            ),
+                            shape = CorneredShape.rounded(40)
+                        )
                     )
-                )
+                ),
+                layerPadding = { cartesianLayerPadding(scalableStart = 8.dp, scalableEnd = 8.dp) },
             ),
-            layerPadding = { cartesianLayerPadding(scalableStart = 8.dp, scalableEnd = 8.dp) },
-        ),
         modelProducer = modelProducer,
         modifier = modifier.height(300.dp),
         zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.x(15.0))
@@ -213,52 +221,165 @@ fun BarChartStatisticsScreen(
 
     CartesianChartHost(
         chart =
-        rememberCartesianChart(
-            rememberColumnCartesianLayer(
-                ColumnCartesianLayer.ColumnProvider.series(
-                    rememberLineComponent(
-                        fill = fill(if (selectedIndex == 0) palette.main else MaterialTheme.colorScheme.primary),
-                        thickness = 24.dp,
-                        shape = CorneredShape.rounded(topLeftPercent = 60, topRightPercent = 60)
+            rememberCartesianChart(
+                rememberColumnCartesianLayer(
+                    ColumnCartesianLayer.ColumnProvider.series(
+                        rememberLineComponent(
+                            fill = fill(if (selectedIndex == 0) palette.main else MaterialTheme.colorScheme.primary),
+                            thickness = 24.dp,
+                            shape = CorneredShape.rounded(topLeftPercent = 60, topRightPercent = 60)
+                        )
                     )
-                )
-            ),
-            startAxis = VerticalAxis.rememberStart(itemPlacer = VerticalAxis.ItemPlacer.count({ 3 }), line = LineComponent(
-                fill(Color.Transparent)
-            )
-            ),
-            bottomAxis = HorizontalAxis.rememberBottom(
-                guideline = LineComponent(
-                    fill = fill(MaterialTheme.colorScheme.onSurface.copy(0.1f)),
-                    shape = dashedShape(gapLength = 2.dp)
                 ),
-                valueFormatter = BottomAxisValueFormatter,
-                itemPlacer = remember { HorizontalAxis.ItemPlacer.segmented() },
-                size = BaseAxis.Size.Auto(),
-                label = TextComponent(
-                    lineCount = 2,
-                    textAlignment = Layout.Alignment.ALIGN_CENTER,
-                    color = MaterialTheme.colorScheme.onSurface.toArgb()
-                ),
-                line = LineComponent(fill = fill(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
-            ),
-            marker = rememberDefaultCartesianMarker(
-                TextComponent(
-                    color = MaterialTheme.colorScheme.onSurface.toArgb(),
-                    padding = Insets(8f),
-                    background = ShapeComponent(
-                        fill = fill(
-                            MaterialTheme.colorScheme.surfaceContainer
-                        ),
-                        shape = CorneredShape.rounded(40)
+                startAxis = VerticalAxis.rememberStart(
+                    itemPlacer = VerticalAxis.ItemPlacer.count({ 3 }), line = LineComponent(
+                        fill(Color.Transparent)
                     )
-                )
+                ),
+                bottomAxis = HorizontalAxis.rememberBottom(
+                    guideline = LineComponent(
+                        fill = fill(MaterialTheme.colorScheme.onSurface.copy(0.1f)),
+                        shape = dashedShape(gapLength = 2.dp)
+                    ),
+                    valueFormatter = BottomAxisValueFormatter,
+                    itemPlacer = remember { HorizontalAxis.ItemPlacer.segmented() },
+                    size = BaseAxis.Size.Auto(),
+                    label = TextComponent(
+                        lineCount = 2,
+                        textAlignment = Layout.Alignment.ALIGN_CENTER,
+                        color = MaterialTheme.colorScheme.onSurface.toArgb()
+                    ),
+                    line = LineComponent(fill = fill(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
+                ),
+                marker = rememberDefaultCartesianMarker(
+                    TextComponent(
+                        color = MaterialTheme.colorScheme.onSurface.toArgb(),
+                        padding = Insets(8f),
+                        background = ShapeComponent(
+                            fill = fill(
+                                MaterialTheme.colorScheme.surfaceContainer
+                            ),
+                            shape = CorneredShape.rounded(40)
+                        )
+                    )
+                ),
+                layerPadding = { cartesianLayerPadding(scalableStart = 8.dp, scalableEnd = 8.dp) },
             ),
-            layerPadding = { cartesianLayerPadding(scalableStart = 8.dp, scalableEnd = 8.dp) },
-        ),
         modelProducer = modelProducer,
         modifier = modifier.height(300.dp),
         zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.x(9.0))
+        //scrollState = rememberVicoScrollState(scrollEnabled = false),
+    )
+}
+
+
+@Composable
+private fun rememberHorizontalLine(budgetAmount: Float,palette: HarmonizedColorPalette): HorizontalLine {
+    val fill = fill(palette.main.copy(alpha = 0.1f))
+    val line = rememberLineComponent(fill = fill(palette.main), thickness = 2.dp)
+    val labelComponent =
+        rememberTextComponent(
+            color = palette.onMain,
+            margins = insets(start = 6.dp),
+            padding = insets(start = 8.dp, end = 8.dp, bottom = 2.dp),
+            background =
+                shapeComponent(fill, CorneredShape.rounded(bottomLeft = 4.dp, bottomRight = 4.dp)),
+        )
+    return remember {
+        HorizontalLine(
+            y = { budgetAmount.toDouble() },
+            line = line,
+            labelComponent = labelComponent,
+            label = { "Daily Budget ₹$budgetAmount" },
+            verticalLabelPosition = Position.Vertical.Bottom,
+        )
+    }
+}
+
+@Composable
+fun BarChartBudgetUsage(
+    modifier: Modifier = Modifier,
+    palette: HarmonizedColorPalette,
+    chartDataList: List<BarChartExpenseModel>,
+    budgetAmount: Float
+) {
+
+    val maxY = maxOf(
+        budgetAmount * 1.2f, // Add 20% buffer above budget
+        chartDataList.maxOfOrNull { it.expenseAmount } ?: 0f
+    ).toDouble()
+
+    val modelProducer = remember { CartesianChartModelProducer() }
+    LaunchedEffect(Unit) {
+        modelProducer.runTransaction {
+            columnSeries { series(chartDataList.map { it.expenseAmount }) }
+            extras {
+                it[BottomAxisLabelKey] =
+                    chartDataList.map { it.dayName }.toList()
+            }
+        }
+    }
+
+    CartesianChartHost(
+        chart =
+            rememberCartesianChart(
+                rememberColumnCartesianLayer(
+                    ColumnCartesianLayer.ColumnProvider.series(
+                        rememberLineComponent(
+                            fill = fill(palette.container),
+                            thickness = 24.dp,
+                            shape = CorneredShape.rounded(topLeftPercent = 60, topRightPercent = 60)
+                        )
+                    ),
+                    rangeProvider = remember {
+                        CartesianLayerRangeProvider.fixed(
+                            minY = 0.0,
+                            maxY = maxY
+                        )
+                    }
+                ),
+                startAxis = VerticalAxis.rememberStart(
+                    horizontalLabelPosition = VerticalAxis.HorizontalLabelPosition.Outside,
+                    itemPlacer = remember { VerticalAxis.ItemPlacer.count({ 3 }) },
+                    size = BaseAxis.Size.Auto(),
+                    line = LineComponent(fill = fill(Color.Transparent)),
+                ),
+                bottomAxis = HorizontalAxis.rememberBottom(
+                    guideline = LineComponent(
+                        fill = fill(MaterialTheme.colorScheme.onSurface.copy(0.1f)),
+                        shape = dashedShape(gapLength = 2.dp)
+                    ),
+                    valueFormatter = BottomAxisValueFormatter,
+                    itemPlacer = remember { HorizontalAxis.ItemPlacer.segmented() },
+                    size = BaseAxis.Size.Auto(),
+                    label = TextComponent(
+                        lineCount = 2,
+                        textAlignment = Layout.Alignment.ALIGN_CENTER,
+                        color = MaterialTheme.colorScheme.onSurface.toArgb()
+                    ),
+                    line = LineComponent(fill = fill(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
+                ),
+                marker = rememberDefaultCartesianMarker(
+                    labelPosition = DefaultCartesianMarker.LabelPosition.AbovePoint,
+                    label =TextComponent(
+                        color = palette.onMain.toArgb(),
+                        padding = Insets(8f),
+                        background = ShapeComponent(
+                            fill = fill(
+                                palette.main
+                            ),
+                            shape = CorneredShape.rounded(40)
+                        )
+                    )
+                ),
+                layerPadding = { cartesianLayerPadding(scalableStart = 8.dp, scalableEnd = 8.dp) },
+                decorations = listOf(rememberHorizontalLine(budgetAmount,palette))
+            ),
+        modelProducer = modelProducer,
+        modifier = modifier
+            .height(300.dp)
+            .fillMaxWidth(),
+        zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.x(7.0))
         //scrollState = rememberVicoScrollState(scrollEnabled = false),
     )
 }
@@ -284,49 +405,50 @@ fun BarChartStatisticsScreenBanks(
 
     CartesianChartHost(
         chart =
-        rememberCartesianChart(
-            rememberColumnCartesianLayer(
-                ColumnCartesianLayer.ColumnProvider.series(
-                    rememberLineComponent(
-                        fill = fill(if (selectedIndex == 0) palette.main else MaterialTheme.colorScheme.primary),
-                        thickness = 24.dp,
-                        shape = CorneredShape.rounded(topLeftPercent = 60, topRightPercent = 60)
+            rememberCartesianChart(
+                rememberColumnCartesianLayer(
+                    ColumnCartesianLayer.ColumnProvider.series(
+                        rememberLineComponent(
+                            fill = fill(if (selectedIndex == 0) palette.main else MaterialTheme.colorScheme.primary),
+                            thickness = 24.dp,
+                            shape = CorneredShape.rounded(topLeftPercent = 60, topRightPercent = 60)
+                        )
                     )
-                )
-            ),
-            startAxis = VerticalAxis.rememberStart(itemPlacer = VerticalAxis.ItemPlacer.count({ 3 }), line = LineComponent(
-                fill(Color.Transparent)
-            )
-            ),
-            bottomAxis = HorizontalAxis.rememberBottom(
-                guideline = LineComponent(
-                    fill = fill(MaterialTheme.colorScheme.onSurface.copy(0.1f)),
-                    shape = dashedShape(gapLength = 2.dp)
                 ),
-                valueFormatter = BottomAxisValueFormatter,
-                itemPlacer = remember { HorizontalAxis.ItemPlacer.segmented() },
-                size = BaseAxis.Size.Auto(),
-                label = TextComponent(
-                    lineCount = 2,
-                    textAlignment = Layout.Alignment.ALIGN_CENTER,
-                    color = MaterialTheme.colorScheme.onSurface.toArgb()
-                ),
-                line = LineComponent(fill = fill(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
-            ),
-            marker = rememberDefaultCartesianMarker(
-                TextComponent(
-                    color = MaterialTheme.colorScheme.onSurface.toArgb(),
-                    padding = Insets(8f),
-                    background = ShapeComponent(
-                        fill = fill(
-                            MaterialTheme.colorScheme.surfaceContainer
-                        ),
-                        shape = CorneredShape.rounded(40)
+                startAxis = VerticalAxis.rememberStart(
+                    itemPlacer = VerticalAxis.ItemPlacer.count({ 3 }), line = LineComponent(
+                        fill(Color.Transparent)
                     )
-                )
+                ),
+                bottomAxis = HorizontalAxis.rememberBottom(
+                    guideline = LineComponent(
+                        fill = fill(MaterialTheme.colorScheme.onSurface.copy(0.1f)),
+                        shape = dashedShape(gapLength = 2.dp)
+                    ),
+                    valueFormatter = BottomAxisValueFormatter,
+                    itemPlacer = remember { HorizontalAxis.ItemPlacer.segmented() },
+                    size = BaseAxis.Size.Auto(),
+                    label = TextComponent(
+                        lineCount = 2,
+                        textAlignment = Layout.Alignment.ALIGN_CENTER,
+                        color = MaterialTheme.colorScheme.onSurface.toArgb()
+                    ),
+                    line = LineComponent(fill = fill(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)))
+                ),
+                marker = rememberDefaultCartesianMarker(
+                    TextComponent(
+                        color = MaterialTheme.colorScheme.onSurface.toArgb(),
+                        padding = Insets(8f),
+                        background = ShapeComponent(
+                            fill = fill(
+                                MaterialTheme.colorScheme.surfaceContainer
+                            ),
+                            shape = CorneredShape.rounded(40)
+                        )
+                    )
+                ),
+                layerPadding = { cartesianLayerPadding(scalableStart = 8.dp, scalableEnd = 8.dp) },
             ),
-            layerPadding = { cartesianLayerPadding(scalableStart = 8.dp, scalableEnd = 8.dp) },
-        ),
         modelProducer = modelProducer,
         modifier = modifier.height(300.dp),
         zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.x(9.0))
