@@ -57,7 +57,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.roaa.expensetracker.Composables.CustomFonts
 import com.roaa.expensetracker.Composables.Navigation.Destinations
@@ -77,6 +76,7 @@ import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.harmonize
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
+import com.roaa.expensetracker.Hilt.AppViewModel
 import com.roaa.expensetracker.Utilities.CalenderDayState
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.DayState
@@ -89,8 +89,6 @@ import com.roaa.expensetracker.Utilities.getDayDifference
 import com.roaa.expensetracker.Utilities.getDaysRemaining
 import com.roaa.expensetracker.Utilities.toDisplayDate
 import com.roaa.expensetracker.Utilities.toLocalDate
-import com.roaa.expensetracker.ViewModels.BudgetViewModel
-import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import java.time.LocalDate
 
 
@@ -103,11 +101,10 @@ val verticalPadding = 8.dp
 fun BudgetScreen(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
+    viewModel: AppViewModel,
     modifier: Modifier = Modifier,
-    budgetViewModel: BudgetViewModel = hiltViewModel(),
-    transactionsViewModel: TransactionsViewModel = hiltViewModel()
 ) {
-    val getCurrentBudgetFromRoom by budgetViewModel.getCurrentBudgetWithDetails().collectAsState(
+    val getCurrentBudgetFromRoom by viewModel.budgetViewModel.getCurrentBudgetWithDetails().collectAsState(
         BudgetWithDayDetails(
             emptyBudgetClass, listOf(emptyBudgetDayClass)
         )
@@ -151,7 +148,7 @@ fun BudgetScreen(
     ) {
         Column(modifier = Modifier.padding(it)) {
             if (isBudgetSet) {
-                val getTotalAmountForRange by transactionsViewModel.getTotalAmountByDateRangeCategoryTypeAndBudgetStatus(
+                val getTotalAmountForRange by viewModel.transactionsViewModel.getTotalAmountByDateRangeCategoryTypeAndBudgetStatus(
                     getCurrentBudget.budgetSummary.budgetStartDate,
                     getCurrentBudget.budgetSummary.budgetEndDate, EXPENSE, true
                 ).collectAsState(emptyTotalAmountClass)

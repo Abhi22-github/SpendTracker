@@ -27,8 +27,8 @@ import com.roaa.expensetracker.Composables.Screens.SettingsScreen
 import com.roaa.expensetracker.Composables.Screens.StatisticsScreenTest
 import com.roaa.expensetracker.Composables.Screens.TransactionDetailsScreen
 import com.roaa.expensetracker.Composables.components.TransactionsListCompose
+import com.roaa.expensetracker.Hilt.AppViewModel
 import com.roaa.expensetracker.Utilities.toLong
-import com.roaa.expensetracker.ViewModels.UiViewModel
 import java.time.LocalDate
 
 
@@ -37,7 +37,7 @@ import java.time.LocalDate
 fun RootNavGraph(
     rooNavController: NavHostController,
     navigationManager: NavigationManager,
-    uiViewModel: UiViewModel,
+    viewModel: AppViewModel,
 ) {
     SharedTransitionLayout {
         val context = LocalContext.current
@@ -50,23 +50,23 @@ fun RootNavGraph(
                 composable<Destinations.ListScreen> {
                     TransactionsListCompose(
                         navigationManager,
+                        viewModel,
                         modifier = Modifier,
                         showSingleDateTransactions = false,
                         date = LocalDate.now().toLong(),
-                        uiViewModel,
                     )
                 }
                 composable<Destinations.MonthScreen> {
                     MonthViewScreen(
                         rooNavController,
                         navigationManager,
+                        viewModel,
                         modifier = Modifier,
-                        uiViewModel
                     )
                 }
                 composable<Destinations.DayScreen> {
                     val args = it.toRoute<Destinations.DayScreen>()
-                    DayViewScreen(rooNavController, navigationManager, args.date, uiViewModel)
+                    DayViewScreen(rooNavController, navigationManager, viewModel,args.date)
                 }
             }
 
@@ -76,6 +76,7 @@ fun RootNavGraph(
                     CategoryScreen(
                         rooNavController,
                         navigationManager,
+                        viewModel,
                         sharedTransitionScope = this@SharedTransitionLayout,
                         animatedVisibilityScope = this
                     )
@@ -85,6 +86,7 @@ fun RootNavGraph(
                     AddCategory(
                         rooNavController,
                         navigationManager,
+                        viewModel,
                         args.categoryId,
                         args.categoryName,
                         args.categoryIconNumber,
@@ -99,6 +101,7 @@ fun RootNavGraph(
                     BudgetScreen(
                         rooNavController,
                         navigationManager,
+                        viewModel,
                         modifier = Modifier
                     )
                 }
@@ -107,16 +110,17 @@ fun RootNavGraph(
                     PaymentMethodScreen(
                         rooNavController,
                         navigationManager,
+                        viewModel,
                         Modifier,
-                        {}, uiViewModel
+                        {}
                     )
                 }
                 composable<Destinations.SettingScreen>() {
-                    SettingsScreen(rooNavController, navigationManager, {})
+                    SettingsScreen(rooNavController, navigationManager,viewModel, {})
                 }
 
                 composable<Destinations.StatisticsScreen>() {
-                    StatisticsScreenTest(rooNavController, navigationManager)
+                    StatisticsScreenTest(rooNavController, navigationManager,viewModel,)
                 }
             }
             composable<Destinations.DetailsScreen> {
@@ -125,9 +129,9 @@ fun RootNavGraph(
                     modifier = Modifier,
                     rooNavController,
                     navigationManager,
+                    viewModel,
                     args.amount,
                     args.categoryName,
-                    uiViewModel
                 )
             }
             composable<Destinations.BankDetailsScreen> {
@@ -135,14 +139,14 @@ fun RootNavGraph(
                 PaymentDetailsScreen(
                     rootNavController = rooNavController,
                     navigationManager = navigationManager,
+                    viewModel = viewModel,
                     modifier = Modifier,
                     bankAccountId = args.bankAccountId,
-                    uiViewModel = uiViewModel
                 )
             }
             composable<Destinations.BudgetSetupScreen> {
                 val args = it.toRoute<Destinations.BudgetSetupScreen>()
-                BudgetSetupScreen(rooNavController, navigationManager,args.type,args.budgetId)
+                BudgetSetupScreen(rooNavController, navigationManager,viewModel,args.type,args.budgetId)
             }
         }
 
@@ -154,7 +158,7 @@ fun RootNavGraph(
 fun AppNavGraph(
     rooNavController: NavHostController,
     navigationManager: NavigationManager,
-    uiViewModel: UiViewModel
+    viewModel: AppViewModel
 ) {
     SharedTransitionLayout {
         val context = LocalContext.current
@@ -167,23 +171,23 @@ fun AppNavGraph(
                 composable<Destinations.ListScreen> {
                     TransactionsListCompose(
                         navigationManager,
+                        viewModel,
                         modifier = Modifier,
                         showSingleDateTransactions = false,
                         date = LocalDate.now().toLong(),
-                        uiViewModel
                     )
                 }
                 composable<Destinations.MonthScreen> {
                     MonthViewScreen(
                         rooNavController,
                         navigationManager,
+                        viewModel,
                         modifier = Modifier,
-                        uiViewModel
                     )
                 }
                 composable<Destinations.DayScreen> {
                     val args = it.toRoute<Destinations.DayScreen>()
-                    DayViewScreen(rooNavController, navigationManager, args.date, uiViewModel)
+                    DayViewScreen(rooNavController, navigationManager, viewModel,args.date)
                 }
             }
 
@@ -193,6 +197,7 @@ fun AppNavGraph(
                     CategoryScreen(
                         rooNavController,
                         navigationManager,
+                        viewModel,
                         sharedTransitionScope = this@SharedTransitionLayout,
                         animatedVisibilityScope = this
                     )
@@ -202,6 +207,7 @@ fun AppNavGraph(
                     AddCategory(
                         rooNavController,
                         navigationManager,
+                        viewModel,
                         args.categoryId,
                         args.categoryName,
                         args.categoryIconNumber,
@@ -216,6 +222,7 @@ fun AppNavGraph(
                     BudgetScreen(
                         rooNavController,
                         navigationManager,
+                        viewModel,
                         modifier = Modifier
                     )
                 }
@@ -224,15 +231,16 @@ fun AppNavGraph(
                     PaymentMethodScreen(
                         rooNavController,
                         navigationManager,
+                        viewModel,
                         Modifier,
-                        {}, uiViewModel
+                        {}
                     )
                 }
                 composable<Destinations.SettingScreen>() {
-                    SettingsScreen(rooNavController, navigationManager, {})
+                    SettingsScreen(rooNavController, navigationManager,viewModel, {})
                 }
                 composable<Destinations.StatisticsScreen>() {
-                    StatisticsScreenTest(rooNavController, navigationManager)
+                    StatisticsScreenTest(rooNavController, navigationManager,viewModel,)
                 }
             }
             composable<Destinations.DetailsScreen> {
@@ -241,9 +249,9 @@ fun AppNavGraph(
                     modifier = Modifier,
                     rooNavController,
                     navigationManager,
+                    viewModel,
                     args.amount,
                     args.categoryName,
-                    uiViewModel
                 )
             }
             composable<Destinations.BankDetailsScreen> {
@@ -251,14 +259,14 @@ fun AppNavGraph(
                 PaymentDetailsScreen(
                     rootNavController = rooNavController,
                     navigationManager = navigationManager,
+                    viewModel = viewModel,
                     modifier = Modifier,
                     args.bankAccountId,
-                    uiViewModel = uiViewModel
                 )
             }
             composable<Destinations.BudgetSetupScreen> {
                 val args = it.toRoute<Destinations.BudgetSetupScreen>()
-                BudgetSetupScreen(rooNavController, navigationManager,args.type,args.budgetId)
+                BudgetSetupScreen(rooNavController, navigationManager,viewModel,args.type,args.budgetId)
             }
         }
 

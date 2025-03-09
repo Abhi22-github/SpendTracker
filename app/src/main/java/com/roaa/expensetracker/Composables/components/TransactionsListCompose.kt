@@ -62,7 +62,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts
 import com.roaa.expensetracker.Composables.Navigation.Destinations
@@ -78,6 +77,7 @@ import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Converters.TransactionConverter
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
+import com.roaa.expensetracker.Hilt.AppViewModel
 import com.roaa.expensetracker.Model.TransactionClass
 import com.roaa.expensetracker.Model.UiDateModels.BarChartExpenseModel
 import com.roaa.expensetracker.R
@@ -96,9 +96,6 @@ import com.roaa.expensetracker.Utilities.getFirstAndLastMonth
 import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toDisplayDate
 import com.roaa.expensetracker.Utilities.toLocalDate
-import com.roaa.expensetracker.ViewModels.PreferencesViewModel
-import com.roaa.expensetracker.ViewModels.TransactionsViewModel
-import com.roaa.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.launch
 
 
@@ -107,21 +104,19 @@ import kotlinx.coroutines.launch
 @Composable
 fun TransactionsListCompose(
     navigationManager: NavigationManager,
+    viewModel:AppViewModel,
     modifier: Modifier,
     showSingleDateTransactions: Boolean,
     date: Long,
-    uiViewModel: UiViewModel,
-    transactionViewModel: TransactionsViewModel = hiltViewModel(),
-    preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     var showAddBottomSheet by remember { mutableStateOf(false) }
-    val currentSelectedMonth by uiViewModel.selectedMonth.collectAsState()
+    val currentSelectedMonth by viewModel.uiViewModel.selectedMonth.collectAsState()
     val monthName =
         convertMonthShortToFullName(currentSelectedMonth)
     var selectedMonthString by remember { mutableStateOf(monthName) }
 
     var firstAndLastDates = getFirstAndLastMonth(currentSelectedMonth)
-    val totalAmountList by transactionViewModel.getListOfTotalAmountPerDayForRangeForCompose(
+    val totalAmountList by viewModel.transactionsViewModel.getListOfTotalAmountPerDayForRangeForCompose(
         firstAndLastDates.first,
         firstAndLastDates.second
     ).collectAsState(listOf(emptyTotalExpenseIncomeClass))
@@ -151,7 +146,7 @@ fun TransactionsListCompose(
     }
 
     var bottomSheet by remember { mutableStateOf(false) }
-    val showExperimentalComponents by preferencesViewModel.showExperimentalComponent.collectAsState(
+    val showExperimentalComponents by viewModel.preferencesViewModel.showExperimentalComponent.collectAsState(
         false
     )
     Scaffold(floatingActionButton = {
@@ -179,26 +174,26 @@ fun TransactionsListCompose(
         val greenPalette = toPalette(greenColor)
 
 
-        val selectedMonth by uiViewModel.selectedMonth.collectAsState()
+        val selectedMonth by viewModel.uiViewModel.selectedMonth.collectAsState()
         val pagerState = rememberPagerState(initialPage = 500 / 2, pageCount = { 500 })
 
         LaunchedEffect(selectedMonth) {
             val (firstDate, lastDate) = getFirstAndLastMonth(selectedMonth)
-            transactionViewModel.getTotalExpenseForRange(firstDate, lastDate)
-            transactionViewModel.getTotalIncomeForRange(firstDate, lastDate)
+            viewModel.transactionsViewModel.getTotalExpenseForRange(firstDate, lastDate)
+            viewModel.transactionsViewModel.getTotalIncomeForRange(firstDate, lastDate)
         }
 
         Column {
             if (!showSingleDateTransactions) {
                 HorizontalPager(state = pagerState, userScrollEnabled = false) {
                     val (firstDate, lastDate) = getFirstAndLastMonth(selectedMonth)
-                    val transactionListOfMonth by transactionViewModel.getTotalTransactionForPeriod(
+                    val transactionListOfMonth by viewModel.transactionsViewModel.getTotalTransactionForPeriod(
                         firstDate,
                         lastDate
                     ).collectAsState(emptyList())
 
-                    val totalExpenseForMonth by transactionViewModel.getTotalExpenseAmountForRangeFlow.collectAsState()
-                    val totalIncomeForMonth by transactionViewModel.getTotalIncomeAmountForRangeFlow.collectAsState()
+                    val totalExpenseForMonth by viewModel.transactionsViewModel.getTotalExpenseAmountForRangeFlow.collectAsState()
+                    val totalIncomeForMonth by viewModel.transactionsViewModel.getTotalIncomeAmountForRangeFlow.collectAsState()
 
                     val transactionsMap =
                         transactionListOfMonth.sortedByDescending { it.transaction.date }
@@ -239,7 +234,7 @@ fun TransactionsListCompose(
                                         SingleTransaction(item, onSingleItemClick = {
                                             singleTransaction = (item)
                                             scope.launch {
-                                                uiViewModel.transactionDetailsWithViewModelFlow.emit(
+                                                viewModel.uiViewModel.transactionDetailsWithViewModelFlow.emit(
                                                     singleTransaction
                                                 )
                                             }
@@ -261,8 +256,8 @@ fun TransactionsListCompose(
                     }
                 }
             } else {
-                transactionViewModel.getAllTransactionsForDate(date)
-                val transactionList by transactionViewModel.getAllTransactionsForDateCompose(
+                viewModel.transactionsViewModel.getAllTransactionsForDate(date)
+                val transactionList by viewModel.transactionsViewModel.getAllTransactionsForDateCompose(
                     date
                 ).collectAsState(listOf())
                 val lazyList = rememberLazyListState()
@@ -274,7 +269,7 @@ fun TransactionsListCompose(
                             SingleTransaction(item, onSingleItemClick = {
                                 singleTransaction = (item)
                                 scope.launch {
-                                    uiViewModel.transactionDetailsWithViewModelFlow.emit(
+                                    viewModel.uiViewModel.transactionDetailsWithViewModelFlow.emit(
                                         singleTransaction
                                     )
                                 }
@@ -297,11 +292,12 @@ fun TransactionsListCompose(
             if (bottomSheet) {
                 BottomSheetContentItemDetails(
                     bottomSheetState,
+                    viewModel,
                     singleTransaction,
                     { bottomSheet = !bottomSheet })
             }
             if (showAddBottomSheet) {
-                AddBottomSheet(date, { showAddBottomSheet = !showAddBottomSheet })
+                AddBottomSheet(date,viewModel, { showAddBottomSheet = !showAddBottomSheet })
             }
         }
     }
@@ -319,7 +315,7 @@ fun SingleTransaction(
 //                .constrainAs(excludeFromBudgetStatus) {
 //                    start.linkTo(parent.start, 40.dp)
 //                    bottom.linkTo(parent.bottom,20.dp)
-//                }
+//
 //                .clip(RoundedCornerShape(25.dp))
 //                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(25.dp))
 //                .zIndex(1f),

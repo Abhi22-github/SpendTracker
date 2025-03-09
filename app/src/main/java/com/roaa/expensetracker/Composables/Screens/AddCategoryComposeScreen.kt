@@ -68,7 +68,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
@@ -84,12 +83,11 @@ import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.secondaryAlpha
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
+import com.roaa.expensetracker.Hilt.AppViewModel
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
-import com.roaa.expensetracker.ViewModels.CategoryViewModel
-import com.roaa.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -99,14 +97,13 @@ import kotlinx.coroutines.launch
 fun AddCategory(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
+    viewModel: AppViewModel,
     categoryId: Long,
     categoryName: String,
     categoryIcon: Int,
     categoryType: String,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
-    uiViewModel: UiViewModel = hiltViewModel(),
-    categoryViewModel: CategoryViewModel = hiltViewModel()
 ) {
     val category = CategoryClass(categoryId, categoryName, 1, categoryIcon, categoryType, true)
     val showDeleteButton by remember { mutableStateOf(if (category.categoryId == 0L) false else true) }
@@ -143,6 +140,7 @@ fun AddCategory(
             }) { paddingValues ->
                 ScaffoldContentDetails(
                     Modifier.padding(paddingValues),
+                    viewModel,
                     category,
                     { rootNavController.onBackPressed() },
                     animatedVisibilityScope
@@ -156,7 +154,7 @@ fun AddCategory(
             ConfirmationAlertDialog(
                 onDismissRequest = { showConfirmationDialog = !showConfirmationDialog },
                 onConfirmation = {
-                    categoryViewModel.deleteCategoryFromDatabase(category)
+                    viewModel.categoryViewModel.deleteCategoryFromDatabase(category)
                     showConfirmationDialog = !showConfirmationDialog
                     rootNavController.onBackPressed()
 
@@ -171,7 +169,7 @@ fun AddCategory(
             ConfirmationAlertDialog(
                 onDismissRequest = { showConfirmationDialog = !showConfirmationDialog },
                 onConfirmation = {
-                    categoryViewModel.deleteCategoryFromDatabase(category)
+                    viewModel.categoryViewModel.deleteCategoryFromDatabase(category)
                     showConfirmationDialog = !showConfirmationDialog
                     rootNavController.onBackPressed()
                 },
@@ -188,18 +186,17 @@ fun AddCategory(
 @Composable
 fun SharedTransitionScope.ScaffoldContentDetails(
     modifier: Modifier = Modifier,
+    viewModel: AppViewModel,
     categoryClass: CategoryClass,
     backButtonClick: () -> Unit,
     animatedVisibilityScope: AnimatedContentScope,
-    uiViewModel: UiViewModel = hiltViewModel(),
-    categoryViewModel: CategoryViewModel = hiltViewModel()
 ) {
     var categoryName by remember { mutableStateOf(categoryClass.categoryName) }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    val selectedIcon by uiViewModel.selectedIconFromBottomSheet.collectAsState()
+    val selectedIcon by viewModel.uiViewModel.selectedIconFromBottomSheet.collectAsState()
     var bottomSheetStatus by remember { mutableStateOf(true) }
     var selectedIndex by remember { mutableIntStateOf(if (categoryClass.categoryType == EXPENSE) 0 else 1) }
-    val errorStatus by uiViewModel.errorStatusInAddCategory.collectAsState(false)
+    val errorStatus by viewModel.uiViewModel.errorStatusInAddCategory.collectAsState(false)
     var showConfirmationDialog by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     val containerColor by animateColorAsState(
@@ -212,9 +209,9 @@ fun SharedTransitionScope.ScaffoldContentDetails(
     LaunchedEffect(selectedIcon) {
 
         scope.launch {
-            uiViewModel.errorStatusInAddCategory.emit(false)
+            viewModel.uiViewModel.errorStatusInAddCategory.emit(false)
             if (categoryClass.categoryIconNumber != 99) {
-                uiViewModel.selectedIconFromBottomSheet.emit(categoryClass.categoryIconNumber)
+                viewModel.uiViewModel.selectedIconFromBottomSheet.emit(categoryClass.categoryIconNumber)
             }
         }
 
@@ -294,7 +291,7 @@ fun SharedTransitionScope.ScaffoldContentDetails(
                 onValueChange = { newText ->
                     categoryName = newText
                     scope.launch {
-                        uiViewModel.errorStatusInAddCategory.emit(false)
+                       viewModel.uiViewModel.errorStatusInAddCategory.emit(false)
                     }
                 },
                 singleLine = true,
@@ -335,13 +332,13 @@ fun SharedTransitionScope.ScaffoldContentDetails(
                 onClick = {
                     scope.launch {
                         if (categoryName.isEmpty()) {
-                            uiViewModel.errorStatusInAddCategory.emit(true)
-                            uiViewModel.errorStatusMessage.emit("Please provide the category name")
+                            viewModel.uiViewModel.errorStatusInAddCategory.emit(true)
+                            viewModel.uiViewModel.setErrorMessage("Please provide the category name")
                             return@launch
                         }
                         if (selectedIcon == 99) {
-                            uiViewModel.errorStatusInAddCategory.emit(true)
-                            uiViewModel.errorStatusMessage.emit("Please select icon for Category")
+                            viewModel.uiViewModel.errorStatusInAddCategory.emit(true)
+                            viewModel.uiViewModel.setErrorMessage("Please select icon for Category")
                             return@launch
                         }
                         if (categoryClass.categoryId != 0L) {
@@ -354,7 +351,7 @@ fun SharedTransitionScope.ScaffoldContentDetails(
                                 selectedIcon,
                                 selectedIndex,
                                 scope,
-                                categoryViewModel,
+                                viewModel,
                                 backButtonClick = { backButtonClick() }
                             )
                         }
@@ -373,7 +370,7 @@ fun SharedTransitionScope.ScaffoldContentDetails(
     }
 
     if (bottomSheetStatus) {
-        BottomSheetIconPicker(bottomSheetState) {
+        BottomSheetIconPicker(bottomSheetState,viewModel) {
             bottomSheetStatus = !bottomSheetStatus
         }
     }
@@ -387,7 +384,7 @@ fun SharedTransitionScope.ScaffoldContentDetails(
                     selectedIcon,
                     selectedIndex,
                     scope,
-                    categoryViewModel,
+                    viewModel,
                     backButtonClick = { backButtonClick() }
                 )
             },
@@ -405,11 +402,11 @@ fun storeCategoryData(
     selectedIcon: Int,
     selectedType: Int,
     scope: CoroutineScope,
-    categoryViewModel: CategoryViewModel,
+    viewModel: AppViewModel,
     backButtonClick: () -> Unit = {}
 ) {
     scope.launch {
-        categoryViewModel.validateCategoryData(
+        viewModel.categoryViewModel.validateCategoryData(
             categoryId,
             categoryName,
             selectedIcon,

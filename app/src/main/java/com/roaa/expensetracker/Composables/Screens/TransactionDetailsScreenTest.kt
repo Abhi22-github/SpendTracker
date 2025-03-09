@@ -73,7 +73,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
@@ -91,13 +90,11 @@ import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.secondaryAlpha
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.toPalette
+import com.roaa.expensetracker.Hilt.AppViewModel
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.Utilities.toLocalDate
-import com.roaa.expensetracker.ViewModels.CategoryViewModel
-import com.roaa.expensetracker.ViewModels.TransactionsViewModel
-import com.roaa.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -107,13 +104,11 @@ fun TransactionDetailsScreen(
     modifier: Modifier = Modifier,
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
+    viewModel: AppViewModel,
     amount: Float,
     categoryName1: String,
-    uiViewModel: UiViewModel,
-    categoryViewModel: CategoryViewModel = hiltViewModel(),
-    transactionsViewModel: TransactionsViewModel = hiltViewModel()
 ) {
-    val singleTransaction by uiViewModel.transactionDetailsWithViewModelFlow.collectAsState()
+    val singleTransaction by viewModel.uiViewModel.transactionDetailsWithViewModelFlow.collectAsState()
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var showEdit by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
@@ -205,7 +200,7 @@ fun TransactionDetailsScreen(
                     Spacer(Modifier.height(24.dp))
 
                     var categoryMenuExpanded by remember { mutableStateOf(false) }
-                    val categoryList by categoryViewModel.allCategoryList.collectAsState()
+                    val categoryList by viewModel.categoryViewModel.allCategoryList.collectAsState()
 //                var selectedCategory by remember {
 //                    mutableStateOf(
 //                        firstSampleClass.apply {
@@ -389,7 +384,7 @@ fun TransactionDetailsScreen(
                                             singleTransaction.transaction.let {
                                                 val temp =
                                                     it.copy(includeInRespectiveBudget = !excludeTransactionFromBudget)
-                                                transactionsViewModel.updateForBudgetSwitchDataInDatabase(
+                                                viewModel.transactionsViewModel.updateForBudgetSwitchDataInDatabase(
                                                     temp
                                                 )
                                             }
@@ -422,7 +417,7 @@ fun TransactionDetailsScreen(
             onDismissRequest = { showDeleteConfirmation = false },
             onConfirmation = {
                 scope.launch {
-                    transactionsViewModel.deleteSingleTransaction(singleTransaction.transaction)
+                    viewModel.transactionsViewModel.deleteSingleTransaction(singleTransaction.transaction)
                     showDeleteConfirmation = false
                     rootNavController.onBackPressed()
                 }
@@ -435,6 +430,7 @@ fun TransactionDetailsScreen(
     AnimatedVisibility(showEdit) {
 
         EditBottomSheet(
+            viewModel,
             singleTransaction,
             closeBottomSheet = {
                 showEdit = !showEdit

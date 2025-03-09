@@ -58,7 +58,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
@@ -85,6 +84,7 @@ import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
+import com.roaa.expensetracker.Hilt.AppViewModel
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
@@ -98,10 +98,6 @@ import com.roaa.expensetracker.Utilities.convertTotalExpenseIncomeClassToMap
 import com.roaa.expensetracker.Utilities.getCalendarForMonthFromDate
 import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toLong
-import com.roaa.expensetracker.ViewModels.BankAccountsViewModel
-import com.roaa.expensetracker.ViewModels.PreferencesViewModel
-import com.roaa.expensetracker.ViewModels.TransactionsViewModel
-import com.roaa.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -110,16 +106,13 @@ import java.time.LocalDate
 fun PaymentMethodScreen(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
+    viewModel: AppViewModel,
     modifier: Modifier = Modifier,
     sendUserBack: () -> Unit,
-    uiViewModel: UiViewModel,
-    bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
-    preferencesViewModel: PreferencesViewModel = hiltViewModel(),
-    transactionViewModel: TransactionsViewModel = hiltViewModel()
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     var showEditBottomSheet by remember { mutableStateOf(false) }
-    val bankAccountsList by bankAccountsViewModel.getAllBankAccountsExceptCashCompose()
+    val bankAccountsList by viewModel.bankAccountsViewModel.getAllBankAccountsExceptCashCompose()
         .collectAsState(
             listOf(emptyBank)
         )
@@ -165,7 +158,7 @@ fun PaymentMethodScreen(
             ) {
                 LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     items(bankAccountsList) {
-                        PaymentCard(Modifier, it, { bankAccounts ->
+                        PaymentCard(Modifier,viewModel, it, { bankAccounts ->
                             bankAccountsClass = bankAccounts
                             showEditBottomSheet = !showEditBottomSheet
                         }, { bankAccount ->
@@ -182,10 +175,11 @@ fun PaymentMethodScreen(
         }
     }
     if (showBottomSheet) {
-        AddPaymentMethodBottomSheet({ showBottomSheet = !showBottomSheet })
+        AddPaymentMethodBottomSheet(viewModel = viewModel,{ showBottomSheet = !showBottomSheet })
     }
     if (showEditBottomSheet) {
         EditPaymentMethodBottomSheet(
+            viewModel,
             bankAccountsClass,
             { showEditBottomSheet = !showEditBottomSheet })
     }
@@ -198,20 +192,20 @@ fun PaymentMethodScreen(
                 when (action) {
                     DeleteAction.DELETE_BANK_ACCOUNT -> {
                         scope.launch {
-                            bankAccountsViewModel.storeBankAccount(bankAccountsClass.apply {
+                            viewModel.bankAccountsViewModel.storeBankAccount(bankAccountsClass.apply {
                                 this.isActive = false
                             })
                         }
                     }
 
                     DeleteAction.DELETE_AND_MIGRATE -> {
-                        bankAccountsViewModel.migrateTransactions(
+                        viewModel.bankAccountsViewModel.migrateTransactions(
                             bankAccountsClass, targetBankAccountClass
                         )
                     }
 
                     DeleteAction.DELETE_ALL -> {
-                        bankAccountsViewModel.deleteBankAccountWithTransactions(bankAccountsClass)
+                        viewModel.bankAccountsViewModel.deleteBankAccountWithTransactions(bankAccountsClass)
                     }
 
                 }
@@ -227,13 +221,11 @@ fun PaymentMethodScreen(
 @Composable
 fun PaymentCard(
     modifier: Modifier,
+    viewModel: AppViewModel,
     bankAccountsClass: BankAccountsClass,
     editClicked: (bankAccountsClass: BankAccountsClass) -> Unit,
     deleteClicked: (bankAccountClass: BankAccountsClass) -> Unit,
     onSingleItemClick: (bankAccountsClass: BankAccountsClass) -> Unit,
-    uiViewModel: UiViewModel = hiltViewModel(),
-    bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
-    preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val color = ColorState.fromNumber(bankAccountsClass.cardColorNumber)!!
     val scope = rememberCoroutineScope()
@@ -442,11 +434,11 @@ fun PaymentCard(
                     { showOptionMenu = false },
                     onPrimaryClicked = {
                         scope.launch {
-                            preferencesViewModel.setPrimaryAccountNumber(
+                            viewModel.preferencesViewModel.setPrimaryAccountNumber(
                                 bankAccountsClass.bankAccountId
                             )
                         }
-                        scope.launch { preferencesViewModel.setPrimaryAccount(bankAccountsClass) }
+                        scope.launch { viewModel.preferencesViewModel.setPrimaryAccount(bankAccountsClass) }
                         showOptionMenu = false
                     },
                     editClicked = {
@@ -463,7 +455,7 @@ fun PaymentCard(
     if (showConfirmationDeleteDialog) ConfirmationAlertDialog(
         onDismissRequest = { showConfirmationDeleteDialog = !showConfirmationDeleteDialog },
         onConfirmation = {
-            bankAccountsViewModel.deleteBankAccount(bankAccountsClass)
+            viewModel.bankAccountsViewModel.deleteBankAccount(bankAccountsClass)
             showConfirmationDeleteDialog = !showConfirmationDeleteDialog
         },
         dialogTitle = "Confirm Delete?",
@@ -752,16 +744,13 @@ fun LivePaymentCard(
 fun PaymentDetailsScreen(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
+    viewModel: AppViewModel,
     modifier: Modifier = Modifier,
     bankAccountId: Long,
-    uiViewModel: UiViewModel,
-    bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
-    transactionViewModel: TransactionsViewModel = hiltViewModel(),
-    preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
-    val bankAccount by bankAccountsViewModel.getSingleBankAccountForCompose(bankAccountId)
+    val bankAccount by viewModel.bankAccountsViewModel.getSingleBankAccountForCompose(bankAccountId)
         .collectAsState(emptyBank)
-    val showExperimentalComponent by preferencesViewModel.showExperimentalComponent.collectAsState(
+    val showExperimentalComponent by viewModel.preferencesViewModel.showExperimentalComponent.collectAsState(
         false
     )
     var showEditBottomSheet by remember { mutableStateOf(false) }
@@ -771,12 +760,12 @@ fun PaymentDetailsScreen(
             emptyBank
         )
     }
-    val transactionListForBankAccount by transactionViewModel.getTransactionsListForBankAccountId(
+    val transactionListForBankAccount by viewModel.transactionsViewModel.getTransactionsListForBankAccountId(
         bankAccountId
     ).collectAsState(
         listOf()
     )
-    val bankAccountsList by bankAccountsViewModel.getAllBankAccountsExceptCashCompose()
+    val bankAccountsList by viewModel.bankAccountsViewModel.getAllBankAccountsExceptCashCompose()
         .collectAsState(
             listOf(emptyBank)
         )
@@ -787,7 +776,7 @@ fun PaymentDetailsScreen(
     }
 
 
-    val totalExpenseListFromRoom by transactionViewModel.getListOfTotalAmountPerDayForRangeForComposeForBankAccountId(
+    val totalExpenseListFromRoom by viewModel.transactionsViewModel.getListOfTotalAmountPerDayForRangeForComposeForBankAccountId(
         allDays[0].toLong(),
         allDays[41].toLong(),
         bankAccountId
@@ -841,7 +830,8 @@ fun PaymentDetailsScreen(
 
                 LazyColumn {
                     item {
-                        PaymentCard(modifier = modifierWithHorizontalPadding,
+                        PaymentCard(
+                            modifier = modifierWithHorizontalPadding,
                             bankAccountsClass = bankAccount,
                             editClicked = { bankAccounts ->
                                 bankAccountsClass = bankAccounts
@@ -851,12 +841,14 @@ fun PaymentDetailsScreen(
                                 actionConfirmationFlag = true
                                 bankAccountsClass = bankAccount
                             },
-                            onSingleItemClick = {})
+                            onSingleItemClick = {},
+                            viewModel = viewModel
+                        )
                         Spacer(Modifier.height(16.dp))
                         Text(
                             modifier = modifierWithHorizontalPadding.padding(vertical = 8.dp),
                             text = "Card Statistics",
-                            style = MaterialTheme.typography.titleMedium,
+                            style = typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
 
@@ -933,7 +925,7 @@ fun PaymentDetailsScreen(
                             Text(
                                 modifier = modifierWithHorizontalPadding.padding(vertical = 8.dp),
                                 text = "Transactions",
-                                style = MaterialTheme.typography.titleMedium,
+                                style = typography.titleMedium,
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
@@ -950,11 +942,13 @@ fun PaymentDetailsScreen(
         if (bottomSheet) {
             BottomSheetContentItemDetails(
                 bottomSheetState,
+                viewModel,
                 singleTransaction,
                 { bottomSheet = !bottomSheet })
         }
         if (showEditBottomSheet) {
             EditPaymentMethodBottomSheet(
+                viewModel,
                 bankAccountsClass,
                 { showEditBottomSheet = !showEditBottomSheet })
         }
@@ -967,20 +961,20 @@ fun PaymentDetailsScreen(
                     when (action) {
                         DeleteAction.DELETE_BANK_ACCOUNT -> {
                             scope.launch {
-                                bankAccountsViewModel.storeBankAccount(bankAccountsClass.apply {
+                                viewModel.bankAccountsViewModel.storeBankAccount(bankAccountsClass.apply {
                                     this.isActive = false
                                 })
                             }
                         }
 
                         DeleteAction.DELETE_AND_MIGRATE -> {
-                            bankAccountsViewModel.migrateTransactions(
+                            viewModel.bankAccountsViewModel.migrateTransactions(
                                 bankAccountsClass, targetBankAccountClass
                             )
                         }
 
                         DeleteAction.DELETE_ALL -> {
-                            bankAccountsViewModel.deleteBankAccountWithTransactions(
+                            viewModel.bankAccountsViewModel.deleteBankAccountWithTransactions(
                                 bankAccountsClass
                             )
                         }
@@ -1020,12 +1014,12 @@ fun StatisticsCardForCardStats(
         Column(Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.titleLarge,
+                style = typography.titleLarge,
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 text = subTitle,
-                style = MaterialTheme.typography.labelLarge,
+                style = typography.labelLarge,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
             )
             Spacer(Modifier.height(8.dp))

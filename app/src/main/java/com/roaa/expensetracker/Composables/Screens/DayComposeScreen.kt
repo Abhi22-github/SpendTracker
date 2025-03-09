@@ -64,7 +64,6 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
@@ -79,6 +78,7 @@ import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.harmonize
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
+import com.roaa.expensetracker.Hilt.AppViewModel
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
@@ -90,10 +90,6 @@ import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
-import com.roaa.expensetracker.ViewModels.AnimationViewModel
-import com.roaa.expensetracker.ViewModels.BudgetViewModel
-import com.roaa.expensetracker.ViewModels.TransactionsViewModel
-import com.roaa.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -102,17 +98,14 @@ fun DayScreen(
     navigationManager: NavigationManager,
     showSingleDateTransactions: Boolean,
     date: Long,
-    uiViewModel: UiViewModel,
-    animationViewModel: AnimationViewModel = hiltViewModel(),
-    transactionsViewModel: TransactionsViewModel = hiltViewModel(),
-    budgetViewModel: BudgetViewModel = hiltViewModel()
+    viewModel: AppViewModel,
 ) {
     val scope = rememberCoroutineScope()
     LaunchedEffect(true) {
-        scope.launch { uiViewModel.selectedMonth.emit(currentMonth) }
+        scope.launch { viewModel.uiViewModel.selectedMonth.emit(currentMonth) }
     }
     Column {
-        TransactionsListCompose(navigationManager, Modifier, true, date, uiViewModel)
+        TransactionsListCompose(navigationManager,viewModel, Modifier, true, date )
     }
 }
 
@@ -122,11 +115,9 @@ fun DayScreen(
 fun DayViewScreen(
     navController: NavController,
     navigationManager: NavigationManager,
+    viewModel: AppViewModel,
     date: Long,
-    uiViewModel: UiViewModel,
     modifier: Modifier = Modifier,
-    transactionViewModel: TransactionsViewModel = hiltViewModel(),
-    budgetViewModel: BudgetViewModel = hiltViewModel()
 ) {
     val pagerState = rememberPagerState(initialPage = 500 / 2, pageCount = { 500 })
 
@@ -167,7 +158,7 @@ fun DayViewScreen(
 
     //vars
     var currentDay by remember { mutableStateOf(LocalDate.now()) }
-    val getCurrentBudgetFromRoom by budgetViewModel.getCurrentBudgetWithDetails()
+    val getCurrentBudgetFromRoom by viewModel.budgetViewModel.getCurrentBudgetWithDetails()
         .collectAsState(
             BudgetWithDayDetails(
                 emptyBudgetClass, listOf(emptyBudgetDayClass)
@@ -180,13 +171,13 @@ fun DayViewScreen(
             )
         )
     }
-    val getTotalExpenseAmountForDate by transactionViewModel.getTotalExpenseAmountForDateCompose(
+    val getTotalExpenseAmountForDate by viewModel.transactionsViewModel.getTotalExpenseAmountForDateCompose(
         currentDay.toLong()
     ).collectAsState(0f)
-    val getTotalIncomeAmountForDate by transactionViewModel.getTotalIncomeAmountForDateCompose(
+    val getTotalIncomeAmountForDate by viewModel.transactionsViewModel.getTotalIncomeAmountForDateCompose(
         currentDay.toLong()
     ).collectAsState(0f)
-    val getTotalAmountForDateExcludingLast by transactionViewModel.getTotalExpenseAmountForDateExcludingLastCompose(
+    val getTotalAmountForDateExcludingLast by viewModel.transactionsViewModel.getTotalExpenseAmountForDateExcludingLastCompose(
         currentDay.toLong()
     ).collectAsState(0f)
     var isBudgetSet by remember { mutableStateOf(false) }
@@ -275,7 +266,7 @@ fun DayViewScreen(
                     navigationManager,
                     false,
                     selectedDay.toLong(),
-                    uiViewModel
+                    viewModel
                 )
             }
         }

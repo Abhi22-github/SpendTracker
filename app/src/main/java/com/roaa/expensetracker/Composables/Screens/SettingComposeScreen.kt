@@ -10,7 +10,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButtonColors
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -25,16 +24,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
 import com.roaa.expensetracker.Composables.ThemeMode
 import com.roaa.expensetracker.Composables.components.SingleItemRadioButton
 import com.roaa.expensetracker.Composables.components.TopBar
-import com.roaa.expensetracker.ViewModels.PreferencesViewModel
+import com.roaa.expensetracker.Hilt.AppViewModel
 import kotlinx.coroutines.launch
 
 val radioButtonColors
@@ -51,8 +48,8 @@ val radioButtonColors
 fun SettingsScreen(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
+    viewModel: AppViewModel,
     sendUserBack: () -> Unit,
-    preferenceViewModel: PreferencesViewModel = hiltViewModel()
 ) {
 
     BackHandler() {
@@ -66,7 +63,7 @@ fun SettingsScreen(
                 delete = {})
         },
     ) {
-        SettingsScreenContent(Modifier.padding(it))
+        SettingsScreenContent(Modifier.padding(it),viewModel)
     }
 }
 
@@ -77,10 +74,10 @@ val topBottomPadding = 0.dp
 @Composable
 fun SettingsScreenContent(
     modifier: Modifier = Modifier,
-    preferenceViewModel: PreferencesViewModel = hiltViewModel()
+    viewModel: AppViewModel
 ) {
-    val themeSelected by preferenceViewModel.getThemeMode.collectAsState(ThemeMode.SYSTEM.toString())
-    val showExperimentalComponent by preferenceViewModel.showExperimentalComponent.collectAsState(false)
+    val themeSelected by viewModel.preferencesViewModel.getThemeMode.collectAsState(ThemeMode.SYSTEM.toString())
+    val showExperimentalComponent by viewModel.preferencesViewModel.showExperimentalComponent.collectAsState(false)
     val sheetState = rememberModalBottomSheetState()
     var bottomSheet by remember { mutableStateOf(false) }
     val list = listOf("LIGHT", "NIGHT", "SYSTEM")
@@ -107,7 +104,7 @@ fun SettingsScreenContent(
                 list.map {
                     SingleItemRadioButton(
                         it,
-                        selectedItem = { preferenceViewModel.saveTheme(it) },
+                        selectedItem = { viewModel.preferencesViewModel.saveTheme(it) },
                         themeSelected
                     )
                 }
@@ -132,7 +129,7 @@ fun SettingsScreenContent(
                     checked = showExperimentalComponent,
                     onCheckedChange = {
                         scope.launch {
-                            preferenceViewModel.setExperimentalComponentsState(it)
+                            viewModel.preferencesViewModel.setExperimentalComponentsState(it)
                         }
                     },
                     modifier = Modifier
@@ -147,20 +144,20 @@ fun SettingsScreenContent(
     }
 }
 
-@Composable
-@Preview
-fun SettingsScreenManagePreview() {
-    Surface {
-        SettingsScreenContent()
-    }
-}
-
-@Composable
-@Preview
-fun SettingsScreenCreatePreview() {
-    Surface {
-        SettingsScreenContent()
-    }
-}
+//@Composable
+//@Preview
+//fun SettingsScreenManagePreview() {
+//    Surface {
+//        SettingsScreenContent()
+//    }
+//}
+//
+//@Composable
+//@Preview
+//fun SettingsScreenCreatePreview() {
+//    Surface {
+//        SettingsScreenContent()
+//    }
+//}
 
 

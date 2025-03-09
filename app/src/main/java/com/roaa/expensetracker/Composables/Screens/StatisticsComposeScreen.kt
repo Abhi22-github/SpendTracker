@@ -79,7 +79,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.aay.compose.donutChart.model.PieChartData
@@ -109,6 +108,7 @@ import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
+import com.roaa.expensetracker.Hilt.AppViewModel
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
@@ -130,9 +130,6 @@ import com.roaa.expensetracker.Utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.Utilities.toLongMillis
-import com.roaa.expensetracker.ViewModels.BankAccountsViewModel
-import com.roaa.expensetracker.ViewModels.TransactionsViewModel
-import com.roaa.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
@@ -516,8 +513,7 @@ private fun CategoryStatEntryPreview() {
 fun StatisticsScreenTest(
     navHostController: NavHostController,
     navigationManager: NavigationManager,
-    transactionsViewModel: TransactionsViewModel = hiltViewModel(),
-    bankAccountsViewModel: BankAccountsViewModel = hiltViewModel()
+    viewModel: AppViewModel,
 ) {
     val options = listOf("Expense", "Income")
     var selectedIndex by remember { mutableIntStateOf(0) }
@@ -529,14 +525,14 @@ fun StatisticsScreenTest(
     var showCategoryAnalysisBottomSheet by remember { mutableStateOf(false) }
 
     //Flows
-    val transactionsForTimePeriodFromRoom by transactionsViewModel.getTotalTransactionForPeriod(
+    val transactionsForTimePeriodFromRoom by viewModel.transactionsViewModel.getTotalTransactionForPeriod(
         startDate, endDate
     ).collectAsState(
         listOf(emptyTransactionWithDetailsClass)
     )
-    val bankAccountList by bankAccountsViewModel.allBankAccountList.collectAsState()
+    val bankAccountList by viewModel.bankAccountsViewModel.allBankAccountList.collectAsState()
     var selectedBankAccountClass by remember { mutableStateOf(emptyBank) }
-    val totalAmountListForTimePeriodFromRoom by transactionsViewModel.getListOfTotalAmountPerDayForRangeForCompose(
+    val totalAmountListForTimePeriodFromRoom by viewModel.transactionsViewModel.getListOfTotalAmountPerDayForRangeForCompose(
         startDate, endDate
     ).collectAsState(listOf(emptyTotalExpenseIncomeClass))
 
@@ -880,6 +876,7 @@ fun StatisticsScreenTest(
     if (showFilterBottomSheet) {
         FilterBottomSheet(
             Modifier,
+            viewModel,
             { showFilterBottomSheet = !showFilterBottomSheet },
             bankAccountList,
             { startDateFinal, endDateFinal, DurationFinal, bankAccountClassFinal ->
@@ -1004,10 +1001,10 @@ fun CategoryStatEntryTest(
 @Composable
 fun FilterBottomSheet(
     modifier: Modifier = Modifier,
+    viewModel: AppViewModel,
     closeBottomSheet: () -> Unit,
     bankAccountList: List<BankAccountsClass>,
     saveButtonClicked: (Long, Long, Long, BankAccountsClass) -> Unit,
-    uiViewModel: UiViewModel = hiltViewModel()
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var selectedBankAccount by remember { mutableStateOf(bankAccountList.get(0)) }
@@ -1021,17 +1018,17 @@ fun FilterBottomSheet(
             )
         )
     }
-    val showErrorStatus by uiViewModel.errorStatusInStatisticsFilter.collectAsState(false)
+    val showErrorStatus by viewModel.uiViewModel.errorStatusInStatisticsFilter.collectAsState(false)
     val scope = rememberCoroutineScope()
 
     LaunchedEffect(startDate, endDate) {
         if (endDate < startDate) {
             scope.launch {
-                uiViewModel.errorStatusInStatisticsFilter.emit(true)
-                uiViewModel.errorStatusMessage.emit("End Date should be greater than Start Date")
+                viewModel.uiViewModel.errorStatusInStatisticsFilter.emit(true)
+                viewModel.uiViewModel.setErrorMessage("End Date should be greater than Start Date")
             }
         } else {
-            uiViewModel.errorStatusInStatisticsFilter.emit(false)
+            viewModel.uiViewModel.errorStatusInStatisticsFilter.emit(false)
         }
         selectedDuration = getDayDifference(startDate.toLocalDate(), endDate.toLocalDate())
     }

@@ -22,9 +22,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import com.roaa.expensetracker.Composables.utils.HarmonizedColorPalette
-import com.roaa.expensetracker.ViewModels.AnimationViewModel
 import com.roaa.expensetracker.ViewModels.DaileBudgetState
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -32,7 +30,6 @@ import com.roaa.expensetracker.ViewModels.DaileBudgetState
 fun StatusLabel(
     harmonizedColor: HarmonizedColorPalette,
     budgetState: DaileBudgetState,
-    animationViewModel: AnimationViewModel = hiltViewModel()
 ) {
     val textColor = LocalContentColor.current
 

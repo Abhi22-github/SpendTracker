@@ -42,7 +42,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
@@ -55,9 +54,9 @@ import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
+import com.roaa.expensetracker.Hilt.AppViewModel
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
-import com.roaa.expensetracker.ViewModels.CategoryViewModel
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -65,6 +64,7 @@ import com.roaa.expensetracker.ViewModels.CategoryViewModel
 fun CategoryScreen(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
+    viewModel:AppViewModel,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
 ) {
@@ -88,6 +88,7 @@ fun CategoryScreen(
                     ScaffoldContent(
                         Modifier.padding(paddingValues),
                         navigationManager,
+                        viewModel,
                         sharedTransitionScope,
                         animatedVisibilityScope
                     )
@@ -120,12 +121,12 @@ fun CategoryScreen(
 fun SharedTransitionScope.ScaffoldContent(
     modifier: Modifier = Modifier,
     navigationManager: NavigationManager,
+    viewModel: AppViewModel,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
-    categoryViewModel: CategoryViewModel = hiltViewModel()
 ) {
-    val allExpenseCategory by categoryViewModel.onlyExpenseCategoryNames.collectAsStateWithLifecycle()
-    val allIncomeCategory by categoryViewModel.onlyIncomeCategoryNames.collectAsStateWithLifecycle()
+    val allExpenseCategory by viewModel.categoryViewModel.onlyExpenseCategoryNames.collectAsStateWithLifecycle()
+    val allIncomeCategory by viewModel.categoryViewModel.onlyIncomeCategoryNames.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
 
     Column(

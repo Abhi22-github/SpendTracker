@@ -89,6 +89,7 @@ import com.roaa.expensetracker.Composables.Navigation.RootNavGraph
 import com.roaa.expensetracker.Composables.Navigation.navigateToWithSingleTop
 import com.roaa.expensetracker.Composables.Screens.MonthChip
 import com.roaa.expensetracker.Composables.syncTheme
+import com.roaa.expensetracker.Hilt.AppViewModel
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.convertToWholeMonthName
 import com.roaa.expensetracker.Utilities.currentDay
@@ -98,13 +99,13 @@ import com.roaa.expensetracker.Utilities.getPreviousAndNext500Months
 import com.roaa.expensetracker.Utilities.lockScreenOrientation
 import com.roaa.expensetracker.Utilities.section1Items
 import com.roaa.expensetracker.Utilities.section2Items
-import com.roaa.expensetracker.ViewModels.UiViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 val LocalWindowSize = compositionLocalOf { WindowWidthSizeClass.Compact }
 val LocalWindowInsets = compositionLocalOf { PaddingValues(0.dp) }
+val LocalErrorMessage = compositionLocalOf { mutableStateOf<String>("") }
 
 @AndroidEntryPoint
 class ComposeMainActivity : ComponentActivity() {
@@ -120,6 +121,16 @@ class ComposeMainActivity : ComponentActivity() {
             val localContext = LocalContext.current
             val rootNavController = rememberNavController()
             val navigationManager = remember { NavigationManager(rootNavController) }
+            val appViewModels: AppViewModel = AppViewModel(
+                transactionsViewModel = hiltViewModel(),
+                categoryViewModel = hiltViewModel(),
+                preferencesViewModel = hiltViewModel(),
+                uiViewModel = hiltViewModel(),
+                budgetViewModel = hiltViewModel(),
+                budgetDayViewModel = hiltViewModel(),
+                bankAccountsViewModel = hiltViewModel(),
+                animationViewModel = hiltViewModel()
+            )
             LaunchedEffect(Unit) {
                 syncTheme(localContext)
                 // App ready for work
@@ -136,14 +147,16 @@ class ComposeMainActivity : ComponentActivity() {
                 .systemBars
                 .asPaddingValues()
 
+            val errorMessage = remember { mutableStateOf<String>("") }
 
             if (isReady.value) {
                 ExpenseTrackerTheme {
                     CompositionLocalProvider(
                         LocalWindowSize provides widthSizeClass,
                         LocalWindowInsets provides windowInsets,
+                        LocalErrorMessage provides errorMessage
                     ) {
-                        NavigationDrawer(rootNavController, navigationManager, Modifier)
+                        NavigationDrawer(rootNavController, navigationManager, appViewModels)
                         LaunchedEffect(Unit) {
                             // App rendered and splash screen can be hidden
                             isDone.value = true
@@ -161,8 +174,7 @@ class ComposeMainActivity : ComponentActivity() {
 fun NavigationDrawer(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
-    modifier: Modifier,
-    uiViewModel: UiViewModel = hiltViewModel()
+    appViewModels: AppViewModel
 ) {
 
     val section1 = section1Items
@@ -198,7 +210,7 @@ fun NavigationDrawer(
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val showMonthFilterChips by uiViewModel.showMonthFilterChips.collectAsState()
+    val showMonthFilterChips by appViewModels.uiViewModel.showMonthFilterChips.collectAsState()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -317,14 +329,14 @@ fun NavigationDrawer(
         val currentYear = currentYear
         val lazyMonthListState = rememberLazyListState()
         val monthList = getPreviousAndNext500Months(LocalDate.now())
-        val selectedMonth by uiViewModel.selectedMonth.collectAsState()
+        val selectedMonth by appViewModels.uiViewModel.selectedMonth.collectAsState()
         LaunchedEffect(true) {
             lazyMonthListState.scrollToItem(250)
         }
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
         CompositionLocalProvider() {
             if (!showAppBar) {
-                AppNavGraph(rootNavController, navigationManager, uiViewModel)
+                AppNavGraph(rootNavController, navigationManager, appViewModels)
             } else {
                 Scaffold(
                     modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -336,7 +348,9 @@ fun NavigationDrawer(
                                     TextButton(
                                         onClick = {
                                             scope.launch {
-                                                uiViewModel.showMonthFilterChips.emit(!showMonthFilterChips)
+                                                appViewModels.uiViewModel.showMonthFilterChips.emit(
+                                                    !showMonthFilterChips
+                                                )
                                             }
                                         },
                                         colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.onSurface)
@@ -376,7 +390,9 @@ fun NavigationDrawer(
                                             .clickable {
                                                 scope.launch {
                                                     lazyMonthListState.animateScrollToItem(250)
-                                                    uiViewModel.selectedMonth.emit(currentMonth)
+                                                    appViewModels.uiViewModel.selectedMonth.emit(
+                                                        currentMonth
+                                                    )
                                                 }
                                             },
                                     ) {
@@ -409,7 +425,7 @@ fun NavigationDrawer(
                                             selectedMonth,
                                             {
                                                 scope.launch {
-                                                    uiViewModel.selectedMonth.emit(it)
+                                                    appViewModels.uiViewModel.selectedMonth.emit(it)
                                                 }
                                             })
                                     }
@@ -419,7 +435,7 @@ fun NavigationDrawer(
                     },
                 ) { innerPadding ->
                     Column(Modifier.padding(innerPadding)) {
-                        RootNavGraph(rootNavController, navigationManager, uiViewModel)
+                        RootNavGraph(rootNavController, navigationManager, appViewModels)
                     }
 
                 }

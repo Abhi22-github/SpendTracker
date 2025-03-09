@@ -112,7 +112,6 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.Screens.LivePaymentCard
@@ -132,6 +131,7 @@ import com.roaa.expensetracker.Composables.utils.distributionChoiceList
 import com.roaa.expensetracker.Composables.utils.iconsList
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
+import com.roaa.expensetracker.Hilt.AppViewModel
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Model.TransactionTypeClass
@@ -141,6 +141,7 @@ import com.roaa.expensetracker.Utilities.Constants.INCOME
 import com.roaa.expensetracker.Utilities.Constants.INSERT
 import com.roaa.expensetracker.Utilities.Constants.UPDATE
 import com.roaa.expensetracker.Utilities.DecimalFilterTransformation
+import com.roaa.expensetracker.Utilities.ErrorManager
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBank
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyCategoryClass
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTransactionClass
@@ -151,12 +152,6 @@ import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLongMillis
-import com.roaa.expensetracker.ViewModels.AnimationViewModel
-import com.roaa.expensetracker.ViewModels.BankAccountsViewModel
-import com.roaa.expensetracker.ViewModels.CategoryViewModel
-import com.roaa.expensetracker.ViewModels.PreferencesViewModel
-import com.roaa.expensetracker.ViewModels.TransactionsViewModel
-import com.roaa.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.take
@@ -165,34 +160,41 @@ import kotlinx.coroutines.launch
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun BottomSheetContentAddItem(
-    date: Long, sheetState: SheetState, closeBottomSheet: () -> Unit
+    date: Long, sheetState: SheetState, viewModel: AppViewModel, closeBottomSheet: () -> Unit
 ) {
-    ModalBottomSheet(onDismissRequest = {
-        closeBottomSheet()
-    },
+    ModalBottomSheet(
+        onDismissRequest = {
+            closeBottomSheet()
+        },
         sheetState = sheetState,
         modifier = Modifier
             .imePadding()
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
-        BottomSheetContentItemAddContent(modifier = Modifier, date, closeBottomSheet)
+        BottomSheetContentItemAddContent(
+            modifier = Modifier,
+            viewModel = viewModel,
+            date,
+            closeBottomSheet
+        )
     }
 }
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun BottomSheetContentEdit(
-    singleTransaction: TransactionWithDetails, sheetState: SheetState, closeBottomSheet: () -> Unit
+    singleTransaction: TransactionWithDetails, sheetState: SheetState,viewModel: AppViewModel, closeBottomSheet: () -> Unit
 ) {
-    ModalBottomSheet(onDismissRequest = {
-        closeBottomSheet()
-    },
+    ModalBottomSheet(
+        onDismissRequest = {
+            closeBottomSheet()
+        },
         sheetState = sheetState,
         modifier = Modifier
             .imePadding()
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
-        BottomSheetContentItemEditContent(modifier = Modifier, singleTransaction, closeBottomSheet)
+        BottomSheetContentItemEditContent(modifier = Modifier, viewModel = viewModel,singleTransaction, closeBottomSheet)
     }
 }
 
@@ -204,14 +206,10 @@ val bottomSheetTopBottomPadding = 0.dp
 @Composable
 fun BottomSheetContentItemAddContent(
     modifier: Modifier,
+    viewModel: AppViewModel,
     date: Long,
     closeBottomSheet: () -> Unit,
-    categoryViewModel: CategoryViewModel = hiltViewModel(),
-    transactionsViewModel: TransactionsViewModel = hiltViewModel(),
-    uiViewModel: UiViewModel = hiltViewModel(),
-    animationViewModel: AnimationViewModel = hiltViewModel(),
-    preferencesViewModel: PreferencesViewModel = hiltViewModel()
-) {
+    ) {
     val scope = rememberCoroutineScope()
     var categoryMenuExpanded by remember { mutableStateOf(false) }
     var expenseValue by remember { mutableStateOf(TextFieldValue("")) }
@@ -219,7 +217,7 @@ fun BottomSheetContentItemAddContent(
     var selectedDate by remember { mutableStateOf<Long?>(date) }
     var selectedPaymentMethod by remember { mutableStateOf<BankAccountsClass>(emptyBank) }
     val focusRequester = remember { FocusRequester() }
-    val categoryList by categoryViewModel.categoryList.collectAsState()
+    val categoryList by viewModel.categoryViewModel.categoryList.collectAsState()
     var selectedCategory by remember {
         mutableStateOf(
             firstSampleClass
@@ -230,7 +228,7 @@ fun BottomSheetContentItemAddContent(
     val incomeType = TransactionTypeClass(2, INCOME)
 
 
-    val errorStatus by uiViewModel.errorStatusInAddBottomSheet.collectAsState(false)
+    val errorStatus by viewModel.uiViewModel.errorStatusInAddBottomSheet.collectAsState(false)
 
 
     //animations
@@ -252,9 +250,9 @@ fun BottomSheetContentItemAddContent(
     LaunchedEffect(Unit) {
         // Request focus for the TextField
         focusRequester.requestFocus()
-        categoryViewModel.getCorrespondingList(selectedType)
-        categoryViewModel.getOnlyExpenseCategoryNames()
-        categoryViewModel.getOnlyIncomeCategoryNames()
+        viewModel.categoryViewModel.getCorrespondingList(selectedType)
+        viewModel.categoryViewModel.getOnlyExpenseCategoryNames()
+        viewModel.categoryViewModel.getOnlyIncomeCategoryNames()
     }
 
 //    LaunchedEffect( typeToggle) {
@@ -263,8 +261,8 @@ fun BottomSheetContentItemAddContent(
 //            expanded = false
 //        }
 //    }
-    val budget by preferencesViewModel.getTotalAmountPerDay.collectAsState(1f)
-    val oldAmount by transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
+    val budget by viewModel.preferencesViewModel.getTotalAmountPerDay.collectAsState(1f)
+    val oldAmount by viewModel.transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
     val newAmountTemp = if (expenseValue.text.isEmpty()) 0L else extractNumbers(expenseValue.text)
     val newDailyBudget = oldAmount + newAmountTemp
     val amountInString = String.format("%.2f", newDailyBudget.toFloat())
@@ -273,11 +271,11 @@ fun BottomSheetContentItemAddContent(
     } else {
         0f
     }
-    animationViewModel.method("₹$amountInString", percent)
+    viewModel.animationViewModel.method("₹$amountInString", percent)
 
     LaunchedEffect(percent) {
         scope.launch {
-            animationViewModel.newSpentPercentage.emit(percent)
+            viewModel.animationViewModel.newSpentPercentage.emit(percent)
         }
     }
 
@@ -297,7 +295,8 @@ fun BottomSheetContentItemAddContent(
             Spacer(Modifier.height(16.dp))
             Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
 
-                Box(contentAlignment = Alignment.Center,
+                Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .fillMaxWidth(0.35f)
                         .background(
@@ -306,7 +305,7 @@ fun BottomSheetContentItemAddContent(
                         .clip(RoundedCornerShape(30.dp))
                         .clickable {
                             typeToggle = !typeToggle
-                            categoryViewModel.getCorrespondingList(if (typeToggle) expenseType.type else incomeType.type)
+                            viewModel.categoryViewModel.getCorrespondingList(if (typeToggle) expenseType.type else incomeType.type)
                             selectedCategory = firstSampleClass
                         }
                         .height(56.dp)) {
@@ -378,7 +377,7 @@ fun BottomSheetContentItemAddContent(
                         selectedCategorySetter = {
                             selectedCategory = it
                             scope.launch {
-                                uiViewModel.errorStatusInAddBottomSheet.emit(false)
+                                viewModel.uiViewModel.errorStatusInAddBottomSheet.emit(false)
                             }
                         },
                     )
@@ -408,7 +407,7 @@ fun BottomSheetContentItemAddContent(
                             }
                         }
                         scope.launch {
-                            uiViewModel.errorStatusInAddBottomSheet.emit(false)
+                            viewModel.uiViewModel.errorStatusInAddBottomSheet.emit(false)
                         }
                     },
                     modifier = Modifier
@@ -457,7 +456,7 @@ fun BottomSheetContentItemAddContent(
                             comment = newValue
                         }
                         scope.launch {
-                            uiViewModel.errorStatusInAddBottomSheet.emit(false)
+                            viewModel.uiViewModel.errorStatusInAddBottomSheet.emit(false)
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -547,6 +546,7 @@ fun BottomSheetContentItemAddContent(
         Row {
             BottomRow(
                 modifier,
+                viewModel,
                 selectedDate,
                 { selectedDate = it },
                 { selectedPaymentMethod = it },
@@ -573,8 +573,7 @@ fun BottomSheetContentItemAddContent(
                         selectedDate,
                         selectedPaymentMethod,
                         scope,
-                        uiViewModel,
-                        transactionsViewModel,
+                        viewModel
                     )
                 }, Modifier
                     .fillMaxWidth()
@@ -592,13 +591,9 @@ fun BottomSheetContentItemAddContent(
 @Composable
 fun BottomSheetContentItemEditContent(
     modifier: Modifier,
+    viewModel: AppViewModel,
     singleTransaction: TransactionWithDetails,
     closeBottomSheet: () -> Unit,
-    categoryViewModel: CategoryViewModel = hiltViewModel(),
-    transactionsViewModel: TransactionsViewModel = hiltViewModel(),
-    uiViewModel: UiViewModel = hiltViewModel(),
-    animationViewModel: AnimationViewModel = hiltViewModel(),
-    preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
     var categoryMenuExpanded by remember { mutableStateOf(false) }
@@ -607,7 +602,7 @@ fun BottomSheetContentItemEditContent(
     var selectedDate by remember { mutableStateOf<Long?>(singleTransaction.transaction.date) }
     var selectedPaymentMethod by remember { mutableStateOf<BankAccountsClass>(singleTransaction.BankAccount) }
     val focusRequester = remember { FocusRequester() }
-    val categoryList by categoryViewModel.categoryList.collectAsState()
+    val categoryList by viewModel.categoryViewModel.categoryList.collectAsState()
     var selectedCategory by remember {
         mutableStateOf(
             singleTransaction.category
@@ -618,7 +613,7 @@ fun BottomSheetContentItemEditContent(
     val incomeType = TransactionTypeClass(2, INCOME)
 
 
-    val errorStatus by uiViewModel.errorStatusInAddBottomSheet.collectAsState(false)
+    val errorStatus by viewModel.uiViewModel.errorStatusInAddBottomSheet.collectAsState(false)
 
 
     //animations
@@ -646,9 +641,9 @@ fun BottomSheetContentItemEditContent(
     LaunchedEffect(Unit) {
         // Request focus for the TextField
         focusRequester.requestFocus()
-        categoryViewModel.getCorrespondingList(selectedType)
-        categoryViewModel.getOnlyExpenseCategoryNames()
-        categoryViewModel.getOnlyIncomeCategoryNames()
+        viewModel.categoryViewModel.getCorrespondingList(selectedType)
+        viewModel.categoryViewModel.getOnlyExpenseCategoryNames()
+        viewModel.categoryViewModel.getOnlyIncomeCategoryNames()
     }
 
     LaunchedEffect(expanded, typeToggle) {
@@ -657,8 +652,8 @@ fun BottomSheetContentItemEditContent(
             expanded = false
         }
     }
-    val budget by preferencesViewModel.getTotalAmountPerDay.collectAsState(1f)
-    val oldAmount by transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
+    val budget by viewModel.preferencesViewModel.getTotalAmountPerDay.collectAsState(1f)
+    val oldAmount by viewModel.transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
     val newAmountTemp = if (expenseValue.text.isEmpty()) 0L else extractNumbers(expenseValue.text)
     val newDailyBudget = oldAmount + newAmountTemp
     val amountInString = String.format("%.2f", newDailyBudget.toFloat())
@@ -667,11 +662,11 @@ fun BottomSheetContentItemEditContent(
     } else {
         0f
     }
-    animationViewModel.method("₹$amountInString", percent)
+    viewModel.animationViewModel.method("₹$amountInString", percent)
 
     LaunchedEffect(percent) {
         scope.launch {
-            animationViewModel.newSpentPercentage.emit(percent)
+            viewModel.animationViewModel.newSpentPercentage.emit(percent)
         }
     }
 
@@ -691,7 +686,8 @@ fun BottomSheetContentItemEditContent(
             Spacer(Modifier.height(16.dp))
             Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
 
-                Box(contentAlignment = Alignment.Center,
+                Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .width(boxSize)
                         .background(
@@ -703,7 +699,7 @@ fun BottomSheetContentItemEditContent(
                                 expanded = !expanded
                             } else {
                                 typeToggle = !typeToggle
-                                categoryViewModel.getCorrespondingList(if (typeToggle) expenseType.type else incomeType.type)
+                                viewModel.categoryViewModel.getCorrespondingList(if (typeToggle) expenseType.type else incomeType.type)
                                 selectedCategory = firstSampleClass
                             }
                         }
@@ -778,7 +774,7 @@ fun BottomSheetContentItemEditContent(
                         selectedCategorySetter = {
                             selectedCategory = it
                             scope.launch {
-                                uiViewModel.errorStatusInAddBottomSheet.emit(false)
+                                viewModel.uiViewModel.errorStatusInAddBottomSheet.emit(false)
                             }
                         },
                     )
@@ -808,7 +804,7 @@ fun BottomSheetContentItemEditContent(
                             }
                         }
                         scope.launch {
-                            uiViewModel.errorStatusInAddBottomSheet.emit(false)
+                            viewModel.uiViewModel.errorStatusInAddBottomSheet.emit(false)
                         }
                     },
                     modifier = Modifier
@@ -857,7 +853,7 @@ fun BottomSheetContentItemEditContent(
                             comment = newValue
                         }
                         scope.launch {
-                            uiViewModel.errorStatusInAddBottomSheet.emit(false)
+                            viewModel.uiViewModel.errorStatusInAddBottomSheet.emit(false)
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -946,6 +942,7 @@ fun BottomSheetContentItemEditContent(
         Row {
             BottomRow(
                 modifier,
+                viewModel,
                 selectedDate,
                 { selectedDate = it },
                 { selectedPaymentMethod = it },
@@ -970,8 +967,7 @@ fun BottomSheetContentItemEditContent(
                         selectedDate,
                         selectedPaymentMethod,
                         scope,
-                        uiViewModel,
-                        transactionsViewModel,
+                       viewModel,
                     )
                 }, Modifier
                     .fillMaxWidth()
@@ -996,34 +992,33 @@ fun validateTransactionData(
     selectedDate: Long?,
     selectedPaymentMethod: BankAccountsClass,
     scope: CoroutineScope,
-    uiViewModel: UiViewModel,
-    transactionsViewModel: TransactionsViewModel
+    viewModel: AppViewModel,
 ) {
 
     scope.launch {
         if (selectedCategory.categoryName == "Select Category") {
-            uiViewModel.errorStatusInAddBottomSheet.emit(true)
-            uiViewModel.errorStatusMessage.emit("Please select a category")
+            viewModel.uiViewModel.errorStatusInAddBottomSheet.emit(true)
+            viewModel.uiViewModel.setErrorMessage("Please select a category")
             return@launch
         }
         if (amount == "0" || amount.isEmpty()) {
-            uiViewModel.errorStatusInAddBottomSheet.emit(true)
-            uiViewModel.errorStatusMessage.emit("Please enter amount")
+            viewModel.uiViewModel.errorStatusInAddBottomSheet.emit(true)
+            viewModel.uiViewModel.setErrorMessage("Please enter amount")
             return@launch
         }
         if (comment.isEmpty()) {
-            uiViewModel.errorStatusInAddBottomSheet.emit(true)
-            uiViewModel.errorStatusMessage.emit("Please provide some comment")
+            viewModel.uiViewModel.errorStatusInAddBottomSheet.emit(true)
+            viewModel.uiViewModel.setErrorMessage("Please provide some comment")
             return@launch
         }
-        if (actionType == INSERT) transactionsViewModel.validateAndPrepareTransactionData(
+        if (actionType == INSERT) viewModel.transactionsViewModel.validateAndPrepareTransactionData(
             type,
             selectedCategory.categoryId,
             amount,
             comment,
             selectedDate,
             selectedPaymentMethod.bankAccountId
-        ) else transactionsViewModel.updateFormDataInDatabase(singleTransaction.transaction.also {
+        ) else viewModel.transactionsViewModel.updateFormDataInDatabase(singleTransaction.transaction.also {
             it.type = type
             selectedDate?.let { date -> it.date = date }
             it.amount = amount.toFloat()
@@ -1041,30 +1036,28 @@ fun validateTransactionData(
 @Composable
 fun BottomRow(
     modifier: Modifier,
+    viewModel: AppViewModel,
     selectedDate: Long?,
     selectedDateSetter: (Long?) -> Unit,
     selectedPaymentMethodSetter: (BankAccountsClass) -> Unit,
-    uiViewModel: UiViewModel = hiltViewModel(),
-    bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
-    preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = selectedDate?.toLocalDate()?.toLongMillis()
     )
-    val bankAccountsList by bankAccountsViewModel.allBankAccountList.collectAsState()
+    val bankAccountsList by viewModel.bankAccountsViewModel.allBankAccountList.collectAsState()
 
     val colorPalletBlue = toPalette(blueColor)
     val scope = rememberCoroutineScope()
 
-    val primaryBankAccount by preferencesViewModel.getPrimaryAccount.collectAsState(
+    val primaryBankAccount by viewModel.preferencesViewModel.getPrimaryAccount.collectAsState(
         emptyBank
     )
     var selectedBankAccount by remember {
         mutableStateOf(emptyBank)
     }
     LaunchedEffect(primaryBankAccount) {
-        preferencesViewModel.getPrimaryAccount.take(1).collect { data ->
+        viewModel.preferencesViewModel.getPrimaryAccount.take(1).collect { data ->
             selectedBankAccount = data
         }
         selectedPaymentMethodSetter(selectedBankAccount)
@@ -1131,7 +1124,8 @@ fun BottomRow(
                     Text(text = selectedBankAccount.bankName)
                 }
 
-                DropDownMenuForBankAccounts(bankAccountMenuExpanded,
+                DropDownMenuForBankAccounts(
+                    bankAccountMenuExpanded,
                     colorPalletBlue,
                     onDismiss = { bankAccountMenuExpanded = false },
                     bankAccountsList,
@@ -1139,7 +1133,7 @@ fun BottomRow(
                         selectedBankAccount = it
                         selectedPaymentMethodSetter(selectedBankAccount)
                         scope.launch {
-                            uiViewModel.errorStatusInAddBottomSheet.emit(false)
+                            viewModel.uiViewModel.errorStatusInAddBottomSheet.emit(false)
                         }
                     })
             }
@@ -1158,9 +1152,8 @@ fun BottomRow(
 @Composable
 fun AddBottomSheet(
     date: Long,
+    viewModel: AppViewModel,
     closeBottomSheet: () -> Unit,
-    transactionsViewModel: TransactionsViewModel = hiltViewModel(),
-    preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     BoxWithConstraints {
         val contentHeight = constraints.maxHeight.toFloat()
@@ -1187,12 +1180,13 @@ fun AddBottomSheet(
         val bottomSheetStateTest = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         val scope = rememberCoroutineScope()
 
-        if (true) BottomSheetContentAddItem(date, bottomSheetState) {
+        if (true) BottomSheetContentAddItem(date, bottomSheetState, viewModel) {
             scope.launch {
                 closeBottomSheet()
             }
         } else BottomSheetContentAddItemTest(
             bottomSheetStateTest,
+            viewModel,
             localDensity,
             internalKeyboardHeight,
         ) {
@@ -1206,13 +1200,14 @@ fun AddBottomSheet(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditBottomSheet(
+    viewModel: AppViewModel,
     singleTransaction: TransactionWithDetails,
     closeBottomSheet: () -> Unit,
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
 
-    BottomSheetContentEdit(singleTransaction, bottomSheetState) {
+    BottomSheetContentEdit(singleTransaction, bottomSheetState, viewModel) {
         scope.launch {
             closeBottomSheet()
         }
@@ -1226,21 +1221,22 @@ fun EditBottomSheet(
 @OptIn(ExperimentalMaterial3Api::class)
 fun BottomSheetContentItemDetails(
     sheetState: SheetState,
+    viewModel: AppViewModel,
     singleTransaction: TransactionWithDetails,
     closeBottomSheet: () -> Unit,
-    uiViewModel: UiViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
-    ModalBottomSheet(onDismissRequest = {
-        closeBottomSheet()
-    },
+    ModalBottomSheet(
+        onDismissRequest = {
+            closeBottomSheet()
+        },
         sheetState = sheetState,
         modifier = Modifier
             .imePadding()
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
         BottomSheetContentItemDetailsContent(
-            modifier = Modifier, sheetState, closeBottomSheet, singleTransaction, uiViewModel
+            modifier = Modifier, sheetState, viewModel ,closeBottomSheet, singleTransaction
         )
     }
 }
@@ -1254,10 +1250,9 @@ val spaceHeightInDetail = 10.dp
 fun BottomSheetContentItemDetailsContent(
     modifier: Modifier,
     sheetState: SheetState,
+    viewModel: AppViewModel,
     closeBottomSheet: () -> Unit,
     singleTransaction: TransactionWithDetails,
-    uiViewModel: UiViewModel,
-    transactionsViewModel: TransactionsViewModel = hiltViewModel()
 ) {
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var showEdit by remember { mutableStateOf(false) }
@@ -1439,7 +1434,7 @@ fun BottomSheetContentItemDetailsContent(
                 onDismissRequest = { showDeleteConfirmation = false },
                 onConfirmation = {
                     scope.launch {
-                        transactionsViewModel.deleteSingleTransaction(singleTransaction.transaction)
+                        viewModel.transactionsViewModel.deleteSingleTransaction(singleTransaction.transaction)
                         showDeleteConfirmation = false
                         closeBottomSheet()
                     }
@@ -1452,6 +1447,7 @@ fun BottomSheetContentItemDetailsContent(
         AnimatedVisibility(showEdit) {
 
             EditBottomSheet(
+                viewModel ,
                 singleTransaction,
                 closeBottomSheet = {
                     showEdit = !showEdit
@@ -1468,7 +1464,7 @@ fun BottomSheetContentItemDetailsContent(
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun BottomSheetIconPicker(
-    sheetState: SheetState, closeBottomSheet: () -> Unit
+    sheetState: SheetState,viewModel: AppViewModel, closeBottomSheet: () -> Unit
 ) {
     ModalBottomSheet(
         onDismissRequest = {
@@ -1479,13 +1475,13 @@ fun BottomSheetIconPicker(
         contentWindowInsets = { WindowInsets.ime },
         scrimColor = Color.Transparent
     ) {
-        BottomSheetContentIconPicker(modifier = Modifier)
+        BottomSheetContentIconPicker(modifier = Modifier, viewModel)
     }
 }
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
-fun BottomSheetContentIconPicker(modifier: Modifier = Modifier) {
+fun BottomSheetContentIconPicker(modifier: Modifier = Modifier,viewModel: AppViewModel) {
     BoxWithConstraints(Modifier.padding(horizontal = 8.dp)) {
         val width = maxWidth / 7
         Column(
@@ -1512,7 +1508,7 @@ fun BottomSheetContentIconPicker(modifier: Modifier = Modifier) {
                 // contentPadding = PaddingValues(16.dp) // Optional padding for content
             ) {
                 items(items) { item ->
-                    SingleIcon(item, width)
+                    SingleIcon(item, width, viewModel)
                 }
 
             }
@@ -1521,7 +1517,7 @@ fun BottomSheetContentIconPicker(modifier: Modifier = Modifier) {
 }
 
 @Composable
-fun SingleIcon(item: Int, width: Dp, uiViewModel: UiViewModel = hiltViewModel()) {
+fun SingleIcon(item: Int, width: Dp, viewModel: AppViewModel) {
     val scope = rememberCoroutineScope()
     Surface(
         shape = CircleShape,
@@ -1529,7 +1525,7 @@ fun SingleIcon(item: Int, width: Dp, uiViewModel: UiViewModel = hiltViewModel())
             .fillMaxSize()
             .aspectRatio(1f)
             .clip(shape = RoundedCornerShape(50))
-            .clickable { scope.launch { uiViewModel.selectedIconFromBottomSheet.emit(item) } },
+            .clickable { scope.launch { viewModel.uiViewModel.selectedIconFromBottomSheet.emit(item) } },
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Box(
@@ -1546,46 +1542,46 @@ fun SingleIcon(item: Int, width: Dp, uiViewModel: UiViewModel = hiltViewModel())
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddPaymentMethodBottomSheet(
+    viewModel: AppViewModel,
     closeBottomSheet: () -> Unit,
-    uiViewModel: UiViewModel = hiltViewModel(),
-    bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
-    preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
-    val showExperimentalComponent by preferencesViewModel.showExperimentalComponent.collectAsState(
+    val showExperimentalComponent by viewModel.preferencesViewModel.showExperimentalComponent.collectAsState(
         false
     )
-    val showError by uiViewModel.errorStatusInBankAccountAdd.collectAsState()
+    val showError by viewModel.uiViewModel.errorStatusInBankAccountAdd.collectAsState()
 
-    ModalBottomSheet(onDismissRequest = {
-        closeBottomSheet()
-    },
+    ModalBottomSheet(
+        onDismissRequest = {
+            closeBottomSheet()
+        },
         sheetState = bottomSheetState,
         modifier = Modifier
             .imePadding()
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
 
-        BottomSheetContentPaymentMethodAddContentNew(Modifier
-            .padding(16.dp, 0.dp),
+        BottomSheetContentPaymentMethodAddContentNew(
+            Modifier
+                .padding(16.dp, 0.dp),
             showError,
             showExperimentalComponent,
-            { scope.launch { uiViewModel.errorStatusInBankAccountAdd.emit(false) } },
+            { scope.launch { viewModel.uiViewModel.errorStatusInBankAccountAdd.emit(false) } },
             { bankName, amount, selectedColor ->
                 scope.launch {
                     if (amount.isEmpty()) {
-                        uiViewModel.errorStatusMessage.emit("Please enter bank amount")
-                        uiViewModel.errorStatusInBankAccountAdd.emit(true)
+                        viewModel.uiViewModel.setErrorMessage("Please enter bank amount")
+                        viewModel.uiViewModel.errorStatusInBankAccountAdd.emit(true)
                         return@launch
                     }
                     if (bankName.isEmpty()) {
-                        uiViewModel.errorStatusMessage.emit("Please enter bank name")
-                        uiViewModel.errorStatusInBankAccountAdd.emit(true)
+                        viewModel.uiViewModel.setErrorMessage("Please enter bank name")
+                        viewModel.uiViewModel.errorStatusInBankAccountAdd.emit(true)
                         return@launch
                     }
                     if (bankName.isNotEmpty() && amount.isNotEmpty()) {
-                        bankAccountsViewModel.createObjectAndStoreIt(
+                        viewModel.bankAccountsViewModel.createObjectAndStoreIt(
                             0L, amount, bankName, selectedColor
                         )
                         closeBottomSheet()
@@ -1601,48 +1597,48 @@ fun AddPaymentMethodBottomSheet(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditPaymentMethodBottomSheet(
+    viewModel: AppViewModel,
     bankAccountsClass: BankAccountsClass,
     closeBottomSheet: () -> Unit,
-    uiViewModel: UiViewModel = hiltViewModel(),
-    bankAccountsViewModel: BankAccountsViewModel = hiltViewModel(),
-    preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
-    val showExperimentalComponent by preferencesViewModel.showExperimentalComponent.collectAsState(
+    val showExperimentalComponent by viewModel.preferencesViewModel.showExperimentalComponent.collectAsState(
         false
     )
-    val showError by uiViewModel.errorStatusInBankAccountAdd.collectAsState()
+    val showError by viewModel.uiViewModel.errorStatusInBankAccountAdd.collectAsState()
 
-    ModalBottomSheet(onDismissRequest = {
-        closeBottomSheet()
-    },
+    ModalBottomSheet(
+        onDismissRequest = {
+            closeBottomSheet()
+        },
         sheetState = bottomSheetState,
         modifier = Modifier
             .imePadding()
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
 
-        BottomSheetContentPaymentMethodEditContentNew(Modifier
-            .padding(16.dp, 0.dp),
+        BottomSheetContentPaymentMethodEditContentNew(
+            Modifier
+                .padding(16.dp, 0.dp),
             bankAccountsClass,
             showError,
             showExperimentalComponent,
-            { scope.launch { uiViewModel.errorStatusInBankAccountAdd.emit(false) } },
+            { scope.launch { viewModel.uiViewModel.errorStatusInBankAccountAdd.emit(false) } },
             { bankName, amount, selectedColor ->
                 scope.launch {
                     if (amount.isEmpty()) {
-                        uiViewModel.errorStatusMessage.emit("Please enter bank amount")
-                        uiViewModel.errorStatusInBankAccountAdd.emit(true)
+                        viewModel.uiViewModel.setErrorMessage("Please enter bank amount")
+                        viewModel.uiViewModel.errorStatusInBankAccountAdd.emit(true)
                         return@launch
                     }
                     if (bankName.isEmpty()) {
-                        uiViewModel.errorStatusMessage.emit("Please enter bank name")
-                        uiViewModel.errorStatusInBankAccountAdd.emit(true)
+                        viewModel.uiViewModel.setErrorMessage("Please enter bank name")
+                        viewModel.uiViewModel.errorStatusInBankAccountAdd.emit(true)
                         return@launch
                     }
                     if (bankName.isNotEmpty() && amount.isNotEmpty()) {
-                        bankAccountsViewModel.createObjectAndStoreIt(
+                        viewModel.bankAccountsViewModel.createObjectAndStoreIt(
                             bankAccountsClass.bankAccountId, amount, bankName, selectedColor
                         )
                         closeBottomSheet()
@@ -1796,7 +1792,8 @@ fun BottomSheetContentPaymentMethodAddContentNew(
                         .padding(16.dp, 16.dp)
                         .fillMaxWidth()
                 ) {
-                    LinearProgressIndicator(progress = { Math.random().toFloat() },
+                    LinearProgressIndicator(
+                        progress = { Math.random().toFloat() },
                         modifier = Modifier
                             .height(15.dp)
                             .fillMaxWidth(),
@@ -2025,7 +2022,8 @@ fun BottomSheetContentPaymentMethodEditContentNew(
                         .padding(16.dp, 16.dp)
                         .fillMaxWidth()
                 ) {
-                    LinearProgressIndicator(progress = { Math.random().toFloat() },
+                    LinearProgressIndicator(
+                        progress = { Math.random().toFloat() },
                         modifier = Modifier
                             .height(15.dp)
                             .fillMaxWidth(),
@@ -2137,8 +2135,8 @@ private fun PaymentEditContentPreview() {
 
 
 @Composable
-fun ErrorRow(showError: Boolean, uiViewModel: UiViewModel = hiltViewModel()) {
-    val errorMessage by uiViewModel.errorStatusMessage.collectAsState()
+fun ErrorRow(showError: Boolean,) {
+    val errorMessage = ErrorManager.errorMessage
     AnimatedVisibility(showError) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             Card(
@@ -2154,7 +2152,7 @@ fun ErrorRow(showError: Boolean, uiViewModel: UiViewModel = hiltViewModel()) {
                 ) {
 
                     Text(
-                        text = errorMessage,
+                        text = errorMessage.value,
                         textAlign = TextAlign.Start,
                         style = typography.bodyMedium
                     )
@@ -2178,7 +2176,8 @@ fun SingleColorButton(color: Int, selectedColor: Int, setColor: (Int) -> Unit) {
             )
             .zIndex(-1f)
     ) {
-        Surface(shape = RoundedCornerShape(50),
+        Surface(
+            shape = RoundedCornerShape(50),
             modifier = Modifier
                 .size(48.dp)
                 .fillMaxSize()
@@ -2204,6 +2203,7 @@ fun SingleColorButton(color: Int, selectedColor: Int, setColor: (Int) -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 fun BottomSheetContentAddItemTest(
     sheetState: SheetState,
+    viewModel: AppViewModel,
     localDensity: Density,
     keyboardHeight: Float,
     closeBottomSheet: () -> Unit
@@ -2219,7 +2219,7 @@ fun BottomSheetContentAddItemTest(
         sheetState = sheetState,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        BottomSheetContentItemAddContentTest(modifier = Modifier, localDensity, keyboardHeight)
+        BottomSheetContentItemAddContentTest(modifier = Modifier,viewModel, localDensity, keyboardHeight)
     }
 }
 
@@ -2230,20 +2230,16 @@ val LocalWindowSize = compositionLocalOf { WindowWidthSizeClass.Compact }
 @Composable
 fun BottomSheetContentItemAddContentTest(
     modifier: Modifier,
+    viewModel: AppViewModel,
     localDensity: Density,
     keyboardHeight: Float,
-    categoryViewModel: CategoryViewModel = hiltViewModel(),
-    transactionsViewModel: TransactionsViewModel = hiltViewModel(),
-    uiViewModel: UiViewModel = hiltViewModel(),
-    animationViewModel: AnimationViewModel = hiltViewModel(),
-    preferencesViewModel: PreferencesViewModel = hiltViewModel()
 ) {
     val scope = rememberCoroutineScope()
     var categoryMenuExpanded by remember { mutableStateOf(false) }
     var expenseValue by remember { mutableStateOf(TextFieldValue("")) }
     var comment by remember { mutableStateOf(TextFieldValue("")) }
     var selectedDate by remember { mutableStateOf<Long?>(System.currentTimeMillis()) }
-    val categoryList by categoryViewModel.categoryList.collectAsState()
+    val categoryList by viewModel.categoryViewModel.categoryList.collectAsState()
     val firstSampleClass = firstSampleClass
     var selectedCategory by remember {
         mutableStateOf(
@@ -2255,7 +2251,7 @@ fun BottomSheetContentItemAddContentTest(
     val incomeType = TransactionTypeClass(2, INCOME)
 
 
-    val errorStatus by uiViewModel.errorStatusInAddBottomSheet.collectAsState(false)
+    val errorStatus by viewModel.uiViewModel.errorStatusInAddBottomSheet.collectAsState(false)
 
 
     //animations
@@ -2280,9 +2276,9 @@ fun BottomSheetContentItemAddContentTest(
     // Request focus once when the composable is first composed
     LaunchedEffect(Unit) {
         // Request focus for the TextField
-        categoryViewModel.getCorrespondingList(selectedType)
-        categoryViewModel.getOnlyExpenseCategoryNames()
-        categoryViewModel.getOnlyIncomeCategoryNames()
+        viewModel.categoryViewModel.getCorrespondingList(selectedType)
+        viewModel.categoryViewModel.getOnlyExpenseCategoryNames()
+        viewModel.categoryViewModel.getOnlyIncomeCategoryNames()
     }
 
     LaunchedEffect(expanded, typeToggle) {
@@ -2291,8 +2287,8 @@ fun BottomSheetContentItemAddContentTest(
             expanded = false
         }
     }
-    val budget by preferencesViewModel.getTotalAmountPerDay.collectAsState(1f)
-    val oldAmount by transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
+    val budget by viewModel.preferencesViewModel.getTotalAmountPerDay.collectAsState(1f)
+    val oldAmount by viewModel.transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
     val newAmountTemp = if (expenseValue.text.isEmpty()) 0L else extractNumbers(expenseValue.text)
     val newDailyBudget = oldAmount + newAmountTemp
     val amountInString = String.format("%.2f", newDailyBudget.toFloat())
@@ -2301,11 +2297,11 @@ fun BottomSheetContentItemAddContentTest(
     } else {
         0f
     }
-    animationViewModel.method("₹$amountInString", percent)
+    viewModel.animationViewModel.method("₹$amountInString", percent)
 
     LaunchedEffect(percent) {
         scope.launch {
-            animationViewModel.newSpentPercentage.emit(percent)
+            viewModel.animationViewModel.newSpentPercentage.emit(percent)
         }
     }
 
@@ -2338,7 +2334,8 @@ fun BottomSheetContentItemAddContentTest(
             Spacer(Modifier.height(16.dp))
             Row(Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)) {
 
-                Box(contentAlignment = Alignment.Center,
+                Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .width(boxSize)
                         .background(
@@ -2350,7 +2347,7 @@ fun BottomSheetContentItemAddContentTest(
                                 expanded = !expanded
                             } else {
                                 typeToggle = !typeToggle
-                                categoryViewModel.getCorrespondingList(if (typeToggle) expenseType.type else incomeType.type)
+                                viewModel.categoryViewModel.getCorrespondingList(if (typeToggle) expenseType.type else incomeType.type)
                                 selectedCategory = firstSampleClass
                             }
                         }
@@ -2428,7 +2425,7 @@ fun BottomSheetContentItemAddContentTest(
                         selectedCategorySetter = {
                             selectedCategory = it
                             scope.launch {
-                                uiViewModel.errorStatusInAddBottomSheet.emit(false)
+                                viewModel.uiViewModel.errorStatusInAddBottomSheet.emit(false)
                             }
                         },
                     )
@@ -2437,7 +2434,8 @@ fun BottomSheetContentItemAddContentTest(
 
                 Spacer(Modifier.width(12.dp))
 
-                Box(contentAlignment = Alignment.Center,
+                Box(
+                    contentAlignment = Alignment.Center,
                     modifier = Modifier
                         .width(boxSize)
                         .background(
@@ -2449,7 +2447,7 @@ fun BottomSheetContentItemAddContentTest(
                                 expanded = !expanded
                             } else {
                                 typeToggle = !typeToggle
-                                categoryViewModel.getCorrespondingList(if (typeToggle) expenseType.type else incomeType.type)
+                                viewModel.categoryViewModel.getCorrespondingList(if (typeToggle) expenseType.type else incomeType.type)
                                 selectedCategory = firstSampleClass
                             }
                         }
@@ -2493,7 +2491,7 @@ fun BottomSheetContentItemAddContentTest(
                             selection = TextRange(extractNumbers(newValue.text).toString().length)
                         )
                         scope.launch {
-                            uiViewModel.errorStatusInAddBottomSheet.emit(false)
+                            viewModel.uiViewModel.errorStatusInAddBottomSheet.emit(false)
                         }
                     },
                     modifier = Modifier
@@ -2538,7 +2536,7 @@ fun BottomSheetContentItemAddContentTest(
                     onValueChange = { newValue ->
                         comment = newValue
                         scope.launch {
-                            uiViewModel.errorStatusInAddBottomSheet.emit(false)
+                            viewModel.uiViewModel.errorStatusInAddBottomSheet.emit(false)
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -2576,7 +2574,7 @@ fun BottomSheetContentItemAddContentTest(
                     onValueChange = { newValue ->
                         comment = newValue
                         scope.launch {
-                            uiViewModel.errorStatusInAddBottomSheet.emit(false)
+                            viewModel.uiViewModel.errorStatusInAddBottomSheet.emit(false)
                         }
                     },
                     modifier = Modifier.fillMaxWidth(),
@@ -2723,9 +2721,10 @@ fun NotificationPercentChooserBottomSheet(
     closeBottomSheet: () -> Unit,
     saveNotificationValue: (Float) -> Unit
 ) {
-    ModalBottomSheet(onDismissRequest = {
-        closeBottomSheet()
-    },
+    ModalBottomSheet(
+        onDismissRequest = {
+            closeBottomSheet()
+        },
         sheetState = sheetState,
         modifier = Modifier
             .imePadding()
@@ -2832,9 +2831,10 @@ fun DistributionMethodPickerBottomSheet(
     restDistributionValue: DistributionMethod,
     saveDistributionMethod: (DistributionMethod) -> Unit
 ) {
-    ModalBottomSheet(onDismissRequest = {
-        closeBottomSheet()
-    },
+    ModalBottomSheet(
+        onDismissRequest = {
+            closeBottomSheet()
+        },
         sheetState = sheetState,
         modifier = Modifier
             .imePadding()
@@ -2945,7 +2945,7 @@ private fun DistributionRadioButtonsPreview() {
 @Preview(showBackground = true)
 @Composable
 private fun DistributionMethodPickerBottomSheetContentPreview() {
-    DistributionMethodPickerBottomSheetContent(Modifier,DistributionMethod.DEFAULT,{})
+    DistributionMethodPickerBottomSheetContent(Modifier, DistributionMethod.DEFAULT, {})
 }
 
 @Preview(showBackground = true)

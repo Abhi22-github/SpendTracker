@@ -2,6 +2,7 @@ package com.roaa.expensetracker.ViewModels
 
 import androidx.lifecycle.ViewModel
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
+import com.roaa.expensetracker.Utilities.ErrorManager
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBank
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyCategoryClass
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTransactionClass
@@ -19,7 +20,11 @@ class UiViewModel @Inject constructor() : ViewModel() {
     var errorStatusInBudgetAdd = MutableStateFlow<Boolean>(false)
     var errorStatusInSetupBudget = MutableStateFlow<Boolean>(false)
     var errorStatusInStatisticsFilter = MutableStateFlow(false)
-    var errorStatusMessage = MutableStateFlow<String>("")
+    //var errorStatusMessage = MutableStateFlow<String>("")
+
+    fun setErrorMessage(message: String) {
+        ErrorManager.errorMessage.value = message
+    }
 
 
     var selectedIconFromBottomSheet = MutableStateFlow<Int>(99)

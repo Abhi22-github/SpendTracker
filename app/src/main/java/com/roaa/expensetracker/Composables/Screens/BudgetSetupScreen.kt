@@ -62,7 +62,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
@@ -77,6 +76,7 @@ import com.roaa.expensetracker.Composables.secondaryAlpha
 import com.roaa.expensetracker.Composables.utils.ActionTypes
 import com.roaa.expensetracker.Composables.utils.DistributionMethod
 import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
+import com.roaa.expensetracker.Hilt.AppViewModel
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.DecimalFilterTransformation
 import com.roaa.expensetracker.Utilities.LongMillisToNormalLong
@@ -88,10 +88,6 @@ import com.roaa.expensetracker.Utilities.toDateWithDayName
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.Utilities.toLongMillis
-import com.roaa.expensetracker.ViewModels.BudgetDayViewModel
-import com.roaa.expensetracker.ViewModels.BudgetViewModel
-import com.roaa.expensetracker.ViewModels.TransactionsViewModel
-import com.roaa.expensetracker.ViewModels.UiViewModel
 import kotlinx.coroutines.launch
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -99,10 +95,10 @@ import kotlinx.coroutines.launch
 fun BudgetSetupScreen(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
+    viewModel: AppViewModel,
     type: ActionTypes,
     budgetId: Long,
     modifier: Modifier = Modifier,
-    budgetViewModel: BudgetViewModel = hiltViewModel()
 ) {
     BackHandler {
         handleBackNavigation(navigationManager)
@@ -111,7 +107,7 @@ fun BudgetSetupScreen(
         ActionTypes.ADD -> "Setup Budget"
         ActionTypes.EDIT -> "Edit Budget"
     }
-    val budgetWithSummaryFromRoom by budgetViewModel.getBudgetWithDays(budgetId).collectAsState(
+    val budgetWithSummaryFromRoom by viewModel.budgetViewModel.getBudgetWithDays(budgetId).collectAsState(
         BudgetWithDayDetails(
             emptyBudgetClass, listOf(emptyBudgetDayClass)
         )
@@ -143,7 +139,7 @@ fun BudgetSetupScreen(
         Column(Modifier.padding(it)) {
             key(budgetWithSummary) {
                 BudgetContentController(
-                    isBudgetSet, navigationManager, budgetWithSummary
+                    isBudgetSet, navigationManager, viewModel,budgetWithSummary
                 )
             }
         }
@@ -154,16 +150,13 @@ fun BudgetSetupScreen(
 fun BudgetContentController(
     isBudgetSet: Boolean,
     navigationManager: NavigationManager,
+    viewModel: AppViewModel,
     budgetWithSummary: BudgetWithDayDetails,
-    budgetViewModel: BudgetViewModel = hiltViewModel(),
-    budgetDayViewModel: BudgetDayViewModel = hiltViewModel(),
-    transactionsViewModel: TransactionsViewModel = hiltViewModel(),
-    uiViewModel: UiViewModel = hiltViewModel(),
 ) {
     val modifier = Modifier.padding(16.dp, 0.dp)
 
     var shouldShowConfirmation by remember { mutableStateOf(false) }
-    val errorStatus by uiViewModel.errorStatusInBudgetAdd.collectAsState()
+    val errorStatus by viewModel.uiViewModel.errorStatusInBudgetAdd.collectAsState()
     val scope = rememberCoroutineScope()
 
     val keyboardController = LocalSoftwareKeyboardController.current
@@ -189,19 +182,19 @@ fun BudgetContentController(
             notificationUsageValue = notificationUsageValueInner
             if (totalAmountText.isEmpty()) {
                 scope.launch {
-                    uiViewModel.errorStatusMessage.emit(
+                    viewModel.uiViewModel.setErrorMessage(
                         "Please enter amount"
                     )
-                    uiViewModel.errorStatusInBudgetAdd.emit(
+                    viewModel.uiViewModel.errorStatusInBudgetAdd.emit(
                         true
                     )
                 }
             } else if (totalAmountText.toFloat() == 0f) {
                 scope.launch {
-                    uiViewModel.errorStatusMessage.emit(
+                    viewModel.uiViewModel.setErrorMessage(
                         "Please enter amount"
                     )
-                    uiViewModel.errorStatusInBudgetAdd.emit(
+                    viewModel.uiViewModel.errorStatusInBudgetAdd.emit(
                         true
                     )
                 }
@@ -211,9 +204,7 @@ fun BudgetContentController(
                 } else {
                     SaveBudgetDetailsInDatabase(
                         budgetWithSummary,
-                        transactionsViewModel,
-                        budgetDayViewModel,
-                        budgetViewModel,
+                       viewModel,
                         totalAmountText,
                         totalAmountPerDay,
                         totalDaysRemaining,
@@ -231,7 +222,7 @@ fun BudgetContentController(
         errorStatus,
         {
             scope.launch {
-                uiViewModel.errorStatusInSetupBudget.emit(false)
+                viewModel.uiViewModel.errorStatusInSetupBudget.emit(false)
             }
         }
     )
@@ -242,9 +233,7 @@ fun BudgetContentController(
             {
                 SaveBudgetDetailsInDatabase(
                     budgetWithSummary,
-                    transactionsViewModel,
-                    budgetDayViewModel,
-                    budgetViewModel,
+                    viewModel,
                     totalAmountText,
                     totalAmountPerDay,
                     totalDaysRemaining,
@@ -266,9 +255,7 @@ fun BudgetContentController(
 
 fun SaveBudgetDetailsInDatabase(
     budgetWithSummary: BudgetWithDayDetails,
-    transactionsViewModel: TransactionsViewModel,
-    budgetDayViewModel: BudgetDayViewModel,
-    budgetViewModel: BudgetViewModel,
+    viewModel: AppViewModel,
     totalAmountForMonth: String,
     totalAmountPerDay: Float,
     totalDaysRemaining: Long,
@@ -281,7 +268,7 @@ fun SaveBudgetDetailsInDatabase(
 ) {
     Log.d(
         "Teshkfajk",totalDaysRemaining.toString())
-    budgetViewModel.createObjectAndStoreIt(
+    viewModel.budgetViewModel.createObjectAndStoreIt(
         budgetWithSummary,
         totalAmountForMonth.toFloat(),
         totalAmountPerDay,
