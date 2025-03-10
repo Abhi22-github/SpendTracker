@@ -1,4 +1,4 @@
-package com.roaa.expensetracker.Database
+package com.roaa.expensetracker.Database.DatabaseUtils
 
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase

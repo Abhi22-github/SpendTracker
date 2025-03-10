@@ -7,15 +7,18 @@ import androidx.room.DeleteColumn
 import androidx.room.RenameColumn
 import androidx.room.Room.databaseBuilder
 import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.roaa.expensetracker.Database.DatabaseUtils.RoomConverters
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Model.BudgetDayModelClass
 import com.roaa.expensetracker.Model.BudgetModelClass
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Model.TransactionClass
 
+@TypeConverters(RoomConverters::class)
 @Database(
     entities = [TransactionClass::class, CategoryClass::class, BankAccountsClass::class, BudgetModelClass::class, BudgetDayModelClass::class],
     version = 4,
