@@ -2,24 +2,33 @@ package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Check
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.ProgressIndicatorDefaults
@@ -36,10 +45,17 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import com.roaa.expensetracker.Composables.Navigation.Destinations
@@ -67,7 +83,9 @@ import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBudgetClass
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBudgetDayClass
 import com.roaa.expensetracker.Utilities.datesListForMonth
 import com.roaa.expensetracker.Utilities.dayNameList
+import com.roaa.expensetracker.Utilities.getDayDifference
 import com.roaa.expensetracker.Utilities.getDaysRemaining
+import com.roaa.expensetracker.Utilities.getMonthsBetween
 import com.roaa.expensetracker.Utilities.toDayMonthFormat
 import com.roaa.expensetracker.Utilities.toLocalDate
 import java.time.LocalDate
@@ -194,6 +212,67 @@ fun BudgetScreen(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                     Spacer(Modifier.height(24.dp))
+                    Column(
+                        Modifier
+                            .padding(horizontal = 20.dp, vertical = 16.dp)
+                            .fillMaxWidth()
+                    ) {
+                        Row(
+                            Modifier
+                                .fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceAround
+                        ) {
+                            Text(
+                                text = getCurrentBudget.budgetSummary.budgetStartDate.toLocalDate()
+                                    .toDayMonthFormat(),
+                                modifier = modifier,
+                                textAlign = TextAlign.Center,
+                                style = typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                            DayProgressIndicator(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 12.dp),
+                                totalDays = getCurrentBudget.budgetSummary.budgetTotalDays,
+                                totalAmount = currentBudgetLocal,
+                                expenseAmount = currentExpenseLocal,
+                                day = getDayDifference(
+                                    getCurrentBudget.budgetSummary.budgetStartDate.toLocalDate(),
+                                    LocalDate.now()
+                                ),
+                                height = 36f,
+                                dayName = LocalDate.now().toDayMonthFormat()
+                            )
+                            Text(
+                                text = getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate()
+                                    .toDayMonthFormat(),
+                                modifier = modifier,
+                                textAlign = TextAlign.Center,
+                                style = typography.bodyMedium,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            )
+                        }
+                        val remainingBudgetDays = getDayDifference(
+                            getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate(),
+                            LocalDate.now()
+                        )
+                        Text(
+                            text = "You can spend ₹${(currentBudgetLocal - currentExpenseLocal) / remainingBudgetDays}/day for ${remainingBudgetDays} more days",
+                            modifier = modifier
+                                .fillMaxWidth()
+                                .padding(top = 16.dp),
+                            textAlign = TextAlign.Center,
+                            style = typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                        )
+                    }
+
+
+
+                    Spacer(Modifier.height(12.dp))
+
 //                    Box(
 //                        Modifier
 //                            .wrapContentHeight()
@@ -244,6 +323,7 @@ fun BudgetScreen(
 //                        )
 //
 //                    }
+
                     Row(
                         Modifier
                             .height(150.dp)
@@ -656,72 +736,22 @@ fun SpendCalender(
         )
     ) {
         Column(Modifier.padding(horizontalPadding, verticalPadding)) {
-
             Text(
                 text = "This table shows how much you spent every day relative to your daily budge",
                 style = typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
             )
-            Spacer(Modifier.height(10.dp))
-            Text(
-                text = "February",
-                style = typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
+            val getMonthsList = getMonthsBetween(
+                getCurrentBudget.budgetSummary.budgetStartDate.toLocalDate(),
+                getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate()
             )
-            Row(
-                Modifier
-                    .fillMaxWidth()
-                    .padding(top = 10.dp)
-            ) {
-                dayNameList.forEachIndexed { index, dayName ->
-                    DayName(Modifier.weight(1f), dayName)
-                }
-            }
-
-            val budgetDayMap = getCurrentBudget.budgetAllDays.associateBy { it.date }
-
-            val list = datesListForMonth(
-                LocalDate.now(),
-                getCurrentBudget.budgetSummary.budgetStartDate,
-                getCurrentBudget.budgetSummary.budgetEndDate,
-            )
-
-            list.forEachIndexed { index, it ->
-                if (budgetDayMap.containsKey(it.dayDate)) {
-                    if (budgetDayMap[it.dayDate]!!.totalExpense == 0f) {
-                        it.dayState = DayState.NOT_STARTED
-                    } else if (budgetDayMap[it.dayDate]!!.totalExpense > budgetDayMap[it.dayDate]!!.budgetAmount) {
-                        it.dayState = DayState.OVER_LIMIT
-                    } else if (budgetDayMap[it.dayDate]!!.totalExpense < budgetDayMap[it.dayDate]!!.budgetAmount) {
-                        it.dayState = DayState.IN_LIMIT
-                    }
-                } else {
-                    it
-                }
-            }
-
-            val chunkedList = list.chunked(7)
-
-            chunkedList.forEachIndexed { index, weekList ->
-                Row(
-                    Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp)
-                ) {
-                    var p = weekList.toMutableList()
-                    if (weekList.size != 7) {
-                        for (i in 0 until (7 - weekList.size)) {
-                            p.add(CalenderDayState(-1, 0L, false, DayState.NOT_STARTED))
-                        }
-                    }
-                    p.forEachIndexed { index, day ->
-                        DayBox(
-                            Modifier
-                                .weight(1f)
-                                .padding(2.dp, 0.dp), day.day, day.isInBudget, day.dayState
-                        )
-                    }
-                }
+            getMonthsList.forEachIndexed { index, it ->
+                val list = datesListForMonth(
+                    it.atDay(1),
+                    getCurrentBudget.budgetSummary.budgetStartDate,
+                    getCurrentBudget.budgetSummary.budgetEndDate,
+                )
+                SpendCalenderMonth(modifier, color, getCurrentBudget, list)
             }
         }
     }
@@ -739,18 +769,95 @@ fun DayName(modifier: Modifier = Modifier, text: String) {
 }
 
 @Composable
-fun DayBox(modifier: Modifier = Modifier, text: Int, inBudget: Boolean, dayState: DayState) {
+fun SpendCalenderMonth(
+    modifier: Modifier = Modifier,
+    color: HarmonizedColorPalette,
+    getCurrentBudget: BudgetWithDayDetails,
+    list: List<CalenderDayState>
+) {
+
+    Column() {
+        Spacer(Modifier.height(10.dp))
+        Text(
+            text = "February",
+            style = typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Row(
+            Modifier
+                .fillMaxWidth()
+                .padding(top = 10.dp)
+        ) {
+            dayNameList.forEachIndexed { index, dayName ->
+                DayName(Modifier.weight(1f), dayName)
+            }
+        }
+
+        val budgetDayMap = getCurrentBudget.budgetAllDays.associateBy { it.date }
+
+
+        list.forEachIndexed { index, it ->
+            if (budgetDayMap.containsKey(it.dayDate)) {
+                if (budgetDayMap[it.dayDate]!!.totalExpense == 0f) {
+                    it.dayState = DayState.NOT_STARTED
+                } else if (budgetDayMap[it.dayDate]!!.totalExpense > budgetDayMap[it.dayDate]!!.budgetAmount) {
+                    it.dayState = DayState.OVER_LIMIT
+                } else if (budgetDayMap[it.dayDate]!!.totalExpense < budgetDayMap[it.dayDate]!!.budgetAmount) {
+                    it.dayState = DayState.IN_LIMIT
+                }else{
+                    it.dayState
+                }
+            }else{
+
+            }
+        }
+
+        val chunkedList = list.chunked(7)
+
+        chunkedList.forEachIndexed { index, weekList ->
+            Row(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(top = 10.dp)
+            ) {
+                var p = weekList.toMutableList()
+                if (weekList.size != 7) {
+                    for (i in 0 until (7 - weekList.size)) {
+                        p.add(CalenderDayState("-1", 0L, false, DayState.NOT_STARTED))
+                    }
+                }
+                p.forEachIndexed { index, day ->
+                    DayBox(
+                        Modifier
+                            .weight(1f)
+                            .padding(2.dp, 0.dp), day.day, day.isInBudget, day.dayState
+                    )
+                }
+            }
+        }
+    }
+
+}
+
+@Composable
+fun DayBox(modifier: Modifier = Modifier, text: String, inBudget: Boolean, dayState: DayState) {
     val greenColorPalette = toPalette(greenColor)
     val orangeColorPalette = toPalette(orange)
 
+    val (icon,tint) = when (dayState) {
+        DayState.IN_LIMIT -> Pair(Icons.Rounded.Check,greenColorPalette.main)
+        DayState.NOT_STARTED -> Pair(Icons.Rounded.Check,greenColorPalette.main)
+        DayState.OVER_LIMIT -> Pair(Icons.Rounded.Close,orangeColorPalette.main)
+        DayState.OUT_OF_BUDGET -> Pair(Icons.Rounded.Check,orangeColorPalette.main)
+    }
     val background =
         if (inBudget) {
             when (dayState) {
                 DayState.IN_LIMIT -> greenColorPalette.main.copy(alpha = 0.1f)
                 DayState.NOT_STARTED -> MaterialTheme.colorScheme.surface
                 DayState.OVER_LIMIT -> orangeColorPalette.main.copy(alpha = 0.1f)
+                DayState.OUT_OF_BUDGET -> Color.Transparent
             }
-
         } else Color.Transparent
 
     val textColor =
@@ -759,15 +866,25 @@ fun DayBox(modifier: Modifier = Modifier, text: Int, inBudget: Boolean, dayState
                 DayState.IN_LIMIT -> greenColorPalette.main
                 DayState.NOT_STARTED -> MaterialTheme.colorScheme.onSurface
                 DayState.OVER_LIMIT -> orangeColorPalette.main
+                DayState.OUT_OF_BUDGET -> Color.Transparent
             }
-        } else MaterialTheme.colorScheme.onSurface
+        } else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
     Box(
         modifier
             .clip(RoundedCornerShape(10.dp))
-            .background(background)
+            .background(background), contentAlignment = Alignment.Center
     ) {
+        if (inBudget && (dayState == DayState.IN_LIMIT || dayState == DayState.OVER_LIMIT))
+            Icon(
+                icon,
+                modifier = Modifier
+                    .size(32.dp)
+                    .zIndex(1f),
+                contentDescription = null,
+                tint = tint.copy(alpha = 0.3f)
+            )
         Text(
-            text = if (text != -1) text.toString() else "",
+            text = if (text != "-1") text.toString() else "",
             style = typography.labelMedium,
             color = textColor,
             textAlign = TextAlign.Center,
@@ -777,6 +894,85 @@ fun DayBox(modifier: Modifier = Modifier, text: Int, inBudget: Boolean, dayState
         )
     }
 }
+
+@Composable
+fun DayProgressIndicator(
+    modifier: Modifier = Modifier,
+    height: Float,
+    totalDays: Long,
+    totalAmount: Float,
+    expenseAmount: Float,
+    day: Long, // Days to decorate
+    dayName: String
+) {
+    val lineColor = MaterialTheme.colorScheme.surfaceContainer
+    val completedColor = MaterialTheme.colorScheme.primaryContainer
+    val decorationColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+    val progress =
+        if (expenseAmount == 0f) 1f else expenseAmount / if (totalAmount == 0f) 1f else totalAmount
+    Box(
+        modifier = modifier, contentAlignment = Alignment.Center
+    ) {
+        Canvas(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(10.dp)
+        ) {
+            val canvasWidth = size.width
+            val segmentWidthForDayDecoration = canvasWidth / totalDays
+            val segmentWidthForProgress = canvasWidth
+
+            // Draw the total progress line
+            drawLine(
+                color = lineColor,
+                start = Offset(0f, size.height / 2),
+                end = Offset(canvasWidth, size.height / 2),
+                strokeWidth = height,
+                cap = StrokeCap.Round
+            )
+
+            // Draw completed progress line
+            drawLine(
+                color = completedColor,
+                start = Offset(0f, size.height / 2),
+                end = Offset(segmentWidthForProgress * progress, size.height / 2),
+                strokeWidth = height,
+                cap = StrokeCap.Round
+            )
+
+            // Draw decorations for specific days
+
+            val xOffset = (segmentWidthForDayDecoration * day)
+            drawRoundRect(
+                color = decorationColor,
+                topLeft = Offset(xOffset, 0f - height / 2),
+                size = Size(20f, 60f),// Rectangle size
+                cornerRadius = CornerRadius(15f, 15f)
+            )
+        }
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+
+            Box(
+                modifier = Modifier
+                    .offset(x = (day.toFloat() / totalDays * 280).dp - 10.dp, y = (-25).dp)
+                    .wrapContentSize()
+            ) {
+                Text(
+                    text = dayName,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+        }
+    }
+
+}
+
 
 @Preview
 @Composable

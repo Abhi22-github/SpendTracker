@@ -117,7 +117,7 @@ fun SpendsBudgetCard(
         content = {
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = if (flipCard) "${100f - showPercent} of budget remaining" else "${showPercent} of budget spent",
+                text = if (flipCard) "${100f - showPercent}% of budget remaining" else "${showPercent}% of budget spent",
                 style = MaterialTheme.typography.bodyMedium,
             )
         },

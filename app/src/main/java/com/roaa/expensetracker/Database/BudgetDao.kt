@@ -55,6 +55,9 @@ interface BudgetDao {
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateDays(budgetDayModelClass: BudgetDayModelClass)
 
+    @Delete()
+    suspend fun removeDays(budgetDayModelClass: BudgetDayModelClass)
+
     //Transactions
     @Transaction
     suspend fun insertWithDayDetails(
@@ -83,12 +86,41 @@ interface BudgetDao {
         validDatesListFromPreviousBudget: List<BudgetDayModelClass>
     ) {
         update(budgetModelClass)
-        val difference =
-            validDatesListFromPreviousBudget.filterNot { it.date in validDatesListFromLong }
-        difference.forEach {
-            val tempObj = it.copy(budgetId = 0L)
-            updateDays(tempObj)
+
+        // Convert previous budget dates to a set for quick lookup
+        val previousDatesSet = validDatesListFromPreviousBudget.map { it.date }.toSet()
+        val newDatesSet = validDatesListFromLong.toSet()
+
+        // Find dates that need to be removed (present in previous but not in new budget)
+        val datesToRemove = validDatesListFromPreviousBudget.filter { it.date !in newDatesSet }
+
+        // Find dates that need to be added (present in new budget but missing in previous)
+        val datesToAdd = validDatesListFromLong.filter { it !in previousDatesSet }
+
+        // Find dates to update (present in both lists, but we may need to update them)
+        val datesToUpdate = validDatesListFromPreviousBudget.filter { it.date in newDatesSet }
+
+
+        datesToRemove.forEach {
+            removeDays(it)
         }
 
+        datesToUpdate.forEach {
+            val updatedObj = it.copy(
+                budgetId = budgetModelClass.budgetId,
+                budgetAmount = budgetModelClass.budgetAmountPerDay
+            )
+            updateDays(updatedObj)
+        }
+
+        // Insert new dates (convert from Long to BudgetDayModelClass)
+        insertWithDayDetails(budgetModelClass, datesToAdd)
     }
 }
+
+//val difference =
+//    validDatesListFromPreviousBudget.filterNot { it.date in validDatesListFromLong }
+//difference.forEach {
+//    val tempObj = it.copy(budgetId = 0L)
+//    updateDays(tempObj)
+//}

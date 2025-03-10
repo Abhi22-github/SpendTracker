@@ -92,7 +92,7 @@ fun LocalDate.toDateWithDayName(): String {
     return "${this.format(showDateFormat)}"
 }
 
-fun LocalDate.toDayMonthFormat():String{
+fun LocalDate.toDayMonthFormat(): String {
     return this.format(dayMonthFormat)
 }
 
@@ -176,7 +176,7 @@ fun getPreviousAndNext500Months(date: LocalDate): List<String> {
 }
 
 fun getDayDifference(startDate: LocalDate, endDate: LocalDate): Long {
-    return ChronoUnit.DAYS.between(startDate, endDate) + 1
+    return Math.abs(ChronoUnit.DAYS.between(startDate, endDate) + 1)
 }
 
 fun getPreviousAndNext100Weeks(): List<String> {
@@ -341,41 +341,40 @@ fun getDaysRemaining(endDate: LocalDate): Long = run {
 val dayNameList = listOf("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat")
 
 fun datesListForMonth(
-    localDate: LocalDate,
+    monthStartDate: LocalDate,
     budgetMonthStartDate: Long,
     budgetMonthEndDate: Long,
-
-    ): List<CalenderDayState> = run {
-    val firstDayOfMonth = localDate.withDayOfMonth(1)
+): List<CalenderDayState> = run {
+    val firstDayOfMonth = monthStartDate.withDayOfMonth(1)
     val lastDayOfMonth = firstDayOfMonth.withDayOfMonth(firstDayOfMonth.lengthOfMonth())
     val startDayOfWeek = firstDayOfMonth.dayOfWeek
 
-    val budgetStartDate = budgetMonthStartDate.toString().takeLast(2).toInt()
-    val budgetEndDate = budgetMonthEndDate.toString().takeLast(2).toInt()
+    val budgetStartDate = budgetMonthStartDate
+    val budgetEndDate = budgetMonthEndDate
     val calendarGrid = mutableListOf<CalenderDayState>()
 
 
     for (i in 1..startDayOfWeek.value) {
-        calendarGrid.add(CalenderDayState(-1, 0L, false, DayState.NOT_STARTED))
+        calendarGrid.add(CalenderDayState("-1", 0L, false, DayState.OUT_OF_BUDGET))
     }
 
-    for (i in 1..lastDayOfMonth.dayOfMonth) {
+    for (i in firstDayOfMonth.toLong()..lastDayOfMonth.toLong()) {
         if (i in budgetStartDate..budgetEndDate) {
             calendarGrid.add(
                 CalenderDayState(
+                    i.toString().takeLast(2),
                     i,
-                    firstDayOfMonth.plusDays(i.toLong() - 1).toLong(),
                     true,
-                    DayState.IN_LIMIT
+                    DayState.NOT_STARTED
                 )
             )
         } else {
             calendarGrid.add(
                 CalenderDayState(
+                    i.toString().takeLast(2),
                     i,
-                    firstDayOfMonth.plusDays(i.toLong() - 1).toLong(),
                     false,
-                    DayState.NOT_STARTED
+                    DayState.OUT_OF_BUDGET
                 )
             )
         }
@@ -421,12 +420,13 @@ fun getCalendarForMonthFromDateIncludingPrevMont(localDate: LocalDate): List<Loc
     return calendarGrid
 }
 
-fun getValidDatesListFromLong(startDate: Long, endDate: Long): List<Long> {
-    val dateList = mutableListOf<Long>()
-    for (i in 0..endDate - startDate) {
-        dateList.add(startDate.toLocalDate().plusDays(i).toLong())
-    }
-    return dateList
+// to get all dates in between 2 Local dates
+fun getValidDatesListFromLong(startDate: LocalDate, endDate: LocalDate): List<Long> {
+    return generateSequence(startDate) { date ->
+        date.plusDays(1).takeIf { it <= endDate }
+    }.map {
+        it.toLong()
+    }.toList()
 }
 
 val currentMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("MMM uuuu"))
@@ -487,4 +487,22 @@ fun getDatesBetween(startDate: LocalDate, endDate: LocalDate): List<Pair<String,
         ) // Full day name (e.g., "Thursday")
         "$dayOfMonth $dayName" to it.toLong() // Pair<String, Long>
     }.toList()
+}
+
+//get month in between dates for Budget Calender
+fun getMonthsBetween(startDate: LocalDate, endDate: LocalDate): List<YearMonth> {
+    val months = mutableListOf<YearMonth>()
+    var current = YearMonth.from(startDate)
+
+    while (current <= YearMonth.from(endDate)) {
+        months.add(current)
+        current = current.plusMonths(1) // Move to the next month
+    }
+
+    return months
+}
+
+fun getAllDatesInMonth(monthYear: YearMonth): List<LocalDate> {
+    val daysInMonth = monthYear.lengthOfMonth() // Get total days in the month
+    return (1..daysInMonth).map { day -> LocalDate.of(monthYear.year, monthYear.monthValue, day) }
 }

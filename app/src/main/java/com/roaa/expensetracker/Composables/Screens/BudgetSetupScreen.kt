@@ -285,7 +285,7 @@ fun SaveBudgetDetailsInDatabase(
         budgetEndDate,
         restDistributionValue,
         notificationUsageValue,
-        getValidDatesListFromLong(budgetStartDate, budgetEndDate)
+        getValidDatesListFromLong(budgetStartDate.toLocalDate(), budgetEndDate.toLocalDate())
     )
 
     focusManager.clearFocus()
