@@ -90,6 +90,8 @@ import com.roaa.expensetracker.Utilities.toDayMonthFormat
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
 import java.time.LocalDate
+import java.time.format.TextStyle
+import java.util.Locale
 
 
 val horizontalPadding = 16.dp
@@ -756,7 +758,14 @@ fun SpendCalender(
                     getCurrentBudget.budgetSummary.budgetStartDate,
                     getCurrentBudget.budgetSummary.budgetEndDate,
                 )
-                SpendCalenderMonth(modifier, color, getCurrentBudget, list)
+
+                SpendCalenderMonth(
+                    modifier,
+                    color,
+                    getCurrentBudget,
+                    it.month.getDisplayName(TextStyle.FULL, Locale.getDefault()),
+                    list
+                )
             }
         }
     }
@@ -778,13 +787,14 @@ fun SpendCalenderMonth(
     modifier: Modifier = Modifier,
     color: HarmonizedColorPalette,
     getCurrentBudget: BudgetWithDayDetails,
+    month: String,
     list: List<CalenderDayState>
 ) {
 
     Column() {
         Spacer(Modifier.height(10.dp))
         Text(
-            text = "February",
+            text = month,
             style = typography.titleMedium,
             color = MaterialTheme.colorScheme.onSurface
         )
