@@ -87,7 +87,7 @@ import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Converters.TransactionConverter
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
-import com.roaa.expensetracker.Hilt.AppViewModel
+import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
@@ -112,7 +112,7 @@ import java.time.LocalDate
 fun PaymentMethodScreen(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     modifier: Modifier = Modifier,
     sendUserBack: () -> Unit,
 ) {
@@ -229,7 +229,7 @@ fun PaymentMethodScreen(
 @Composable
 fun PaymentCard(
     modifier: Modifier,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     bankAccountsClass: BankAccountsClass,
     editClicked: (bankAccountsClass: BankAccountsClass) -> Unit,
     deleteClicked: (bankAccountClass: BankAccountsClass) -> Unit,
@@ -756,7 +756,7 @@ fun LivePaymentCard(
 fun PaymentDetailsScreen(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     modifier: Modifier = Modifier,
     bankAccountId: Long,
 ) {

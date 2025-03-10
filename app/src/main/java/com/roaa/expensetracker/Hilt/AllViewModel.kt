@@ -9,7 +9,7 @@ import com.roaa.expensetracker.ViewModels.PreferencesViewModel
 import com.roaa.expensetracker.ViewModels.TransactionsViewModel
 import com.roaa.expensetracker.ViewModels.UiViewModel
 
-class AppViewModel(
+class AllViewModel(
     val transactionsViewModel: TransactionsViewModel,
     val categoryViewModel: CategoryViewModel,
     val preferencesViewModel: PreferencesViewModel,

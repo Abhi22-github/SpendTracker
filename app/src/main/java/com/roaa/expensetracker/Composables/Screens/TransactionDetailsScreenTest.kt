@@ -90,7 +90,7 @@ import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.secondaryAlpha
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.toPalette
-import com.roaa.expensetracker.Hilt.AppViewModel
+import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.toDisplayStringForMonthWithYear
@@ -104,7 +104,7 @@ fun TransactionDetailsScreen(
     modifier: Modifier = Modifier,
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     amount: Float,
     categoryName1: String,
 ) {

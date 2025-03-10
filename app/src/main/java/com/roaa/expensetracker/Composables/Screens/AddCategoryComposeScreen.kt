@@ -83,7 +83,7 @@ import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.secondaryAlpha
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
-import com.roaa.expensetracker.Hilt.AppViewModel
+import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
@@ -97,7 +97,7 @@ import kotlinx.coroutines.launch
 fun AddCategory(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     categoryId: Long,
     categoryName: String,
     categoryIcon: Int,
@@ -186,7 +186,7 @@ fun AddCategory(
 @Composable
 fun SharedTransitionScope.ScaffoldContentDetails(
     modifier: Modifier = Modifier,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     categoryClass: CategoryClass,
     backButtonClick: () -> Unit,
     animatedVisibilityScope: AnimatedContentScope,
@@ -402,7 +402,7 @@ fun storeCategoryData(
     selectedIcon: Int,
     selectedType: Int,
     scope: CoroutineScope,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     backButtonClick: () -> Unit = {}
 ) {
     scope.launch {

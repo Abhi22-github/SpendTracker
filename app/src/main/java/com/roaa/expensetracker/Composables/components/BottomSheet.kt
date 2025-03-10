@@ -131,7 +131,7 @@ import com.roaa.expensetracker.Composables.utils.distributionChoiceList
 import com.roaa.expensetracker.Composables.utils.iconsList
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
-import com.roaa.expensetracker.Hilt.AppViewModel
+import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Model.TransactionTypeClass
@@ -160,7 +160,7 @@ import kotlinx.coroutines.launch
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun BottomSheetContentAddItem(
-    date: Long, sheetState: SheetState, viewModel: AppViewModel, closeBottomSheet: () -> Unit
+    date: Long, sheetState: SheetState, viewModel: AllViewModel, closeBottomSheet: () -> Unit
 ) {
     ModalBottomSheet(
         onDismissRequest = {
@@ -183,7 +183,7 @@ fun BottomSheetContentAddItem(
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun BottomSheetContentEdit(
-    singleTransaction: TransactionWithDetails, sheetState: SheetState,viewModel: AppViewModel, closeBottomSheet: () -> Unit
+    singleTransaction: TransactionWithDetails, sheetState: SheetState, viewModel: AllViewModel, closeBottomSheet: () -> Unit
 ) {
     ModalBottomSheet(
         onDismissRequest = {
@@ -206,7 +206,7 @@ val bottomSheetTopBottomPadding = 0.dp
 @Composable
 fun BottomSheetContentItemAddContent(
     modifier: Modifier,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     date: Long,
     closeBottomSheet: () -> Unit,
     ) {
@@ -591,7 +591,7 @@ fun BottomSheetContentItemAddContent(
 @Composable
 fun BottomSheetContentItemEditContent(
     modifier: Modifier,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     singleTransaction: TransactionWithDetails,
     closeBottomSheet: () -> Unit,
 ) {
@@ -992,7 +992,7 @@ fun validateTransactionData(
     selectedDate: Long?,
     selectedPaymentMethod: BankAccountsClass,
     scope: CoroutineScope,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
 ) {
 
     scope.launch {
@@ -1036,7 +1036,7 @@ fun validateTransactionData(
 @Composable
 fun BottomRow(
     modifier: Modifier,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     selectedDate: Long?,
     selectedDateSetter: (Long?) -> Unit,
     selectedPaymentMethodSetter: (BankAccountsClass) -> Unit,
@@ -1152,7 +1152,7 @@ fun BottomRow(
 @Composable
 fun AddBottomSheet(
     date: Long,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     closeBottomSheet: () -> Unit,
 ) {
     BoxWithConstraints {
@@ -1200,7 +1200,7 @@ fun AddBottomSheet(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditBottomSheet(
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     singleTransaction: TransactionWithDetails,
     closeBottomSheet: () -> Unit,
 ) {
@@ -1221,7 +1221,7 @@ fun EditBottomSheet(
 @OptIn(ExperimentalMaterial3Api::class)
 fun BottomSheetContentItemDetails(
     sheetState: SheetState,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     singleTransaction: TransactionWithDetails,
     closeBottomSheet: () -> Unit,
 ) {
@@ -1250,7 +1250,7 @@ val spaceHeightInDetail = 10.dp
 fun BottomSheetContentItemDetailsContent(
     modifier: Modifier,
     sheetState: SheetState,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     closeBottomSheet: () -> Unit,
     singleTransaction: TransactionWithDetails,
 ) {
@@ -1464,7 +1464,7 @@ fun BottomSheetContentItemDetailsContent(
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun BottomSheetIconPicker(
-    sheetState: SheetState,viewModel: AppViewModel, closeBottomSheet: () -> Unit
+    sheetState: SheetState, viewModel: AllViewModel, closeBottomSheet: () -> Unit
 ) {
     ModalBottomSheet(
         onDismissRequest = {
@@ -1481,7 +1481,7 @@ fun BottomSheetIconPicker(
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
-fun BottomSheetContentIconPicker(modifier: Modifier = Modifier,viewModel: AppViewModel) {
+fun BottomSheetContentIconPicker(modifier: Modifier = Modifier,viewModel: AllViewModel) {
     BoxWithConstraints(Modifier.padding(horizontal = 8.dp)) {
         val width = maxWidth / 7
         Column(
@@ -1517,7 +1517,7 @@ fun BottomSheetContentIconPicker(modifier: Modifier = Modifier,viewModel: AppVie
 }
 
 @Composable
-fun SingleIcon(item: Int, width: Dp, viewModel: AppViewModel) {
+fun SingleIcon(item: Int, width: Dp, viewModel: AllViewModel) {
     val scope = rememberCoroutineScope()
     Surface(
         shape = CircleShape,
@@ -1542,7 +1542,7 @@ fun SingleIcon(item: Int, width: Dp, viewModel: AppViewModel) {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddPaymentMethodBottomSheet(
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     closeBottomSheet: () -> Unit,
 ) {
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -1597,7 +1597,7 @@ fun AddPaymentMethodBottomSheet(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun EditPaymentMethodBottomSheet(
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     bankAccountsClass: BankAccountsClass,
     closeBottomSheet: () -> Unit,
 ) {
@@ -2203,7 +2203,7 @@ fun SingleColorButton(color: Int, selectedColor: Int, setColor: (Int) -> Unit) {
 @OptIn(ExperimentalMaterial3Api::class)
 fun BottomSheetContentAddItemTest(
     sheetState: SheetState,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     localDensity: Density,
     keyboardHeight: Float,
     closeBottomSheet: () -> Unit
@@ -2230,7 +2230,7 @@ val LocalWindowSize = compositionLocalOf { WindowWidthSizeClass.Compact }
 @Composable
 fun BottomSheetContentItemAddContentTest(
     modifier: Modifier,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     localDensity: Density,
     keyboardHeight: Float,
 ) {

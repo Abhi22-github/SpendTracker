@@ -77,7 +77,7 @@ import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Converters.TransactionConverter
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
-import com.roaa.expensetracker.Hilt.AppViewModel
+import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Model.TransactionClass
 import com.roaa.expensetracker.Model.UiDateModels.BarChartExpenseModel
 import com.roaa.expensetracker.R
@@ -104,7 +104,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun TransactionsListCompose(
     navigationManager: NavigationManager,
-    viewModel:AppViewModel,
+    viewModel:AllViewModel,
     modifier: Modifier,
     showSingleDateTransactions: Boolean,
     date: Long,

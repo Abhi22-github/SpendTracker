@@ -75,7 +75,7 @@ import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.harmonize
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
-import com.roaa.expensetracker.Hilt.AppViewModel
+import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Model.UiDateModels.BarChartExpenseModel
 import com.roaa.expensetracker.Utilities.CalenderDayState
 import com.roaa.expensetracker.Utilities.DayState
@@ -103,7 +103,7 @@ val verticalPadding = 8.dp
 fun BudgetScreen(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     modifier: Modifier = Modifier,
 ) {
     val getCurrentBudgetFromRoom by viewModel.budgetViewModel.getCurrentBudgetWithDetails()

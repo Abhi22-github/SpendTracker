@@ -108,7 +108,7 @@ import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
-import com.roaa.expensetracker.Hilt.AppViewModel
+import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
@@ -513,7 +513,7 @@ private fun CategoryStatEntryPreview() {
 fun StatisticsScreenTest(
     navHostController: NavHostController,
     navigationManager: NavigationManager,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
 ) {
     val options = listOf("Expense", "Income")
     var selectedIndex by remember { mutableIntStateOf(0) }
@@ -1001,7 +1001,7 @@ fun CategoryStatEntryTest(
 @Composable
 fun FilterBottomSheet(
     modifier: Modifier = Modifier,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     closeBottomSheet: () -> Unit,
     bankAccountList: List<BankAccountsClass>,
     saveButtonClicked: (Long, Long, Long, BankAccountsClass) -> Unit,

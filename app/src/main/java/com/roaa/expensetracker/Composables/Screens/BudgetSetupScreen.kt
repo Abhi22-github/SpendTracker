@@ -76,7 +76,7 @@ import com.roaa.expensetracker.Composables.secondaryAlpha
 import com.roaa.expensetracker.Composables.utils.ActionTypes
 import com.roaa.expensetracker.Composables.utils.DistributionMethod
 import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
-import com.roaa.expensetracker.Hilt.AppViewModel
+import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.DecimalFilterTransformation
 import com.roaa.expensetracker.Utilities.LongMillisToNormalLong
@@ -95,7 +95,7 @@ import kotlinx.coroutines.launch
 fun BudgetSetupScreen(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     type: ActionTypes,
     budgetId: Long,
     modifier: Modifier = Modifier,
@@ -150,7 +150,7 @@ fun BudgetSetupScreen(
 fun BudgetContentController(
     isBudgetSet: Boolean,
     navigationManager: NavigationManager,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     budgetWithSummary: BudgetWithDayDetails,
 ) {
     val modifier = Modifier.padding(16.dp, 0.dp)
@@ -263,7 +263,7 @@ fun BudgetContentController(
 
 fun SaveBudgetDetailsInDatabase(
     budgetWithSummary: BudgetWithDayDetails,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     totalAmountForMonth: String,
     totalAmountPerDay: Float,
     totalDaysRemaining: Long,

@@ -89,12 +89,13 @@ import com.roaa.expensetracker.Composables.Navigation.RootNavGraph
 import com.roaa.expensetracker.Composables.Navigation.navigateToWithSingleTop
 import com.roaa.expensetracker.Composables.Screens.MonthChip
 import com.roaa.expensetracker.Composables.syncTheme
-import com.roaa.expensetracker.Hilt.AppViewModel
+import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Notification.NotificationPermissionHandler
 import com.roaa.expensetracker.Notification.WorkManger.scheduleDailyNotification
 import com.roaa.expensetracker.Notification.createNotificationChannel
 import com.roaa.expensetracker.Notification.notificationChannelList
 import com.roaa.expensetracker.R
+import com.roaa.expensetracker.Utilities.appStartingChecks
 import com.roaa.expensetracker.Utilities.convertToWholeMonthName
 import com.roaa.expensetracker.Utilities.currentDay
 import com.roaa.expensetracker.Utilities.currentMonth
@@ -125,7 +126,7 @@ class ComposeMainActivity : ComponentActivity() {
             val localContext = LocalContext.current
             val rootNavController = rememberNavController()
             val navigationManager = remember { NavigationManager(rootNavController) }
-            val appViewModels: AppViewModel = AppViewModel(
+            val allViewModels: AllViewModel = AllViewModel(
                 transactionsViewModel = hiltViewModel(),
                 categoryViewModel = hiltViewModel(),
                 preferencesViewModel = hiltViewModel(),
@@ -145,7 +146,7 @@ class ComposeMainActivity : ComponentActivity() {
                 }
             )
             scheduleDailyNotification(this)
-            appViewModels.preferencesViewModel.setFirstStartupCompleted()
+            allViewModels.preferencesViewModel.setFirstStartupCompleted()
 
 
             LaunchedEffect(Unit) {
@@ -154,6 +155,7 @@ class ComposeMainActivity : ComponentActivity() {
                 notificationChannelList.forEach {
                     createNotificationChannel(context, it)
                 }
+                appStartingChecks(allViewModels)
                 // App ready for work
                 isReady.value = true
             }
@@ -177,7 +179,7 @@ class ComposeMainActivity : ComponentActivity() {
                         LocalWindowInsets provides windowInsets,
                         LocalErrorMessage provides errorMessage
                     ) {
-                        NavigationDrawer(rootNavController, navigationManager, appViewModels)
+                        NavigationDrawer(rootNavController, navigationManager, allViewModels)
                         LaunchedEffect(Unit) {
                             // App rendered and splash screen can be hidden
                             isDone.value = true
@@ -195,7 +197,7 @@ class ComposeMainActivity : ComponentActivity() {
 fun NavigationDrawer(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
-    appViewModels: AppViewModel
+    allViewModels: AllViewModel
 ) {
 
     val section1 = section1Items
@@ -231,7 +233,7 @@ fun NavigationDrawer(
 
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
-    val showMonthFilterChips by appViewModels.uiViewModel.showMonthFilterChips.collectAsState()
+    val showMonthFilterChips by allViewModels.uiViewModel.showMonthFilterChips.collectAsState()
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -350,14 +352,14 @@ fun NavigationDrawer(
         val currentYear = currentYear
         val lazyMonthListState = rememberLazyListState()
         val monthList = getPreviousAndNext500Months(LocalDate.now())
-        val selectedMonth by appViewModels.uiViewModel.selectedMonth.collectAsState()
+        val selectedMonth by allViewModels.uiViewModel.selectedMonth.collectAsState()
         LaunchedEffect(true) {
             lazyMonthListState.scrollToItem(250)
         }
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
         CompositionLocalProvider() {
             if (!showAppBar) {
-                AppNavGraph(rootNavController, navigationManager, appViewModels)
+                AppNavGraph(rootNavController, navigationManager, allViewModels)
             } else {
                 Scaffold(
                     modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -369,7 +371,7 @@ fun NavigationDrawer(
                                     TextButton(
                                         onClick = {
                                             scope.launch {
-                                                appViewModels.uiViewModel.showMonthFilterChips.emit(
+                                                allViewModels.uiViewModel.showMonthFilterChips.emit(
                                                     !showMonthFilterChips
                                                 )
                                             }
@@ -411,7 +413,7 @@ fun NavigationDrawer(
                                             .clickable {
                                                 scope.launch {
                                                     lazyMonthListState.animateScrollToItem(250)
-                                                    appViewModels.uiViewModel.selectedMonth.emit(
+                                                    allViewModels.uiViewModel.selectedMonth.emit(
                                                         currentMonth
                                                     )
                                                 }
@@ -446,7 +448,7 @@ fun NavigationDrawer(
                                             selectedMonth,
                                             {
                                                 scope.launch {
-                                                    appViewModels.uiViewModel.selectedMonth.emit(it)
+                                                    allViewModels.uiViewModel.selectedMonth.emit(it)
                                                 }
                                             })
                                     }
@@ -456,7 +458,7 @@ fun NavigationDrawer(
                     },
                 ) { innerPadding ->
                     Column(Modifier.padding(innerPadding)) {
-                        RootNavGraph(rootNavController, navigationManager, appViewModels)
+                        RootNavGraph(rootNavController, navigationManager, allViewModels)
                     }
 
                 }

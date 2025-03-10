@@ -31,7 +31,7 @@ import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
 import com.roaa.expensetracker.Composables.ThemeMode
 import com.roaa.expensetracker.Composables.components.SingleItemRadioButton
 import com.roaa.expensetracker.Composables.components.TopBar
-import com.roaa.expensetracker.Hilt.AppViewModel
+import com.roaa.expensetracker.Hilt.AllViewModel
 import kotlinx.coroutines.launch
 
 val radioButtonColors
@@ -48,7 +48,7 @@ val radioButtonColors
 fun SettingsScreen(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     sendUserBack: () -> Unit,
 ) {
 
@@ -74,7 +74,7 @@ val topBottomPadding = 0.dp
 @Composable
 fun SettingsScreenContent(
     modifier: Modifier = Modifier,
-    viewModel: AppViewModel
+    viewModel: AllViewModel
 ) {
     val themeSelected by viewModel.preferencesViewModel.getThemeMode.collectAsState(ThemeMode.SYSTEM.toString())
     val showExperimentalComponent by viewModel.preferencesViewModel.showExperimentalComponent.collectAsState(false)

@@ -58,7 +58,7 @@ import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.toPalette
-import com.roaa.expensetracker.Hilt.AppViewModel
+import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Utilities.Constants.MAX_PAGES
 import com.roaa.expensetracker.Utilities.calculateEffectivePage
 import com.roaa.expensetracker.Utilities.convertTotalExpenseIncomeClassToMap
@@ -78,7 +78,7 @@ import java.util.Locale
 fun MonthViewScreen(
     navController: NavController,
     navigationManager: NavigationManager,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     modifier: Modifier = Modifier,
 ) {
     val scope = rememberCoroutineScope()

@@ -54,7 +54,7 @@ import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
-import com.roaa.expensetracker.Hilt.AppViewModel
+import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 
@@ -64,7 +64,7 @@ import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 fun CategoryScreen(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
-    viewModel:AppViewModel,
+    viewModel:AllViewModel,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
 ) {
@@ -121,7 +121,7 @@ fun CategoryScreen(
 fun SharedTransitionScope.ScaffoldContent(
     modifier: Modifier = Modifier,
     navigationManager: NavigationManager,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
 ) {

@@ -78,7 +78,7 @@ import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.harmonize
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
-import com.roaa.expensetracker.Hilt.AppViewModel
+import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
@@ -98,7 +98,7 @@ fun DayScreen(
     navigationManager: NavigationManager,
     showSingleDateTransactions: Boolean,
     date: Long,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
 ) {
     val scope = rememberCoroutineScope()
     LaunchedEffect(true) {
@@ -115,7 +115,7 @@ fun DayScreen(
 fun DayViewScreen(
     navController: NavController,
     navigationManager: NavigationManager,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
     date: Long,
     modifier: Modifier = Modifier,
 ) {

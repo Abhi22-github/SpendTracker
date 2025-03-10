@@ -27,7 +27,7 @@ import com.roaa.expensetracker.Composables.Screens.SettingsScreen
 import com.roaa.expensetracker.Composables.Screens.StatisticsScreenTest
 import com.roaa.expensetracker.Composables.Screens.TransactionDetailsScreen
 import com.roaa.expensetracker.Composables.components.TransactionsListCompose
-import com.roaa.expensetracker.Hilt.AppViewModel
+import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Utilities.toLong
 import java.time.LocalDate
 
@@ -37,7 +37,7 @@ import java.time.LocalDate
 fun RootNavGraph(
     rooNavController: NavHostController,
     navigationManager: NavigationManager,
-    viewModel: AppViewModel,
+    viewModel: AllViewModel,
 ) {
     SharedTransitionLayout {
         val context = LocalContext.current
@@ -158,7 +158,7 @@ fun RootNavGraph(
 fun AppNavGraph(
     rooNavController: NavHostController,
     navigationManager: NavigationManager,
-    viewModel: AppViewModel
+    viewModel: AllViewModel
 ) {
     SharedTransitionLayout {
         val context = LocalContext.current
