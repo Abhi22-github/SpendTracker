@@ -224,10 +224,10 @@ fun TransactionDetailsScreen(
                                 start = 20.dp, end = 20.dp, top = 16.dp, bottom = 16.dp
                             )
                         ) {
-                            val image =
+                            val newImage =
                                 rememberAsyncImagePainter(IconState.fromNumber(singleTransaction.category.categoryIconNumber))
                             Image(
-                                painter = image,
+                                painter = newImage,
                                 contentDescription = "Test Image",
                                 modifier = Modifier.size(24.dp),
                             )
@@ -368,7 +368,6 @@ fun TransactionDetailsScreen(
                                 )
                                 .padding(horizontal = 16.dp),
                         ) {
-                            val color = MaterialTheme.colorScheme.primary
 
                             Column {
                                 TitleWithCheckBox(
@@ -396,14 +395,16 @@ fun TransactionDetailsScreen(
                     }
                     Spacer(Modifier.height(20.dp))
                 }
-                Box(Modifier
-                    .padding(16.dp, 0.dp)
-                    .constrainAs(bottomRow) {
-                        bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }) {
-                    BottomActionRow(Modifier,
+                Box(
+                    Modifier
+                        .padding(16.dp, 0.dp)
+                        .constrainAs(bottomRow) {
+                            bottom.linkTo(parent.bottom)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                        }) {
+                    BottomActionRow(
+                        Modifier,
                         { showDeleteConfirmation = !showDeleteConfirmation },
                         { showEdit = !showEdit })
                 }

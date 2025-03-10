@@ -301,7 +301,6 @@ fun BottomSheetBudgetContent(
     removeError: () -> Unit,
     setError:() -> Unit
 ) {
-    val scope = rememberCoroutineScope()
     val focusRequester = remember {
         FocusRequester()
     }
@@ -500,7 +499,7 @@ fun BottomSheetBudgetContent(
                         )
                     }
                     Text(
-                        text = "${restDistributionValue.type}",
+                        text = restDistributionValue.type,
                         modifier = Modifier
                             .weight(1f),
                         textAlign = TextAlign.End,

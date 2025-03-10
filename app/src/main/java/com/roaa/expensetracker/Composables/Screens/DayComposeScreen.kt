@@ -313,7 +313,7 @@ fun TabItem(
                     color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(
                         alpha = 0.6f
                     ),
-                    style = MaterialTheme.typography.bodySmall.copy(),
+                    style = typography.bodySmall.copy(),
                     textAlign = TextAlign.Center,
                     modifier = Modifier.padding()
                 )
@@ -334,7 +334,7 @@ fun TabItem(
                         color = if (isSelected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.primary.copy(
                             alpha = 1f
                         ),
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = typography.bodyMedium,
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()

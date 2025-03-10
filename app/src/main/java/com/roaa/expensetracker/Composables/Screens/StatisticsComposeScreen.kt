@@ -35,9 +35,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.rounded.AccessTime
-import androidx.compose.material.icons.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.BubbleChart
 import androidx.compose.material.icons.rounded.FilterList
@@ -191,7 +191,7 @@ fun StatisticsScreen(
                         )
                     ) {
                         Text(
-                            text = "last 1 month", style = MaterialTheme.typography.titleMedium
+                            text = "last 1 month", style = typography.titleMedium
                         )
                         Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = "Settings")
 
@@ -243,7 +243,7 @@ fun StatisticsScreen(
                             modifier = Modifier
                                 .padding(horizontal = 16.dp, vertical = 16.dp)
                                 .weight(0.9f),
-                            style = MaterialTheme.typography.titleMedium
+                            style = typography.titleMedium
                         )
                         IconButton(onClick = { categoryWiseDropDown = !categoryWiseDropDown }) {
                             Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = "down")
@@ -312,7 +312,7 @@ fun StatisticsScreen(
                             modifier = Modifier
                                 .padding(horizontal = 16.dp, vertical = 16.dp)
                                 .weight(0.9f),
-                            style = MaterialTheme.typography.titleMedium
+                            style = typography.titleMedium
                         )
                         IconButton(onClick = { expenseWiseDropDown = !expenseWiseDropDown }) {
                             Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = "down")
@@ -351,7 +351,7 @@ fun StatisticsScreen(
                             modifier = Modifier
                                 .padding(horizontal = 16.dp, vertical = 16.dp)
                                 .weight(0.9f),
-                            style = MaterialTheme.typography.titleMedium
+                            style = typography.titleMedium
                         )
                         IconButton(onClick = { incomeWiseDropDown = !incomeWiseDropDown }) {
                             Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = "down")
@@ -401,7 +401,6 @@ fun ChipsForFilter(
 
 @Composable
 fun BankChips(
-    index: Int,
     selectedBankAccountsClass: BankAccountsClass,
     bankAccountsClass: BankAccountsClass,
     selectChip: (BankAccountsClass) -> Unit
@@ -412,7 +411,7 @@ fun BankChips(
             Text(
                 text = bankAccountsClass.bankName,
                 modifier = Modifier.padding(vertical = 8.dp),
-                style = MaterialTheme.typography.bodyMedium
+                style = typography.bodyMedium
             )
         },
         selected = selectedBankAccountsClass.bankAccountId == bankAccountsClass.bankAccountId,
@@ -476,14 +475,14 @@ fun CategoryStatEntry(modifier: Modifier = Modifier, color: Color) {
                 Row() {
                     Text(
                         text = "Food & Expense",
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
                         text = "(60%)",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontFamily = CustomFonts.numberFont),
+                        style = typography.bodyLarge.copy(fontFamily = CustomFonts.numberFont),
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -495,7 +494,7 @@ fun CategoryStatEntry(modifier: Modifier = Modifier, color: Color) {
             }
             Text(
                 text = parseAmount(BigDecimal(34735)),
-                style = MaterialTheme.typography.bodyLarge.copy(fontFamily = CustomFonts.numberFont)
+                style =typography.bodyLarge.copy(fontFamily = CustomFonts.numberFont)
             )
         }
     }
@@ -619,7 +618,7 @@ fun StatisticsScreenTest(
                                 startDate.toLocalDate().toDisplayStringForMonthWithYear()
                                     .split(",")[0]
                             }-${endDate.toLocalDate().toDisplayStringForMonthWithYear()}",
-                            style = MaterialTheme.typography.titleMedium
+                            style =typography.titleMedium
                         )
                         Spacer(Modifier.width(4.dp))
                         Icon(Icons.Rounded.FilterList, contentDescription = "Settings")
@@ -692,7 +691,7 @@ fun StatisticsScreenTest(
                             Text(
                                 text = it,
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
                         }
@@ -700,7 +699,7 @@ fun StatisticsScreenTest(
                             Text(
                                 text = "₹ ${parseAmount(it)}",
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp),
-                                style = MaterialTheme.typography.headlineMedium.copy(fontFamily = CustomFonts.numberFont)
+                                style = typography.headlineMedium.copy(fontFamily = CustomFonts.numberFont)
                             )
                         }
                         AnimatedContent(targetState = transactionCount) {
@@ -709,7 +708,7 @@ fun StatisticsScreenTest(
                                 modifier = Modifier.padding(
                                     horizontal = 16.dp, vertical = 8.dp
                                 ),
-                                style = MaterialTheme.typography.labelLarge,
+                                style = typography.labelLarge,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                             )
                         }
@@ -723,7 +722,7 @@ fun StatisticsScreenTest(
                         ), modifier = Modifier.padding(horizontal = 16.dp)
                     ) {
                         Text(
-                            text = "Daily", style = MaterialTheme.typography.bodyMedium
+                            text = "Daily", style = typography.bodyMedium
                         )
                         Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = "Settings")
 
@@ -752,7 +751,7 @@ fun StatisticsScreenTest(
                 Text(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     text = "Category",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Column {
@@ -825,11 +824,11 @@ fun StatisticsScreenTest(
                                 Spacer(Modifier.width(8.dp))
                                 Text(
                                     text = "Bank Account Analysis",
-                                    style = MaterialTheme.typography.titleMedium
+                                    style = typography.titleMedium
                                 )
                             }
 
-                            Icon(Icons.Rounded.ArrowForward, contentDescription = "Settings")
+                            Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = "Settings")
                         }
                     }
                 }
@@ -861,11 +860,11 @@ fun StatisticsScreenTest(
                                 Spacer(Modifier.width(8.dp))
                                 Text(
                                     text = "Category Wise Analysis",
-                                    style = MaterialTheme.typography.titleMedium
+                                    style = typography.titleMedium
                                 )
                             }
 
-                            Icon(Icons.Rounded.ArrowForward, contentDescription = "Settings")
+                            Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = "Settings")
                         }
                     }
                 }
@@ -957,7 +956,7 @@ fun CategoryStatEntryTest(
                         Row(Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
                             Text(
                                 text = "${String.format("%.2f", categorySummaryClass.percentage)}%",
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -979,7 +978,7 @@ fun CategoryStatEntryTest(
                         Row(Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
                             Text(
                                 text = "${categorySummaryClass.categoryClass.categoryName} X${categorySummaryClass.transactionCount}",
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -990,7 +989,7 @@ fun CategoryStatEntryTest(
             }
             Text(
                 text = "₹ ${parseAmount(categorySummaryClass.totalAmount)}",
-                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = CustomFonts.numberFont)
+                style = typography.bodyMedium.copy(fontFamily = CustomFonts.numberFont)
             )
         }
     }
@@ -1169,7 +1168,7 @@ fun FilterBottomSheetContent(
             ) {
                 bankAccountList.forEachIndexed { index, bankAccountsClass ->
                     BankChips(
-                        index, selectedBankAccount, bankAccountsClass
+                        selectedBankAccount, bankAccountsClass
                     ) { setSelectedChip(it) }
                 }
             }
@@ -1273,7 +1272,7 @@ fun BankAnalysisBottomSheetContent(
         ) {
             bankAccountList.forEachIndexed { index, bankAccountsClass ->
                 BankChips(
-                    index, selectedBankAccount, bankAccountsClass
+                    selectedBankAccount, bankAccountsClass
                 ) { setSelectedBankAccount(it) }
             }
         }
@@ -1318,7 +1317,7 @@ fun BankAnalysisBottomSheetContent(
                     Text(
                         modifier = modifier.padding(vertical = 8.dp),
                         text = "Transactions",
-                        style = MaterialTheme.typography.titleMedium,
+                        style = typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }

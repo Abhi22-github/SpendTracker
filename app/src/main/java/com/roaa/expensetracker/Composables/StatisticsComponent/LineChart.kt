@@ -234,7 +234,7 @@ fun LineChartBudgetTotalUsage(
     ) {
     val maxY = maxOf(
         totalBudgetAmount.multiply(BigDecimal(1.2)), // Add 20% buffer above budget
-        lineChartDataList.values.max() ?: BigDecimal.ZERO
+        lineChartDataList.values.max()
     ).toDouble()
 
     val modelProducer = remember { CartesianChartModelProducer() }

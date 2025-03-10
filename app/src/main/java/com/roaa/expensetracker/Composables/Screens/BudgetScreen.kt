@@ -576,14 +576,14 @@ fun BudgetScreen(
                         Text(
                             text = "Total Budget Analysis",
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp),
-                            style = MaterialTheme.typography.titleMedium
+                            style = typography.titleMedium
                         )
                         Text(
                             text = "total cumulative expense by day for budget period",
                             modifier = Modifier.padding(
                                 horizontal = 16.dp, vertical = 0.dp
                             ),
-                            style = MaterialTheme.typography.labelLarge,
+                            style = typography.labelLarge,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                         )
 
@@ -601,14 +601,14 @@ fun BudgetScreen(
                         Text(
                             text = "Expense Per Day Analysis",
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp),
-                            style = MaterialTheme.typography.titleMedium
+                            style = typography.titleMedium
                         )
                         Text(
                             text = "total cumulative expense by day for budget period",
                             modifier = Modifier.padding(
                                 horizontal = 16.dp, vertical = 0.dp
                             ),
-                            style = MaterialTheme.typography.labelLarge,
+                            style = typography.labelLarge,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                         )
 
@@ -823,8 +823,6 @@ fun SpendCalenderMonth(
                 } else {
                     it.dayState
                 }
-            } else {
-
             }
         }
 
@@ -836,7 +834,7 @@ fun SpendCalenderMonth(
                     .fillMaxWidth()
                     .padding(top = 10.dp)
             ) {
-                var p = weekList.toMutableList()
+                val p = weekList.toMutableList()
                 if (weekList.size != 7) {
                     for (i in 0 until (7 - weekList.size)) {
                         p.add(CalenderDayState("-1", 0L, false, DayState.NOT_STARTED))
@@ -900,7 +898,7 @@ fun DayBox(modifier: Modifier = Modifier, text: String, inBudget: Boolean, daySt
                 tint = tint.copy(alpha = 0.3f)
             )
         Text(
-            text = if (text != "-1") text.toString() else "",
+            text = if (text != "-1") text else "",
             style = typography.labelMedium,
             color = textColor,
             textAlign = TextAlign.Center,

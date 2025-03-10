@@ -1,7 +1,5 @@
 package com.roaa.expensetracker.Utilities
 
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import com.roaa.expensetracker.Composables.color1
 import com.roaa.expensetracker.Composables.color2
 import com.roaa.expensetracker.Composables.color3
@@ -58,13 +56,6 @@ fun convertDataToSeries(
         incomeListPerDayHashMap[day.toDateWithDayName()] = income
     }
     return Pair(expenseListPerDayHashMap, incomeListPerDayHashMap)
-}
-
-fun calculateBarPercentageHeight(maxHeight: Dp, maxExpense: Float, expenseAmount: Float): Dp {
-    if (maxExpense == 0f) return 0.dp
-    if (expenseAmount == 0f) return 0.dp
-
-    return (maxHeight.value * expenseAmount / maxExpense).dp
 }
 
 enum class DeleteAction {

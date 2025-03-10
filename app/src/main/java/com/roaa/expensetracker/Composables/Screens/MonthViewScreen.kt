@@ -148,7 +148,6 @@ fun MonthViewScreen(
         val totalValuesPerDayForMonthMap = remember(totalExpenseList) {
             convertTotalExpenseIncomeClassToMap(totalExpenseList)
         }
-        val color = toPalette(orange)
         Column {
             HorizontalDivider(
                 thickness = 0.7.dp,
@@ -225,7 +224,7 @@ fun MonthView(
                     text = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.labelMedium
+                    style = typography.labelMedium
                 )
             }
         }
@@ -355,7 +354,7 @@ fun DayCell(
                         text = date.dayOfMonth.toString(),
                         color = textColor,
                         fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = typography.labelMedium,
                         textAlign = TextAlign.Center,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -377,7 +376,7 @@ fun DayCell(
                     Text(
                         text = "-₹${parseAmount(it.first)}",
                         color = colorPalletOrange.main,
-                        style = MaterialTheme.typography.labelSmall.copy(fontFamily = CustomFonts.numberFont),
+                        style = typography.labelSmall.copy(fontFamily = CustomFonts.numberFont),
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -401,7 +400,7 @@ fun DayCell(
                     Text(
                         text = "+₹${parseAmount(it.second)}",
                         color = colorPalletGreen.main,
-                        style = MaterialTheme.typography.labelSmall.copy(fontFamily = CustomFonts.numberFont),
+                        style = typography.labelSmall.copy(fontFamily = CustomFonts.numberFont),
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .padding(3.dp, 2.dp)

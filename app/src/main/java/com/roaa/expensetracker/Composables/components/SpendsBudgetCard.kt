@@ -92,7 +92,7 @@ fun SpendsBudgetCard(
                     colorNotGood,
                     colorGood,
                 ),
-                percentWithNewSpentAnimated.coerceIn(0f, 1f).toFloat(),
+                percentWithNewSpentAnimated.coerceIn(0f, 1f),
             )
         )
     )

@@ -195,7 +195,7 @@ fun Test(
 
 
     Box(Modifier.size(350.dp)) {
-        PieChartView(pieDataSet = pieDataSet, surface.toArgb(),onSurface.toArgb())
+        PieChartView(pieDataSet = pieDataSet,onSurface.toArgb())
     }
 
 //    PieChart(
@@ -222,7 +222,7 @@ fun Test(
 }
 
 @Composable
-fun PieChartView(pieDataSet: PieDataSet, surface: Int, onSurface: Int) {
+fun PieChartView(pieDataSet: PieDataSet, onSurface: Int) {
     AndroidView(factory = { context ->
         com.github.mikephil.charting.charts.PieChart(context).apply {
             layoutParams = ViewGroup.LayoutParams(
