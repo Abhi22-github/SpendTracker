@@ -105,8 +105,6 @@ fun TransactionDetailsScreen(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
     viewModel: AllViewModel,
-    amount: Float,
-    categoryName1: String,
 ) {
     val singleTransaction by viewModel.uiViewModel.transactionDetailsWithViewModelFlow.collectAsState()
     var showDeleteConfirmation by remember { mutableStateOf(false) }

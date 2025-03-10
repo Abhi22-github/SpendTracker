@@ -50,7 +50,8 @@ import com.patrykandpatrick.vico.core.common.component.TextComponent
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import com.roaa.expensetracker.Composables.utils.HarmonizedColorPalette
-import com.roaa.expensetracker.Model.UiDateModels.BarChartExpenseModel
+import com.roaa.expensetracker.Model.UiDataModels.BarChartExpenseModel
+import java.math.BigDecimal
 import java.text.DecimalFormat
 
 
@@ -274,7 +275,7 @@ fun BarChartStatisticsScreen(
 
 
 @Composable
-private fun rememberHorizontalLine(budgetAmount: Float,palette: HarmonizedColorPalette): HorizontalLine {
+private fun rememberHorizontalLine(budgetAmount: BigDecimal,palette: HarmonizedColorPalette): HorizontalLine {
     val fill = fill(palette.main.copy(alpha = 0.1f))
     val line = rememberLineComponent(fill = fill(palette.main), thickness = 2.dp)
     val labelComponent =
@@ -301,12 +302,12 @@ fun BarChartBudgetUsage(
     modifier: Modifier = Modifier,
     palette: HarmonizedColorPalette,
     chartDataList: List<BarChartExpenseModel>,
-    budgetAmount: Float
+    budgetAmount: BigDecimal
 ) {
 
     val maxY = maxOf(
-        budgetAmount * 1.2f, // Add 20% buffer above budget
-        chartDataList.maxOfOrNull { it.expenseAmount } ?: 0f
+        budgetAmount.multiply(BigDecimal(1.2)), // Add 20% buffer above budget
+        chartDataList.maxOfOrNull { it.expenseAmount } ?: BigDecimal.ZERO
     ).toDouble()
 
     val modelProducer = remember { CartesianChartModelProducer() }

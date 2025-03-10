@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import javax.inject.Inject
 
 
@@ -62,13 +63,13 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
 
     fun createObjectAndStoreIt(
         budgetSummaryWithDay: BudgetWithDayDetails,
-        totalAMountForMonth: Float,
-        totalAmountPerDay: Float,
+        totalAMountForMonth: BigDecimal,
+        totalAmountPerDay: BigDecimal,
         totalDaysRemaining: Long,
         budgeMonthStartDate: Long,
         budgetMonthEndDate: Long,
         restDistributionValue: DistributionMethod,
-        notificationUsageValue: Float,
+        notificationUsageValue: BigDecimal,
         validDatesListFromLong: List<Long>
     ) {
         val budgeObject = BudgetModelClass(

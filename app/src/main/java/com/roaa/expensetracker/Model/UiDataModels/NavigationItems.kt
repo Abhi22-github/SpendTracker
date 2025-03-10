@@ -1,4 +1,4 @@
-package com.roaa.expensetracker.Model
+package com.roaa.expensetracker.Model.UiDataModels
 
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 

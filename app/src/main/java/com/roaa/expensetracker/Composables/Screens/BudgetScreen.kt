@@ -74,8 +74,9 @@ import com.roaa.expensetracker.Composables.utils.HarmonizedColorPalette
 import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.harmonize
 import com.roaa.expensetracker.Composables.utils.toPalette
+import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import com.roaa.expensetracker.Hilt.AllViewModel
-import com.roaa.expensetracker.Model.UiDateModels.BarChartExpenseModel
+import com.roaa.expensetracker.Model.UiDataModels.BarChartExpenseModel
 import com.roaa.expensetracker.Utilities.CalenderDayState
 import com.roaa.expensetracker.Utilities.DayState
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBudgetClass
@@ -88,7 +89,7 @@ import com.roaa.expensetracker.Utilities.getMonthsBetween
 import com.roaa.expensetracker.Utilities.toDayMonthFormat
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
-import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
+import java.math.BigDecimal
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
@@ -151,10 +152,10 @@ fun BudgetScreen(
     ) {
         Column(modifier = Modifier.padding(it)) {
             if (isBudgetSet) {
-                var currentBudgetLocal by remember { mutableStateOf(0f) }
-                var currentExpenseLocal by remember { mutableStateOf(0f) }
+                var currentBudgetLocal by remember { mutableStateOf(BigDecimal.ZERO) }
+                var currentExpenseLocal by remember { mutableStateOf(BigDecimal.ZERO) }
                 var remainingBudget by remember { mutableStateOf(currentBudgetLocal - currentExpenseLocal) }
-                var remainingDaysPercentage by remember { mutableStateOf(0f) }
+                var remainingDaysPercentage by remember { mutableStateOf(BigDecimal.ZERO) }
 
                 val barChartDataList = getCurrentBudget.budgetAllDays.map {
                     BarChartExpenseModel(
@@ -165,7 +166,7 @@ fun BudgetScreen(
                     )
                 }
                 val cumulativeBudgetList =
-                    getCurrentBudget.budgetAllDays.runningFold(0f) { sum, item -> sum + item.totalExpense }
+                    getCurrentBudget.budgetAllDays.runningFold(BigDecimal.ZERO) { sum, item -> sum + item.totalExpense }
                         .drop(1)
 
 
@@ -177,12 +178,12 @@ fun BudgetScreen(
 
                 LaunchedEffect(getCurrentBudget) {
 
-                    if (getCurrentBudget.budgetSummary.totalBudgetAmount == 0f) {
+                    if (getCurrentBudget.budgetSummary.totalBudgetAmount == BigDecimal.ZERO) {
                         currentBudgetLocal = getCurrentBudget.budgetSummary.totalBudgetAmount
                     } else {
                         currentBudgetLocal = getCurrentBudget.budgetSummary.totalBudgetAmount
                     }
-                    currentExpenseLocal = getCurrentBudget.budgetAllDays.fold(0f) { acc, i ->
+                    currentExpenseLocal = getCurrentBudget.budgetAllDays.fold(BigDecimal.ZERO) { acc, i ->
                         acc + i.totalExpense
                     }
                     remainingBudget = currentBudgetLocal - currentExpenseLocal
@@ -191,10 +192,10 @@ fun BudgetScreen(
                 LaunchedEffect(getCurrentBudget) {
                     if (getCurrentBudget.budgetSummary.budgetTotalDays != 0L) {
                         remainingDaysPercentage =
-                            (getDaysRemaining(getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate()).toFloat()
-                                .div(getCurrentBudget.budgetSummary.budgetTotalDays.toFloat()))
+                            (getDaysRemaining(getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate()).toBigDecimal()
+                                .div(getCurrentBudget.budgetSummary.budgetTotalDays.toBigDecimal()))
                     } else {
-                        remainingDaysPercentage = 1f
+                        remainingDaysPercentage = BigDecimal.ONE
                     }
                 }
 
@@ -266,7 +267,7 @@ fun BudgetScreen(
                             LocalDate.now()
                         )
                         Text(
-                            text = "You can spend ₹${(currentBudgetLocal - currentExpenseLocal) / remainingBudgetDays}/day for ${remainingBudgetDays} more days",
+                            text = "You can spend ₹${(currentBudgetLocal - currentExpenseLocal).div(BigDecimal(remainingBudgetDays))}/day for ${remainingBudgetDays} more days",
                             modifier = modifier
                                 .fillMaxWidth()
                                 .padding(top = 16.dp),
@@ -338,8 +339,8 @@ fun BudgetScreen(
                     ) {
                         SpendsBudgetCard(
                             Modifier,
-                            if (currentBudgetLocal == 0f) 1f else currentBudgetLocal,
-                            if (currentExpenseLocal == 0f) 1f else currentExpenseLocal,
+                            if (currentBudgetLocal == BigDecimal.ZERO) BigDecimal.ONE else currentBudgetLocal,
+                            if (currentExpenseLocal == BigDecimal.ZERO) BigDecimal.ONE else currentExpenseLocal,
                         )
                     }
                     Spacer(Modifier.height(12.dp))
@@ -667,11 +668,11 @@ fun BudgetScreen(
 @Composable
 fun IndeterminateCircularIndicator(
     modifier: Modifier,
-    progress: State<Float>,
+    progress: State<BigDecimal>,
     harmonizedColor: HarmonizedColorPalette
 ) {
     CircularProgressIndicator(
-        progress = { progress.value },
+        progress = { progress.value.toFloat() },
         modifier = modifier,
         color = harmonizedColor.main,
         trackColor = harmonizedColor.container.copy(alpha = 0.3f),
@@ -813,7 +814,7 @@ fun SpendCalenderMonth(
 
         list.forEachIndexed { index, it ->
             if (budgetDayMap.containsKey(it.dayDate)) {
-                if (budgetDayMap[it.dayDate]!!.totalExpense == 0f) {
+                if (budgetDayMap[it.dayDate]!!.totalExpense == BigDecimal.ZERO) {
                     it.dayState = DayState.NOT_STARTED
                 } else if (budgetDayMap[it.dayDate]!!.totalExpense > budgetDayMap[it.dayDate]!!.budgetAmount) {
                     it.dayState = DayState.OVER_LIMIT
@@ -915,8 +916,8 @@ fun DayProgressIndicator(
     modifier: Modifier = Modifier,
     height: Float,
     totalDays: Long,
-    totalAmount: Float,
-    expenseAmount: Float,
+    totalAmount: BigDecimal,
+    expenseAmount: BigDecimal,
     day: Long, // Days to decorate
     dayName: String,
     isInBudget: Boolean
@@ -925,7 +926,7 @@ fun DayProgressIndicator(
     val completedColor = MaterialTheme.colorScheme.primaryContainer
     val decorationColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
     val progress =
-        if (expenseAmount == 0f) 1f else expenseAmount / if (totalAmount == 0f) 1f else totalAmount
+        if (expenseAmount == BigDecimal.ZERO) BigDecimal.ONE else expenseAmount / if (totalAmount == BigDecimal.ZERO) BigDecimal.ONE else totalAmount
     Box(
         modifier = modifier, contentAlignment = Alignment.Center
     ) {
@@ -951,7 +952,7 @@ fun DayProgressIndicator(
             drawLine(
                 color = completedColor,
                 start = Offset(0f, size.height / 2),
-                end = Offset(segmentWidthForProgress * progress, size.height / 2),
+                end = Offset(segmentWidthForProgress * progress.toFloat(), size.height / 2),
                 strokeWidth = height,
                 cap = StrokeCap.Round
             )

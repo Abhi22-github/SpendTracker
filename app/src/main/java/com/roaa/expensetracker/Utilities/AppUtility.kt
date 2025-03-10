@@ -8,7 +8,7 @@ import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Hilt.AllViewModel
-import com.roaa.expensetracker.Model.NavigationItems
+import com.roaa.expensetracker.Model.UiDataModels.NavigationItems
 import com.roaa.expensetracker.R
 import kotlinx.coroutines.DelicateCoroutinesApi
 import java.time.LocalDate

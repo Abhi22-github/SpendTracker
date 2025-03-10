@@ -5,9 +5,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.roaa.expensetracker.Model.TotalAmountClass
-import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Model.TransactionClass
+import com.roaa.expensetracker.Model.UiDataModels.TotalAmountClass
+import com.roaa.expensetracker.Model.UiDataModels.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
 import com.roaa.expensetracker.Utilities.UiState
@@ -41,13 +41,13 @@ class TransactionsViewModel @Inject constructor(
 
     //flow to get total Expense amount for range
     private val _getTotalExpenseAmountForRangeFlow =
-        MutableStateFlow<TotalAmountClass>(TotalAmountClass(0, 0f))
+        MutableStateFlow<TotalAmountClass>(TotalAmountClass(0, BigDecimal.ZERO))
     val getTotalExpenseAmountForRangeFlow: StateFlow<TotalAmountClass> =
         _getTotalExpenseAmountForRangeFlow
 
     //flow to get total Income amount for range
     private val _getTotalIncomeAmountForRangeFlow =
-        MutableStateFlow<TotalAmountClass>(TotalAmountClass(0, 0f))
+        MutableStateFlow<TotalAmountClass>(TotalAmountClass(0, BigDecimal.ZERO))
     val getTotalIncomeAmountForRangeFlow: StateFlow<TotalAmountClass> =
         _getTotalIncomeAmountForRangeFlow
 
@@ -64,8 +64,8 @@ class TransactionsViewModel @Inject constructor(
         _getListOfTotalAmountPerDayForRangeFlow
 
     //flow to get total amount for given date
-    private val _getTotalExpenseAmountForDateFlow = MutableStateFlow<Float>(0f)
-    val getTotalExpenseAmountForDateFlow: StateFlow<Float> = _getTotalExpenseAmountForDateFlow
+    private val _getTotalExpenseAmountForDateFlow = MutableStateFlow<BigDecimal>(BigDecimal.ZERO)
+    val getTotalExpenseAmountForDateFlow: StateFlow<BigDecimal> = _getTotalExpenseAmountForDateFlow
 
 
     var selectedDate: Long
@@ -77,8 +77,8 @@ class TransactionsViewModel @Inject constructor(
     var currentSelectedDate: LiveData<Int>
     var todaysDate: LocalDate
     var spend: MutableLiveData<BigDecimal>
-    var oldTotal: MutableLiveData<Float>
-    var newTotal: MutableLiveData<Float>
+    var oldTotal: MutableLiveData<BigDecimal>
+    var newTotal: MutableLiveData<BigDecimal>
     var oldTotalString: MutableLiveData<String>
     var newTotalString: MutableLiveData<String>
     var dateList: MutableLiveData<MutableList<String>>
@@ -91,8 +91,8 @@ class TransactionsViewModel @Inject constructor(
         currentSelectedDate = _currentSelectedDate
         todaysDate = LocalDate.now()
         spend = MutableLiveData(BigDecimal.valueOf(1))
-        oldTotal = MutableLiveData(1f)
-        newTotal = MutableLiveData(1f)
+        oldTotal = MutableLiveData(BigDecimal.ONE)
+        newTotal = MutableLiveData(BigDecimal.ONE)
         oldTotalString = MutableLiveData("")
         newTotalString = MutableLiveData("")
         dateList = MutableLiveData(mutableListOf<String>())
@@ -131,7 +131,7 @@ class TransactionsViewModel @Inject constructor(
         val modal = TransactionClass(
             id = 0L,
             type = expense.trim { it <= ' ' },
-            amount = amount.trim { it <= ' ' }.replace(",", "").toFloat(),
+            amount = amount.trim { it <= ' ' }.replace(",", "").toBigDecimal(),
             note = note.trim { it <= ' ' },
             dateWithTime = System.currentTimeMillis(),
             date = date,
@@ -293,15 +293,15 @@ class TransactionsViewModel @Inject constructor(
         return transactionRepository.getTransactionListForBankAccountId(bankAccountId)
     }
 
-    fun getTotalExpenseAmountForDateCompose(date: Long): Flow<Float> {
+    fun getTotalExpenseAmountForDateCompose(date: Long): Flow<BigDecimal> {
         return transactionRepository.getTotalAmountForDate(date, EXPENSE)
     }
 
-    fun getTotalIncomeAmountForDateCompose(date: Long): Flow<Float> {
+    fun getTotalIncomeAmountForDateCompose(date: Long): Flow<BigDecimal> {
         return transactionRepository.getTotalAmountForDate(date, INCOME)
     }
 
-    fun getTotalExpenseAmountForDateExcludingLastCompose(date: Long): Flow<Float> {
+    fun getTotalExpenseAmountForDateExcludingLastCompose(date: Long): Flow<BigDecimal> {
         return transactionRepository.getTotalAmountForDateExcludingLast(date, EXPENSE)
     }
 

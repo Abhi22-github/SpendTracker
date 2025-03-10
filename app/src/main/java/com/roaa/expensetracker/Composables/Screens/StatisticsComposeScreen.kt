@@ -131,6 +131,7 @@ import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.Utilities.toLongMillis
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -493,7 +494,7 @@ fun CategoryStatEntry(modifier: Modifier = Modifier, color: Color) {
 //                Spacer(modifier = Modifier.width(16.dp))
             }
             Text(
-                text = parseAmount(34735f),
+                text = parseAmount(BigDecimal(34735)),
                 style = MaterialTheme.typography.bodyLarge.copy(fontFamily = CustomFonts.numberFont)
             )
         }
@@ -540,10 +541,10 @@ fun StatisticsScreenTest(
 
     val expenseTransactions =
         transactionsForTimePeriodFromRoom.filter { it.transaction.type == EXPENSE }
-    val totalExpense = expenseTransactions.sumOf { it.transaction.amount.toDouble() }.toFloat()
+    val totalExpense = expenseTransactions.sumOf { it.transaction.amount }
     val incomeTransaction =
         transactionsForTimePeriodFromRoom.filter { it.transaction.type == INCOME }
-    val totalIncome = incomeTransaction.sumOf { it.transaction.amount.toDouble() }.toFloat()
+    val totalIncome = incomeTransaction.sumOf { it.transaction.amount }
 
     val title = if (selectedIndex == 0) "Total Expense" else "Total Income"
     val amount = if (selectedIndex == 0) totalExpense else totalIncome
@@ -557,24 +558,24 @@ fun StatisticsScreenTest(
         ), totalAmountMap
     )
 
-    var totalAmount = 0f
+    var totalAmount = BigDecimal.ZERO
 
     val categoryListData =
         (if (selectedIndex == 0) expenseTransactions else incomeTransaction).groupBy { it.category }
             .mapValues { (category, list) ->
-                totalAmount += list.fold(0f) { acc, i -> acc + i.transaction.amount }
+                totalAmount += list.fold(BigDecimal.ZERO) { acc, i -> acc + i.transaction.amount }
                 CategorySummaryClass(
                     category,
                     list.size,
-                    ((list.size.toFloat() / transactionCount.toFloat()) * 100),
-                    list.sumOf { it.transaction.amount.toDouble() }.toFloat(),
+                    ((list.size.toBigDecimal().div(transactionCount.toBigDecimal())) * BigDecimal(100)),
+                    list.sumOf { it.transaction.amount},
                     colorList.random()
                 )
             }
     categoryListData.onEachIndexed { index, entry ->
         entry.value.color = colorList[index]
         entry.value.percentage =
-            ((entry.value.totalAmount / if (totalAmount == 0f) 1f else totalAmount) * 100)
+            ((entry.value.totalAmount / if (totalAmount == BigDecimal.ZERO) BigDecimal.ONE else totalAmount) * BigDecimal(100))
     }
     val sortedCategoryListData = categoryListData.toList()
         .sortedByDescending { it.second.totalAmount } // Sort by value
@@ -765,7 +766,7 @@ fun StatisticsScreenTest(
                         val pieDataList = sortedCategoryListData.map {
                             PieChartData(
                                 partName = it.key.categoryName,
-                                data = if (it.value.totalAmount == 0f) 1.0 else it.value.totalAmount.toDouble(),
+                                data = if (it.value.totalAmount == BigDecimal.ZERO) 1.0 else it.value.totalAmount.toDouble(),
                                 color = it.value.color,
                             )
                         }

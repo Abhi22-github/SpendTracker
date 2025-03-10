@@ -184,7 +184,7 @@ fun Test(
     }.mapValues {
         it.value.percentage
     }
-    val pieEntries = pieData.map { PieEntry(it.value, it.key) }
+    val pieEntries = pieData.map { PieEntry(it.value.toFloat(), it.key) }
 
     val pieDataSet = PieDataSet(pieEntries, "Categories").apply {
         colors = colorList.map { it.toArgb() }

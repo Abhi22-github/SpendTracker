@@ -78,7 +78,7 @@ import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Converters.TransactionConverter
 import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Model.TransactionClass
-import com.roaa.expensetracker.Model.UiDateModels.BarChartExpenseModel
+import com.roaa.expensetracker.Model.UiDataModels.BarChartExpenseModel
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
@@ -97,6 +97,7 @@ import com.roaa.expensetracker.Utilities.toDisplayDate
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -240,10 +241,7 @@ fun TransactionsListCompose(
                                             }
                                             if (showExperimentalComponents)
                                                 navigationManager.navigateTo(
-                                                    Destinations.DetailsScreen(
-                                                        it.transaction.amount,
-                                                        it.category.categoryName
-                                                    )
+                                                    Destinations.DetailsScreen
                                                 )
                                             else
                                                 bottomSheet = true
@@ -275,10 +273,7 @@ fun TransactionsListCompose(
                                 }
                                 if (showExperimentalComponents)
                                     navigationManager.navigateTo(
-                                        Destinations.DetailsScreen(
-                                            it.transaction.amount,
-                                            it.category.categoryName
-                                        )
+                                        Destinations.DetailsScreen
                                     )
                                 else
                                     bottomSheet = true
@@ -432,7 +427,7 @@ fun HomeStatCardNew(
     expense: String,
     totalTransactionsCount: Int,
     selectedMonthShort: String,
-    currentMonthAllDayAndDatesListAndMaxValue: Pair<List<BarChartExpenseModel>, Float>
+    currentMonthAllDayAndDatesListAndMaxValue: Pair<List<BarChartExpenseModel>, BigDecimal>
 ) {
     val palette =
         toPalette(orange)

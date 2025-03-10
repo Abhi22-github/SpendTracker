@@ -38,7 +38,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.key
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -89,6 +88,7 @@ import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.Utilities.toLongMillis
 import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -162,12 +162,12 @@ fun BudgetContentController(
     val keyboardController = LocalSoftwareKeyboardController.current
     val focusManager = LocalFocusManager.current
     var totalAmountText by remember { mutableStateOf("") }
-    var totalAmountPerDay by remember { mutableFloatStateOf(0f) }
+    var totalAmountPerDay by remember { mutableStateOf(BigDecimal.ZERO) }
     var totalDaysRemaining by remember { mutableLongStateOf(0L) }
     var startDate by remember { mutableLongStateOf(0L) }
     var endDate by remember { mutableLongStateOf(0L) }
     var restDistributionValue by remember { mutableStateOf(DistributionMethod.DEFAULT) }
-    var notificationUsageValue by remember { mutableFloatStateOf(20f) }
+    var notificationUsageValue by remember { mutableStateOf(BigDecimal(20)) }
 
     BottomSheetBudgetContent(
         modifier,
@@ -190,7 +190,7 @@ fun BudgetContentController(
                         true
                     )
                 }
-            } else if (totalAmountText.toFloat() == 0f) {
+            } else if (totalAmountText.toBigDecimal() == BigDecimal.ZERO) {
                 scope.launch {
                     viewModel.uiViewModel.setErrorMessage(
                         "Please enter amount"
@@ -265,18 +265,18 @@ fun SaveBudgetDetailsInDatabase(
     budgetWithSummary: BudgetWithDayDetails,
     viewModel: AllViewModel,
     totalAmountForMonth: String,
-    totalAmountPerDay: Float,
+    totalAmountPerDay: BigDecimal,
     totalDaysRemaining: Long,
     budgetStartDate: Long,
     budgetEndDate: Long,
     restDistributionValue: DistributionMethod,
-    notificationUsageValue: Float,
+    notificationUsageValue: BigDecimal,
     keyboardController: SoftwareKeyboardController?,
     focusManager: FocusManager,
 ) {
     viewModel.budgetViewModel.createObjectAndStoreIt(
         budgetWithSummary,
-        totalAmountForMonth.toFloat(),
+        totalAmountForMonth.toBigDecimal(),
         totalAmountPerDay,
         totalDaysRemaining,
         budgetStartDate,
@@ -296,7 +296,7 @@ fun BottomSheetBudgetContent(
     modifier: Modifier,
     isBudgetSet: Boolean,
     budgetWithSummary: BudgetWithDayDetails,
-    saveButtonClicked: (String, Long, Long, Long, DistributionMethod, Float, Float) -> Unit,
+    saveButtonClicked: (String, Long, Long, Long, DistributionMethod, BigDecimal, BigDecimal) -> Unit,
     errorStatus: Boolean,
     removeError: () -> Unit,
     setError:() -> Unit
@@ -307,7 +307,7 @@ fun BottomSheetBudgetContent(
     }
     val buttonTitle by remember { mutableStateOf(if (isBudgetSet) "Save Budget" else "Create Budget") }
     var totalAmountText by remember { mutableStateOf(TextFieldValue(if (isBudgetSet) budgetWithSummary.budgetSummary.totalBudgetAmount.toString() else "")) }
-    var totalAmountPerDay by remember { mutableFloatStateOf(if (isBudgetSet) budgetWithSummary.budgetSummary.budgetAmountPerDay else 0f) }
+    var totalAmountPerDay by remember { mutableStateOf(if (isBudgetSet) budgetWithSummary.budgetSummary.budgetAmountPerDay else BigDecimal.ZERO) }
     var showDateRangePickerForStartDate by remember { mutableStateOf(false) }
     var showDateRangePickerForEndDate by remember { mutableStateOf(false) }
 
@@ -339,7 +339,7 @@ fun BottomSheetBudgetContent(
     val notificationSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val restDistributionSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showNotificationPicker by remember { mutableStateOf(false) }
-    var notificationUsageValue by remember { mutableFloatStateOf(if (isBudgetSet) budgetWithSummary.budgetSummary.notificationForBudgetUsage else 20f) }
+    var notificationUsageValue by remember { mutableStateOf(if (isBudgetSet) budgetWithSummary.budgetSummary.notificationForBudgetUsage else BigDecimal(20)) }
     var restDistribution by remember { mutableStateOf(false) }
     var restDistributionValue by remember {
         mutableStateOf(
@@ -356,10 +356,10 @@ fun BottomSheetBudgetContent(
             startDate.toLocalDate(),
             endDate.toLocalDate()
         )
-        if (totalAmountText.text.isNotEmpty() && totalAmountText.text.toFloat() != 0f) {
-            totalAmountPerDay = totalAmountText.text.toFloat() / totalDaysRemaining
+        if (totalAmountText.text.isNotEmpty() && totalAmountText.text.toBigDecimal() != BigDecimal.ZERO) {
+            totalAmountPerDay = totalAmountText.text.toBigDecimal().div(totalDaysRemaining.toBigDecimal())
         } else {
-            totalAmountPerDay = 0f
+            totalAmountPerDay = BigDecimal.ZERO
         }
         if (endDate < startDate) {
             setError()
@@ -610,7 +610,7 @@ fun BottomSheetBudgetContent(
     if (showNotificationPicker) {
         NotificationPercentChooserBottomSheet(
             sheetState = notificationSheetState,
-            saveNotificationValue = { notificationUsageValue = it },
+            saveNotificationValue = { notificationUsageValue = it.toBigDecimal() },
             closeBottomSheet = { showNotificationPicker = !showNotificationPicker })
     }
 }

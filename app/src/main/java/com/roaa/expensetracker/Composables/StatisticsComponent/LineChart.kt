@@ -46,6 +46,7 @@ import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shader.ShaderProvider
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import com.roaa.expensetracker.Composables.utils.HarmonizedColorPalette
+import java.math.BigDecimal
 
 
 private val BottomAxisLabelKey = ExtraStore.Key<List<String>>()
@@ -199,7 +200,7 @@ fun LineChartTest(
 
 @Composable
 private fun rememberHorizontalLine(
-    budgetAmount: Float,
+    budgetAmount: BigDecimal,
     palette: HarmonizedColorPalette
 ): HorizontalLine {
     val fill = fill(palette.main.copy(alpha = 0.1f))
@@ -227,13 +228,13 @@ private fun rememberHorizontalLine(
 fun LineChartBudgetTotalUsage(
     modifier: Modifier = Modifier,
     palette: HarmonizedColorPalette,
-    lineChartDataList: Map<String, Float>,
-    totalBudgetAmount: Float,
+    lineChartDataList: Map<String, BigDecimal>,
+    totalBudgetAmount: BigDecimal,
 
     ) {
     val maxY = maxOf(
-        totalBudgetAmount * 1.2f, // Add 20% buffer above budget
-        lineChartDataList.values.max() ?: 0f
+        totalBudgetAmount.multiply(BigDecimal(1.2)), // Add 20% buffer above budget
+        lineChartDataList.values.max() ?: BigDecimal.ZERO
     ).toDouble()
 
     val modelProducer = remember { CartesianChartModelProducer() }

@@ -1,11 +1,12 @@
 package com.roaa.expensetracker.Database
 
-import com.roaa.expensetracker.Model.TotalAmountClass
-import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
-import com.roaa.expensetracker.Model.TransactionClass
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
+import com.roaa.expensetracker.Model.TransactionClass
+import com.roaa.expensetracker.Model.UiDataModels.TotalAmountClass
+import com.roaa.expensetracker.Model.UiDataModels.TotalExpenseIncomeClass
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import java.math.BigDecimal
 import javax.inject.Inject
 
 class TransactionRepository @Inject constructor(private val transactionDao: TransactionDao) {
@@ -72,12 +73,12 @@ class TransactionRepository @Inject constructor(private val transactionDao: Tran
         )
     }
 
-    fun getTotalAmountForDate(date: Long, type: String): Flow<Float> {
-        return transactionDao.getTotalAmountForDate(date, type).map { it ?: 0f }
+    fun getTotalAmountForDate(date: Long, type: String): Flow<BigDecimal> {
+        return transactionDao.getTotalAmountForDate(date, type).map { it ?: BigDecimal.ZERO }
     }
 
-    fun getTotalAmountForDateExcludingLast(date: Long, type: String): Flow<Float> {
-        return transactionDao.getTotalAmountForDate(date, type).map { it ?: 0f }
+    fun getTotalAmountForDateExcludingLast(date: Long, type: String): Flow<BigDecimal> {
+        return transactionDao.getTotalAmountForDate(date, type).map { it ?: BigDecimal.ZERO }
     }
 
     fun getTransactionListForBankAccountId(bankAccountId: Long): Flow<List<TransactionWithDetails>> {

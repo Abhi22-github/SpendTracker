@@ -30,7 +30,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -68,6 +67,7 @@ import com.roaa.expensetracker.Utilities.getMonthFromLocalDate
 import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toLong
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.TextStyle
@@ -135,8 +135,8 @@ fun MonthViewScreen(
             allDays[0].toLong(),
             allDays[41].toLong()
         ).collectAsState(listOf())
-        var totalExpense by remember { mutableFloatStateOf(0f) }
-        var totalIncome by remember { mutableFloatStateOf(0f) }
+        var totalExpense by remember { mutableStateOf(BigDecimal.ZERO) }
+        var totalIncome by remember { mutableStateOf(BigDecimal.ZERO) }
         LaunchedEffect(totalExpenseList) {
             totalExpenseList.forEach {
                 if (it.date >= currentMonthFirstAndLastDate.first && it.date <= currentMonthFirstAndLastDate.second) {
@@ -207,7 +207,7 @@ fun MonthView(
     onDateSelected: (LocalDate) -> Unit,
     firstDayOfWeek: DayOfWeek,
     allDays: List<LocalDate>,
-    totalValuesPerDayForMonthMap: HashMap<Long, Pair<Float, Float>>,
+    totalValuesPerDayForMonthMap: HashMap<Long, Pair<BigDecimal, BigDecimal>>,
 ) {
     Column(modifier = modifier) {
         // Month header
@@ -277,7 +277,7 @@ fun DayCell(
     onDateSelected: (LocalDate) -> Unit,
     singleCellHeight: Dp,
     position: Position,
-    pair: Pair<Float, Float>?
+    pair: Pair<BigDecimal, BigDecimal>?
 ) {
     val isToday = date == LocalDate.now()
     val textColor = when {

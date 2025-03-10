@@ -1,7 +1,8 @@
 package com.roaa.expensetracker.Utilities
 
-import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
+import com.roaa.expensetracker.Model.UiDataModels.TotalExpenseIncomeClass
 import okhttp3.internal.toLongOrDefault
+import java.math.BigDecimal
 import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.time.Instant
@@ -97,14 +98,14 @@ fun LocalDate.toDayMonthFormat(): String {
 }
 
 
-fun parseAmount(amount: Float): String {
+fun parseAmount(amount: BigDecimal): String {
     val formatter = DecimalFormat("##,##,##,###")
-    return formatter.format(amount)
+    return formatter.format(amount.toFloat())
 }
 
 
-fun convertTotalExpenseIncomeClassToMap(totalExpenseIncomeClassList: List<TotalExpenseIncomeClass>): HashMap<Long, Pair<Float, Float>> {
-    val map = hashMapOf<Long, Pair<Float, Float>>()
+fun convertTotalExpenseIncomeClassToMap(totalExpenseIncomeClassList: List<TotalExpenseIncomeClass>): HashMap<Long, Pair<BigDecimal, BigDecimal>> {
+    val map = hashMapOf<Long, Pair<BigDecimal, BigDecimal>>()
     totalExpenseIncomeClassList.forEach { it ->
         map[it.date] = Pair(it.totalExpense, it.totalIncome)
     }

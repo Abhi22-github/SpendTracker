@@ -130,8 +130,6 @@ fun RootNavGraph(
                     rooNavController,
                     navigationManager,
                     viewModel,
-                    args.amount,
-                    args.categoryName,
                 )
             }
             composable<Destinations.BankDetailsScreen> {
@@ -250,8 +248,6 @@ fun AppNavGraph(
                     rooNavController,
                     navigationManager,
                     viewModel,
-                    args.amount,
-                    args.categoryName,
                 )
             }
             composable<Destinations.BankDetailsScreen> {

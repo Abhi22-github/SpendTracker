@@ -133,7 +133,7 @@ import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Model.CategoryClass
-import com.roaa.expensetracker.Model.TransactionTypeClass
+import com.roaa.expensetracker.Model.UiDataModels.TransactionTypeClass
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
@@ -156,6 +156,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -264,18 +265,18 @@ fun BottomSheetContentItemAddContent(
     val budget by viewModel.preferencesViewModel.getTotalAmountPerDay.collectAsState(1f)
     val oldAmount by viewModel.transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
     val newAmountTemp = if (expenseValue.text.isEmpty()) 0L else extractNumbers(expenseValue.text)
-    val newDailyBudget = oldAmount + newAmountTemp
+    val newDailyBudget = oldAmount + BigDecimal(newAmountTemp)
     val amountInString = String.format("%.2f", newDailyBudget.toFloat())
     val percent = if (budget != 0f) {
-        newDailyBudget / budget
+        newDailyBudget / budget.toBigDecimal()
     } else {
-        0f
+        BigDecimal.ZERO
     }
-    viewModel.animationViewModel.method("₹$amountInString", percent)
+    viewModel.animationViewModel.method("₹$amountInString", percent.toFloat())
 
     LaunchedEffect(percent) {
         scope.launch {
-            viewModel.animationViewModel.newSpentPercentage.emit(percent)
+            viewModel.animationViewModel.newSpentPercentage.emit(percent.toFloat())
         }
     }
 
@@ -655,18 +656,18 @@ fun BottomSheetContentItemEditContent(
     val budget by viewModel.preferencesViewModel.getTotalAmountPerDay.collectAsState(1f)
     val oldAmount by viewModel.transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
     val newAmountTemp = if (expenseValue.text.isEmpty()) 0L else extractNumbers(expenseValue.text)
-    val newDailyBudget = oldAmount + newAmountTemp
+    val newDailyBudget = oldAmount + BigDecimal(newAmountTemp)
     val amountInString = String.format("%.2f", newDailyBudget.toFloat())
     val percent = if (budget != 0f) {
-        newDailyBudget / budget
+        newDailyBudget / budget.toBigDecimal()
     } else {
-        0f
+        BigDecimal.ZERO
     }
-    viewModel.animationViewModel.method("₹$amountInString", percent)
+    viewModel.animationViewModel.method("₹$amountInString", percent.toFloat())
 
     LaunchedEffect(percent) {
         scope.launch {
-            viewModel.animationViewModel.newSpentPercentage.emit(percent)
+            viewModel.animationViewModel.newSpentPercentage.emit(percent.toFloat())
         }
     }
 
@@ -1021,7 +1022,7 @@ fun validateTransactionData(
         ) else viewModel.transactionsViewModel.updateFormDataInDatabase(singleTransaction.transaction.also {
             it.type = type
             selectedDate?.let { date -> it.date = date }
-            it.amount = amount.toFloat()
+            it.amount = amount.toBigDecimal()
             it.note = comment
             it.categoryId = selectedCategory.categoryId
             it.bankAccountId = selectedPaymentMethod.bankAccountId
@@ -2290,18 +2291,18 @@ fun BottomSheetContentItemAddContentTest(
     val budget by viewModel.preferencesViewModel.getTotalAmountPerDay.collectAsState(1f)
     val oldAmount by viewModel.transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
     val newAmountTemp = if (expenseValue.text.isEmpty()) 0L else extractNumbers(expenseValue.text)
-    val newDailyBudget = oldAmount + newAmountTemp
+    val newDailyBudget = oldAmount + BigDecimal(newAmountTemp)
     val amountInString = String.format("%.2f", newDailyBudget.toFloat())
     val percent = if (budget != 0f) {
-        newDailyBudget / budget
+        newDailyBudget / budget.toBigDecimal()
     } else {
         0f
     }
-    viewModel.animationViewModel.method("₹$amountInString", percent)
+    viewModel.animationViewModel.method("₹$amountInString", percent.toFloat())
 
     LaunchedEffect(percent) {
         scope.launch {
-            viewModel.animationViewModel.newSpentPercentage.emit(percent)
+            viewModel.animationViewModel.newSpentPercentage.emit(percent.toFloat())
         }
     }
 

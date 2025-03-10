@@ -1,56 +1,28 @@
 package com.roaa.expensetracker.Database
 
-import androidx.room.AutoMigration
+
 import androidx.room.Database
-import androidx.room.DeleteColumn
-import androidx.room.RenameColumn
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import androidx.room.migration.AutoMigrationSpec
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
+import com.roaa.expensetracker.Database.DatabaseUtils.RoomConverters
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Model.BudgetDayModelClass
 import com.roaa.expensetracker.Model.BudgetModelClass
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Model.TransactionClass
-import com.roaa.expensetracker.Database.DatabaseUtils.RoomConverters
+
 
 @TypeConverters(RoomConverters::class)
 @Database(
     entities = [TransactionClass::class, CategoryClass::class, BankAccountsClass::class, BudgetModelClass::class, BudgetDayModelClass::class],
-    version = 4,
+    version = 1,
     exportSchema = true,
     autoMigrations = [
-        AutoMigration(from = 2, to = 3, spec = AppDatabase.AutoMigrationSpecVersion2To3::class),
-        AutoMigration(from = 3, to = 4)
     ]
 )
 abstract class AppDatabase : RoomDatabase() {
-    @RenameColumn.Entries(
-        RenameColumn(
-            tableName = "budget_table",
-            fromColumnName = "budgetAmountForMonth",
-            toColumnName = "totalBudgetAmount"
-        ),
-        RenameColumn(
-            tableName = "budget_table",
-            fromColumnName = "budgetMonthStartDate",
-            toColumnName = "budgetStartDate"
-        ),
-        RenameColumn(
-            tableName = "budget_table",
-            fromColumnName = "budgetMonthEndDate",
-            toColumnName = "budgetEndDate"
-        ),
-    )
-    @DeleteColumn.Entries(
-        DeleteColumn(
-            tableName = "budget_table",
-            columnName = "currentMonthName"
-        )
-    )
-    class AutoMigrationSpecVersion2To3 : AutoMigrationSpec
 
     // below line is to create
     // abstract variable for dao.
@@ -142,7 +114,7 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("INSERT INTO category_table(categoryName, categoryColorNumber, categoryIconNumber, categoryType,isActive) VALUES('Other',1,99,'Income',true) ")
 
                 //payment method cash
-                db.execSQL("INSERT INTO bank_accounts(initialAmount, currentAmount, bankName, cardColorNumber,cardIconNumber,accountType,isActive) VALUES(0,0,'Cash',1,25,'CASH',true) ")
+                db.execSQL("INSERT INTO bank_accounts(initialAmount, currentAmount, bankName, cardColorNumber,cardIconNumber,accountType,isActive) VALUES('0','0','Cash',1,25,'CASH',true) ")
             }
         }
     }

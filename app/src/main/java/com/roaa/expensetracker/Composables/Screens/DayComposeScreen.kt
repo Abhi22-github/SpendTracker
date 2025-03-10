@@ -91,6 +91,7 @@ import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import java.time.LocalDate
 
 @Composable
@@ -173,13 +174,13 @@ fun DayViewScreen(
     }
     val getTotalExpenseAmountForDate by viewModel.transactionsViewModel.getTotalExpenseAmountForDateCompose(
         currentDay.toLong()
-    ).collectAsState(0f)
+    ).collectAsState(BigDecimal.ZERO)
     val getTotalIncomeAmountForDate by viewModel.transactionsViewModel.getTotalIncomeAmountForDateCompose(
         currentDay.toLong()
-    ).collectAsState(0f)
+    ).collectAsState(BigDecimal.ZERO)
     val getTotalAmountForDateExcludingLast by viewModel.transactionsViewModel.getTotalExpenseAmountForDateExcludingLastCompose(
         currentDay.toLong()
-    ).collectAsState(0f)
+    ).collectAsState(BigDecimal.ZERO)
     var isBudgetSet by remember { mutableStateOf(false) }
     LaunchedEffect(getCurrentBudgetFromRoom) {
 //        getCurrentBudgetFromRoom?.let {
@@ -189,19 +190,19 @@ fun DayViewScreen(
             emptyBudgetClass, listOf(emptyBudgetDayClass)
         )
     }
-    val oldPercent = if (getCurrentBudget.budgetSummary.budgetAmountPerDay != 0f) {
+    val oldPercent = if (getCurrentBudget.budgetSummary.budgetAmountPerDay != BigDecimal.ZERO) {
         // Safe division: Handle division by zero and null values
         getTotalAmountForDateExcludingLast / getCurrentBudget.budgetSummary.budgetAmountPerDay
     } else {
         // Handle edge case (division by zero or null value)
-        0f  // or use another default value, depending on your requirements
+        BigDecimal.ZERO  // or use another default value, depending on your requirements
     }
-    val percent = if (getCurrentBudget.budgetSummary.budgetAmountPerDay != 0f) {
+    val percent = if (getCurrentBudget.budgetSummary.budgetAmountPerDay != BigDecimal.ZERO) {
         // Safe division: Handle division by zero and null values
         getTotalExpenseAmountForDate / getCurrentBudget.budgetSummary.budgetAmountPerDay
     } else {
         // Handle edge case (division by zero or null value)
-        0f  // or use another default value, depending on your requirements
+        BigDecimal.ZERO  // or use another default value, depending on your requirements
     }
 
     LaunchedEffect(pagerState.currentPage,getCurrentBudget) {
@@ -250,8 +251,8 @@ fun DayViewScreen(
                 getTotalExpenseAmountForDate,
                 getTotalIncomeAmountForDate,
                 isBudgetSet,
-                1 - oldPercent,
-                1 - percent,
+                BigDecimal.ONE.minus(oldPercent),
+                BigDecimal.ONE.minus(percent),
                 getCurrentBudget.budgetSummary.budgetAmountPerDay
             )
         }
@@ -360,12 +361,12 @@ private fun calculateCurrentPageDay(
 fun DayStatCard(
     modifier: Modifier = Modifier,
     currentDay: LocalDate,
-    expense: Float,
-    income: Float,
+    expense: BigDecimal,
+    income: BigDecimal,
     isBudgetSet: Boolean,
-    oldPercent: Float,
-    percent: Float,
-    budgetAmountPerDay: Float,
+    oldPercent: BigDecimal,
+    percent: BigDecimal,
+    budgetAmountPerDay: BigDecimal,
 ) {
 
     Log.d(
@@ -374,7 +375,7 @@ fun DayStatCard(
     )
     val percentWithNewSpentAnimated = animateFloatAsState(
         label = "percentWithNewSpentAnimated",
-        targetValue = percent,
+        targetValue = percent.toFloat(),
         animationSpec = TweenSpec(300),
     ).value
 

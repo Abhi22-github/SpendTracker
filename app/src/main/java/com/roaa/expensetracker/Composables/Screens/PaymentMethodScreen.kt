@@ -40,7 +40,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -105,6 +104,7 @@ import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import java.time.LocalDate
 
 @Composable
@@ -807,8 +807,8 @@ fun PaymentDetailsScreen(
         convertTotalExpenseIncomeClassToMap(totalExpenseListFromRoom)
     }
 
-    var totalExpense by remember { mutableFloatStateOf(0f) }
-    var totalIncome by remember { mutableFloatStateOf(0f) }
+    var totalExpense by remember { mutableStateOf(BigDecimal.ZERO) }
+    var totalIncome by remember { mutableStateOf(BigDecimal.ZERO) }
     LaunchedEffect(totalExpenseListFromRoom) {
         totalExpenseListFromRoom.forEach {
             totalExpense += it.totalExpense
@@ -1061,7 +1061,7 @@ fun HeaderNew(date: String, totalExpenseForDay: Double, totalIncomeForDay: Doubl
 //                        tint = successColor
 //                    )
                     Text(
-                        "₹ ${parseAmount(totalIncomeForDay.toFloat())}",
+                        "₹ ${parseAmount(totalIncomeForDay.toBigDecimal())}",
                         style = typography.labelLarge.copy(fontFamily = CustomFonts.numberFont),
                         color = successColor
                     )
@@ -1070,7 +1070,7 @@ fun HeaderNew(date: String, totalExpenseForDay: Double, totalIncomeForDay: Doubl
                 Row {
 //                    Icon(painterResource(R.drawable.expense_icon_new), contentDescription = null, tint = orange)
                     Text(
-                        "₹ ${parseAmount(totalExpenseForDay.toFloat())}",
+                        "₹ ${parseAmount(totalExpenseForDay.toBigDecimal())}",
                         style = typography.labelLarge.copy(fontFamily = CustomFonts.numberFont),
                         color = Color.Red
                     )
@@ -1087,8 +1087,8 @@ fun StatisticsCardForCardStats(
     expenseListPerDay: LinkedHashMap<String, Int>,
     incomeListPerDay: LinkedHashMap<String, Int>,
     type: String,
-    totalExpense: Float,
-    totalIncome: Float,
+    totalExpense: BigDecimal,
+    totalIncome: BigDecimal,
 ) {
     val subTitle = if (type == EXPENSE) "Total Expense" else "Total Income"
     val title = parseAmount(if (type == EXPENSE) totalExpense else totalIncome)

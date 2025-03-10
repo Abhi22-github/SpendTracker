@@ -5,9 +5,7 @@ import androidx.room.Relation
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Model.TransactionClass
-import kotlinx.serialization.Serializable
 
-@Serializable
 data class TransactionWithDetails(
     @Embedded val transaction: TransactionClass,
     @Relation(
