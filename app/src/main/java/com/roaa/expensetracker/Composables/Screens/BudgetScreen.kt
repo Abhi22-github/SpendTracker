@@ -88,6 +88,7 @@ import com.roaa.expensetracker.Utilities.getDaysRemaining
 import com.roaa.expensetracker.Utilities.getMonthsBetween
 import com.roaa.expensetracker.Utilities.toDayMonthFormat
 import com.roaa.expensetracker.Utilities.toLocalDate
+import com.roaa.expensetracker.Utilities.toLong
 import java.time.LocalDate
 
 
@@ -243,7 +244,11 @@ fun BudgetScreen(
                                     LocalDate.now()
                                 ),
                                 height = 36f,
-                                dayName = LocalDate.now().toDayMonthFormat()
+                                dayName = LocalDate.now().toDayMonthFormat(),
+                                isInBudget = (LocalDate.now()
+                                    .toLong() <= getCurrentBudget.budgetSummary.budgetEndDate && LocalDate.now()
+                                    .toLong() >= getCurrentBudget.budgetSummary.budgetStartDate)
+
                             )
                             Text(
                                 text = getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate()
@@ -804,10 +809,10 @@ fun SpendCalenderMonth(
                     it.dayState = DayState.OVER_LIMIT
                 } else if (budgetDayMap[it.dayDate]!!.totalExpense < budgetDayMap[it.dayDate]!!.budgetAmount) {
                     it.dayState = DayState.IN_LIMIT
-                }else{
+                } else {
                     it.dayState
                 }
-            }else{
+            } else {
 
             }
         }
@@ -844,11 +849,11 @@ fun DayBox(modifier: Modifier = Modifier, text: String, inBudget: Boolean, daySt
     val greenColorPalette = toPalette(greenColor)
     val orangeColorPalette = toPalette(orange)
 
-    val (icon,tint) = when (dayState) {
-        DayState.IN_LIMIT -> Pair(Icons.Rounded.Check,greenColorPalette.main)
-        DayState.NOT_STARTED -> Pair(Icons.Rounded.Check,greenColorPalette.main)
-        DayState.OVER_LIMIT -> Pair(Icons.Rounded.Close,orangeColorPalette.main)
-        DayState.OUT_OF_BUDGET -> Pair(Icons.Rounded.Check,orangeColorPalette.main)
+    val (icon, tint) = when (dayState) {
+        DayState.IN_LIMIT -> Pair(Icons.Rounded.Check, greenColorPalette.main)
+        DayState.NOT_STARTED -> Pair(Icons.Rounded.Check, greenColorPalette.main)
+        DayState.OVER_LIMIT -> Pair(Icons.Rounded.Close, orangeColorPalette.main)
+        DayState.OUT_OF_BUDGET -> Pair(Icons.Rounded.Check, orangeColorPalette.main)
     }
     val background =
         if (inBudget) {
@@ -903,7 +908,8 @@ fun DayProgressIndicator(
     totalAmount: Float,
     expenseAmount: Float,
     day: Long, // Days to decorate
-    dayName: String
+    dayName: String,
+    isInBudget: Boolean
 ) {
     val lineColor = MaterialTheme.colorScheme.surfaceContainer
     val completedColor = MaterialTheme.colorScheme.primaryContainer
@@ -942,27 +948,28 @@ fun DayProgressIndicator(
 
             // Draw decorations for specific days
 
-            val xOffset = (segmentWidthForDayDecoration * day)
-            drawRoundRect(
-                color = decorationColor,
-                topLeft = Offset(xOffset, 0f - height / 2),
-                size = Size(20f, 60f),// Rectangle size
-                cornerRadius = CornerRadius(15f, 15f)
-            )
+            if (isInBudget) {
+                val xOffset = (segmentWidthForDayDecoration * day)
+                drawRoundRect(
+                    color = decorationColor,
+                    topLeft = Offset(xOffset, 0f - height / 2),
+                    size = Size(20f, 60f),// Rectangle size
+                    cornerRadius = CornerRadius(15f, 15f)
+                )
+            }
         }
 
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-
             Box(
                 modifier = Modifier
                     .offset(x = (day.toFloat() / totalDays * 280).dp - 10.dp, y = (-25).dp)
                     .wrapContentSize()
             ) {
                 Text(
-                    text = dayName,
+                    text = if (!isInBudget) "$dayName(Budget not started)" else dayName,
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.onSurface,
                     fontWeight = FontWeight.Bold

@@ -1,7 +1,6 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -252,6 +251,7 @@ fun BudgetContentController(
                     keyboardController,
                     focusManager
                 )
+                handleBackNavigation(navigationManager)
                 shouldShowConfirmation = false
             },
             "Change Budget",
@@ -274,8 +274,6 @@ fun SaveBudgetDetailsInDatabase(
     keyboardController: SoftwareKeyboardController?,
     focusManager: FocusManager,
 ) {
-    Log.d(
-        "Teshkfajk",totalDaysRemaining.toString())
     viewModel.budgetViewModel.createObjectAndStoreIt(
         budgetWithSummary,
         totalAmountForMonth.toFloat(),
