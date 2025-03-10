@@ -6,6 +6,7 @@ import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 
 const val PREFERENCES_NAME = "Settings"
+val IS_APP_FIRST_STARTUP = booleanPreferencesKey("is_app_first_startup")
 val TOTAL_BUDGET_FOR_MONTH = floatPreferencesKey("total_budget_for_month")
 val TOTAL_BUDGET_PER_DAY = floatPreferencesKey("total_budget_per_day")
 val CURRENT_BUDGET_MONTH_NAME = stringPreferencesKey("current_month_name")

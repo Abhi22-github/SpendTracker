@@ -8,6 +8,7 @@ import com.roaa.expensetracker.Utilities.PreferenceManger.CURRENT_BUDGET_DURATIO
 import com.roaa.expensetracker.Utilities.PreferenceManger.CURRENT_BUDGET_END_DATE
 import com.roaa.expensetracker.Utilities.PreferenceManger.CURRENT_BUDGET_MONTH_NAME
 import com.roaa.expensetracker.Utilities.PreferenceManger.CURRENT_BUDGET_START_DATE
+import com.roaa.expensetracker.Utilities.PreferenceManger.IS_APP_FIRST_STARTUP
 import com.roaa.expensetracker.Utilities.PreferenceManger.IS_BUDGET_SET
 import com.roaa.expensetracker.Utilities.PreferenceManger.PRIMARY_BANK_ACCOUNT
 import com.roaa.expensetracker.Utilities.PreferenceManger.PreferenceManager
@@ -82,7 +83,14 @@ class PreferencesViewModel @Inject constructor(private val preferenceManager: Pr
             preferenceManager.saveBooleanValue(budgetState, IS_BUDGET_SET)
         }
     }
-
     val isBudgetSet = preferenceManager.getBooleanValue(IS_BUDGET_SET)
+
+    fun setFirstStartupCompleted() {
+        viewModelScope.launch {
+            preferenceManager.saveBooleanValue(true, IS_APP_FIRST_STARTUP)
+        }
+    }
+    val isNotFirstStartup = preferenceManager.getBooleanValue(IS_APP_FIRST_STARTUP)
+
 
 }

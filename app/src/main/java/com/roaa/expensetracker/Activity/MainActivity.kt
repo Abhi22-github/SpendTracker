@@ -90,6 +90,10 @@ import com.roaa.expensetracker.Composables.Navigation.navigateToWithSingleTop
 import com.roaa.expensetracker.Composables.Screens.MonthChip
 import com.roaa.expensetracker.Composables.syncTheme
 import com.roaa.expensetracker.Hilt.AppViewModel
+import com.roaa.expensetracker.Notification.NotificationPermissionHandler
+import com.roaa.expensetracker.Notification.WorkManger.scheduleDailyNotification
+import com.roaa.expensetracker.Notification.createNotificationChannel
+import com.roaa.expensetracker.Notification.notificationChannelList
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.convertToWholeMonthName
 import com.roaa.expensetracker.Utilities.currentDay
@@ -131,8 +135,25 @@ class ComposeMainActivity : ComponentActivity() {
                 bankAccountsViewModel = hiltViewModel(),
                 animationViewModel = hiltViewModel()
             )
+            val context = LocalContext.current
+
+
+            NotificationPermissionHandler(
+                onPermissionGranted = {
+                },
+                onPermissionDenied = {
+                }
+            )
+            scheduleDailyNotification(this)
+            appViewModels.preferencesViewModel.setFirstStartupCompleted()
+
+
             LaunchedEffect(Unit) {
                 syncTheme(localContext)
+                //create notification channel
+                notificationChannelList.forEach {
+                    createNotificationChannel(context, it)
+                }
                 // App ready for work
                 isReady.value = true
             }
@@ -443,4 +464,5 @@ fun NavigationDrawer(
         }
     }
 }
+
 

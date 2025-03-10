@@ -100,7 +100,7 @@ dependencies {
     implementation(libs.accompanist.systemuicontroller)
     implementation(libs.androidx.constraintlayout.compose)
 
-
+    implementation("androidx.work:work-runtime-ktx:2.10.0")
 //firebase
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.analytics)
