@@ -2,9 +2,6 @@ package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,22 +10,16 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.MonetizationOn
-import androidx.compose.material.icons.filled.Timelapse
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.ProgressIndicatorDefaults
@@ -51,7 +42,6 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
-import com.roaa.expensetracker.Composables.CustomFonts
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
@@ -63,7 +53,6 @@ import com.roaa.expensetracker.Composables.components.EmptyScreen
 import com.roaa.expensetracker.Composables.components.SpendsBudgetCard
 import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
-import com.roaa.expensetracker.Composables.purpleColor
 import com.roaa.expensetracker.Composables.utils.ActionTypes
 import com.roaa.expensetracker.Composables.utils.HarmonizedColorPalette
 import com.roaa.expensetracker.Composables.utils.combineColors
@@ -73,14 +62,11 @@ import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import com.roaa.expensetracker.Hilt.AppViewModel
 import com.roaa.expensetracker.Model.UiDateModels.BarChartExpenseModel
 import com.roaa.expensetracker.Utilities.CalenderDayState
-import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.DayState
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBudgetClass
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBudgetDayClass
-import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTotalAmountClass
 import com.roaa.expensetracker.Utilities.datesListForMonth
 import com.roaa.expensetracker.Utilities.dayNameList
-import com.roaa.expensetracker.Utilities.getDayDifference
 import com.roaa.expensetracker.Utilities.getDaysRemaining
 import com.roaa.expensetracker.Utilities.toDayMonthFormat
 import com.roaa.expensetracker.Utilities.toLocalDate
@@ -144,16 +130,10 @@ fun BudgetScreen(
     ) {
         Column(modifier = Modifier.padding(it)) {
             if (isBudgetSet) {
-                val getTotalAmountForRange by viewModel.transactionsViewModel.getTotalAmountByDateRangeCategoryTypeAndBudgetStatus(
-                    getCurrentBudget.budgetSummary.budgetStartDate,
-                    getCurrentBudget.budgetSummary.budgetEndDate, EXPENSE, true
-                ).collectAsState(emptyTotalAmountClass)
-                var currentBudgetLocal by remember { mutableStateOf(1f) }
-                var currentExpenseLocal by remember { mutableStateOf(1f) }
+                var currentBudgetLocal by remember { mutableStateOf(0f) }
+                var currentExpenseLocal by remember { mutableStateOf(0f) }
                 var remainingBudget by remember { mutableStateOf(currentBudgetLocal - currentExpenseLocal) }
-                var remainingDaysPercentage by remember { mutableStateOf(1f) }
-                val purpleColorPalette = toPalette(purpleColor)
-                val orangeColorPalette = toPalette(orange)
+                var remainingDaysPercentage by remember { mutableStateOf(0f) }
 
                 val barChartDataList = getCurrentBudget.budgetAllDays.map {
                     BarChartExpenseModel(
@@ -167,22 +147,22 @@ fun BudgetScreen(
                     getCurrentBudget.budgetAllDays.runningFold(0f) { sum, item -> sum + item.totalExpense }
                         .drop(1)
 
+
                 val lineChartDataList = getCurrentBudget.budgetAllDays.mapIndexed { index, item ->
                     item.date.toLocalDate().toDayMonthFormat() to
                             cumulativeBudgetList[index]
                 }.toMap()
 
-                LaunchedEffect(getCurrentBudget, getTotalAmountForRange) {
+
+                LaunchedEffect(getCurrentBudget) {
 
                     if (getCurrentBudget.budgetSummary.totalBudgetAmount == 0f) {
                         currentBudgetLocal = getCurrentBudget.budgetSummary.totalBudgetAmount
                     } else {
                         currentBudgetLocal = getCurrentBudget.budgetSummary.totalBudgetAmount
                     }
-                    if (getTotalAmountForRange.totalAmount == 0f) {
-                        currentExpenseLocal = getTotalAmountForRange.totalAmount
-                    } else {
-                        currentExpenseLocal = getTotalAmountForRange.totalAmount
+                    currentExpenseLocal = getCurrentBudget.budgetAllDays.fold(0f) { acc, i ->
+                        acc + i.totalExpense
                     }
                     remainingBudget = currentBudgetLocal - currentExpenseLocal
                 }
@@ -214,93 +194,104 @@ fun BudgetScreen(
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                     )
                     Spacer(Modifier.height(24.dp))
-                    Box(
+//                    Box(
+//                        Modifier
+//                            .wrapContentHeight()
+//                            .fillMaxWidth(), contentAlignment = Alignment.Center
+//                    ) {
+//                        val dayValue = ((getDayDifference(
+//                            LocalDate.now(),
+//                            getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate()
+//                        )).toFloat() / getCurrentBudget.budgetSummary.budgetTotalDays.toFloat())
+//                        IndeterminateCircularIndicator(
+//                            Modifier.size(180.dp),
+//                            animateFloatAsState(
+//                                dayValue,
+//                                animationSpec = tween(
+//                                    durationMillis = 2000,
+//                                    easing = FastOutSlowInEasing
+//                                )
+//                            ),
+//                            orangeColorPalette
+//                        )
+//                        Column {
+//
+//                            Text(
+//                                text = "₹${if (remainingBudget.toInt() < 0) 0 else remainingBudget}",
+//                                style = typography.headlineSmall.copy(fontFamily = CustomFonts.numberFont),
+//                                textAlign = TextAlign.Center,
+//                                color = purpleColorPalette.main,
+//                                modifier = Modifier.width(130.dp)
+//                            )
+//                            Text(
+//                                text = "${getDaysRemaining(getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate())} days",
+//                                style = typography.titleLarge.copy(fontFamily = CustomFonts.numberFont),
+//                                textAlign = TextAlign.Center,
+//                                color = orangeColorPalette.main,
+//                                modifier = Modifier.width(130.dp)
+//                            )
+//                        }
+//                        IndeterminateCircularIndicator(
+//                            Modifier.size(240.dp),
+//                            animateFloatAsState(
+//                                ((currentBudgetLocal - currentExpenseLocal) / currentBudgetLocal),
+//                                animationSpec = tween(
+//                                    durationMillis = 2000,
+//                                    easing = FastOutSlowInEasing
+//                                )
+//                            ),
+//                            purpleColorPalette
+//                        )
+//
+//                    }
+                    Row(
                         Modifier
-                            .wrapContentHeight()
-                            .fillMaxWidth(), contentAlignment = Alignment.Center
+                            .height(150.dp)
+                            .padding(horizontalPadding, verticalPadding)
                     ) {
-                        val dayValue = ((getDayDifference(
-                            LocalDate.now(),
-                            getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate()
-                        )).toFloat() / getCurrentBudget.budgetSummary.budgetTotalDays.toFloat())
-                        IndeterminateCircularIndicator(
-                            Modifier.size(180.dp),
-                            animateFloatAsState(
-                                dayValue,
-                                animationSpec = tween(
-                                    durationMillis = 2000,
-                                    easing = FastOutSlowInEasing
-                                )
-                            ),
-                            orangeColorPalette
+                        SpendsBudgetCard(
+                            Modifier,
+                            if (currentBudgetLocal == 0f) 1f else currentBudgetLocal,
+                            if (currentExpenseLocal == 0f) 1f else currentExpenseLocal,
                         )
-                        Column {
-
-                            Text(
-                                text = "₹${if (remainingBudget.toInt() < 0) 0 else remainingBudget}",
-                                style = typography.headlineSmall.copy(fontFamily = CustomFonts.numberFont),
-                                textAlign = TextAlign.Center,
-                                color = purpleColorPalette.main,
-                                modifier = Modifier.width(130.dp)
-                            )
-                            Text(
-                                text = "${getDaysRemaining(getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate())} days",
-                                style = typography.titleLarge.copy(fontFamily = CustomFonts.numberFont),
-                                textAlign = TextAlign.Center,
-                                color = orangeColorPalette.main,
-                                modifier = Modifier.width(130.dp)
-                            )
-                        }
-                        IndeterminateCircularIndicator(
-                            Modifier.size(240.dp),
-                            animateFloatAsState(
-                                ((currentBudgetLocal - currentExpenseLocal) / currentBudgetLocal),
-                                animationSpec = tween(
-                                    durationMillis = 2000,
-                                    easing = FastOutSlowInEasing
-                                )
-                            ),
-                            purpleColorPalette
-                        )
-
                     }
                     Spacer(Modifier.height(12.dp))
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Row {
-                            Icon(
-                                Icons.Filled.MonetizationOn,
-                                contentDescription = null,
-                                tint = purpleColorPalette.main
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                text = "Budget Remaining",
-                                style = typography.bodyMedium,
-                                textAlign = TextAlign.Start,
-                                color = purpleColorPalette.main,
-                                modifier = Modifier
-                            )
-                        }
-                        Spacer(Modifier.height(4.dp))
-                        Row {
-                            Icon(
-                                Icons.Filled.Timelapse,
-                                contentDescription = null,
-                                tint = orangeColorPalette.main
-                            )
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                text = "Days Remaining",
-                                style = typography.bodyMedium,
-                                textAlign = TextAlign.Start,
-                                color = orangeColorPalette.main,
-                                modifier = Modifier
-                            )
-                        }
-                    }
+//                    Column(
+//                        horizontalAlignment = Alignment.CenterHorizontally,
+//                        modifier = Modifier.fillMaxWidth()
+//                    ) {
+//                        Row {
+//                            Icon(
+//                                Icons.Filled.MonetizationOn,
+//                                contentDescription = null,
+//                                tint = purpleColorPalette.main
+//                            )
+//                            Spacer(Modifier.width(8.dp))
+//                            Text(
+//                                text = "Budget Remaining",
+//                                style = typography.bodyMedium,
+//                                textAlign = TextAlign.Start,
+//                                color = purpleColorPalette.main,
+//                                modifier = Modifier
+//                            )
+//                        }
+//                        Spacer(Modifier.height(4.dp))
+//                        Row {
+//                            Icon(
+//                                Icons.Filled.Timelapse,
+//                                contentDescription = null,
+//                                tint = orangeColorPalette.main
+//                            )
+//                            Spacer(Modifier.width(8.dp))
+//                            Text(
+//                                text = "Days Remaining",
+//                                style = typography.bodyMedium,
+//                                textAlign = TextAlign.Start,
+//                                color = orangeColorPalette.main,
+//                                modifier = Modifier
+//                            )
+//                        }
+//                    }
 
                     Spacer(Modifier.height(24.dp))
 
@@ -541,17 +532,17 @@ fun BudgetScreen(
                         getCurrentBudget.budgetSummary.budgetAmountPerDay
                     )
                     Spacer(Modifier.height(24.dp))
-                    Row(
-                        Modifier
-                            .height(150.dp)
-                            .padding(horizontalPadding, verticalPadding)
-                    ) {
-                        SpendsBudgetCard(
-                            Modifier,
-                            currentBudgetLocal,
-                            currentExpenseLocal
-                        )
-                    }
+//                    Row(
+//                        Modifier
+//                            .height(150.dp)
+//                            .padding(horizontalPadding, verticalPadding)
+//                    ) {
+//                        SpendsBudgetCard(
+//                            Modifier,
+//                            currentBudgetLocal,
+//                            currentExpenseLocal
+//                        )
+//                    }
                     SpendCalender(Modifier, getCurrentBudget)
                 }
             } else {

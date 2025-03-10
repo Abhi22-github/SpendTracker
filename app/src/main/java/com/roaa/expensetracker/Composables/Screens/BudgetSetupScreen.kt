@@ -571,8 +571,8 @@ fun BottomSheetBudgetContent(
                 onClick = {
                     saveButtonClicked(
                         totalAmountText.text,
-                        startDate.LongMillisToNormalLong().toLocalDate().toLong(),
-                        endDate.LongMillisToNormalLong().toLocalDate().toLong(),
+                        startDate.toLocalDate().toLong(),
+                        endDate.toLocalDate().toLong(),
                         totalDaysRemaining,
                         restDistributionValue,
                         notificationUsageValue,

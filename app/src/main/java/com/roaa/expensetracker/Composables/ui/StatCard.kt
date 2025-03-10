@@ -1,14 +1,20 @@
 package com.roaa.expensetracker.Composables.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardColors
 import androidx.compose.material3.CardDefaults
@@ -32,6 +38,7 @@ fun StatCard(
     value: String,
     budget: String,
     label: String,
+    flip: Boolean,
     contentPadding: PaddingValues = PaddingValues(vertical = 16.dp, horizontal = 24.dp),
     colors: CardColors = CardDefaults.cardColors(),
     valueFontSize: TextUnit = MaterialTheme.typography.titleLarge.fontSize,
@@ -65,30 +72,66 @@ fun StatCard(
                     .fillMaxWidth()
                     .padding(contentPadding)
             ) {
-                Text(
-                    text = "$value out of $budget",
-                    style = valueFontStyle,
-                    fontSize = valueFontSize,
-                    overflow = TextOverflow.Ellipsis,
-                    softWrap = false,
-                    lineHeight = TextUnit(0.2f, TextUnitType.Em)
-                )
-                Text(
-                    text = label,
-                    style = labelFontStyle,
-                    color = textColor.copy(alpha = 0.6f),
-                    overflow = TextOverflow.Ellipsis,
-                    softWrap = false,
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-
-                CompositionLocalProvider(
-                    LocalContentColor provides textColor,
-                ) {
+                Row(Modifier.fillMaxWidth()) {
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        content = content,
-                    )
+                        Modifier
+                            .weight(0.8f)
+                    ) {
+                        Text(
+                            text = value,
+                            style = valueFontStyle,
+                            fontSize = valueFontSize,
+                            overflow = TextOverflow.Ellipsis,
+                            softWrap = false,
+                            lineHeight = TextUnit(0.2f, TextUnitType.Em)
+                        )
+                        Text(
+                            text = label,
+                            style = labelFontStyle,
+                            color = textColor.copy(alpha = 0.6f),
+                            overflow = TextOverflow.Ellipsis,
+                            softWrap = false,
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        CompositionLocalProvider(
+                            LocalContentColor provides textColor,
+                        ) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                content = content,
+                            )
+                        }
+                    }
+                    Row(
+                        Modifier
+                            .weight(0.1f), horizontalArrangement = Arrangement.End
+                    ) {
+                        Box(
+                            Modifier
+                                .size(6.dp)
+                                .background(
+                                    if (!flip)
+                                        MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(
+                                        alpha = 0.3f
+                                    ),
+                                    RoundedCornerShape(50)
+                                )
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Box(
+                            Modifier
+                                .size(6.dp)
+                                .background(
+                                    if (flip)
+                                        MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(
+                                        alpha = 0.3f
+                                    ),
+                                    RoundedCornerShape(50)
+                                )
+                        )
+
+                    }
                 }
             }
         }
@@ -103,6 +146,7 @@ private fun Preview() {
             value = "value",
             label = "label",
             budget = "budget",
+            flip = false
         )
     }
 }

@@ -7,6 +7,7 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.TweenSpec
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
@@ -18,11 +19,14 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
@@ -35,7 +39,6 @@ import com.roaa.expensetracker.Composables.ui.StatCard
 import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.harmonize
 import com.roaa.expensetracker.Composables.utils.toPalette
-import com.roaa.expensetracker.R
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.math.RoundingMode
@@ -46,11 +49,13 @@ fun SpendsBudgetCard(
     budget: Float,
     spend: Float,
 ) {
+    var flipCard by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val percent = 1.minus(spend.div(budget))
 
     val bigDecimal = BigDecimal((1 - percent.toDouble()) * 100).setScale(2, RoundingMode.HALF_UP)
     val percentFormatted = bigDecimal.toFloat()
+    val showPercent = percentFormatted
 
 //    val percentFormatted =  remember{
 //        val formatter = NumberFormat.getNumberInstance(Locale.getDefault())
@@ -70,7 +75,7 @@ fun SpendsBudgetCard(
                     1f,
                     animationSpec = FloatTweenSpec(4000, 0, LinearEasing)
                 )
-                shift.snapTo(0f)
+                shift.animateTo(0f)
                 anim()
             }
         }
@@ -97,21 +102,22 @@ fun SpendsBudgetCard(
     )
 
     StatCard(
-        modifier = modifier,
+        modifier = modifier.clip(MaterialTheme.shapes.extraLarge ).clickable { flipCard = !flipCard },
         colors = CardDefaults.cardColors(
             containerColor = harmonizedColor.container,
             contentColor = harmonizedColor.onContainer,
         ),
+        flip = flipCard,
         value = numberFormat(
             context,
-            BigDecimal(spend.toDouble()),
+            BigDecimal(if (flipCard) (budget - spend).toDouble() else spend.toDouble()),
         ),
         budget = budget.toString(),
-        label = stringResource(R.string.spent_budget),
+        label = if (flipCard) "Remaining" else "Spent",
         content = {
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = stringResource(R.string.rest_budget_percent, percentFormatted),
+                text = if (flipCard) "${100f - showPercent} of budget remaining" else "${showPercent} of budget spent",
                 style = MaterialTheme.typography.bodyMedium,
             )
         },
