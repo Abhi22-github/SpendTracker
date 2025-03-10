@@ -53,6 +53,12 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
         }
     }
 
+    fun updateBudget(budgetModelClass: BudgetModelClass){
+        viewModelScope.launch {
+            budgetRepository.update(budgetModelClass)
+        }
+    }
+
 
     fun createObjectAndStoreIt(
         budgetSummaryWithDay: BudgetWithDayDetails,

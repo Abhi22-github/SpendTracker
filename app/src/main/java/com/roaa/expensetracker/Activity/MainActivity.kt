@@ -155,7 +155,7 @@ class ComposeMainActivity : ComponentActivity() {
                 notificationChannelList.forEach {
                     createNotificationChannel(context, it)
                 }
-                appStartingChecks(allViewModels)
+                appStartingChecks(context,allViewModels)
                 // App ready for work
                 isReady.value = true
             }
