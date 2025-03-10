@@ -1,7 +1,6 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -639,7 +638,7 @@ fun SingleInfoBoxForTransactions(
 @Composable
 fun TagChip(text: String) {
     SuggestionChip(
-        onClick = { Log.d("Suggestion chip", "hello world") },
+        onClick = {  },
         label = { Text(text) },
         colors = SuggestionChipDefaults.suggestionChipColors(
             labelColor = MaterialTheme.colorScheme.onSurface.copy(

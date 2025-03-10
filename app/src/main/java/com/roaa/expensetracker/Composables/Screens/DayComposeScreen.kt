@@ -214,7 +214,6 @@ fun DayViewScreen(
         } else {
             isBudgetSet = false
         }
-        Log.d("Tetff","$currentDay $isBudgetSet ${getCurrentBudget.budgetSummary}")
     }
 
     Column {
@@ -369,10 +368,6 @@ fun DayStatCard(
     budgetAmountPerDay: BigDecimal,
 ) {
 
-    Log.d(
-        "DayComposeScreen",
-        "$currentDay $expense $income $isBudgetSet $oldPercent $percent $budgetAmountPerDay"
-    )
     val percentWithNewSpentAnimated = animateFloatAsState(
         label = "percentWithNewSpentAnimated",
         targetValue = percent.toFloat(),

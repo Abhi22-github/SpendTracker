@@ -1,6 +1,5 @@
 package com.roaa.expensetracker.ViewModels
 
-import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -179,7 +178,6 @@ class TransactionsViewModel @Inject constructor(
                 error(e)
             }.collect { totalAmount ->
                 _getTotalIncomeAmountForRangeFlow.value = totalAmount
-                Log.d("Hello", "getTotalIncomeForRange: $totalAmount")
                 completed()
             }
         }
@@ -192,7 +190,6 @@ class TransactionsViewModel @Inject constructor(
                 startDate, endDate, EXPENSE
             ).catch { error(it) }.collect { totalAmount ->
                 _getTotalExpenseAmountForRangeFlow.value = totalAmount
-                Log.d("Hello", "getTotalExpenseForRange: $totalAmount")
                 completed()
             }
         }
@@ -330,6 +327,5 @@ class TransactionsViewModel @Inject constructor(
 
     fun error(error: Throwable) {
         _uiState.value = UiState.Error(error.toString())
-        Log.d("Hello Error reason", error.toString())
     }
 }

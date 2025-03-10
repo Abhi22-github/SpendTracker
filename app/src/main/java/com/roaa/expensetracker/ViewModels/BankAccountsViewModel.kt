@@ -1,6 +1,5 @@
 package com.roaa.expensetracker.ViewModels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roaa.expensetracker.Model.BankAccountsClass
@@ -163,7 +162,6 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
 
     fun error(error: Throwable) {
         _uiState.value = UiState.Error(error.toString())
-        Log.d("Hello Error reason", error.toString())
     }
 
 

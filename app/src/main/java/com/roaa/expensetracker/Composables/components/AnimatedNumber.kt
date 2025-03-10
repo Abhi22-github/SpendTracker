@@ -1,6 +1,5 @@
 package com.roaa.expensetracker.Composables.components
 
-import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.tween
@@ -33,7 +32,6 @@ fun AnimatedNumber(
     var blocks by remember { mutableStateOf<List<CharState>>(emptyList()) }
 
     DisposableEffect(value) {
-        Log.d("Hello length-",value.length.toString())
         var splittedValue = emptyList<String>().toMutableList()
         val it = BreakIterator.getCharacterInstance()
         it.setText(value)
@@ -55,7 +53,6 @@ fun AnimatedNumber(
 
         var newBlocks: MutableList<CharState> = emptyList<CharState>().toMutableList()
 
-        Log.d("Hello length+",length.toString())
         for (i in 0 .. length) {
             newBlocks.add(
                 CharState(
@@ -70,7 +67,6 @@ fun AnimatedNumber(
         blocks = newBlocks
         previewsValue = splittedValue
 
-        Log.d("Hello length=",value.length.toString())
         onDispose {  }
 
     }
