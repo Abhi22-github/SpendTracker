@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -57,6 +58,7 @@ import com.roaa.expensetracker.model.uiDataModels.BarChartExpenseModel
 import com.roaa.expensetracker.utilities.parseAmount
 import com.roaa.expensetracker.utilities.toLong
 import java.math.BigDecimal
+import java.text.DecimalFormat
 import java.time.LocalDate
 
 
@@ -85,7 +87,7 @@ fun BarChart(
     }
 
     val modelProducer = remember { CartesianChartModelProducer() }
-    LaunchedEffect(Unit) {
+    LaunchedEffect(currentMonthAllDayAndDates) {
         modelProducer.runTransaction {
             columnSeries { series(currentMonthAllDayAndDates.map { it.expenseAmount }) }
             extras {
@@ -322,8 +324,12 @@ fun BarChartBudgetUsage(
     modifier: Modifier = Modifier,
     palette: HarmonizedColorPalette,
     chartDataList: List<BarChartExpenseModel>,
-    budgetAmount: BigDecimal
+    budgetAmount: BigDecimal,
+    dayDifferenceForCharts: MutableState<Long>
 ) {
+    val localCurrency = LocalCurrency.current.currencySymbol
+    val MarkerValueFormatter =
+        DefaultCartesianMarker.ValueFormatter.default(DecimalFormat("$localCurrency#,##,##0.00"))
 
     val maxY = maxOf(
         budgetAmount.multiply(BigDecimal(1.2)), // Add 20% buffer above budget
@@ -331,7 +337,7 @@ fun BarChartBudgetUsage(
     ).toDouble()
 
     val modelProducer = remember { CartesianChartModelProducer() }
-    LaunchedEffect(Unit) {
+    LaunchedEffect(chartDataList,dayDifferenceForCharts) {
         modelProducer.runTransaction {
             columnSeries { series(chartDataList.map { it.expenseAmount }) }
             extras {
@@ -395,7 +401,8 @@ fun BarChartBudgetUsage(
                             ),
                             shape = CorneredShape.rounded(40)
                         )
-                    )
+                    ),
+                    valueFormatter = MarkerValueFormatter
                 ),
                 layerPadding = { cartesianLayerPadding(scalableStart = 8.dp, scalableEnd = 8.dp) },
                 decorations = listOf(rememberHorizontalLine(budgetAmount, palette))
@@ -404,8 +411,11 @@ fun BarChartBudgetUsage(
         modifier = modifier
             .height(300.dp)
             .fillMaxWidth(),
-        zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.x(7.0))
-        //scrollState = rememberVicoScrollState(scrollEnabled = false),
+        zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.x(7.0)),
+        scrollState = rememberVicoScrollState(
+            scrollEnabled = true,
+            initialScroll = Scroll.Absolute.x(dayDifferenceForCharts.value.toDouble(), 0.5f)
+        ),
     )
 }
 

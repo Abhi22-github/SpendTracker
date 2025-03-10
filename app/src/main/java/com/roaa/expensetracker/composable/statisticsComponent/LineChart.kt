@@ -5,6 +5,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -17,6 +20,7 @@ import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLine
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberLineCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
@@ -25,6 +29,7 @@ import com.patrykandpatrick.vico.compose.common.fill
 import com.patrykandpatrick.vico.compose.common.insets
 import com.patrykandpatrick.vico.compose.common.shader.verticalGradient
 import com.patrykandpatrick.vico.compose.common.shape.rounded
+import com.patrykandpatrick.vico.core.cartesian.Scroll
 import com.patrykandpatrick.vico.core.cartesian.Zoom
 import com.patrykandpatrick.vico.core.cartesian.axis.BaseAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
@@ -48,6 +53,7 @@ import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import com.roaa.expensetracker.activity.LocalCurrency
 import com.roaa.expensetracker.composable.utils.HarmonizedColorPalette
 import java.math.BigDecimal
+import java.text.DecimalFormat
 
 
 private val BottomAxisLabelKey = ExtraStore.Key<List<String>>()
@@ -232,16 +238,19 @@ fun LineChartBudgetTotalUsage(
     palette: HarmonizedColorPalette,
     lineChartDataList: Map<String, BigDecimal>,
     totalBudgetAmount: BigDecimal,
-
+    dayDifferenceForCharts: MutableState<Long>,
     ) {
+    val localCurrency = LocalCurrency.current.currencySymbol
+    val MarkerValueFormatter =  DefaultCartesianMarker.ValueFormatter.default(DecimalFormat("$localCurrency#,##,##0.00"))
     val maxY = maxOf(
         totalBudgetAmount.multiply(BigDecimal(1.2)), // Add 20% buffer above budget
         lineChartDataList.values.max()
     ).toDouble()
 
     val modelProducer = remember { CartesianChartModelProducer() }
+    val scrollX by remember { mutableStateOf(dayDifferenceForCharts.value.toDouble()) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(lineChartDataList,dayDifferenceForCharts,totalBudgetAmount) {
         modelProducer.runTransaction {
             lineSeries {
                 series(lineChartDataList.values)
@@ -314,7 +323,8 @@ fun LineChartBudgetTotalUsage(
                         ),
                         shape = CorneredShape.rounded(40)
                     )
-                )
+                ),
+                valueFormatter = MarkerValueFormatter
             ),
             decorations = listOf(rememberHorizontalLine(totalBudgetAmount, palette))
         ),
@@ -323,5 +333,9 @@ fun LineChartBudgetTotalUsage(
             .height(300.dp)
             .fillMaxWidth(),
         zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.x(6.0)),
+        scrollState = rememberVicoScrollState(
+            scrollEnabled = true,
+            initialScroll = Scroll.Absolute.x(scrollX, 0.5f)
+        ),
     )
 }

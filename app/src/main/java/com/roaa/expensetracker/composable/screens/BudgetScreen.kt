@@ -148,6 +148,14 @@ fun BudgetScreen(
             emptyBudgetClass, listOf(emptyBudgetDayClass)
         )
     }
+    val dayDifferenceForCharts = remember {
+        mutableStateOf(
+            getDayDifference(
+                getCurrentBudget.budgetSummary.budgetStartDate.toLocalDate(),
+                LocalDate.now()
+            )
+        )
+    }
     BackHandler {
         handleBackNavigation(navigationManager)
     }
@@ -185,8 +193,8 @@ fun BudgetScreen(
                             var currentExpenseLocal by remember { mutableStateOf(BigDecimal.ZERO) }
                             var remainingBudget by remember { mutableStateOf(currentBudgetLocal - currentExpenseLocal) }
                             var remainingDaysPercentage by remember { mutableStateOf(BigDecimal.ZERO) }
-
-                            val barChartDataList = getCurrentBudget.budgetAllDays.map {
+                            val sortedBudgetAllDays = getCurrentBudget.budgetAllDays.sortedBy { it.date }
+                            val barChartDataList = sortedBudgetAllDays.map {
                                 BarChartExpenseModel(
                                     date = it.date,
                                     dayName = it.date.toLocalDate().toDayMonthFormat(),
@@ -195,12 +203,12 @@ fun BudgetScreen(
                                 )
                             }
                             val cumulativeBudgetList =
-                                getCurrentBudget.budgetAllDays.runningFold(BigDecimal.ZERO) { sum, item -> sum + item.totalExpense }
+                                sortedBudgetAllDays.runningFold(BigDecimal.ZERO) { sum, item -> sum + item.totalExpense }
                                     .drop(1)
 
 
                             val lineChartDataList =
-                                getCurrentBudget.budgetAllDays.mapIndexed { index, item ->
+                                sortedBudgetAllDays.mapIndexed { index, item ->
                                     item.date.toLocalDate().toDayMonthFormat() to
                                             cumulativeBudgetList[index]
                                 }.toMap()
@@ -363,7 +371,8 @@ fun BudgetScreen(
                                 LineChartBudgetTotalUsage(
                                     Modifier,
                                     toPalette(color1), lineChartDataList,
-                                    getCurrentBudget.budgetSummary.totalBudgetAmount
+                                    getCurrentBudget.budgetSummary.totalBudgetAmount,
+                                    dayDifferenceForCharts
                                 )
                                 Spacer(Modifier.height(42.dp))
 
@@ -392,7 +401,8 @@ fun BudgetScreen(
                                     Modifier,
                                     toPalette(orange),
                                     barChartDataList,
-                                    getCurrentBudget.budgetSummary.budgetAmountPerDay
+                                    getCurrentBudget.budgetSummary.budgetAmountPerDay,
+                                    dayDifferenceForCharts
                                 )
                                 Spacer(Modifier.height(24.dp))
                                 SpendCalender(Modifier, getCurrentBudget)
@@ -792,7 +802,7 @@ fun DayProgressIndicator(
             // Draw decorations for specific days
 
             if (isInBudget) {
-                val xOffset = (segmentWidthForDayDecoration * (day/totalDays))
+                val xOffset = (segmentWidthForDayDecoration * (day / totalDays))
                 drawRoundRect(
                     color = decorationColor,
                     topLeft = Offset(xOffset, 0f - height / 2),
