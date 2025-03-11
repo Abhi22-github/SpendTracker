@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roaa.expensetracker.Composables.changeThemeSystemWide
 import com.roaa.expensetracker.Model.BankAccountsClass
+import com.roaa.expensetracker.Model.UiDateModels.CurrencyClass
 import com.roaa.expensetracker.Utilities.PreferenceManger.CURRENT_BUDGET_DURATION
 import com.roaa.expensetracker.Utilities.PreferenceManger.CURRENT_BUDGET_END_DATE
 import com.roaa.expensetracker.Utilities.PreferenceManger.CURRENT_BUDGET_MONTH_NAME
@@ -83,6 +84,7 @@ class PreferencesViewModel @Inject constructor(private val preferenceManager: Pr
             preferenceManager.saveBooleanValue(budgetState, IS_BUDGET_SET)
         }
     }
+
     val isBudgetSet = preferenceManager.getBooleanValue(IS_BUDGET_SET)
 
     fun setFirstStartupCompleted() {
@@ -90,7 +92,17 @@ class PreferencesViewModel @Inject constructor(private val preferenceManager: Pr
             preferenceManager.saveBooleanValue(true, IS_APP_FIRST_STARTUP)
         }
     }
+
     val isNotFirstStartup = preferenceManager.getBooleanValue(IS_APP_FIRST_STARTUP)
+
+
+    fun setCurrency(currencyClass: CurrencyClass) {
+        viewModelScope.launch {
+            preferenceManager.setCurrency(currencyClass)
+        }
+    }
+
+    val getCurrency = preferenceManager.getCurrency()
 
 
 }

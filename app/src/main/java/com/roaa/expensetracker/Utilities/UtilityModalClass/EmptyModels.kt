@@ -1,5 +1,6 @@
 package com.roaa.expensetracker.Utilities.UtilityModalClass
 
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Model.BudgetDayModelClass
 import com.roaa.expensetracker.Model.BudgetModelClass
@@ -7,9 +8,9 @@ import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Model.TransactionClass
 import com.roaa.expensetracker.Model.UiDataModels.TotalAmountClass
 import com.roaa.expensetracker.Model.UiDataModels.TotalExpenseIncomeClass
+import com.roaa.expensetracker.Model.UiDateModels.CurrencyClass
 import com.roaa.expensetracker.Utilities.Constants.CASH
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
-import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import java.math.BigDecimal
 
 val emptyBank = BankAccountsClass(
@@ -68,3 +69,5 @@ val emptyTransactionWithDetailsClass = TransactionWithDetails(
 val firstSampleClass = CategoryClass(
     -1, "Select Category", 1, -99, EXPENSE, isActive = false
 )
+
+val defaultCurrency = CurrencyClass("India", "INR", "Indian Rupees", "₹","🇮🇳" )

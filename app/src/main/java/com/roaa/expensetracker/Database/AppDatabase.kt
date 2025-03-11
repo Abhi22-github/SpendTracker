@@ -87,7 +87,7 @@ abstract class AppDatabase : RoomDatabase() {
         }
 
         // below line is to create a callback for our room database.
-         val prePopulateData: Callback = object : Callback() {
+        val prePopulateData: Callback = object : Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
                 // this method is called when database is created

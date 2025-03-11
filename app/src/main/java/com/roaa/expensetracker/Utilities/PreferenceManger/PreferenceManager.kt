@@ -8,6 +8,8 @@ import androidx.datastore.preferences.preferencesDataStore
 import com.roaa.expensetracker.Composables.ThemeMode
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Model.BankAccountsSerializer
+import com.roaa.expensetracker.Model.UiDateModels.CurrencyClass
+import com.roaa.expensetracker.Model.UiDateModels.CurrencyClassSerializer
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -15,11 +17,16 @@ import javax.inject.Inject
 
 
 val Context.dataStore by preferencesDataStore(name = PREFERENCES_NAME)
-val Context.dataStoreBank by dataStore("my_file.json", serializer = BankAccountsSerializer)
+val Context.dataStoreBank by dataStore("bank_file.json", serializer = BankAccountsSerializer)
+val Context.dataStoreCurrency by dataStore(
+    "currency_file.json",
+    serializer = CurrencyClassSerializer
+)
 
 class PreferenceManager @Inject constructor(@ApplicationContext val context: Context) {
     private val dataStore = context.dataStore
     private val dataStoreBank = context.dataStoreBank
+    private val dataStoreCurrency = context.dataStoreCurrency
 
     // Save float value
     suspend fun saveFloatValue(value: Float, key: Preferences.Key<Float>) {
@@ -28,7 +35,7 @@ class PreferenceManager @Inject constructor(@ApplicationContext val context: Con
         }
     }
 
-     fun getPrimaryBankAccount(): Flow<BankAccountsClass> =
+    fun getPrimaryBankAccount(): Flow<BankAccountsClass> =
         context.dataStoreBank.data
 
     suspend fun setPrimaryBankAccount(bankAccountsClass: BankAccountsClass) {
@@ -111,5 +118,20 @@ class PreferenceManager @Inject constructor(@ApplicationContext val context: Con
             .map { preferences ->
                 preferences[key] ?: ThemeMode.SYSTEM.toString()
             }
+    }
+
+    fun getCurrency(): Flow<CurrencyClass> =
+        dataStoreCurrency.data
+
+    suspend fun setCurrency(currencyClass: CurrencyClass) {
+        dataStoreCurrency.updateData {
+            it.copy(
+                countryName = currencyClass.countryName,
+                currencyCode = currencyClass.currencyCode,
+                currencyDisplayName = currencyClass.currencyDisplayName,
+                currencySymbol = currencyClass.currencySymbol,
+                flag = currencyClass.flag
+            )
+        }
     }
 }
