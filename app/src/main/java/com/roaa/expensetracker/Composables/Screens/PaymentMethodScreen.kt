@@ -59,6 +59,7 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
+import com.roaa.expensetracker.Activity.LocalCurrency
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
@@ -83,6 +84,7 @@ import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Converters.TransactionConverter
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.R
@@ -99,7 +101,6 @@ import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toDisplayDate
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
-import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -322,7 +323,7 @@ fun PaymentCard(
             }
 
             Text(
-                text = "₹${bankAccountsClass.currentAmount}",
+                text = "${LocalCurrency.current.currencySymbol}${bankAccountsClass.currentAmount}",
                 style = typography.headlineMedium.copy(fontFamily = numberFont),
                 modifier = Modifier.constrainAs(balanceText) {
                     top.linkTo(parent.top, margin = 24.dp)
@@ -656,7 +657,7 @@ fun LivePaymentCard(
                 start.linkTo(parent.start, margin = 24.dp)
             }, verticalAlignment = Alignment.CenterVertically) {
                 Text(
-                    text = "₹",
+                    text = "${LocalCurrency.current.currencySymbol}",
                     style = typography.headlineMedium.copy(
                         fontFamily = numberFont,
                     ),
@@ -890,24 +891,24 @@ fun PaymentDetailsScreen(
                                 SingleInfoBox(
                                     Modifier.weight(1f),
                                     "Total Expense",
-                                    "₹ ${parseAmount(totalExpense)}",
+                                    "${LocalCurrency.current.currencySymbol} ${parseAmount(totalExpense)}",
                                 )
                                 SingleInfoBox(
                                     Modifier.weight(1f),
                                     "Total Income",
-                                    "₹ ${parseAmount(totalIncome)}",
+                                    "${LocalCurrency.current.currencySymbol} ${parseAmount(totalIncome)}",
                                 )
                             }
 //                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
 //                                SingleInfoBox(
 //                                    Modifier.weight(1f),
 //                                    "Minimum Spend",
-//                                    "₹ 3000",
+//                                    "${LocalCurrency.current.currencySymbol} 3000",
 //                                )
 //                                SingleInfoBox(
 //                                    Modifier.weight(1f),
 //                                    "Maximum Spend",
-//                                    "₹ 3000",
+//                                    "${LocalCurrency.current.currencySymbol} 3000",
 //                                )
 //                            }
                             Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
@@ -1046,7 +1047,7 @@ fun HeaderNew(date: String, totalExpenseForDay: Double, totalIncomeForDay: Doubl
 //                        tint = successColor
 //                    )
                     Text(
-                        "₹ ${parseAmount(totalIncomeForDay.toBigDecimal())}",
+                        "${LocalCurrency.current.currencySymbol} ${parseAmount(totalIncomeForDay.toBigDecimal())}",
                         style = typography.labelLarge.copy(fontFamily = numberFont),
                         color = successColor
                     )
@@ -1055,7 +1056,7 @@ fun HeaderNew(date: String, totalExpenseForDay: Double, totalIncomeForDay: Doubl
                 Row {
 //                    Icon(painterResource(R.drawable.expense_icon_new), contentDescription = null, tint = orange)
                     Text(
-                        "₹ ${parseAmount(totalExpenseForDay.toBigDecimal())}",
+                        "${LocalCurrency.current.currencySymbol} ${parseAmount(totalExpenseForDay.toBigDecimal())}",
                         style = typography.labelLarge.copy(fontFamily = numberFont),
                         color = Color.Red
                     )

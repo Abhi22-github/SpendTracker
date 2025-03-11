@@ -28,6 +28,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.unit.dp
+import com.roaa.expensetracker.Activity.LocalCurrency
 import com.roaa.expensetracker.Composables.colorBad
 import com.roaa.expensetracker.Composables.colorEditor
 import com.roaa.expensetracker.Composables.colorGood
@@ -50,6 +51,7 @@ fun RowScope.RestBudgetPill(
         targetValue = percent.toFloat(),
         animationSpec = TweenSpec(300),
     ).value
+    val currency = LocalCurrency.current.currencySymbol
 
     val harmonizedColor = toPalette(
         harmonize(
@@ -109,7 +111,7 @@ fun RowScope.RestBudgetPill(
                 StatusLabel(harmonizedColor, budgetState = DaileBudgetState.END)
                 Spacer(modifier = Modifier.weight(1f))
                 AnimatedNumber(
-                    value = "₹" + totalExpenseAmountForDate.toString(),
+                    value = currency + totalExpenseAmountForDate.toString(),
                     style = MaterialTheme.typography.titleLarge.copy(
                         fontSize = MaterialTheme.typography.titleLarge.fontSize
                     ),

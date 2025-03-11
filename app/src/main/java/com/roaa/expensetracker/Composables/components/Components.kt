@@ -48,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.constraintlayout.compose.Dimension
 import coil.compose.rememberAsyncImagePainter
+import com.roaa.expensetracker.Activity.LocalCurrency
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.utils.HarmonizedColorPalette
 import com.roaa.expensetracker.Composables.utils.IconState
@@ -182,7 +183,7 @@ fun SummaryCard(color: Color) {
         ConstraintLayout(Modifier.fillMaxWidth()) {
             val (balanceText, balanceLabel, expense, income, moreIcon, backgroundImage1, backgroundImage2, progress) = createRefs()
 
-            Text(text = "₹24,045",
+            Text(text = "${LocalCurrency.current.currencySymbol}24,045",
                 style = MaterialTheme.typography.headlineMedium.copy(fontFamily = numberFont),
                 modifier = Modifier.constrainAs(balanceText) {
                     top.linkTo(parent.top, margin = 24.dp)
@@ -231,7 +232,7 @@ fun SummaryCard(color: Color) {
 
                 ) {
                     Text(
-                        text = "₹3,999",
+                        text = "${LocalCurrency.current.currencySymbol}3,999",
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 1f),
                         style = typography.titleMedium.copy(
                             fontFamily = numberFont,
@@ -286,7 +287,7 @@ fun SummaryCard(color: Color) {
 
                 ) {
                     Text(
-                        text = "₹2000",
+                        text = "${LocalCurrency.current.currencySymbol}2000",
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 1f),
                         style = typography.titleMedium.copy(
                             fontFamily = numberFont,

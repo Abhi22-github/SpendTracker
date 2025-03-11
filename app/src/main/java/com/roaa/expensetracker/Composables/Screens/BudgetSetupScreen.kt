@@ -62,6 +62,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
+import com.roaa.expensetracker.Activity.LocalCurrency
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
@@ -74,6 +75,7 @@ import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.secondaryAlpha
 import com.roaa.expensetracker.Composables.utils.ActionTypes
 import com.roaa.expensetracker.Composables.utils.DistributionMethod
+import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.DecimalFilterTransformation
@@ -86,7 +88,6 @@ import com.roaa.expensetracker.Utilities.toDateWithDayName
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.Utilities.toLongMillis
-import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 
@@ -399,7 +400,7 @@ fun BottomSheetBudgetContent(
 
                     placeholder = {
                         Text(
-                            "₹0",
+                            "${LocalCurrency.current.currencySymbol}0",
                             style = typography.displayMedium,
                             modifier = Modifier
                                 .fillMaxWidth()

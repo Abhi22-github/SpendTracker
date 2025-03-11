@@ -82,6 +82,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.aay.compose.donutChart.model.PieChartData
+import com.roaa.expensetracker.Activity.LocalCurrency
 import com.roaa.expensetracker.Composables.CustomFonts
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
@@ -107,6 +108,7 @@ import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.toPalette
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
@@ -129,7 +131,6 @@ import com.roaa.expensetracker.Utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.Utilities.toLongMillis
-import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.time.LocalDate
@@ -645,19 +646,19 @@ fun StatisticsScreenTest(
 //                    SingleInfoBox(
 //                        Modifier.weight(1f),
 //                        "Total Expense",
-//                        "₹ ${parseAmount(totalExpense)}"
+//                        "${LocalCurrency.current.currencySymbol} ${parseAmount(totalExpense)}"
 //                    )
 //                    SingleInfoBox(
 //                        Modifier.weight(1f),
 //                        "Total Income",
-//                        "₹ ${parseAmount(totalIncome)}"
+//                        "${LocalCurrency.current.currencySymbol} ${parseAmount(totalIncome)}"
 //                    )
 //                }
 //                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
 //                    SingleInfoBox(
 //                        Modifier.weight(1f),
 //                        "Average Expense",
-//                        "₹ ${
+//                        "${LocalCurrency.current.currencySymbol} ${
 //                            parseAmount(
 //                                totalExpense /
 //                                        expenseTransactions.size
@@ -667,7 +668,7 @@ fun StatisticsScreenTest(
 //                    SingleInfoBox(
 //                        Modifier.weight(1f),
 //                        "Average Income",
-//                        "₹ ${
+//                        "${LocalCurrency.current.currencySymbol} ${
 //                            parseAmount(
 //                                totalIncome /
 //                                        incomeTransaction.size
@@ -697,7 +698,7 @@ fun StatisticsScreenTest(
                         }
                         AnimatedContent(targetState = amount) {
                             Text(
-                                text = "₹ ${parseAmount(it)}",
+                                text = "${LocalCurrency.current.currencySymbol} ${parseAmount(it)}",
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp),
                                 style = typography.headlineMedium.copy(fontFamily = CustomFonts.numberFont)
                             )
@@ -988,7 +989,7 @@ fun CategoryStatEntryTest(
                 }
             }
             Text(
-                text = "₹ ${parseAmount(categorySummaryClass.totalAmount)}",
+                text = "${LocalCurrency.current.currencySymbol} ${parseAmount(categorySummaryClass.totalAmount)}",
                 style = typography.bodyMedium.copy(fontFamily = CustomFonts.numberFont)
             )
         }
@@ -1294,12 +1295,12 @@ fun BankAnalysisBottomSheetContent(
                         SingleInfoBox(
                             Modifier.weight(1f),
                             "Minimum Spend",
-                            "₹ 3000",
+                            "${LocalCurrency.current.currencySymbol} 3000",
                         )
                         SingleInfoBox(
                             Modifier.weight(1f),
                             "Maximum Spend",
-                            "₹ 3000",
+                            "${LocalCurrency.current.currencySymbol} 3000",
                         )
                     }
                     Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {

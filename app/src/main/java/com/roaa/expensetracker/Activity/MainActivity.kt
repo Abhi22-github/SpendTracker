@@ -95,6 +95,7 @@ import com.roaa.expensetracker.Notification.WorkManger.scheduleDailyNotification
 import com.roaa.expensetracker.Notification.createNotificationChannel
 import com.roaa.expensetracker.Notification.notificationChannelList
 import com.roaa.expensetracker.R
+import com.roaa.expensetracker.Utilities.UtilityModalClass.defaultCurrency
 import com.roaa.expensetracker.Utilities.appStartingChecks
 import com.roaa.expensetracker.Utilities.convertToWholeMonthName
 import com.roaa.expensetracker.Utilities.currentDay
@@ -111,6 +112,7 @@ import java.time.LocalDate
 val LocalWindowSize = compositionLocalOf { WindowWidthSizeClass.Compact }
 val LocalWindowInsets = compositionLocalOf { PaddingValues(0.dp) }
 val LocalErrorMessage = compositionLocalOf { mutableStateOf<String>("") }
+val LocalCurrency = compositionLocalOf { defaultCurrency }
 
 @AndroidEntryPoint
 class ComposeMainActivity : ComponentActivity() {
@@ -156,7 +158,7 @@ class ComposeMainActivity : ComponentActivity() {
                 notificationChannelList.forEach {
                     createNotificationChannel(context, it)
                 }
-                appStartingChecks(context,allViewModels)
+                appStartingChecks(context, allViewModels)
                 // App ready for work
                 isReady.value = true
             }
@@ -172,13 +174,17 @@ class ComposeMainActivity : ComponentActivity() {
                 .asPaddingValues()
 
             val errorMessage = remember { mutableStateOf<String>("") }
+            val localCurrencyClass by allViewModels.preferencesViewModel.getCurrency.collectAsState(
+                defaultCurrency
+            )
 
             if (isReady.value) {
                 ExpenseTrackerTheme {
                     CompositionLocalProvider(
                         LocalWindowSize provides widthSizeClass,
                         LocalWindowInsets provides windowInsets,
-                        LocalErrorMessage provides errorMessage
+                        LocalErrorMessage provides errorMessage,
+                        LocalCurrency provides localCurrencyClass
                     ) {
                         NavigationDrawer(rootNavController, navigationManager, allViewModels)
                         LaunchedEffect(Unit) {

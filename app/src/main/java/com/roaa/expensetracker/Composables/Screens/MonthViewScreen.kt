@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
+import com.roaa.expensetracker.Activity.LocalCurrency
 import com.roaa.expensetracker.Composables.CustomFonts
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
@@ -364,7 +365,7 @@ fun DayCell(
 
                 ) {
                     Text(
-                        text = "-₹${parseAmount(it.first)}",
+                        text = "-${LocalCurrency.current.currencySymbol}${parseAmount(it.first)}",
                         color = colorPalletOrange.main,
                         style = typography.labelSmall.copy(fontFamily = CustomFonts.numberFont),
                         textAlign = TextAlign.Center,
@@ -388,7 +389,7 @@ fun DayCell(
 
                 ) {
                     Text(
-                        text = "+₹${parseAmount(it.second)}",
+                        text = "+${LocalCurrency.current.currencySymbol}${parseAmount(it.second)}",
                         color = colorPalletGreen.main,
                         style = typography.labelSmall.copy(fontFamily = CustomFonts.numberFont),
                         textAlign = TextAlign.Center,
@@ -428,7 +429,7 @@ fun MonthStatCard(
                 }
         ) {
             Text(
-                text = "₹ $value",
+                text = "${LocalCurrency.current.currencySymbol} $value",
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth(),
                 style = typography.bodyMedium.copy(

@@ -111,6 +111,7 @@ import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil.compose.rememberAsyncImagePainter
+import com.roaa.expensetracker.Activity.LocalCurrency
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.Screens.LivePaymentCard
 import com.roaa.expensetracker.Composables.Screens.ValueLabelList
@@ -128,6 +129,7 @@ import com.roaa.expensetracker.Composables.utils.colorList
 import com.roaa.expensetracker.Composables.utils.distributionChoiceList
 import com.roaa.expensetracker.Composables.utils.iconsList
 import com.roaa.expensetracker.Composables.utils.toPalette
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Model.CategoryClass
@@ -149,7 +151,6 @@ import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLongMillis
-import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.take
@@ -270,7 +271,7 @@ fun BottomSheetContentItemAddContent(
     } else {
         BigDecimal.ZERO
     }
-    viewModel.animationViewModel.method("₹$amountInString", percent.toFloat())
+    viewModel.animationViewModel.method("${LocalCurrency.current.currencySymbol}$amountInString", percent.toFloat())
 
     LaunchedEffect(percent) {
         scope.launch {
@@ -417,7 +418,7 @@ fun BottomSheetContentItemAddContent(
 
                     placeholder = {
                         Text(
-                            "₹0",
+                            "${LocalCurrency.current.currencySymbol}0",
                             style = typography.displayMedium,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -661,7 +662,7 @@ fun BottomSheetContentItemEditContent(
     } else {
         BigDecimal.ZERO
     }
-    viewModel.animationViewModel.method("₹$amountInString", percent.toFloat())
+    viewModel.animationViewModel.method("${LocalCurrency.current.currencySymbol}$amountInString", percent.toFloat())
 
     LaunchedEffect(percent) {
         scope.launch {
@@ -814,7 +815,7 @@ fun BottomSheetContentItemEditContent(
 
                     placeholder = {
                         Text(
-                            "₹0",
+                            "${LocalCurrency.current.currencySymbol}0",
                             style = typography.displayMedium,
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -1254,8 +1255,9 @@ fun BottomSheetContentItemDetailsContent(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()
     ) {
+
         Text(
-            text = "₹" + parseAmount(singleTransaction.transaction.amount),
+            text = "${LocalCurrency.current.currencySymbol}" + parseAmount(singleTransaction.transaction.amount),
             style = typography.headlineLarge,
             fontFamily = numberFont
         )
@@ -1796,7 +1798,7 @@ fun BottomSheetContentPaymentMethodAddContentNew(
                     Spacer(Modifier.height(12.dp))
                     Text(
                         modifier = Modifier,
-                        text = "₹345890",
+                        text = "${LocalCurrency.current.currencySymbol}345890",
                         style = typography.titleMedium.copy(fontFamily = numberFont),
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -2026,7 +2028,7 @@ fun BottomSheetContentPaymentMethodEditContentNew(
                     Spacer(Modifier.height(12.dp))
                     Text(
                         modifier = Modifier,
-                        text = "₹345890",
+                        text = "${LocalCurrency.current.currencySymbol}345890",
                         style = typography.titleMedium.copy(fontFamily = numberFont),
                         color = MaterialTheme.colorScheme.onSurface
                     )
@@ -2276,7 +2278,7 @@ fun BottomSheetContentItemAddContentTest(
     } else {
         0f
     }
-    viewModel.animationViewModel.method("₹$amountInString", percent.toFloat())
+    viewModel.animationViewModel.method("${LocalCurrency.current.currencySymbol}$amountInString", percent.toFloat())
 
     LaunchedEffect(percent) {
         scope.launch {
@@ -2472,7 +2474,7 @@ fun BottomSheetContentItemAddContentTest(
 
                     placeholder = {
                         Text(
-                            "₹0",
+                            "${LocalCurrency.current.currencySymbol}0",
                             style = typography.displayMedium,
                             modifier = Modifier
                                 .fillMaxWidth()

@@ -49,6 +49,7 @@ import com.patrykandpatrick.vico.core.common.component.ShapeComponent
 import com.patrykandpatrick.vico.core.common.component.TextComponent
 import com.patrykandpatrick.vico.core.common.data.ExtraStore
 import com.patrykandpatrick.vico.core.common.shape.CorneredShape
+import com.roaa.expensetracker.Activity.LocalCurrency
 import com.roaa.expensetracker.Composables.utils.HarmonizedColorPalette
 import com.roaa.expensetracker.Model.UiDataModels.BarChartExpenseModel
 import java.math.BigDecimal
@@ -275,7 +276,11 @@ fun BarChartStatisticsScreen(
 
 
 @Composable
-private fun rememberHorizontalLine(budgetAmount: BigDecimal,palette: HarmonizedColorPalette): HorizontalLine {
+private fun rememberHorizontalLine(
+    budgetAmount: BigDecimal,
+    palette: HarmonizedColorPalette
+): HorizontalLine {
+    val currency = LocalCurrency.current.currencySymbol
     val fill = fill(palette.main.copy(alpha = 0.1f))
     val line = rememberLineComponent(fill = fill(palette.main), thickness = 2.dp)
     val labelComponent =
@@ -291,7 +296,7 @@ private fun rememberHorizontalLine(budgetAmount: BigDecimal,palette: HarmonizedC
             y = { budgetAmount.toDouble() },
             line = line,
             labelComponent = labelComponent,
-            label = { "Daily Budget ₹$budgetAmount" },
+            label = { "Daily Budget ${currency}$budgetAmount" },
             verticalLabelPosition = Position.Vertical.Bottom,
         )
     }
@@ -362,7 +367,7 @@ fun BarChartBudgetUsage(
                 ),
                 marker = rememberDefaultCartesianMarker(
                     labelPosition = DefaultCartesianMarker.LabelPosition.AbovePoint,
-                    label =TextComponent(
+                    label = TextComponent(
                         color = palette.onMain.toArgb(),
                         padding = Insets(8f),
                         background = ShapeComponent(
@@ -374,7 +379,7 @@ fun BarChartBudgetUsage(
                     )
                 ),
                 layerPadding = { cartesianLayerPadding(scalableStart = 8.dp, scalableEnd = 8.dp) },
-                decorations = listOf(rememberHorizontalLine(budgetAmount,palette))
+                decorations = listOf(rememberHorizontalLine(budgetAmount, palette))
             ),
         modelProducer = modelProducer,
         modifier = modifier

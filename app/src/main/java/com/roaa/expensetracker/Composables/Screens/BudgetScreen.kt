@@ -58,6 +58,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
+import com.roaa.expensetracker.Activity.LocalCurrency
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
@@ -202,7 +203,7 @@ fun BudgetScreen(
                 Column(Modifier.verticalScroll(rememberScrollState())) {
 
                     Text(
-                        text = "₹ ${getCurrentBudget.budgetSummary.totalBudgetAmount}",
+                        text = "${LocalCurrency.current.currencySymbol} ${getCurrentBudget.budgetSummary.totalBudgetAmount}",
                         modifier = modifier.fillMaxWidth(),
                         textAlign = TextAlign.Center,
                         style = typography.headlineMedium,
@@ -267,7 +268,7 @@ fun BudgetScreen(
                             LocalDate.now()
                         )
                         Text(
-                            text = "You can spend ₹${(currentBudgetLocal - currentExpenseLocal).div(BigDecimal(remainingBudgetDays))}/day for ${remainingBudgetDays} more days",
+                            text = "You can spend ${LocalCurrency.current.currencySymbol}${(currentBudgetLocal - currentExpenseLocal).div(BigDecimal(remainingBudgetDays))}/day for ${remainingBudgetDays} more days",
                             modifier = modifier
                                 .fillMaxWidth()
                                 .padding(top = 16.dp),
@@ -304,7 +305,7 @@ fun BudgetScreen(
 //                        Column {
 //
 //                            Text(
-//                                text = "₹${if (remainingBudget.toInt() < 0) 0 else remainingBudget}",
+//                                text = "${LocalCurrency.current.currencySymbol}${if (remainingBudget.toInt() < 0) 0 else remainingBudget}",
 //                                style = typography.headlineSmall.copy(fontFamily = CustomFonts.numberFont),
 //                                textAlign = TextAlign.Center,
 //                                color = purpleColorPalette.main,
@@ -402,7 +403,7 @@ fun BudgetScreen(
 //                                    modifier = Modifier,
 //                                    labelAndValueStyle = typography.bodyMedium,
 //                                    labelName = "Amount Per day",
-//                                    labelValue = "₹ ${getCurrentBudget.budgetSummary.budgetAmountPerDay}",
+//                                    labelValue = "${LocalCurrency.current.currencySymbol} ${getCurrentBudget.budgetSummary.budgetAmountPerDay}",
 //                                    iconNumber = 12,
 //                                    image = Icons.Rounded.AttachMoney,
 //                                )
@@ -418,7 +419,7 @@ fun BudgetScreen(
 //                                    modifier = Modifier,
 //                                    labelAndValueStyle = typography.bodyMedium,
 //                                    labelName = "Budget Remaining",
-//                                    labelValue = "₹ ${if (remainingBudget.toInt() < 0) 0 else remainingBudget}",
+//                                    labelValue = "${LocalCurrency.current.currencySymbol} ${if (remainingBudget.toInt() < 0) 0 else remainingBudget}",
 //                                    iconNumber = 12,
 //                                    image = Icons.Rounded.AttachMoney,
 //                                )
@@ -535,7 +536,7 @@ fun BudgetScreen(
 //                                SingleInfoBox(
 //                                    Modifier.weight(1f),
 //                                    "Budget Amount",
-//                                    "₹${getCurrentBudget.budgetSummary.totalBudgetAmount}"
+//                                    "${LocalCurrency.current.currencySymbol}${getCurrentBudget.budgetSummary.totalBudgetAmount}"
 //                                )
 //                                Spacer(Modifier.width(12.dp))
 //                                SingleInfoBox(
@@ -564,7 +565,7 @@ fun BudgetScreen(
 //                                SingleInfoBox(
 //                                    Modifier.weight(1f),
 //                                    "Total Amount",
-//                                    "₹${getCurrentBudget.budgetSummary.budgetAmountPerDay}/day"
+//                                    "${LocalCurrency.current.currencySymbol}${getCurrentBudget.budgetSummary.budgetAmountPerDay}/day"
 //                                )
 //                            }
 //                        }

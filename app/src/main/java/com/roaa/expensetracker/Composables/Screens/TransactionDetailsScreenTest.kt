@@ -74,6 +74,7 @@ import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.roaa.expensetracker.Activity.LocalCurrency
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.onBackPressed
@@ -183,7 +184,7 @@ fun TransactionDetailsScreen(
                     }
                     Spacer(Modifier.height(24.dp))
                     Text(
-                        text = "₹ ${singleTransaction.transaction.amount}",
+                        text = "${LocalCurrency.current.currencySymbol} ${singleTransaction.transaction.amount}",
                         style = typography.displayMedium.copy(fontFamily = numberFont),
                         color = colorPalette.main
                     )

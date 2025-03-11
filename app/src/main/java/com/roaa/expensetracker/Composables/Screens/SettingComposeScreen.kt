@@ -302,7 +302,7 @@ fun WorldCurrencyChooserContent(
         if (defaultCurrency == null) return@LaunchedEffect
 
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
-            val index = list.indexOfFirst { it.currencyCode == defaultCurrency.currencyCode }
+            val index = list.indexOfFirst { it.countryName == defaultCurrency.countryName }
 
             scrollState.scrollToItem(index)
         }
@@ -386,7 +386,7 @@ fun WorldCurrencyChooserContent(
                         filteredList.forEach {
                             itemsCurrency(
                                 currencyClass = it,
-                                selected = selectCurrency.value.currencyDisplayName == it.currencyDisplayName,
+                                selected = selectCurrency.value.countryName == it.countryName,
                                 onClick = {
                                     selectCurrency.value = it
                                 },

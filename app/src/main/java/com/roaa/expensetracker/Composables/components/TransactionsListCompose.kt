@@ -63,6 +63,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
 import coil.compose.rememberAsyncImagePainter
+import com.roaa.expensetracker.Activity.LocalCurrency
 import com.roaa.expensetracker.Composables.CustomFonts
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
@@ -75,6 +76,7 @@ import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Converters.TransactionConverter
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Model.TransactionClass
 import com.roaa.expensetracker.Model.UiDataModels.BarChartExpenseModel
@@ -94,7 +96,6 @@ import com.roaa.expensetracker.Utilities.getFirstAndLastMonth
 import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toDisplayDate
 import com.roaa.expensetracker.Utilities.toLocalDate
-import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 
@@ -344,10 +345,10 @@ fun SingleTransaction(
                 var amount = parseAmount(item.transaction.amount)
                 var amountColor = successColor
                 if (item.category.categoryType.equals(EXPENSE)) {
-                    amount = "-₹" + amount
+                    amount = "-${LocalCurrency.current.currencySymbol}" + amount
                     amountColor = failureColor
                 } else {
-                    amount = "+₹" + amount
+                    amount = "+${LocalCurrency.current.currencySymbol}" + amount
                     amountColor = successColor
                 }
                 Surface(
@@ -661,7 +662,7 @@ fun HomeStatCard(
                     }
             ) {
                 Text(
-                    text = "₹ $value",
+                    text = "${LocalCurrency.current.currencySymbol} $value",
                     textAlign = TextAlign.Center,
                     modifier = Modifier.fillMaxWidth(),
                     style = typography.bodyMedium.copy(
