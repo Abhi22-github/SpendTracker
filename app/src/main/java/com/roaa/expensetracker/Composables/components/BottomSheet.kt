@@ -94,7 +94,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -109,7 +108,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import coil.compose.rememberAsyncImagePainter
@@ -133,7 +131,7 @@ import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Model.CategoryClass
-import com.roaa.expensetracker.Model.TransactionTypeClass
+import com.roaa.expensetracker.Model.UiDataModels.TransactionTypeClass
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
@@ -156,6 +154,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -264,18 +263,18 @@ fun BottomSheetContentItemAddContent(
     val budget by viewModel.preferencesViewModel.getTotalAmountPerDay.collectAsState(1f)
     val oldAmount by viewModel.transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
     val newAmountTemp = if (expenseValue.text.isEmpty()) 0L else extractNumbers(expenseValue.text)
-    val newDailyBudget = oldAmount + newAmountTemp
+    val newDailyBudget = oldAmount + BigDecimal(newAmountTemp)
     val amountInString = String.format("%.2f", newDailyBudget.toFloat())
     val percent = if (budget != 0f) {
-        newDailyBudget / budget
+        newDailyBudget / budget.toBigDecimal()
     } else {
-        0f
+        BigDecimal.ZERO
     }
-    viewModel.animationViewModel.method("₹$amountInString", percent)
+    viewModel.animationViewModel.method("₹$amountInString", percent.toFloat())
 
     LaunchedEffect(percent) {
         scope.launch {
-            viewModel.animationViewModel.newSpentPercentage.emit(percent)
+            viewModel.animationViewModel.newSpentPercentage.emit(percent.toFloat())
         }
     }
 
@@ -655,18 +654,18 @@ fun BottomSheetContentItemEditContent(
     val budget by viewModel.preferencesViewModel.getTotalAmountPerDay.collectAsState(1f)
     val oldAmount by viewModel.transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
     val newAmountTemp = if (expenseValue.text.isEmpty()) 0L else extractNumbers(expenseValue.text)
-    val newDailyBudget = oldAmount + newAmountTemp
+    val newDailyBudget = oldAmount + BigDecimal(newAmountTemp)
     val amountInString = String.format("%.2f", newDailyBudget.toFloat())
     val percent = if (budget != 0f) {
-        newDailyBudget / budget
+        newDailyBudget / budget.toBigDecimal()
     } else {
-        0f
+        BigDecimal.ZERO
     }
-    viewModel.animationViewModel.method("₹$amountInString", percent)
+    viewModel.animationViewModel.method("₹$amountInString", percent.toFloat())
 
     LaunchedEffect(percent) {
         scope.launch {
-            viewModel.animationViewModel.newSpentPercentage.emit(percent)
+            viewModel.animationViewModel.newSpentPercentage.emit(percent.toFloat())
         }
     }
 
@@ -1021,7 +1020,7 @@ fun validateTransactionData(
         ) else viewModel.transactionsViewModel.updateFormDataInDatabase(singleTransaction.transaction.also {
             it.type = type
             selectedDate?.let { date -> it.date = date }
-            it.amount = amount.toFloat()
+            it.amount = amount.toBigDecimal()
             it.note = comment
             it.categoryId = selectedCategory.categoryId
             it.bankAccountId = selectedPaymentMethod.bankAccountId
@@ -1170,12 +1169,6 @@ fun AddBottomSheet(
             contentWidth / 2f
         }.coerceAtMost(with(localDensity) { 500.dp.toPx() }).coerceAtMost(contentHeight / 2)
 
-        val currentKeyboardHeight = if (isShowSystemKeyboard) {
-            with(localDensity) { systemKeyboardHeight.toPx() }
-        } else {
-            internalKeyboardHeight
-        }
-
         val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         val bottomSheetStateTest = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         val scope = rememberCoroutineScope()
@@ -1225,7 +1218,6 @@ fun BottomSheetContentItemDetails(
     singleTransaction: TransactionWithDetails,
     closeBottomSheet: () -> Unit,
 ) {
-    val scope = rememberCoroutineScope()
     ModalBottomSheet(
         onDismissRequest = {
             closeBottomSheet()
@@ -1236,7 +1228,7 @@ fun BottomSheetContentItemDetails(
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
         BottomSheetContentItemDetailsContent(
-            modifier = Modifier, sheetState, viewModel ,closeBottomSheet, singleTransaction
+            modifier = Modifier, viewModel ,closeBottomSheet, singleTransaction
         )
     }
 }
@@ -1249,7 +1241,6 @@ val spaceHeightInDetail = 10.dp
 @Composable
 fun BottomSheetContentItemDetailsContent(
     modifier: Modifier,
-    sheetState: SheetState,
     viewModel: AllViewModel,
     closeBottomSheet: () -> Unit,
     singleTransaction: TransactionWithDetails,
@@ -1260,13 +1251,6 @@ fun BottomSheetContentItemDetailsContent(
     val scope = rememberCoroutineScope()
     val colorPalette =
         toPalette(if (singleTransaction.transaction.type == EXPENSE) orange else greenColor)
-    val gradient = Brush.verticalGradient(
-        listOf(
-            colorPalette.main.copy(alpha = 0.5f),
-            MaterialTheme.colorScheme.surface.copy(alpha = 0.35f),
-            MaterialTheme.colorScheme.surface
-        )
-    )
     Column(
         horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()
     ) {
@@ -1508,7 +1492,7 @@ fun BottomSheetContentIconPicker(modifier: Modifier = Modifier,viewModel: AllVie
                 // contentPadding = PaddingValues(16.dp) // Optional padding for content
             ) {
                 items(items) { item ->
-                    SingleIcon(item, width, viewModel)
+                    SingleIcon(item, viewModel)
                 }
 
             }
@@ -1517,7 +1501,7 @@ fun BottomSheetContentIconPicker(modifier: Modifier = Modifier,viewModel: AllVie
 }
 
 @Composable
-fun SingleIcon(item: Int, width: Dp, viewModel: AllViewModel) {
+fun SingleIcon(item: Int, viewModel: AllViewModel) {
     val scope = rememberCoroutineScope()
     Surface(
         shape = CircleShape,
@@ -2219,7 +2203,7 @@ fun BottomSheetContentAddItemTest(
         sheetState = sheetState,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        BottomSheetContentItemAddContentTest(modifier = Modifier,viewModel, localDensity, keyboardHeight)
+        BottomSheetContentItemAddContentTest(modifier = Modifier,viewModel, keyboardHeight)
     }
 }
 
@@ -2231,7 +2215,6 @@ val LocalWindowSize = compositionLocalOf { WindowWidthSizeClass.Compact }
 fun BottomSheetContentItemAddContentTest(
     modifier: Modifier,
     viewModel: AllViewModel,
-    localDensity: Density,
     keyboardHeight: Float,
 ) {
     val scope = rememberCoroutineScope()
@@ -2249,10 +2232,6 @@ fun BottomSheetContentItemAddContentTest(
 
     val expenseType = TransactionTypeClass(1, EXPENSE)
     val incomeType = TransactionTypeClass(2, INCOME)
-
-
-    val errorStatus by viewModel.uiViewModel.errorStatusInAddBottomSheet.collectAsState(false)
-
 
     //animations
     var expanded by remember { mutableStateOf(false) }
@@ -2290,33 +2269,25 @@ fun BottomSheetContentItemAddContentTest(
     val budget by viewModel.preferencesViewModel.getTotalAmountPerDay.collectAsState(1f)
     val oldAmount by viewModel.transactionsViewModel.getTotalExpenseAmountForDateFlow.collectAsState()
     val newAmountTemp = if (expenseValue.text.isEmpty()) 0L else extractNumbers(expenseValue.text)
-    val newDailyBudget = oldAmount + newAmountTemp
+    val newDailyBudget = oldAmount + BigDecimal(newAmountTemp)
     val amountInString = String.format("%.2f", newDailyBudget.toFloat())
     val percent = if (budget != 0f) {
-        newDailyBudget / budget
+        newDailyBudget / budget.toBigDecimal()
     } else {
         0f
     }
-    viewModel.animationViewModel.method("₹$amountInString", percent)
+    viewModel.animationViewModel.method("₹$amountInString", percent.toFloat())
 
     LaunchedEffect(percent) {
         scope.launch {
-            viewModel.animationViewModel.newSpentPercentage.emit(percent)
+            viewModel.animationViewModel.newSpentPercentage.emit(percent.toFloat())
         }
     }
 
     val imeHeight = WindowInsets.ime.getBottom(Density(LocalContext.current))
 
-    // Check if the keyboard is open (i.e., imeHeight > 0)
     val isKeyboardVisible = imeHeight > 0
-    //val isKeyboardVisible by remember { mutableStateOf(height != 0) }
     val localDensity = LocalDensity.current
-    val windowSizeClass = LocalWindowSize.current
-    val windowInsets = LocalWindowInsets.current
-
-    val keyboardAdditionalOffset =
-        windowInsets.calculateBottomPadding().minus(16.dp).coerceAtLeast(0.dp)
-
 
     Column(
         modifier.fillMaxWidth()

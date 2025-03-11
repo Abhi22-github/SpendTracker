@@ -8,13 +8,14 @@ import androidx.room.Transaction
 import androidx.room.Update
 import com.roaa.expensetracker.Model.BudgetDayModelClass
 import com.roaa.expensetracker.Model.BudgetModelClass
-import com.roaa.expensetracker.Model.TotalAmountClass
-import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Model.TransactionClass
+import com.roaa.expensetracker.Model.UiDataModels.TotalAmountClass
+import com.roaa.expensetracker.Model.UiDataModels.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import kotlinx.coroutines.flow.Flow
+import java.math.BigDecimal
 
 @Dao
 interface TransactionDao {
@@ -33,10 +34,10 @@ interface TransactionDao {
     suspend fun deleteAllTransaction()
 
     @Query("SELECT SUM(amount) FROM transaction_table where date == :date and type == :type")
-    fun getTotalAmountForDate(date: Long, type: String): Flow<Float?>
+    fun getTotalAmountForDate(date: Long, type: String): Flow<BigDecimal?>
 
     @Query("SELECT COALESCE(SUM(amount),0) FROM transaction_table WHERE date = :date AND type = :type AND id NOT IN (SELECT id FROM transaction_table WHERE date = :date AND type = :type ORDER BY dateWithTime DESC LIMIT 1)")
-    fun getTotalAmountForDateExcludingLast(date: Long, type: String): Flow<Float?>
+    fun getTotalAmountForDateExcludingLast(date: Long, type: String): Flow<BigDecimal?>
 
     @Query("SELECT date,SUM(amount) AS totalAmount FROM transaction_table where date >= :startDate and date <= :endDate and type == :type")
     fun getTotalAmountByDateRangeAndCategoryType(
@@ -84,14 +85,14 @@ interface TransactionDao {
 
     //Transaction Supporting
     @Query("SELECT SUM(amount) FROM transaction_table where date == :date and type == :type")
-    fun getTotalAmountForDateWithoutFlow(date: Long, type: String): Float?
+    fun getTotalAmountForDateWithoutFlow(date: Long, type: String): BigDecimal?
 
     @Query("SELECT SUM(amount) FROM transaction_table where date == :date and type == :type and includeInRespectiveBudget ==:includeInBudget")
     fun getTotalAmountForDateForBudgetOptTransactionWithoutFlow(
         date: Long,
         type: String,
         includeInBudget: Boolean
-    ): Float?
+    ): BigDecimal?
 
     @get:Query("SELECT * FROM budget_table WHERE isActive = 1")
     val getCurrentBudget: BudgetModelClass?
@@ -115,8 +116,8 @@ interface TransactionDao {
             if (transactionClass.date >= it.budgetStartDate && transactionClass.date <= it.budgetEndDate) {
                 val singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
                 singleDay?.let {
-                    it.totalExpense = expense ?: 0f
-                    it.totalIncome = income ?: 0f
+                    it.totalExpense = expense ?: BigDecimal.ZERO
+                    it.totalIncome = income ?: BigDecimal.ZERO
                 }
                 singleDay?.let { updateSingleDay(it) }
             }
@@ -135,8 +136,8 @@ interface TransactionDao {
             if (transactionClass.date >= it.budgetStartDate && transactionClass.date <= it.budgetEndDate) {
                 val singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
                 singleDay?.let {
-                    it.totalExpense = expense ?: 0f
-                    it.totalIncome = income ?: 0f
+                    it.totalExpense = expense ?: BigDecimal.ZERO
+                    it.totalIncome = income ?: BigDecimal.ZERO
                 }
                 singleDay?.let { updateSingleDay(it) }
             }
@@ -164,8 +165,8 @@ interface TransactionDao {
             if (transactionClass.date >= it.budgetStartDate && transactionClass.date <= it.budgetEndDate) {
                 val singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
                 singleDay?.let {
-                    it.totalExpense = expense ?: 0f
-                    it.totalIncome = income ?: 0f
+                    it.totalExpense = expense ?: BigDecimal.ZERO
+                    it.totalIncome = income ?: BigDecimal.ZERO
                 }
                 singleDay?.let { updateSingleDay(it) }
             }
@@ -184,8 +185,8 @@ interface TransactionDao {
             if (transactionClass.date >= it.budgetStartDate && transactionClass.date <= it.budgetEndDate) {
                 val singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
                 singleDay?.let {
-                    it.totalExpense = expense ?: 0f
-                    it.totalIncome = income ?: 0f
+                    it.totalExpense = expense ?: BigDecimal.ZERO
+                    it.totalIncome = income ?: BigDecimal.ZERO
                 }
                 singleDay?.let { updateSingleDay(it) }
             }

@@ -1,14 +1,13 @@
 package com.roaa.expensetracker.Utilities
 
 import android.content.Context
-import android.util.Log
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.input.OffsetMapping
 import androidx.compose.ui.text.input.TransformedText
 import androidx.compose.ui.text.input.VisualTransformation
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Hilt.AllViewModel
-import com.roaa.expensetracker.Model.NavigationItems
+import com.roaa.expensetracker.Model.UiDataModels.NavigationItems
 import com.roaa.expensetracker.R
 import kotlinx.coroutines.DelicateCoroutinesApi
 import java.time.LocalDate
@@ -83,21 +82,9 @@ class DecimalFilterTransformation : VisualTransformation {
     }
 }
 
-fun getEffectivePercentageForPill(
-    budgetAmountPerDay: Float,
-    totalAmountForCurrentDate: Float
-): Float {
-    Log.d("DayComposeScreen", "$budgetAmountPerDay : $totalAmountForCurrentDate")
-    if (budgetAmountPerDay != 0f && totalAmountForCurrentDate != 0f) {
-        return totalAmountForCurrentDate / budgetAmountPerDay
-    } else
-        return 0f
-}
-
 fun appStartingChecks(context: Context, viewModel: AllViewModel) {
     checkIfBudgetIsExpired(context, viewModel)
 }
-
 
 @OptIn(DelicateCoroutinesApi::class)
 fun checkIfBudgetIsExpired(context: Context, viewModel: AllViewModel) {

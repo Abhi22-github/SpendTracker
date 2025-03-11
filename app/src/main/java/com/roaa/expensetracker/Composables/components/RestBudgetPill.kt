@@ -36,17 +36,18 @@ import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.harmonize
 import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.ViewModels.DaileBudgetState
+import java.math.BigDecimal
 
 @Composable
 fun RowScope.RestBudgetPill(
-    totalExpenseAmountForDate: Float,
-    totalAmountPerDay: Float,
-    oldPercent: Float,
-    percent: Float,
+    totalExpenseAmountForDate: BigDecimal,
+    totalAmountPerDay: BigDecimal,
+    oldPercent: BigDecimal,
+    percent: BigDecimal,
 ) {
     val percentWithNewSpentAnimated = animateFloatAsState(
         label = "percentWithNewSpentAnimated",
-        targetValue = percent,
+        targetValue = percent.toFloat(),
         animationSpec = TweenSpec(300),
     ).value
 

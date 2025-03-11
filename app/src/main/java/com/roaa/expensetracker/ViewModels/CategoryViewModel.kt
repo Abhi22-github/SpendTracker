@@ -1,6 +1,5 @@
 package com.roaa.expensetracker.ViewModels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roaa.expensetracker.Model.CategoryClass
@@ -131,7 +130,6 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
 
     fun error(error: Throwable) {
         _uiState.value = UiState.Error(error.toString())
-        Log.d("Hello Error reason", error.toString())
     }
 
     fun validateCategoryData(

@@ -1,6 +1,5 @@
 package com.roaa.expensetracker.ViewModels
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.roaa.expensetracker.Model.BudgetDayModelClass
@@ -12,6 +11,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import javax.inject.Inject
 
 
@@ -35,8 +35,8 @@ class BudgetDayViewModel @Inject constructor(private val budgetDayRepository: Bu
     }
 
     fun createObjectAndStoreIt(
-        totalAMountForMonth: Float,
-        totalAmountPerDay: Float,
+        totalAMountForMonth: BigDecimal,
+        totalAmountPerDay: BigDecimal,
         totalDaysRemaining: Long,
         currentMonthName: String,
         budgeMonthStartDate: Long,
@@ -50,7 +50,7 @@ class BudgetDayViewModel @Inject constructor(private val budgetDayRepository: Bu
             budgetStartDate = budgeMonthStartDate,
             budgetEndDate = budgetMonthEndDate,
             restDistributionType = 1,
-            notificationForBudgetUsage = 20f,
+            notificationForBudgetUsage = BigDecimal(20),
             isActive = true
         )
         // saveBudget(budgeObject)
@@ -83,7 +83,6 @@ class BudgetDayViewModel @Inject constructor(private val budgetDayRepository: Bu
 
     fun error(error: Throwable) {
         _uiState.value = UiState.Error(error.toString())
-        Log.d("Hello Error reason", error.toString())
     }
 
 

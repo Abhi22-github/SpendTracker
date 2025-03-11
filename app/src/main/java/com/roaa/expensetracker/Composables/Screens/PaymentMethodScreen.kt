@@ -18,7 +18,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -40,7 +39,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -61,7 +59,6 @@ import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
-import com.roaa.expensetracker.Composables.CustomFonts
 import com.roaa.expensetracker.Composables.CustomFonts.numberFont
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
@@ -96,7 +93,6 @@ import com.roaa.expensetracker.Utilities.LongMillisToNormalLong
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBank
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyCategoryClass
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTransactionClass
-import com.roaa.expensetracker.Utilities.convertDataToSeries
 import com.roaa.expensetracker.Utilities.convertTotalExpenseIncomeClassToMap
 import com.roaa.expensetracker.Utilities.getCalendarForMonthFromDate
 import com.roaa.expensetracker.Utilities.parseAmount
@@ -105,6 +101,7 @@ import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import java.time.LocalDate
 
 @Composable
@@ -125,8 +122,6 @@ fun PaymentMethodScreen(
 
     var actionConfirmationFlag by remember { mutableStateOf(false) }
 
-
-    val lazyListState = rememberLazyListState()
     val scope = rememberCoroutineScope()
 
     var bankAccountsClass by remember {
@@ -238,7 +233,6 @@ fun PaymentCard(
     val color = ColorState.fromNumber(bankAccountsClass.cardColorNumber)!!
     val scope = rememberCoroutineScope()
     var showOptionMenu by remember { mutableStateOf(false) }
-    val showBottomSheet by remember { mutableStateOf(false) }
     var showConfirmationDeleteDialog by remember { mutableStateOf(false) }
 
     Card(
@@ -365,9 +359,9 @@ fun PaymentCard(
                     Box(
                         modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                     ) {
-                        val image = rememberAsyncImagePainter(IconState.fromNumber(24))
+                        val newImage = rememberAsyncImagePainter(IconState.fromNumber(24))
                         Image(
-                            painter = image,
+                            painter = newImage,
                             contentDescription = "Test Image",
                             modifier = Modifier.size(18.dp),
                         )
@@ -698,9 +692,9 @@ fun LivePaymentCard(
                     Box(
                         modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
                     ) {
-                        val image = rememberAsyncImagePainter(IconState.fromNumber(24))
+                        val newImage = rememberAsyncImagePainter(IconState.fromNumber(24))
                         Image(
-                            painter = image,
+                            painter = newImage,
                             contentDescription = "Test Image",
                             modifier = Modifier.size(24.dp),
                         )
@@ -762,9 +756,6 @@ fun PaymentDetailsScreen(
 ) {
     val bankAccount by viewModel.bankAccountsViewModel.getSingleBankAccountForCompose(bankAccountId)
         .collectAsState(emptyBank)
-    val showExperimentalComponent by viewModel.preferencesViewModel.showExperimentalComponent.collectAsState(
-        false
-    )
     var showEditBottomSheet by remember { mutableStateOf(false) }
     var actionConfirmationFlag by remember { mutableStateOf(false) }
     var bankAccountsClass by remember {
@@ -807,8 +798,8 @@ fun PaymentDetailsScreen(
         convertTotalExpenseIncomeClassToMap(totalExpenseListFromRoom)
     }
 
-    var totalExpense by remember { mutableFloatStateOf(0f) }
-    var totalIncome by remember { mutableFloatStateOf(0f) }
+    var totalExpense by remember { mutableStateOf(BigDecimal.ZERO) }
+    var totalIncome by remember { mutableStateOf(BigDecimal.ZERO) }
     LaunchedEffect(totalExpenseListFromRoom) {
         totalExpenseListFromRoom.forEach {
             totalExpense += it.totalExpense
@@ -826,12 +817,6 @@ fun PaymentDetailsScreen(
             )
         )
     }
-    val (expenseListPerDayHashMap, incomeListPerDayHashMap) =
-        convertDataToSeries(
-            allDays,
-            totalValuesPerDayForMonthMap
-        )
-
 
     BackHandler { handleBackNavigation(navigationManager) }
 
@@ -870,7 +855,7 @@ fun PaymentDetailsScreen(
                         Text(
                             modifier = modifierWithHorizontalPadding.padding(vertical = 8.dp),
                             text = "Card Statistics",
-                            style = MaterialTheme.typography.titleMedium,
+                            style = typography.titleMedium,
                             color = MaterialTheme.colorScheme.onSurface
                         )
 //                        HorizontalDivider(
@@ -950,7 +935,7 @@ fun PaymentDetailsScreen(
                         }
                     }
                     transactionConverterList.forEach { (date, transactionList) ->
-                        val date = transactionList.get(0).transaction.date
+                        val newDate = transactionList.get(0).transaction.date
                         val totalIncomeForDay = transactionList
                             .filter { it.transaction.type == INCOME }
                             .sumOf { it.transaction.amount.toDouble() }
@@ -961,7 +946,7 @@ fun PaymentDetailsScreen(
 
                         item {
                             HeaderNew(
-                                if (date == System.currentTimeMillis()
+                                if (newDate == System.currentTimeMillis()
                                         .LongMillisToNormalLong()
                                 ) "Today" else date.toLocalDate().toDisplayDate(),
                                 totalExpenseForDay, totalIncomeForDay
@@ -1061,8 +1046,8 @@ fun HeaderNew(date: String, totalExpenseForDay: Double, totalIncomeForDay: Doubl
 //                        tint = successColor
 //                    )
                     Text(
-                        "₹ ${parseAmount(totalIncomeForDay.toFloat())}",
-                        style = typography.labelLarge.copy(fontFamily = CustomFonts.numberFont),
+                        "₹ ${parseAmount(totalIncomeForDay.toBigDecimal())}",
+                        style = typography.labelLarge.copy(fontFamily = numberFont),
                         color = successColor
                     )
                 }
@@ -1070,8 +1055,8 @@ fun HeaderNew(date: String, totalExpenseForDay: Double, totalIncomeForDay: Doubl
                 Row {
 //                    Icon(painterResource(R.drawable.expense_icon_new), contentDescription = null, tint = orange)
                     Text(
-                        "₹ ${parseAmount(totalExpenseForDay.toFloat())}",
-                        style = typography.labelLarge.copy(fontFamily = CustomFonts.numberFont),
+                        "₹ ${parseAmount(totalExpenseForDay.toBigDecimal())}",
+                        style = typography.labelLarge.copy(fontFamily = numberFont),
                         color = Color.Red
                     )
                 }
@@ -1087,8 +1072,8 @@ fun StatisticsCardForCardStats(
     expenseListPerDay: LinkedHashMap<String, Int>,
     incomeListPerDay: LinkedHashMap<String, Int>,
     type: String,
-    totalExpense: Float,
-    totalIncome: Float,
+    totalExpense: BigDecimal,
+    totalIncome: BigDecimal,
 ) {
     val subTitle = if (type == EXPENSE) "Total Expense" else "Total Income"
     val title = parseAmount(if (type == EXPENSE) totalExpense else totalIncome)

@@ -35,9 +35,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.rounded.AccessTime
-import androidx.compose.material.icons.rounded.ArrowForward
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.BubbleChart
 import androidx.compose.material.icons.rounded.FilterList
@@ -131,6 +131,7 @@ import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.Utilities.toLongMillis
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -190,7 +191,7 @@ fun StatisticsScreen(
                         )
                     ) {
                         Text(
-                            text = "last 1 month", style = MaterialTheme.typography.titleMedium
+                            text = "last 1 month", style = typography.titleMedium
                         )
                         Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = "Settings")
 
@@ -242,7 +243,7 @@ fun StatisticsScreen(
                             modifier = Modifier
                                 .padding(horizontal = 16.dp, vertical = 16.dp)
                                 .weight(0.9f),
-                            style = MaterialTheme.typography.titleMedium
+                            style = typography.titleMedium
                         )
                         IconButton(onClick = { categoryWiseDropDown = !categoryWiseDropDown }) {
                             Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = "down")
@@ -311,7 +312,7 @@ fun StatisticsScreen(
                             modifier = Modifier
                                 .padding(horizontal = 16.dp, vertical = 16.dp)
                                 .weight(0.9f),
-                            style = MaterialTheme.typography.titleMedium
+                            style = typography.titleMedium
                         )
                         IconButton(onClick = { expenseWiseDropDown = !expenseWiseDropDown }) {
                             Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = "down")
@@ -350,7 +351,7 @@ fun StatisticsScreen(
                             modifier = Modifier
                                 .padding(horizontal = 16.dp, vertical = 16.dp)
                                 .weight(0.9f),
-                            style = MaterialTheme.typography.titleMedium
+                            style = typography.titleMedium
                         )
                         IconButton(onClick = { incomeWiseDropDown = !incomeWiseDropDown }) {
                             Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = "down")
@@ -400,7 +401,6 @@ fun ChipsForFilter(
 
 @Composable
 fun BankChips(
-    index: Int,
     selectedBankAccountsClass: BankAccountsClass,
     bankAccountsClass: BankAccountsClass,
     selectChip: (BankAccountsClass) -> Unit
@@ -411,7 +411,7 @@ fun BankChips(
             Text(
                 text = bankAccountsClass.bankName,
                 modifier = Modifier.padding(vertical = 8.dp),
-                style = MaterialTheme.typography.bodyMedium
+                style = typography.bodyMedium
             )
         },
         selected = selectedBankAccountsClass.bankAccountId == bankAccountsClass.bankAccountId,
@@ -475,14 +475,14 @@ fun CategoryStatEntry(modifier: Modifier = Modifier, color: Color) {
                 Row() {
                     Text(
                         text = "Food & Expense",
-                        style = MaterialTheme.typography.bodyLarge,
+                        style = typography.bodyLarge,
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
                     Text(
                         text = "(60%)",
-                        style = MaterialTheme.typography.bodyLarge.copy(fontFamily = CustomFonts.numberFont),
+                        style = typography.bodyLarge.copy(fontFamily = CustomFonts.numberFont),
                         color = MaterialTheme.colorScheme.onSurface,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
@@ -493,8 +493,8 @@ fun CategoryStatEntry(modifier: Modifier = Modifier, color: Color) {
 //                Spacer(modifier = Modifier.width(16.dp))
             }
             Text(
-                text = parseAmount(34735f),
-                style = MaterialTheme.typography.bodyLarge.copy(fontFamily = CustomFonts.numberFont)
+                text = parseAmount(BigDecimal(34735)),
+                style =typography.bodyLarge.copy(fontFamily = CustomFonts.numberFont)
             )
         }
     }
@@ -540,10 +540,10 @@ fun StatisticsScreenTest(
 
     val expenseTransactions =
         transactionsForTimePeriodFromRoom.filter { it.transaction.type == EXPENSE }
-    val totalExpense = expenseTransactions.sumOf { it.transaction.amount.toDouble() }.toFloat()
+    val totalExpense = expenseTransactions.sumOf { it.transaction.amount }
     val incomeTransaction =
         transactionsForTimePeriodFromRoom.filter { it.transaction.type == INCOME }
-    val totalIncome = incomeTransaction.sumOf { it.transaction.amount.toDouble() }.toFloat()
+    val totalIncome = incomeTransaction.sumOf { it.transaction.amount }
 
     val title = if (selectedIndex == 0) "Total Expense" else "Total Income"
     val amount = if (selectedIndex == 0) totalExpense else totalIncome
@@ -557,24 +557,24 @@ fun StatisticsScreenTest(
         ), totalAmountMap
     )
 
-    var totalAmount = 0f
+    var totalAmount = BigDecimal.ZERO
 
     val categoryListData =
         (if (selectedIndex == 0) expenseTransactions else incomeTransaction).groupBy { it.category }
             .mapValues { (category, list) ->
-                totalAmount += list.fold(0f) { acc, i -> acc + i.transaction.amount }
+                totalAmount += list.fold(BigDecimal.ZERO) { acc, i -> acc + i.transaction.amount }
                 CategorySummaryClass(
                     category,
                     list.size,
-                    ((list.size.toFloat() / transactionCount.toFloat()) * 100),
-                    list.sumOf { it.transaction.amount.toDouble() }.toFloat(),
+                    ((list.size.toBigDecimal().div(transactionCount.toBigDecimal())) * BigDecimal(100)),
+                    list.sumOf { it.transaction.amount},
                     colorList.random()
                 )
             }
     categoryListData.onEachIndexed { index, entry ->
         entry.value.color = colorList[index]
         entry.value.percentage =
-            ((entry.value.totalAmount / if (totalAmount == 0f) 1f else totalAmount) * 100)
+            ((entry.value.totalAmount / if (totalAmount == BigDecimal.ZERO) BigDecimal.ONE else totalAmount) * BigDecimal(100))
     }
     val sortedCategoryListData = categoryListData.toList()
         .sortedByDescending { it.second.totalAmount } // Sort by value
@@ -618,7 +618,7 @@ fun StatisticsScreenTest(
                                 startDate.toLocalDate().toDisplayStringForMonthWithYear()
                                     .split(",")[0]
                             }-${endDate.toLocalDate().toDisplayStringForMonthWithYear()}",
-                            style = MaterialTheme.typography.titleMedium
+                            style =typography.titleMedium
                         )
                         Spacer(Modifier.width(4.dp))
                         Icon(Icons.Rounded.FilterList, contentDescription = "Settings")
@@ -691,7 +691,7 @@ fun StatisticsScreenTest(
                             Text(
                                 text = it,
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                             )
                         }
@@ -699,7 +699,7 @@ fun StatisticsScreenTest(
                             Text(
                                 text = "₹ ${parseAmount(it)}",
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp),
-                                style = MaterialTheme.typography.headlineMedium.copy(fontFamily = CustomFonts.numberFont)
+                                style = typography.headlineMedium.copy(fontFamily = CustomFonts.numberFont)
                             )
                         }
                         AnimatedContent(targetState = transactionCount) {
@@ -708,7 +708,7 @@ fun StatisticsScreenTest(
                                 modifier = Modifier.padding(
                                     horizontal = 16.dp, vertical = 8.dp
                                 ),
-                                style = MaterialTheme.typography.labelLarge,
+                                style = typography.labelLarge,
                                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
                             )
                         }
@@ -722,7 +722,7 @@ fun StatisticsScreenTest(
                         ), modifier = Modifier.padding(horizontal = 16.dp)
                     ) {
                         Text(
-                            text = "Daily", style = MaterialTheme.typography.bodyMedium
+                            text = "Daily", style = typography.bodyMedium
                         )
                         Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = "Settings")
 
@@ -751,7 +751,7 @@ fun StatisticsScreenTest(
                 Text(
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
                     text = "Category",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface
                 )
                 Column {
@@ -765,7 +765,7 @@ fun StatisticsScreenTest(
                         val pieDataList = sortedCategoryListData.map {
                             PieChartData(
                                 partName = it.key.categoryName,
-                                data = if (it.value.totalAmount == 0f) 1.0 else it.value.totalAmount.toDouble(),
+                                data = if (it.value.totalAmount == BigDecimal.ZERO) 1.0 else it.value.totalAmount.toDouble(),
                                 color = it.value.color,
                             )
                         }
@@ -824,11 +824,11 @@ fun StatisticsScreenTest(
                                 Spacer(Modifier.width(8.dp))
                                 Text(
                                     text = "Bank Account Analysis",
-                                    style = MaterialTheme.typography.titleMedium
+                                    style = typography.titleMedium
                                 )
                             }
 
-                            Icon(Icons.Rounded.ArrowForward, contentDescription = "Settings")
+                            Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = "Settings")
                         }
                     }
                 }
@@ -860,11 +860,11 @@ fun StatisticsScreenTest(
                                 Spacer(Modifier.width(8.dp))
                                 Text(
                                     text = "Category Wise Analysis",
-                                    style = MaterialTheme.typography.titleMedium
+                                    style = typography.titleMedium
                                 )
                             }
 
-                            Icon(Icons.Rounded.ArrowForward, contentDescription = "Settings")
+                            Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = "Settings")
                         }
                     }
                 }
@@ -956,7 +956,7 @@ fun CategoryStatEntryTest(
                         Row(Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
                             Text(
                                 text = "${String.format("%.2f", categorySummaryClass.percentage)}%",
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -978,7 +978,7 @@ fun CategoryStatEntryTest(
                         Row(Modifier.padding(horizontal = 8.dp, vertical = 4.dp)) {
                             Text(
                                 text = "${categorySummaryClass.categoryClass.categoryName} X${categorySummaryClass.transactionCount}",
-                                style = MaterialTheme.typography.bodyMedium,
+                                style = typography.bodyMedium,
                                 color = MaterialTheme.colorScheme.onSurface,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis,
@@ -989,7 +989,7 @@ fun CategoryStatEntryTest(
             }
             Text(
                 text = "₹ ${parseAmount(categorySummaryClass.totalAmount)}",
-                style = MaterialTheme.typography.bodyMedium.copy(fontFamily = CustomFonts.numberFont)
+                style = typography.bodyMedium.copy(fontFamily = CustomFonts.numberFont)
             )
         }
     }
@@ -1168,7 +1168,7 @@ fun FilterBottomSheetContent(
             ) {
                 bankAccountList.forEachIndexed { index, bankAccountsClass ->
                     BankChips(
-                        index, selectedBankAccount, bankAccountsClass
+                        selectedBankAccount, bankAccountsClass
                     ) { setSelectedChip(it) }
                 }
             }
@@ -1272,7 +1272,7 @@ fun BankAnalysisBottomSheetContent(
         ) {
             bankAccountList.forEachIndexed { index, bankAccountsClass ->
                 BankChips(
-                    index, selectedBankAccount, bankAccountsClass
+                    selectedBankAccount, bankAccountsClass
                 ) { setSelectedBankAccount(it) }
             }
         }
@@ -1317,7 +1317,7 @@ fun BankAnalysisBottomSheetContent(
                     Text(
                         modifier = modifier.padding(vertical = 8.dp),
                         text = "Transactions",
-                        style = MaterialTheme.typography.titleMedium,
+                        style = typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface
                     )
                 }

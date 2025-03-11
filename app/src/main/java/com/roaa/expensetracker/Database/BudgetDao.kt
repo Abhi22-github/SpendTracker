@@ -13,6 +13,7 @@ import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
 import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import kotlinx.coroutines.flow.Flow
+import java.math.BigDecimal
 
 @Dao
 interface BudgetDao {
@@ -27,7 +28,7 @@ interface BudgetDao {
     suspend fun update(budgetModelClass: BudgetModelClass)
 
     @Query("SELECT SUM(amount) FROM transaction_table where date = :date and type = :type")
-    suspend fun getTotalAmountForDate(date: Long, type: String): Float?
+    suspend fun getTotalAmountForDate(date: Long, type: String): BigDecimal?
 
     @Query("DELETE FROM budget_table")
     suspend fun deleteAllBudget()
@@ -69,8 +70,8 @@ interface BudgetDao {
                 budgetDayId = 0L,
                 date = date,
                 budgetAmount = budgetModelClass.budgetAmountPerDay,
-                totalExpense = getTotalAmountForDate(date, EXPENSE) ?: 0f,
-                totalIncome = getTotalAmountForDate(date, INCOME) ?: 0f,
+                totalExpense = getTotalAmountForDate(date, EXPENSE) ?: BigDecimal.ZERO,
+                totalIncome = getTotalAmountForDate(date, INCOME) ?: BigDecimal.ZERO,
                 totalExpenseTransactionCount = 0L,
                 totalIncomeTransactionCount = 0L,
                 budgetId = transactionId

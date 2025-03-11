@@ -35,7 +35,7 @@ sealed class Destinations(){
     data object SettingScreen : Destinations()
 
     @Serializable
-    data class DetailsScreen(val amount: Float, val categoryName: String) : Destinations()
+    data object DetailsScreen : Destinations()
 
     @Serializable
     data object ListScreen : Destinations()

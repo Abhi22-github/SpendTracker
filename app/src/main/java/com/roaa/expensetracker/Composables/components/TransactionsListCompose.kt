@@ -68,7 +68,6 @@ import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.StatisticsComponent.BarChart
 import com.roaa.expensetracker.Composables.failureColor
-import com.roaa.expensetracker.Composables.greenColor
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.successColor
 import com.roaa.expensetracker.Composables.utils.HarmonizedColorPalette
@@ -78,7 +77,7 @@ import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Converters.TransactionConverter
 import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Model.TransactionClass
-import com.roaa.expensetracker.Model.UiDateModels.BarChartExpenseModel
+import com.roaa.expensetracker.Model.UiDataModels.BarChartExpenseModel
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
@@ -97,6 +96,7 @@ import com.roaa.expensetracker.Utilities.toDisplayDate
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -170,9 +170,6 @@ fun TransactionsListCompose(
             )
         }
         val scope = rememberCoroutineScope()
-        val orangePalette = toPalette(orange)
-        val greenPalette = toPalette(greenColor)
-
 
         val selectedMonth by viewModel.uiViewModel.selectedMonth.collectAsState()
         val pagerState = rememberPagerState(initialPage = 500 / 2, pageCount = { 500 })
@@ -222,10 +219,10 @@ fun TransactionsListCompose(
                                     }
                                 }
                                 transactionConverterList.forEach { (date, transactionList) ->
-                                    val date = transactionList.get(0).transaction.date
+                                    val newdate = transactionList.get(0).transaction.date
                                     item {
                                         Header(
-                                            if (date == System.currentTimeMillis()
+                                            if (newdate == System.currentTimeMillis()
                                                     .LongMillisToNormalLong()
                                             ) "Today" else date.toLocalDate().toDisplayDate()
                                         )
@@ -240,10 +237,7 @@ fun TransactionsListCompose(
                                             }
                                             if (showExperimentalComponents)
                                                 navigationManager.navigateTo(
-                                                    Destinations.DetailsScreen(
-                                                        it.transaction.amount,
-                                                        it.category.categoryName
-                                                    )
+                                                    Destinations.DetailsScreen
                                                 )
                                             else
                                                 bottomSheet = true
@@ -275,10 +269,7 @@ fun TransactionsListCompose(
                                 }
                                 if (showExperimentalComponents)
                                     navigationManager.navigateTo(
-                                        Destinations.DetailsScreen(
-                                            it.transaction.amount,
-                                            it.category.categoryName
-                                        )
+                                        Destinations.DetailsScreen
                                     )
                                 else
                                     bottomSheet = true
@@ -432,7 +423,7 @@ fun HomeStatCardNew(
     expense: String,
     totalTransactionsCount: Int,
     selectedMonthShort: String,
-    currentMonthAllDayAndDatesListAndMaxValue: Pair<List<BarChartExpenseModel>, Float>
+    currentMonthAllDayAndDatesListAndMaxValue: Pair<List<BarChartExpenseModel>, BigDecimal>
 ) {
     val palette =
         toPalette(orange)

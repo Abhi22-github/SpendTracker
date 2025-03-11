@@ -1,6 +1,5 @@
 package com.roaa.expensetracker.Composables.components
 
-import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FloatTweenSpec
 import androidx.compose.animation.core.LinearEasing
@@ -9,7 +8,6 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -27,9 +25,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.roaa.expensetracker.Composables.ExpenseTrackerTheme
 import com.roaa.expensetracker.Composables.WavyShape
 import com.roaa.expensetracker.Composables.colorBad
 import com.roaa.expensetracker.Composables.colorGood
@@ -46,12 +42,12 @@ import java.math.RoundingMode
 @Composable
 fun SpendsBudgetCard(
     modifier: Modifier = Modifier,
-    budget: Float,
-    spend: Float,
+    budget: BigDecimal,
+    spend: BigDecimal,
 ) {
     var flipCard by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val percent = 1.minus(spend.div(budget))
+    val percent = BigDecimal.ONE.minus(spend.div(budget))
 
     val bigDecimal = BigDecimal((1 - percent.toDouble()) * 100).setScale(2, RoundingMode.HALF_UP)
     val percentFormatted = bigDecimal.toFloat()
@@ -96,7 +92,7 @@ fun SpendsBudgetCard(
                     colorNotGood,
                     colorGood,
                 ),
-                percentWithNewSpentAnimated.coerceIn(0f, 1f).toFloat(),
+                percentWithNewSpentAnimated.coerceIn(0f, 1f),
             )
         )
     )
@@ -133,68 +129,68 @@ fun SpendsBudgetCard(
                         ),
                     )
                     .fillMaxHeight()
-                    .fillMaxWidth(percent),
+                    .fillMaxWidth(percent.toFloat()),
             )
         }
     )
 }
-
-@Preview(name = "The budget is almost completely spent")
-@Composable
-private fun Preview() {
-    ExpenseTrackerTheme {
-        SpendsBudgetCard(
-            modifier = Modifier.height(IntrinsicSize.Min),
-            spend = 3740f,
-            budget = 60000f,
-        )
-    }
-}
-
-@Preview(name = "Budget half spent")
-@Composable
-private fun PreviewHalf() {
-    ExpenseTrackerTheme {
-        SpendsBudgetCard(
-            modifier = Modifier.height(IntrinsicSize.Min),
-            spend = 30740f,
-            budget = 60000f,
-        )
-    }
-}
-
-@Preview(name = "Almost no budget")
-@Composable
-private fun PreviewFull() {
-    ExpenseTrackerTheme {
-        SpendsBudgetCard(
-            modifier = Modifier.height(IntrinsicSize.Min),
-            spend = 45740f,
-            budget = 60000f,
-        )
-    }
-}
-
-@Preview(name = "Overspending budget")
-@Composable
-private fun PreviewOverspending() {
-    ExpenseTrackerTheme {
-        SpendsBudgetCard(
-            modifier = Modifier.height(IntrinsicSize.Min),
-            spend = 0f,
-            budget = 60000f,
-        )
-    }
-}
-
-@Preview(name = "Might mode", uiMode = UI_MODE_NIGHT_YES)
-@Composable
-private fun PreviewNightMode() {
-    ExpenseTrackerTheme {
-        SpendsBudgetCard(
-            modifier = Modifier.height(IntrinsicSize.Min),
-            spend = 14740f,
-            budget = 60000f,
-        )
-    }
-}
+//
+//@Preview(name = "The budget is almost completely spent")
+//@Composable
+//private fun Preview() {
+//    ExpenseTrackerTheme {
+//        SpendsBudgetCard(
+//            modifier = Modifier.height(IntrinsicSize.Min),
+//            spend = 3740f,
+//            budget = 60000f,
+//        )
+//    }
+//}
+//
+//@Preview(name = "Budget half spent")
+//@Composable
+//private fun PreviewHalf() {
+//    ExpenseTrackerTheme {
+//        SpendsBudgetCard(
+//            modifier = Modifier.height(IntrinsicSize.Min),
+//            spend = 30740f,
+//            budget = 60000f,
+//        )
+//    }
+//}
+//
+//@Preview(name = "Almost no budget")
+//@Composable
+//private fun PreviewFull() {
+//    ExpenseTrackerTheme {
+//        SpendsBudgetCard(
+//            modifier = Modifier.height(IntrinsicSize.Min),
+//            spend = 45740f,
+//            budget = 60000f,
+//        )
+//    }
+//}
+//
+//@Preview(name = "Overspending budget")
+//@Composable
+//private fun PreviewOverspending() {
+//    ExpenseTrackerTheme {
+//        SpendsBudgetCard(
+//            modifier = Modifier.height(IntrinsicSize.Min),
+//            spend = 0f,
+//            budget = 60000f,
+//        )
+//    }
+//}
+//
+//@Preview(name = "Might mode", uiMode = UI_MODE_NIGHT_YES)
+//@Composable
+//private fun PreviewNightMode() {
+//    ExpenseTrackerTheme {
+//        SpendsBudgetCard(
+//            modifier = Modifier.height(IntrinsicSize.Min),
+//            spend = 14740f,
+//            budget = 60000f,
+//        )
+//    }
+//}

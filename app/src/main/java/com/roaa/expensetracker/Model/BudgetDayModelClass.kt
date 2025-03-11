@@ -2,17 +2,17 @@ package com.roaa.expensetracker.Model
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import kotlinx.serialization.Serializable
+import java.math.BigDecimal
 
-@Serializable
+
 @Entity(tableName = "budget_day_table")
 data class BudgetDayModelClass(
     @PrimaryKey(autoGenerate = true)
     val budgetDayId:Long,
     val date: Long,
-    val budgetAmount: Float = 0f,
-    var totalExpense: Float = 0f,
-    var totalIncome: Float = 0f,
+    val budgetAmount: BigDecimal ,
+    var totalExpense: BigDecimal,
+    var totalIncome: BigDecimal,
     val totalExpenseTransactionCount: Long = 0L,
     val totalIncomeTransactionCount: Long = 0L,
     val budgetId: Long,

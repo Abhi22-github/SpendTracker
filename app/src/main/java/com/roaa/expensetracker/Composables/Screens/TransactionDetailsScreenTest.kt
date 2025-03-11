@@ -1,7 +1,6 @@
 package com.roaa.expensetracker.Composables.Screens
 
 import android.annotation.SuppressLint
-import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -105,8 +104,6 @@ fun TransactionDetailsScreen(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
     viewModel: AllViewModel,
-    amount: Float,
-    categoryName1: String,
 ) {
     val singleTransaction by viewModel.uiViewModel.transactionDetailsWithViewModelFlow.collectAsState()
     var showDeleteConfirmation by remember { mutableStateOf(false) }
@@ -226,10 +223,10 @@ fun TransactionDetailsScreen(
                                 start = 20.dp, end = 20.dp, top = 16.dp, bottom = 16.dp
                             )
                         ) {
-                            val image =
+                            val newImage =
                                 rememberAsyncImagePainter(IconState.fromNumber(singleTransaction.category.categoryIconNumber))
                             Image(
-                                painter = image,
+                                painter = newImage,
                                 contentDescription = "Test Image",
                                 modifier = Modifier.size(24.dp),
                             )
@@ -370,7 +367,6 @@ fun TransactionDetailsScreen(
                                 )
                                 .padding(horizontal = 16.dp),
                         ) {
-                            val color = MaterialTheme.colorScheme.primary
 
                             Column {
                                 TitleWithCheckBox(
@@ -398,14 +394,16 @@ fun TransactionDetailsScreen(
                     }
                     Spacer(Modifier.height(20.dp))
                 }
-                Box(Modifier
-                    .padding(16.dp, 0.dp)
-                    .constrainAs(bottomRow) {
-                        bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }) {
-                    BottomActionRow(Modifier,
+                Box(
+                    Modifier
+                        .padding(16.dp, 0.dp)
+                        .constrainAs(bottomRow) {
+                            bottom.linkTo(parent.bottom)
+                            start.linkTo(parent.start)
+                            end.linkTo(parent.end)
+                        }) {
+                    BottomActionRow(
+                        Modifier,
                         { showDeleteConfirmation = !showDeleteConfirmation },
                         { showEdit = !showEdit })
                 }
@@ -640,7 +638,7 @@ fun SingleInfoBoxForTransactions(
 @Composable
 fun TagChip(text: String) {
     SuggestionChip(
-        onClick = { Log.d("Suggestion chip", "hello world") },
+        onClick = {  },
         label = { Text(text) },
         colors = SuggestionChipDefaults.suggestionChipColors(
             labelColor = MaterialTheme.colorScheme.onSurface.copy(

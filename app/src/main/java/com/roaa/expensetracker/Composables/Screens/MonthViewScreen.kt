@@ -30,7 +30,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -68,6 +67,7 @@ import com.roaa.expensetracker.Utilities.getMonthFromLocalDate
 import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toLong
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.TextStyle
@@ -99,7 +99,6 @@ fun MonthViewScreen(
         pagerFlag = true
         monthChipFlag = false
     }
-    Log.d("Month outside", "${pagerState.currentPage}")
     LaunchedEffect(pagerState.targetPage, pagerFlag) {
         scope.launch {
             viewModel.uiViewModel.selectedMonth.emit(
@@ -110,14 +109,6 @@ fun MonthViewScreen(
                     )
                 )
             )
-//            Log.d(
-//                "Month Testing123", getMonthFromLocalDate(
-//                            calculateMonthStartDate(
-//                                pagerState.targetPage,
-//                                MAX_PAGES / 2
-//                            )
-//                        )
-//            )
         }
         pagerFlag = false
         monthChipFlag = true
@@ -135,8 +126,8 @@ fun MonthViewScreen(
             allDays[0].toLong(),
             allDays[41].toLong()
         ).collectAsState(listOf())
-        var totalExpense by remember { mutableFloatStateOf(0f) }
-        var totalIncome by remember { mutableFloatStateOf(0f) }
+        var totalExpense by remember { mutableStateOf(BigDecimal.ZERO) }
+        var totalIncome by remember { mutableStateOf(BigDecimal.ZERO) }
         LaunchedEffect(totalExpenseList) {
             totalExpenseList.forEach {
                 if (it.date >= currentMonthFirstAndLastDate.first && it.date <= currentMonthFirstAndLastDate.second) {
@@ -148,7 +139,6 @@ fun MonthViewScreen(
         val totalValuesPerDayForMonthMap = remember(totalExpenseList) {
             convertTotalExpenseIncomeClassToMap(totalExpenseList)
         }
-        val color = toPalette(orange)
         Column {
             HorizontalDivider(
                 thickness = 0.7.dp,
@@ -192,7 +182,6 @@ fun MonthViewScreen(
 }
 
 private fun calculateMonthStartDate(page: Int, initialPage: Int): LocalDate {
-    Log.d("Month Debug", "$page $initialPage")
     val initialDate = LocalDate.now().withDayOfMonth(1)
     val monthsOffset = (page - initialPage).toLong()
     return initialDate.plusMonths(monthsOffset)
@@ -207,7 +196,7 @@ fun MonthView(
     onDateSelected: (LocalDate) -> Unit,
     firstDayOfWeek: DayOfWeek,
     allDays: List<LocalDate>,
-    totalValuesPerDayForMonthMap: HashMap<Long, Pair<Float, Float>>,
+    totalValuesPerDayForMonthMap: HashMap<Long, Pair<BigDecimal, BigDecimal>>,
 ) {
     Column(modifier = modifier) {
         // Month header
@@ -225,7 +214,7 @@ fun MonthView(
                     text = dayOfWeek.getDisplayName(TextStyle.SHORT, Locale.getDefault()),
                     modifier = Modifier.weight(1f),
                     textAlign = TextAlign.Center,
-                    style = MaterialTheme.typography.labelMedium
+                    style = typography.labelMedium
                 )
             }
         }
@@ -277,7 +266,7 @@ fun DayCell(
     onDateSelected: (LocalDate) -> Unit,
     singleCellHeight: Dp,
     position: Position,
-    pair: Pair<Float, Float>?
+    pair: Pair<BigDecimal, BigDecimal>?
 ) {
     val isToday = date == LocalDate.now()
     val textColor = when {
@@ -355,7 +344,7 @@ fun DayCell(
                         text = date.dayOfMonth.toString(),
                         color = textColor,
                         fontWeight = if (isToday) FontWeight.Bold else FontWeight.Normal,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = typography.labelMedium,
                         textAlign = TextAlign.Center,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
@@ -377,7 +366,7 @@ fun DayCell(
                     Text(
                         text = "-₹${parseAmount(it.first)}",
                         color = colorPalletOrange.main,
-                        style = MaterialTheme.typography.labelSmall.copy(fontFamily = CustomFonts.numberFont),
+                        style = typography.labelSmall.copy(fontFamily = CustomFonts.numberFont),
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .fillMaxWidth()
@@ -401,7 +390,7 @@ fun DayCell(
                     Text(
                         text = "+₹${parseAmount(it.second)}",
                         color = colorPalletGreen.main,
-                        style = MaterialTheme.typography.labelSmall.copy(fontFamily = CustomFonts.numberFont),
+                        style = typography.labelSmall.copy(fontFamily = CustomFonts.numberFont),
                         textAlign = TextAlign.Center,
                         modifier = Modifier
                             .padding(3.dp, 2.dp)

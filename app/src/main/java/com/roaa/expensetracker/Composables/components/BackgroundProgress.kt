@@ -29,24 +29,25 @@ import com.roaa.expensetracker.Composables.WavyShape
 import com.roaa.expensetracker.Composables.utils.HarmonizedColorPalette
 import com.roaa.expensetracker.Utilities.clamp
 import kotlinx.coroutines.launch
+import java.math.BigDecimal
 import kotlin.math.ceil
 
 
 @Composable
 fun BackgroundProgress(
     harmonizedColor: HarmonizedColorPalette,
-    oldPercent: Float,
-    percent: Float,
+    oldPercent: BigDecimal,
+    percent: BigDecimal,
 ) {
 
     val percentWithoutNewSpentAnimated by animateFloatAsState(
         label = "percentRealAnim",
-        targetValue = oldPercent,
+        targetValue = oldPercent.toFloat(),
         animationSpec = TweenSpec(250),
     )
     val percentWithNewSpentAnimated = animateFloatAsState(
         label = "percentWithNewSpentAnimated",
-        targetValue = percent,
+        targetValue = percent.toFloat(),
         animationSpec = TweenSpec(300),
     ).value
 
@@ -70,7 +71,7 @@ fun BackgroundProgress(
 
     Box(Modifier.fillMaxSize()) {
         AnimatedVisibility(
-            visible = percent != 0.0f,
+            visible = percent != BigDecimal.ZERO,
             enter = fadeIn(),
             exit = fadeOut(),
         ) {
