@@ -9,13 +9,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Model.NavigationItems
-import com.roaa.expensetracker.Notification.generalNotificationChannel
-import com.roaa.expensetracker.Notification.sendNotification
 import com.roaa.expensetracker.R
 import kotlinx.coroutines.DelicateCoroutinesApi
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 
 val section1Items = listOf(
@@ -106,19 +101,19 @@ fun appStartingChecks(context: Context, viewModel: AllViewModel) {
 
 @OptIn(DelicateCoroutinesApi::class)
 fun checkIfBudgetIsExpired(context: Context, viewModel: AllViewModel) {
-    GlobalScope.launch {
-        viewModel.budgetViewModel.getCurrentBudget().catch { }.collect { budgetModelClass ->
-            if (budgetModelClass.budgetEndDate < LocalDate.now().toLong()) {
-                val temp = budgetModelClass.copy(isActive = false)
-                viewModel.budgetViewModel.updateBudget(temp)
-                sendNotification(
-                    context,
-                    generalNotificationChannel,
-                    "Budget Expired",
-                    "Your budget has expired"
-                )
-            }
-
-        }
-    }
+//    GlobalScope.launch {
+//        viewModel.budgetViewModel.getCurrentBudget().catch { }.collect { budgetModelClass ->
+//            if (budgetModelClass.budgetEndDate < LocalDate.now().toLong()) {
+//                val temp = budgetModelClass.copy(isActive = false)
+//                viewModel.budgetViewModel.updateBudget(temp)
+//                sendNotification(
+//                    context,
+//                    generalNotificationChannel,
+//                    "Budget Expired",
+//                    "Your budget has expired"
+//                )
+//            }
+//
+//        }
+//    }
 }
