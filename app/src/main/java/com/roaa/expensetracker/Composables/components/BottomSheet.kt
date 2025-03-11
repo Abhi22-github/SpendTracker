@@ -1,6 +1,7 @@
 package com.roaa.expensetracker.Composables.components
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearEasing
@@ -183,7 +184,10 @@ fun BottomSheetContentAddItem(
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
 fun BottomSheetContentEdit(
-    singleTransaction: TransactionWithDetails, sheetState: SheetState, viewModel: AllViewModel, closeBottomSheet: () -> Unit
+    singleTransaction: TransactionWithDetails,
+    sheetState: SheetState,
+    viewModel: AllViewModel,
+    closeBottomSheet: () -> Unit
 ) {
     ModalBottomSheet(
         onDismissRequest = {
@@ -194,7 +198,12 @@ fun BottomSheetContentEdit(
             .imePadding()
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
-        BottomSheetContentItemEditContent(modifier = Modifier, viewModel = viewModel,singleTransaction, closeBottomSheet)
+        BottomSheetContentItemEditContent(
+            modifier = Modifier,
+            viewModel = viewModel,
+            singleTransaction,
+            closeBottomSheet
+        )
     }
 }
 
@@ -209,7 +218,7 @@ fun BottomSheetContentItemAddContent(
     viewModel: AllViewModel,
     date: Long,
     closeBottomSheet: () -> Unit,
-    ) {
+) {
     val scope = rememberCoroutineScope()
     var categoryMenuExpanded by remember { mutableStateOf(false) }
     var expenseValue by remember { mutableStateOf(TextFieldValue("")) }
@@ -217,16 +226,38 @@ fun BottomSheetContentItemAddContent(
     var selectedDate by remember { mutableStateOf<Long?>(date) }
     var selectedPaymentMethod by remember { mutableStateOf<BankAccountsClass>(emptyBank) }
     val focusRequester = remember { FocusRequester() }
+    val expenseType = TransactionTypeClass(1, EXPENSE)
+    val incomeType = TransactionTypeClass(2, INCOME)
+    var selectedType by remember { mutableStateOf(expenseType.type) }
     val categoryList by viewModel.categoryViewModel.categoryList.collectAsState()
+    val lastExpenseCategoryId by viewModel.preferencesViewModel.getLastExpenseCategory.collectAsState(
+        0L
+    )
+    val lastIncomeCategoryId by viewModel.preferencesViewModel.getLastIncomeCategory.collectAsState(
+        0L
+    )
     var selectedCategory by remember {
         mutableStateOf(
             firstSampleClass
         )
     }
-
-    val expenseType = TransactionTypeClass(1, EXPENSE)
-    val incomeType = TransactionTypeClass(2, INCOME)
-
+    LaunchedEffect(lastExpenseCategoryId, lastIncomeCategoryId, categoryList, selectedType) {
+        if (categoryList.isNotEmpty()) {
+            if (selectedType == expenseType.type) {
+                val expenseCategoryPresent =
+                    categoryList.any { it.categoryId == lastExpenseCategoryId }
+                if (expenseCategoryPresent) {
+                    selectedCategory = categoryList.first { it.categoryId == lastExpenseCategoryId }
+                }
+            } else {
+                val incomeCategoryPresent =
+                    categoryList.any { it.categoryId == lastIncomeCategoryId }
+                if (incomeCategoryPresent) {
+                    selectedCategory = categoryList.first { it.categoryId == lastIncomeCategoryId }
+                }
+            }
+        }
+    }
 
     val errorStatus by viewModel.uiViewModel.errorStatusInAddBottomSheet.collectAsState(false)
 
@@ -239,7 +270,6 @@ fun BottomSheetContentItemAddContent(
         ), animationSpec = tween(500)
     )
 
-    var selectedType by remember { mutableStateOf(expenseType.type) }
     if (typeToggle) {
         selectedType = expenseType.type
     } else {
@@ -271,7 +301,10 @@ fun BottomSheetContentItemAddContent(
     } else {
         BigDecimal.ZERO
     }
-    viewModel.animationViewModel.method("${LocalCurrency.current.currencySymbol}$amountInString", percent.toFloat())
+    viewModel.animationViewModel.method(
+        "${LocalCurrency.current.currencySymbol}$amountInString",
+        percent.toFloat()
+    )
 
     LaunchedEffect(percent) {
         scope.launch {
@@ -346,27 +379,34 @@ fun BottomSheetContentItemAddContent(
                             start = 20.dp, end = 10.dp, top = 16.dp, bottom = 16.dp
                         )
                     ) {
-                        val image =
-                            rememberAsyncImagePainter(IconState.fromNumber(selectedCategory.categoryIconNumber))
-                        Image(
-                            painter = image,
-                            contentDescription = "Test Image",
-                            modifier = Modifier.size(24.dp),
-                        )
-
-                        Text(
-                            text = selectedCategory.categoryName,
-                            modifier = Modifier
-                                .weight(0.6f)
-                                .padding(start = 8.dp),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                        Icon(
-                            Icons.Filled.KeyboardArrowDown,
-                            "backIcon",
-                            modifier = Modifier.weight(0.2f)
-                        )
+                        Row {
+                            Row (Modifier.weight(0.8f)){
+                                val image =
+                                    rememberAsyncImagePainter(IconState.fromNumber(selectedCategory.categoryIconNumber))
+                                AnimatedContent(image) {
+                                    Image(
+                                        painter = it,
+                                        contentDescription = "Test Image",
+                                        modifier = Modifier.size(24.dp),
+                                    )
+                                }
+                                AnimatedContent(selectedCategory.categoryName) {
+                                    Text(
+                                        text = it,
+                                        modifier = Modifier
+                                            .weight(0.6f)
+                                            .padding(start = 8.dp),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                            Icon(
+                                Icons.Filled.KeyboardArrowDown,
+                                "backIcon",
+                                modifier = Modifier.weight(0.2f)
+                            )
+                        }
                     }
                     DropDownMenu(
                         Modifier,
@@ -662,7 +702,10 @@ fun BottomSheetContentItemEditContent(
     } else {
         BigDecimal.ZERO
     }
-    viewModel.animationViewModel.method("${LocalCurrency.current.currencySymbol}$amountInString", percent.toFloat())
+    viewModel.animationViewModel.method(
+        "${LocalCurrency.current.currencySymbol}$amountInString",
+        percent.toFloat()
+    )
 
     LaunchedEffect(percent) {
         scope.launch {
@@ -967,7 +1010,7 @@ fun BottomSheetContentItemEditContent(
                         selectedDate,
                         selectedPaymentMethod,
                         scope,
-                       viewModel,
+                        viewModel,
                     )
                 }, Modifier
                     .fillMaxWidth()
@@ -1026,6 +1069,12 @@ fun validateTransactionData(
             it.categoryId = selectedCategory.categoryId
             it.bankAccountId = selectedPaymentMethod.bankAccountId
         })
+        if (type == EXPENSE) {
+            viewModel.preferencesViewModel.setLastUsedExpenseCategoryId(selectedCategory.categoryId)
+        } else {
+            viewModel.preferencesViewModel.setLastUsedIncomeCategoryId(selectedCategory.categoryId)
+        }
+
         closeBottomSheet()
 
     }
@@ -1229,7 +1278,7 @@ fun BottomSheetContentItemDetails(
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
         BottomSheetContentItemDetailsContent(
-            modifier = Modifier, viewModel ,closeBottomSheet, singleTransaction
+            modifier = Modifier, viewModel, closeBottomSheet, singleTransaction
         )
     }
 }
@@ -1433,7 +1482,7 @@ fun BottomSheetContentItemDetailsContent(
         AnimatedVisibility(showEdit) {
 
             EditBottomSheet(
-                viewModel ,
+                viewModel,
                 singleTransaction,
                 closeBottomSheet = {
                     showEdit = !showEdit
@@ -1467,7 +1516,7 @@ fun BottomSheetIconPicker(
 
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
-fun BottomSheetContentIconPicker(modifier: Modifier = Modifier,viewModel: AllViewModel) {
+fun BottomSheetContentIconPicker(modifier: Modifier = Modifier, viewModel: AllViewModel) {
     BoxWithConstraints(Modifier.padding(horizontal = 8.dp)) {
         val width = maxWidth / 7
         Column(
@@ -2121,7 +2170,7 @@ private fun PaymentEditContentPreview() {
 
 
 @Composable
-fun ErrorRow(showError: Boolean,) {
+fun ErrorRow(showError: Boolean) {
     val errorMessage = ErrorManager.errorMessage
     AnimatedVisibility(showError) {
         Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
@@ -2205,7 +2254,7 @@ fun BottomSheetContentAddItemTest(
         sheetState = sheetState,
         modifier = Modifier.fillMaxWidth(),
     ) {
-        BottomSheetContentItemAddContentTest(modifier = Modifier,viewModel, keyboardHeight)
+        BottomSheetContentItemAddContentTest(modifier = Modifier, viewModel, keyboardHeight)
     }
 }
 
@@ -2278,7 +2327,10 @@ fun BottomSheetContentItemAddContentTest(
     } else {
         0f
     }
-    viewModel.animationViewModel.method("${LocalCurrency.current.currencySymbol}$amountInString", percent.toFloat())
+    viewModel.animationViewModel.method(
+        "${LocalCurrency.current.currencySymbol}$amountInString",
+        percent.toFloat()
+    )
 
     LaunchedEffect(percent) {
         scope.launch {

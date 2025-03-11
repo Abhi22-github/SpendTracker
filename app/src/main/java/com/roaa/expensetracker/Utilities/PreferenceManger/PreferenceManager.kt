@@ -90,18 +90,18 @@ class PreferenceManager @Inject constructor(@ApplicationContext val context: Con
             }
     }
 
-    //save Boolean value
+    //save Long value
     suspend fun saveLongValue(value: Long, key: Preferences.Key<Long>) {
         dataStore.edit { preferences ->
             preferences[key] = value
         }
     }
 
-    // Retrieve Boolean value
+    // Retrieve Long value
     fun getLongValue(key: Preferences.Key<Long>): Flow<Long> {
         return context.dataStore.data
             .map { preferences ->
-                preferences[key] ?: 1L
+                preferences[key] ?: 0L
             }
     }
 

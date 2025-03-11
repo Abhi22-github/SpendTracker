@@ -225,7 +225,8 @@ fun TransactionsListCompose(
                                         Header(
                                             if (newdate == System.currentTimeMillis()
                                                     .LongMillisToNormalLong()
-                                            ) "Today" else date.toLocalDate().toDisplayDate()
+                                            ) "Today"
+                                            else date.toLocalDate().toDisplayDate()
                                         )
                                     }
                                     items(transactionList, key = { it.transaction.id }) { item ->

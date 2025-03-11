@@ -11,6 +11,8 @@ import com.roaa.expensetracker.Utilities.PreferenceManger.CURRENT_BUDGET_MONTH_N
 import com.roaa.expensetracker.Utilities.PreferenceManger.CURRENT_BUDGET_START_DATE
 import com.roaa.expensetracker.Utilities.PreferenceManger.IS_APP_FIRST_STARTUP
 import com.roaa.expensetracker.Utilities.PreferenceManger.IS_BUDGET_SET
+import com.roaa.expensetracker.Utilities.PreferenceManger.LAST_USED_EXPENSE_CATEGORY_ID
+import com.roaa.expensetracker.Utilities.PreferenceManger.LAST_USED_INCOME_CATEGORY_ID
 import com.roaa.expensetracker.Utilities.PreferenceManger.PRIMARY_BANK_ACCOUNT
 import com.roaa.expensetracker.Utilities.PreferenceManger.PreferenceManager
 import com.roaa.expensetracker.Utilities.PreferenceManger.SHOW_EXPERIMENTAL_COMPONENTS
@@ -103,6 +105,22 @@ class PreferencesViewModel @Inject constructor(private val preferenceManager: Pr
     }
 
     val getCurrency = preferenceManager.getCurrency()
+
+    fun setLastUsedExpenseCategoryId(id: Long) {
+        viewModelScope.launch {
+            preferenceManager.saveLongValue(id, LAST_USED_EXPENSE_CATEGORY_ID)
+        }
+    }
+
+    val getLastExpenseCategory = preferenceManager.getLongValue(LAST_USED_EXPENSE_CATEGORY_ID)
+
+    fun setLastUsedIncomeCategoryId(id: Long) {
+        viewModelScope.launch {
+            preferenceManager.saveLongValue(id, LAST_USED_INCOME_CATEGORY_ID)
+        }
+    }
+
+    val getLastIncomeCategory = preferenceManager.getLongValue(LAST_USED_INCOME_CATEGORY_ID)
 
 
 }

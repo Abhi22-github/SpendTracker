@@ -304,7 +304,7 @@ fun getPreviousAndNextDays(date: LocalDate): MutableList<String> {
     return allDates
 }
 
-fun String.toLocalDate() = run { LocalDate.parse(this) }
+fun String.toLocalDate() = run { LocalDate.parse(this, yearMonthDateLongFormat) }
 
 fun LocalDate.toNormalString() = run { this.format(DateTimeFormatter.ISO_LOCAL_DATE) }
 

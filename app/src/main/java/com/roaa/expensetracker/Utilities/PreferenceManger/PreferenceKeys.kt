@@ -8,6 +8,9 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 const val PREFERENCES_NAME = "Settings"
 val IS_APP_FIRST_STARTUP = booleanPreferencesKey("is_app_first_startup")
 val TOTAL_BUDGET_FOR_MONTH = floatPreferencesKey("total_budget_for_month")
+val LAST_USED_EXPENSE_CATEGORY_ID = longPreferencesKey("last_used_expense_category_id")
+val LAST_USED_INCOME_CATEGORY_ID = longPreferencesKey("last_used_income_category_id")
+val IS_ONE_DEFAULT_CATEGORY_SET = booleanPreferencesKey("is_one_default_category_set")
 val TOTAL_BUDGET_PER_DAY = floatPreferencesKey("total_budget_per_day")
 val CURRENT_BUDGET_MONTH_NAME = stringPreferencesKey("current_month_name")
 val CURRENT_BUDGET_DURATION = longPreferencesKey("current_budget_duration")
