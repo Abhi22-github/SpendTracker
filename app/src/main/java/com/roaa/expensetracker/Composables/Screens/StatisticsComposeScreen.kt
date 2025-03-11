@@ -107,7 +107,6 @@ import com.roaa.expensetracker.Composables.components.TopBar
 import com.roaa.expensetracker.Composables.orange
 import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.toPalette
-import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
@@ -130,6 +129,7 @@ import com.roaa.expensetracker.Utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.Utilities.toLongMillis
+import com.roaa.expensetracker.database.Relations.TransactionWithDetails
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 

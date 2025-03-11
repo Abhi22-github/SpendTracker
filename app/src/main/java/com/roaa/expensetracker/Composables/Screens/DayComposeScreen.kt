@@ -77,7 +77,6 @@ import com.roaa.expensetracker.Composables.components.TransactionsListCompose
 import com.roaa.expensetracker.Composables.utils.combineColors
 import com.roaa.expensetracker.Composables.utils.harmonize
 import com.roaa.expensetracker.Composables.utils.toPalette
-import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
@@ -90,6 +89,7 @@ import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
+import com.roaa.expensetracker.database.Relations.BudgetWithDayDetails
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 

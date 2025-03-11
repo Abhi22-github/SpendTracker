@@ -1,4 +1,4 @@
-package com.roaa.expensetracker.Database
+package com.roaa.expensetracker.database
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -48,7 +48,7 @@ interface BankAccountDao {
 
     //Transactions
     @Transaction
-    suspend fun MigrateTransactionToAnotherBankAccountAndDeleteIt(
+    suspend fun migrateTransactionToAnotherBankAccountAndDeleteIt(
         firstBankAccount: BankAccountsClass,
         secondBankAccount: BankAccountsClass
     ) {

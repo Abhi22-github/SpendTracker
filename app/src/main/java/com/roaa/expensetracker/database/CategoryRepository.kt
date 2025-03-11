@@ -1,29 +1,16 @@
-package com.roaa.expensetracker.Database
+package com.roaa.expensetracker.database
 
-import android.content.Context
-import com.roaa.expensetracker.Database.AppDatabase.Companion.getInstance
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Utilities.Constants
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class CategoryRepository(@ApplicationContext applicationContext: Context) {
-    // below line is the create a variable  
-    // for dao and list for all category. 
-    private val categoryDao: CategoryDao
+class CategoryRepository @Inject constructor(private val categoryDao: CategoryDao) {
 
     // below method is to read all category from database.
-    val allCategories: Flow<List<CategoryClass>>
+    val allCategories: Flow<List<CategoryClass>> = categoryDao.allCategory
 
-    // creating a constructor for our variables 
-    // and passing the variables to it.
-    init {
-        val database = getInstance(applicationContext)
-        categoryDao = database.categoryDao()
-        allCategories = categoryDao.allCategory
-    }
-
-     fun getOnlyExpenseCategories(): Flow<List<CategoryClass>> {
+    fun getOnlyExpenseCategories(): Flow<List<CategoryClass>> {
         return categoryDao.getOnlyExpenseCategories(Constants.EXPENSE)
     }
 

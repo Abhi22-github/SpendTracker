@@ -1,42 +1,46 @@
 package com.roaa.expensetracker.Hilt
 
-import android.content.Context
-import com.roaa.expensetracker.Database.BankAccountRepository
-import com.roaa.expensetracker.Database.BudgetDayRepository
-import com.roaa.expensetracker.Database.BudgetRepository
-import com.roaa.expensetracker.Database.CategoryRepository
-import com.roaa.expensetracker.Database.TransactionRepository
+
+import com.roaa.expensetracker.database.BankAccountDao
+import com.roaa.expensetracker.database.BankAccountRepository
+import com.roaa.expensetracker.database.BudgetDao
+import com.roaa.expensetracker.database.BudgetDayDao
+import com.roaa.expensetracker.database.BudgetDayRepository
+import com.roaa.expensetracker.database.BudgetRepository
+import com.roaa.expensetracker.database.CategoryDao
+import com.roaa.expensetracker.database.CategoryRepository
+import com.roaa.expensetracker.database.TransactionDao
+import com.roaa.expensetracker.database.TransactionRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
-import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 
 @Module
 @InstallIn(SingletonComponent::class)
 class RepositoryModule() {
     @Provides
-    fun provideTransactionRepository(@ApplicationContext applicationContext: Context): TransactionRepository {
-        return TransactionRepository(applicationContext)
+    fun provideTransactionRepository(transactionDao: TransactionDao): TransactionRepository {
+        return TransactionRepository(transactionDao)
     }
 
     @Provides
-    fun provideCategoryRepository(@ApplicationContext applicationContext: Context): CategoryRepository {
-        return CategoryRepository(applicationContext)
+    fun provideCategoryRepository(categoryDao: CategoryDao): CategoryRepository {
+        return CategoryRepository(categoryDao)
     }
 
     @Provides
-    fun provideBankAccountRepository(@ApplicationContext applicationContext: Context): BankAccountRepository {
-        return BankAccountRepository(applicationContext)
+    fun provideBankAccountRepository(bankAccountDao: BankAccountDao): BankAccountRepository {
+        return BankAccountRepository(bankAccountDao)
     }
 
     @Provides
-    fun provideBudgetRepository(@ApplicationContext applicationContext: Context): BudgetRepository {
-        return BudgetRepository(applicationContext)
+    fun provideBudgetRepository(budgetDao: BudgetDao): BudgetRepository {
+        return BudgetRepository(budgetDao)
     }
 
     @Provides
-    fun provideBudgetDayRepository(@ApplicationContext applicationContext: Context): BudgetDayRepository {
-        return BudgetDayRepository(applicationContext)
+    fun provideBudgetDayRepository(budgetDayDao: BudgetDayDao): BudgetDayRepository {
+        return BudgetDayRepository(budgetDayDao)
     }
 }

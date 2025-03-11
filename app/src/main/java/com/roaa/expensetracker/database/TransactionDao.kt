@@ -1,13 +1,11 @@
-package com.roaa.expensetracker.Database
+package com.roaa.expensetracker.database
 
-import android.util.Log
 import androidx.room.Dao
 import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
-import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Model.BudgetDayModelClass
 import com.roaa.expensetracker.Model.BudgetModelClass
 import com.roaa.expensetracker.Model.TotalAmountClass
@@ -15,6 +13,7 @@ import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Model.TransactionClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
+import com.roaa.expensetracker.database.Relations.TransactionWithDetails
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -112,10 +111,9 @@ interface TransactionDao {
 
         val currentBudget = getCurrentBudget
 
-        Log.d("TransactionDao", "$expense $income ${currentBudget?.budgetId}")
         currentBudget?.let {
             if (transactionClass.date >= it.budgetStartDate && transactionClass.date <= it.budgetEndDate) {
-                var singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
+                val singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
                 singleDay?.let {
                     it.totalExpense = expense ?: 0f
                     it.totalIncome = income ?: 0f
@@ -133,10 +131,9 @@ interface TransactionDao {
 
         val currentBudget = getCurrentBudget
 
-        Log.d("TransactionDao", "$expense $income ${currentBudget?.budgetId}")
         currentBudget?.let {
             if (transactionClass.date >= it.budgetStartDate && transactionClass.date <= it.budgetEndDate) {
-                var singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
+                val singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
                 singleDay?.let {
                     it.totalExpense = expense ?: 0f
                     it.totalIncome = income ?: 0f
@@ -163,10 +160,9 @@ interface TransactionDao {
 
         val currentBudget = getCurrentBudget
 
-        Log.d("TransactionDao", "$expense $income ${currentBudget?.budgetId}")
         currentBudget?.let {
             if (transactionClass.date >= it.budgetStartDate && transactionClass.date <= it.budgetEndDate) {
-                var singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
+                val singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
                 singleDay?.let {
                     it.totalExpense = expense ?: 0f
                     it.totalIncome = income ?: 0f
@@ -184,10 +180,9 @@ interface TransactionDao {
 
         val currentBudget = getCurrentBudget
 
-        Log.d("TransactionDao", "$expense $income ${currentBudget?.budgetId}")
         currentBudget?.let {
             if (transactionClass.date >= it.budgetStartDate && transactionClass.date <= it.budgetEndDate) {
-                var singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
+                val singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
                 singleDay?.let {
                     it.totalExpense = expense ?: 0f
                     it.totalIncome = income ?: 0f

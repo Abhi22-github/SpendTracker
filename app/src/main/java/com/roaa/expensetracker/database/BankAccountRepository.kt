@@ -1,24 +1,15 @@
-package com.roaa.expensetracker.Database
+package com.roaa.expensetracker.database
 
-import android.content.Context
-import com.roaa.expensetracker.Database.AppDatabase.Companion.getInstance
 import com.roaa.expensetracker.Model.BankAccountsClass
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class BankAccountRepository(@ApplicationContext applicationContext: Context) {
-    private val bankAccountsDao: BankAccountDao
+class BankAccountRepository @Inject constructor( private val bankAccountsDao: BankAccountDao ) {
+
 
     // below method is to read all category from database.
-    val allBankAccountsExceptCash: Flow<List<BankAccountsClass>>
-    val allBankAccounts: Flow<List<BankAccountsClass>>
-
-    init {
-        val database = getInstance(applicationContext)
-        bankAccountsDao = database.bankAccountsDao()
-        allBankAccounts = bankAccountsDao.allBankAccountsClass
-        allBankAccountsExceptCash = bankAccountsDao.allBankAccountsClassExceptCash
-    }
+    val allBankAccountsExceptCash: Flow<List<BankAccountsClass>> = bankAccountsDao.allBankAccountsClassExceptCash
+    val allBankAccounts: Flow<List<BankAccountsClass>> = bankAccountsDao.allBankAccountsClass
 
     // creating a method to insert the data to our database.
     suspend fun insert(bankAccountsClass: BankAccountsClass) {
@@ -30,7 +21,7 @@ class BankAccountRepository(@ApplicationContext applicationContext: Context) {
     }
 
     suspend fun migrateTransactions(firstBank:BankAccountsClass, secondBank:BankAccountsClass){
-        bankAccountsDao.MigrateTransactionToAnotherBankAccountAndDeleteIt(firstBank,secondBank)
+        bankAccountsDao.migrateTransactionToAnotherBankAccountAndDeleteIt(firstBank,secondBank)
     }
 
     suspend fun deleteBankAccountWithTransactions(bank:BankAccountsClass){

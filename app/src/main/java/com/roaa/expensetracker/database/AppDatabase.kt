@@ -1,22 +1,20 @@
-package com.roaa.expensetracker.Database
+package com.roaa.expensetracker.database
 
-import android.content.Context
 import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.DeleteColumn
 import androidx.room.RenameColumn
-import androidx.room.Room.databaseBuilder
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
 import androidx.room.migration.AutoMigrationSpec
 import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
-import com.roaa.expensetracker.Database.DatabaseUtils.RoomConverters
 import com.roaa.expensetracker.Model.BankAccountsClass
 import com.roaa.expensetracker.Model.BudgetDayModelClass
 import com.roaa.expensetracker.Model.BudgetModelClass
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Model.TransactionClass
+import com.roaa.expensetracker.database.DatabaseUtils.RoomConverters
 
 @TypeConverters(RoomConverters::class)
 @Database(
@@ -62,60 +60,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun budgetDao(): BudgetDao
     abstract fun budgetDayDao(): BudgetDayDao
 
-//    // we are creating an async task class to perform task in background.
-//    private class PopulateDbAsyncTask(instance: TransactionDatabase) :
-//        AsyncTask<Void?, Void?, Void?>() {
-//        init {
-//            val transactionDao = instance.transactionDao()
-//            val categoryDao = instance.categoryDao()
-//        }
-//
-//        override fun doInBackground(vararg voids: Void): Void? {
-//            return null
-//        }
-//    }
-
     companion object {
-        // below line is to create instance
-        // for our database class.
-        private var instance: AppDatabase? = null
-
-        // on below line we are getting instance for our database.
-        @JvmStatic
-        @Synchronized
-        fun getInstance(context: Context): AppDatabase {
-            // below line is to check if
-            // the instance is null or not.
-            if (instance == null) {
-                // if the instance is null we
-                // are creating a new instance
-                instance =  // for creating a instance for our database
-                        // we are creating a database builder and passing
-                        // our database class with our database name.
-                    databaseBuilder(
-                        context.applicationContext, AppDatabase::class.java, "database"
-                    ) // below line is use to add fall back to
-                        // destructive migration to our database.
-                        .addMigrations(MIGRATION_1_2)
-                        //.addMigrations(MIGRATION_2_3)// below line is to add callback
-                        // to our database.
-                        .addCallback(prePopulateData).allowMainThreadQueries()
-                        .fallbackToDestructiveMigration()
-                        // below line is to
-                        // build our database.
-                        .build()
-            }
-            // after creating an instance
-            // we are returning our instance
-            return instance!!
-        }
-
-        val MIGRATION_2_3 = object : Migration(2, 3) {
-            override fun migrate(database: SupportSQLiteDatabase) {
-
-            }
-        }
-
         val MIGRATION_1_2 = object : Migration(1, 2) {
             override fun migrate(database: SupportSQLiteDatabase) {
                 // For example, adding a new column
@@ -170,7 +115,7 @@ abstract class AppDatabase : RoomDatabase() {
         }
 
         // below line is to create a callback for our room database.
-        private val prePopulateData: Callback = object : Callback() {
+         val prePopulateData: Callback = object : Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {
                 super.onCreate(db)
                 // this method is called when database is created

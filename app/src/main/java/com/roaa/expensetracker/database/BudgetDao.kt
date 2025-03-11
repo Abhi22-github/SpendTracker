@@ -1,4 +1,4 @@
-package com.roaa.expensetracker.Database
+package com.roaa.expensetracker.database
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -7,11 +7,11 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
-import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import com.roaa.expensetracker.Model.BudgetDayModelClass
 import com.roaa.expensetracker.Model.BudgetModelClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
+import com.roaa.expensetracker.database.Relations.BudgetWithDayDetails
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -55,7 +55,7 @@ interface BudgetDao {
     @Update(onConflict = OnConflictStrategy.REPLACE)
     suspend fun updateDays(budgetDayModelClass: BudgetDayModelClass)
 
-    @Delete()
+    @Delete
     suspend fun removeDays(budgetDayModelClass: BudgetDayModelClass)
 
     //Transactions

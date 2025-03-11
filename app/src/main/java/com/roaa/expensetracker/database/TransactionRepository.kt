@@ -1,24 +1,17 @@
-package com.roaa.expensetracker.Database
+package com.roaa.expensetracker.database
 
-import android.content.Context
-import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import com.roaa.expensetracker.Model.TotalAmountClass
 import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Model.TransactionClass
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.roaa.expensetracker.database.Relations.TransactionWithDetails
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
 
-class TransactionRepository(@ApplicationContext applicationContext: Context) {
+class TransactionRepository @Inject constructor(private val transactionDao: TransactionDao) {
 
-    private val transactionDao: TransactionDao
-    val allTransactions: Flow<List<TransactionWithDetails>>
 
-    init {
-        val database = AppDatabase.getInstance(applicationContext)
-        transactionDao = database.transactionDao()
-        allTransactions = transactionDao.allTransactions
-    }
+    val allTransactions: Flow<List<TransactionWithDetails>> = transactionDao.allTransactions
 
     suspend fun insert(transactionClass: TransactionClass) {
         transactionDao.insert(transactionClass)

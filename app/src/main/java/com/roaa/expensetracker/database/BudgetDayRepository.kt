@@ -1,22 +1,14 @@
-package com.roaa.expensetracker.Database
+package com.roaa.expensetracker.database
 
-import android.content.Context
-import com.roaa.expensetracker.Database.AppDatabase.Companion.getInstance
 import com.roaa.expensetracker.Model.BudgetDayModelClass
-import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class BudgetDayRepository(@ApplicationContext applicationContext: Context) {
-    private val budgetDayDao: BudgetDayDao
+class BudgetDayRepository @Inject constructor(private val budgetDayDao: BudgetDayDao) {
+
 
     // below method is to read all category from database.
-    val allDaysForAllBudgets: Flow<List<BudgetDayModelClass>>
-
-    init {
-        val database = getInstance(applicationContext)
-        budgetDayDao = database.budgetDayDao()
-        allDaysForAllBudgets = budgetDayDao.allDays
-    }
+    val allDaysForAllBudgets: Flow<List<BudgetDayModelClass>> = budgetDayDao.allDays
 
     // creating a method to insert the data to our database.
     suspend fun insert(budgetDayModelClass: BudgetDayModelClass) {

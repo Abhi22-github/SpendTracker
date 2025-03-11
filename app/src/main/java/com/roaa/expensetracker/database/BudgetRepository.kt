@@ -1,28 +1,18 @@
-package com.roaa.expensetracker.Database
+package com.roaa.expensetracker.database
 
-import android.content.Context
-import com.roaa.expensetracker.Database.AppDatabase.Companion.getInstance
-import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
+
 import com.roaa.expensetracker.Model.BudgetDayModelClass
 import com.roaa.expensetracker.Model.BudgetModelClass
-import dagger.hilt.android.qualifiers.ApplicationContext
+import com.roaa.expensetracker.database.Relations.BudgetWithDayDetails
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class BudgetRepository(@ApplicationContext applicationContext: Context) {
-    private val budgetDao: BudgetDao
+class BudgetRepository @Inject constructor(private val budgetDao: BudgetDao) {
 
     // below method is to read all category from database.
-    val getCurrentBudget: Flow<BudgetModelClass>
-    val getCurrentBudgetWithDays: Flow<BudgetWithDayDetails?>
-    val allBudget: Flow<List<BudgetModelClass>>
-
-    init {
-        val database = getInstance(applicationContext)
-        budgetDao = database.budgetDao()
-        getCurrentBudget = budgetDao.getCurrentBudget
-        getCurrentBudgetWithDays = budgetDao.getCurrentBudgetWithDays
-        allBudget = budgetDao.allBudget
-    }
+    val getCurrentBudget: Flow<BudgetModelClass> = budgetDao.getCurrentBudget
+    val getCurrentBudgetWithDays: Flow<BudgetWithDayDetails?> = budgetDao.getCurrentBudgetWithDays
+    val allBudget: Flow<List<BudgetModelClass>> = budgetDao.allBudget
 
     // creating a method to insert the data to our database.
     suspend fun insert(budgetModelClass: BudgetModelClass): Long {

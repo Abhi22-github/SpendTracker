@@ -1,4 +1,4 @@
-package com.roaa.expensetracker.Database.DatabaseUtils
+package com.roaa.expensetracker.database.DatabaseUtils
 
 import androidx.room.TypeConverter
 import java.math.BigDecimal
