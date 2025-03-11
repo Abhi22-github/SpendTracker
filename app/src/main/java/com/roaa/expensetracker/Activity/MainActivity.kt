@@ -122,6 +122,7 @@ class ComposeMainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         WindowCompat.setDecorFitsSystemWindows(window, false)
         installSplashScreen().setKeepOnScreenCondition { !isDone.value }
+        this.deleteDatabase("database")
         setContent {
             val localContext = LocalContext.current
             val rootNavController = rememberNavController()

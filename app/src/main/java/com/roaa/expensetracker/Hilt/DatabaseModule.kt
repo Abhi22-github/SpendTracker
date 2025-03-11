@@ -26,7 +26,7 @@ class DatabaseModule() {
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
         return databaseBuilder(
-            context.applicationContext, AppDatabase::class.java, "database"
+            context.applicationContext, AppDatabase::class.java, "database1"
         )
             .addMigrations(MIGRATION_1_2)
             .addCallback(prePopulateData).allowMainThreadQueries()
