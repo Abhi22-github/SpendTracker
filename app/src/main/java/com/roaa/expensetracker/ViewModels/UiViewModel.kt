@@ -6,7 +6,7 @@ import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyBank
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyCategoryClass
 import com.roaa.expensetracker.Utilities.UtilityModalClass.emptyTransactionClass
 import com.roaa.expensetracker.Utilities.currentMonth
-import com.roaa.expensetracker.database.Relations.TransactionWithDetails
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import javax.inject.Inject

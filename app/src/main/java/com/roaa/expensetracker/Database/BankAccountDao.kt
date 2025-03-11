@@ -1,4 +1,4 @@
-package com.roaa.expensetracker.database
+package com.roaa.expensetracker.Database
 
 import androidx.room.Dao
 import androidx.room.Delete

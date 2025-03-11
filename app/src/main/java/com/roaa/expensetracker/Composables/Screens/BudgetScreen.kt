@@ -88,7 +88,7 @@ import com.roaa.expensetracker.Utilities.getMonthsBetween
 import com.roaa.expensetracker.Utilities.toDayMonthFormat
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
-import com.roaa.expensetracker.database.Relations.BudgetWithDayDetails
+import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale

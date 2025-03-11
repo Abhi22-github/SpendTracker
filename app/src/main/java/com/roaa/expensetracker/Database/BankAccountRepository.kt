@@ -1,4 +1,4 @@
-package com.roaa.expensetracker.database
+package com.roaa.expensetracker.Database
 
 import com.roaa.expensetracker.Model.BankAccountsClass
 import kotlinx.coroutines.flow.Flow

@@ -1,9 +1,9 @@
-package com.roaa.expensetracker.database
+package com.roaa.expensetracker.Database
 
 
 import com.roaa.expensetracker.Model.BudgetDayModelClass
 import com.roaa.expensetracker.Model.BudgetModelClass
-import com.roaa.expensetracker.database.Relations.BudgetWithDayDetails
+import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

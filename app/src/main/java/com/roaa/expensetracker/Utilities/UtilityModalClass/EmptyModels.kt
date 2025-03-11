@@ -9,7 +9,7 @@ import com.roaa.expensetracker.Model.TotalExpenseIncomeClass
 import com.roaa.expensetracker.Model.TransactionClass
 import com.roaa.expensetracker.Utilities.Constants.CASH
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
-import com.roaa.expensetracker.database.Relations.TransactionWithDetails
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 
 val emptyBank = BankAccountsClass(
     1L,

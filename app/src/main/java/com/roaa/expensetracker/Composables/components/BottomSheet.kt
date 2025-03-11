@@ -151,7 +151,7 @@ import com.roaa.expensetracker.Utilities.parseAmount
 import com.roaa.expensetracker.Utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLongMillis
-import com.roaa.expensetracker.database.Relations.TransactionWithDetails
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.take

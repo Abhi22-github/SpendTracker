@@ -1,4 +1,4 @@
-package com.roaa.expensetracker.database
+package com.roaa.expensetracker.Database
 
 import androidx.room.Dao
 import androidx.room.Delete
@@ -11,7 +11,7 @@ import com.roaa.expensetracker.Model.BudgetDayModelClass
 import com.roaa.expensetracker.Model.BudgetModelClass
 import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
-import com.roaa.expensetracker.database.Relations.BudgetWithDayDetails
+import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import kotlinx.coroutines.flow.Flow
 
 @Dao

@@ -129,7 +129,7 @@ import com.roaa.expensetracker.Utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.Utilities.toLocalDate
 import com.roaa.expensetracker.Utilities.toLong
 import com.roaa.expensetracker.Utilities.toLongMillis
-import com.roaa.expensetracker.database.Relations.TransactionWithDetails
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 

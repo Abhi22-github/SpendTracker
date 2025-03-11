@@ -1,4 +1,4 @@
-package com.roaa.expensetracker.database
+package com.roaa.expensetracker.Database
 
 import androidx.room.AutoMigration
 import androidx.room.Database
@@ -14,7 +14,7 @@ import com.roaa.expensetracker.Model.BudgetDayModelClass
 import com.roaa.expensetracker.Model.BudgetModelClass
 import com.roaa.expensetracker.Model.CategoryClass
 import com.roaa.expensetracker.Model.TransactionClass
-import com.roaa.expensetracker.database.DatabaseUtils.RoomConverters
+import com.roaa.expensetracker.Database.DatabaseUtils.RoomConverters
 
 @TypeConverters(RoomConverters::class)
 @Database(

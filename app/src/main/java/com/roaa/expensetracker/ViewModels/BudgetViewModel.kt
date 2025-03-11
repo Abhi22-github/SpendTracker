@@ -6,8 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.roaa.expensetracker.Composables.utils.DistributionMethod
 import com.roaa.expensetracker.Model.BudgetModelClass
 import com.roaa.expensetracker.Utilities.UiState
-import com.roaa.expensetracker.database.BudgetRepository
-import com.roaa.expensetracker.database.Relations.BudgetWithDayDetails
+import com.roaa.expensetracker.Database.BudgetRepository
+import com.roaa.expensetracker.Database.Relations.BudgetWithDayDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

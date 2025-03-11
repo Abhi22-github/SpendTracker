@@ -12,8 +12,8 @@ import com.roaa.expensetracker.Utilities.Constants.EXPENSE
 import com.roaa.expensetracker.Utilities.Constants.INCOME
 import com.roaa.expensetracker.Utilities.UiState
 import com.roaa.expensetracker.Utilities.toLong
-import com.roaa.expensetracker.database.Relations.TransactionWithDetails
-import com.roaa.expensetracker.database.TransactionRepository
+import com.roaa.expensetracker.Database.Relations.TransactionWithDetails
+import com.roaa.expensetracker.Database.TransactionRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow

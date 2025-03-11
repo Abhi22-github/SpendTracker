@@ -1,4 +1,4 @@
-package com.roaa.expensetracker.database.Relations
+package com.roaa.expensetracker.Database.Relations
 
 import androidx.room.Embedded
 import androidx.room.Relation

@@ -1,16 +1,16 @@
 package com.roaa.expensetracker.Hilt
 
 
-import com.roaa.expensetracker.database.BankAccountDao
-import com.roaa.expensetracker.database.BankAccountRepository
-import com.roaa.expensetracker.database.BudgetDao
-import com.roaa.expensetracker.database.BudgetDayDao
-import com.roaa.expensetracker.database.BudgetDayRepository
-import com.roaa.expensetracker.database.BudgetRepository
-import com.roaa.expensetracker.database.CategoryDao
-import com.roaa.expensetracker.database.CategoryRepository
-import com.roaa.expensetracker.database.TransactionDao
-import com.roaa.expensetracker.database.TransactionRepository
+import com.roaa.expensetracker.Database.BankAccountDao
+import com.roaa.expensetracker.Database.BankAccountRepository
+import com.roaa.expensetracker.Database.BudgetDao
+import com.roaa.expensetracker.Database.BudgetDayDao
+import com.roaa.expensetracker.Database.BudgetDayRepository
+import com.roaa.expensetracker.Database.BudgetRepository
+import com.roaa.expensetracker.Database.CategoryDao
+import com.roaa.expensetracker.Database.CategoryRepository
+import com.roaa.expensetracker.Database.TransactionDao
+import com.roaa.expensetracker.Database.TransactionRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
