@@ -1,0 +1,113 @@
+package com.roaa.expensetracker.database
+
+import com.roaa.expensetracker.database.relations.TransactionWithDetails
+import com.roaa.expensetracker.model.TransactionClass
+import com.roaa.expensetracker.model.uiDataModels.TotalAmountClass
+import com.roaa.expensetracker.model.uiDataModels.TotalExpenseIncomeClass
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
+import java.math.BigDecimal
+import javax.inject.Inject
+
+class TransactionRepository @Inject constructor(private val transactionDao: TransactionDao) {
+
+
+    val allTransactions: Flow<List<TransactionWithDetails>> = transactionDao.allTransactions
+
+    suspend fun insert(transactionClass: TransactionClass) {
+        transactionDao.insert(transactionClass)
+    }
+
+    suspend fun insertAndPropagateChanges(transactionClass: TransactionClass) {
+        transactionDao.addTransactionAndPropagateChanges(transactionClass)
+    }
+
+    suspend fun updateAndPropagateChanges(transactionClass: TransactionClass) {
+        transactionDao.updateTransactionAndPropagateChanges(transactionClass)
+    }
+    suspend fun updateForBudgetSwitchAndPropagateChanges(transactionClass: TransactionClass) {
+        transactionDao.updateTransactionOnlyForBudgetSwitchAndPropagateChanges(transactionClass)
+    }
+
+    suspend fun deleteAndPropagateChanges(transactionClass: TransactionClass) {
+        transactionDao.deleteTransactionAndPropagateChanges(transactionClass)
+    }
+
+    suspend fun update(transactionClass: TransactionClass) {
+        transactionDao.update(transactionClass)
+    }
+
+    suspend fun delete(transactionClass: TransactionClass) {
+        transactionDao.delete(transactionClass)
+    }
+
+    fun getTotalTransactionForPeriod(
+        startDate: Long,
+        endDate: Long
+    ): Flow<List<TransactionWithDetails>> {
+        return transactionDao.getAllTransactionsForPeriod(startDate, endDate)
+    }
+
+    fun getTotalAmountByDateRangeAndCategoryType(
+        startDate: Long,
+        endDate: Long,
+        categoryType: String
+    ): Flow<TotalAmountClass> {
+        return transactionDao.getTotalAmountByDateRangeAndCategoryType(
+            startDate,
+            endDate,
+            categoryType
+        )
+    }
+    fun getTotalAmountByDateRangeCategoryTypeAndBudgetStatus(
+        startDate: Long,
+        endDate: Long,
+        categoryType: String,
+        budgetStatus:Boolean
+    ): Flow<TotalAmountClass> {
+        return transactionDao.getTotalAmountByDateRangeCategoryTypeAndBudgetStatus(
+            startDate,
+            endDate,
+            categoryType,
+            budgetStatus
+        )
+    }
+
+    fun getTotalAmountForDate(date: Long, type: String): Flow<BigDecimal> {
+        return transactionDao.getTotalAmountForDate(date, type).map { it ?: BigDecimal.ZERO }
+    }
+
+    fun getTotalAmountForDateExcludingLast(date: Long, type: String): Flow<BigDecimal> {
+        return transactionDao.getTotalAmountForDate(date, type).map { it ?: BigDecimal.ZERO }
+    }
+
+    fun getTransactionListForBankAccountId(bankAccountId: Long): Flow<List<TransactionWithDetails>> {
+        return transactionDao.getAllTransactionForBankAccountId(bankAccountId)
+    }
+
+    fun getListOfTotalAmountPerDayForRange(
+        startDate: Long,
+        endDate: Long
+    ): Flow<List<TotalExpenseIncomeClass>> {
+        return transactionDao.getListOfTotalAmountPerDayForRange(startDate, endDate)
+    }
+    fun getListOfTotalAmountPerDayForRangeForBankAccountId(
+        startDate: Long,
+        endDate: Long,
+        bankAccountId: Long
+    ): Flow<List<TotalExpenseIncomeClass>> {
+        return transactionDao.getListOfTotalAmountPerDayForRangeForBankAccountId(startDate, endDate, bankAccountId)
+    }
+
+
+
+
+    fun getAllTransactionsForDate(date: Long): Flow<List<TransactionWithDetails>> {
+        return transactionDao.getAllTransactionsForDate(date)
+    }
+
+    // below is the method to delete all the courses.
+    suspend fun deleteAllTransaction() {
+        transactionDao.deleteAllTransaction()
+    }
+}

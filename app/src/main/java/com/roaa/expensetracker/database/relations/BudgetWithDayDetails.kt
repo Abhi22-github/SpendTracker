@@ -1,0 +1,15 @@
+package com.roaa.expensetracker.database.relations
+
+import androidx.room.Embedded
+import androidx.room.Relation
+import com.roaa.expensetracker.model.BudgetDayModelClass
+import com.roaa.expensetracker.model.BudgetModelClass
+
+data class BudgetWithDayDetails(
+    @Embedded val budgetSummary: BudgetModelClass,
+    @Relation(
+        parentColumn = "budgetId",
+        entityColumn = "budgetId"
+    )
+    val budgetAllDays: List<BudgetDayModelClass>,
+)

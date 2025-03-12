@@ -19,7 +19,7 @@
         tools:targetApi="31">
 
         <activity
-            android:name=".Activity.ComposeMainActivity"
+            android:name=".activity.ComposeMainActivity"
             android:exported="true"
             android:theme="@style/Theme.ExpenseTracker.Splash">
             <intent-filter>
