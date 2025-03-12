@@ -292,6 +292,7 @@ fun SingleActionItem(
                             }
                         }
                         DropDownMenuForBankAccounts(bankAccountMenuExpanded,
+                            selectedBankAccountForMigration,
                             colorPalette,
                             onDismiss = { bankAccountMenuExpanded = false },
                             bankAccountList,

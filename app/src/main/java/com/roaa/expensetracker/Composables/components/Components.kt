@@ -1,6 +1,7 @@
 package com.roaa.expensetracker.Composables.components
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -96,20 +97,26 @@ fun DateInputChip(
 fun DropDownMenu(
     modifier: Modifier = Modifier,
     menuExpanded: Boolean,
+    selectedCategory: CategoryClass,
     colorPallet: HarmonizedColorPalette,
     onDismiss: () -> Unit,
     itemList: List<CategoryClass>,
     selectedCategorySetter: (CategoryClass) -> Unit
 ) {
     DropdownMenu(
-        modifier =  modifier,
+        modifier = modifier,
         expanded = menuExpanded,
         onDismissRequest = { onDismiss() },
-        containerColor = colorPallet.surfaceVariant,
+        containerColor = colorPallet.surface,
         shape = RoundedCornerShape(24.dp),
     ) {
 //        if (type == 1) {
+
         itemList.forEach { categoryClass ->
+            val selectedModifier =
+                if (selectedCategory.categoryId == categoryClass.categoryId) Modifier.background(
+                    colorPallet.surfaceVariant
+                ) else modifier
             val selectedIcon =
                 rememberAsyncImagePainter(IconState.fromNumber(categoryClass.categoryIconNumber))
             DropdownMenuItem(text = { Text(text = categoryClass.categoryName) }, leadingIcon = {
@@ -121,7 +128,7 @@ fun DropDownMenu(
             }, onClick = {
                 selectedCategorySetter(categoryClass)
                 onDismiss()
-            })
+            }, modifier = selectedModifier)
         }
 
     }
@@ -130,6 +137,7 @@ fun DropDownMenu(
 @Composable
 fun DropDownMenuForBankAccounts(
     menuExpanded: Boolean,
+    selectedBankAccountsClass: BankAccountsClass,
     colorPallet: HarmonizedColorPalette,
     onDismiss: () -> Unit,
     itemList: List<BankAccountsClass>,
@@ -138,11 +146,15 @@ fun DropDownMenuForBankAccounts(
     DropdownMenu(
         expanded = menuExpanded,
         onDismissRequest = { onDismiss() },
-        containerColor = colorPallet.surfaceVariant,
-        shape = RoundedCornerShape(24.dp),
+        containerColor = colorPallet.surface,
+        shape = RoundedCornerShape(20.dp),
     ) {
 //        if (type == 1) {
         itemList.forEach { bankAccountClass ->
+            val selectedModifier =
+                if (selectedBankAccountsClass.bankAccountId == bankAccountClass.bankAccountId) Modifier.background(
+                    colorPallet.surfaceVariant
+                ) else Modifier
             val selectedIcon =
                 rememberAsyncImagePainter(IconState.fromNumber(bankAccountClass.cardIconNumber))
             DropdownMenuItem(
@@ -157,7 +169,8 @@ fun DropDownMenuForBankAccounts(
                 onClick = {
                     selectedBankAccountSetter(bankAccountClass)
                     onDismiss()
-                })
+                }, modifier = selectedModifier
+            )
         }
 
     }
@@ -183,14 +196,16 @@ fun SummaryCard(color: Color) {
         ConstraintLayout(Modifier.fillMaxWidth()) {
             val (balanceText, balanceLabel, expense, income, moreIcon, backgroundImage1, backgroundImage2, progress) = createRefs()
 
-            Text(text = "${LocalCurrency.current.currencySymbol}24,045",
+            Text(
+                text = "${LocalCurrency.current.currencySymbol}24,045",
                 style = MaterialTheme.typography.headlineMedium.copy(fontFamily = numberFont),
                 modifier = Modifier.constrainAs(balanceText) {
                     top.linkTo(parent.top, margin = 24.dp)
                     start.linkTo(parent.start, margin = 24.dp)
                 })
 
-            Text(text = "Amount",
+            Text(
+                text = "Amount",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.60f),
                 modifier = Modifier.constrainAs(balanceLabel) {

@@ -376,6 +376,7 @@ fun SettingsScreenContent(
                                 DropDownMenu(
                                     Modifier,
                                     expenseDropDownStatus,
+                                    selectedExpenseCategory,
                                     colorPaletteOrange,
                                     onDismiss = { expenseDropDownStatus = false },
                                     expenseCategoryList,
@@ -447,6 +448,7 @@ fun SettingsScreenContent(
                                 DropDownMenu(
                                     Modifier,
                                     incomeDropDownStatus,
+                                    selectedIncomeCategory,
                                     colorPalletGreen,
                                     onDismiss = { incomeDropDownStatus = false },
                                     incomeCategoryList,

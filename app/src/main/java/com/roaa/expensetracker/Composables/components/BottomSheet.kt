@@ -414,6 +414,7 @@ fun BottomSheetContentItemAddContent(
                     DropDownMenu(
                         Modifier,
                         categoryMenuExpanded,
+                        selectedCategory,
                         colorPalletGreen,
                         onDismiss = { categoryMenuExpanded = false },
                         categoryList,
@@ -820,6 +821,7 @@ fun BottomSheetContentItemEditContent(
                     DropDownMenu(
                         Modifier,
                         categoryMenuExpanded,
+                        selectedCategory,
                         colorPalletGreen,
                         onDismiss = { categoryMenuExpanded = false },
                         categoryList,
@@ -1191,6 +1193,7 @@ fun BottomRow(
 
                 DropDownMenuForBankAccounts(
                     bankAccountMenuExpanded,
+                    selectedBankAccount,
                     colorPalletBlue,
                     onDismiss = { bankAccountMenuExpanded = false },
                     bankAccountsList,
@@ -2460,6 +2463,7 @@ fun BottomSheetContentItemAddContentTest(
                     DropDownMenu(
                         Modifier,
                         categoryMenuExpanded,
+                        selectedCategory,
                         colorPalletGreen,
                         onDismiss = { categoryMenuExpanded = false },
                         categoryList,
