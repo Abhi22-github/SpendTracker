@@ -8,9 +8,12 @@ import androidx.compose.ui.text.input.VisualTransformation
 import com.roaa.expensetracker.Composables.Navigation.Destinations
 import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Model.UiDataModels.NavigationItems
+import com.roaa.expensetracker.Model.UiDateModels.CurrencyClass
 import com.roaa.expensetracker.R
 import kotlinx.coroutines.DelicateCoroutinesApi
 import java.time.LocalDate
+import java.util.Currency
+import java.util.Locale
 
 val section1Items = listOf(
     NavigationItems(
@@ -104,3 +107,41 @@ fun checkIfBudgetIsExpired(context: Context, viewModel: AllViewModel) {
 //        }
 //    }
 }
+
+
+fun getCountryCurrencyList(): List<CurrencyClass> {
+    val countryList = mutableListOf<CurrencyClass>()
+
+    Locale.getISOCountries().forEach { countryCode ->
+        val locale = Locale("", countryCode)
+        val countryName = locale.displayCountry
+        val currency = try {
+            Currency.getInstance(locale)
+        } catch (e: Exception) {
+            null
+        }
+        val currencyCode = currency?.currencyCode ?: "N/A"
+        val currencySymbol = currency?.symbol ?: "N/A"
+        val currencyDisplayName = currency?.displayName ?: "N/A"
+        val flag = getCountryFlagEmoji(countryCode)
+
+        countryList.add(
+            CurrencyClass(
+                countryName,
+                currencyCode,
+                currencyDisplayName,
+                currencySymbol,
+                flag
+            )
+        )
+
+    }
+    return countryList.sortedBy { it.countryName }
+}
+
+fun getCountryFlagEmoji(countryCode: String): String {
+    return countryCode.uppercase().map { char ->
+        Character.toChars(127397 + char.code).joinToString("")
+    }.joinToString("")
+}
+

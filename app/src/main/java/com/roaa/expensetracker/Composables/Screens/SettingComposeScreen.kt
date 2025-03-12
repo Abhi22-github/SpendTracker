@@ -2,10 +2,14 @@ package com.roaa.expensetracker.Composables.Screens
 
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import androidx.activity.compose.BackHandler
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
@@ -13,7 +17,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -21,7 +27,10 @@ import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
@@ -60,20 +69,26 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
+import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.Composables.Navigation.NavigationManager
 import com.roaa.expensetracker.Composables.Navigation.handleBackNavigation
 import com.roaa.expensetracker.Composables.ThemeMode
+import com.roaa.expensetracker.Composables.components.DropDownMenu
 import com.roaa.expensetracker.Composables.components.SingleItemRadioButton
 import com.roaa.expensetracker.Composables.components.TopBar
+import com.roaa.expensetracker.Composables.greenColor
+import com.roaa.expensetracker.Composables.orange
+import com.roaa.expensetracker.Composables.utils.IconState
 import com.roaa.expensetracker.Composables.utils.combineColors
+import com.roaa.expensetracker.Composables.utils.toPalette
 import com.roaa.expensetracker.Hilt.AllViewModel
 import com.roaa.expensetracker.Model.UiDateModels.CurrencyClass
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.Utilities.UtilityModalClass.defaultCurrency
+import com.roaa.expensetracker.Utilities.UtilityModalClass.firstSampleClass
+import com.roaa.expensetracker.Utilities.getCountryCurrencyList
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.launch
-import java.util.Currency
-import java.util.Locale
 
 val radioButtonColors
     @Composable
@@ -122,10 +137,45 @@ fun SettingsScreenContent(
     val showExperimentalComponent by viewModel.preferencesViewModel.showExperimentalComponent.collectAsState(
         false
     )
+    val isPreDefaultCategorySet by viewModel.preferencesViewModel.getPreDefaultCategoryStatus.collectAsState(
+        false
+    )
+    var expenseDropDownStatus by remember { mutableStateOf(false) }
+    var incomeDropDownStatus by remember { mutableStateOf(false) }
+    val expenseCategoryId by viewModel.preferencesViewModel.getLastExpenseCategory.collectAsState(0L)
+    val incomeCategoryId by viewModel.preferencesViewModel.getLastIncomeCategory.collectAsState(0L)
     val list = listOf("LIGHT", "NIGHT", "SYSTEM")
     val scope = rememberCoroutineScope()
     var showCurrencyDialog by remember { mutableStateOf(false) }
     val currentCurrency by viewModel.preferencesViewModel.getCurrency.collectAsState(defaultCurrency)
+    val expenseCategoryList by viewModel.categoryViewModel.onlyExpenseCategoryNames.collectAsState()
+    val incomeCategoryList by viewModel.categoryViewModel.onlyIncomeCategoryNames.collectAsState()
+    var selectedExpenseCategory by remember {
+        mutableStateOf(
+            firstSampleClass
+        )
+    }
+    var selectedIncomeCategory by remember {
+        mutableStateOf(
+            firstSampleClass
+        )
+    }
+
+    LaunchedEffect(expenseCategoryList, expenseCategoryId) {
+        val expenseCategoryPresent =
+            expenseCategoryList.any { it.categoryId == expenseCategoryId }
+        if (expenseCategoryPresent) {
+            selectedExpenseCategory =
+                expenseCategoryList.first { it.categoryId == expenseCategoryId }
+        }
+    }
+    LaunchedEffect(incomeCategoryList, incomeCategoryId) {
+        val incomeCategoryPresent =
+            incomeCategoryList.any { it.categoryId == incomeCategoryId }
+        if (incomeCategoryPresent) {
+            selectedIncomeCategory = incomeCategoryList.first { it.categoryId == incomeCategoryId }
+        }
+    }
 
     Column(modifier) {
         Column() {
@@ -187,8 +237,7 @@ fun SettingsScreenContent(
                 }
             }
 
-            Spacer(Modifier.height(12.dp))
-
+            Spacer(Modifier.height(24.dp))
             Row(modifier = Modifier.clickable { showCurrencyDialog = !showCurrencyDialog }) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
@@ -220,6 +269,201 @@ fun SettingsScreenContent(
                     )
                 }
             }
+
+            Spacer(Modifier.height(32.dp))
+
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .padding(horizontalPadding, verticalPadding)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Column(Modifier.weight(1f)) {
+                        Text(
+                            text = "Preset Default Category",
+                            style = MaterialTheme.typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface,
+                        )
+                        Text(
+                            text = "Automatically pre-fill a chosen category for faster expense entry",
+                            style = MaterialTheme.typography.labelLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.6f),
+                        )
+                    }
+                    Row(
+                        modifier = Modifier
+                            .weight(.3f), horizontalArrangement = Arrangement.End
+                    ) {
+                        Switch(
+                            checked = isPreDefaultCategorySet,
+                            onCheckedChange = {
+                                scope.launch {
+                                    viewModel.preferencesViewModel.setPreDefaultCategoryStatus(it)
+                                }
+                            },
+                            modifier = Modifier
+
+                        )
+                    }
+                }
+                AnimatedVisibility(isPreDefaultCategorySet) {
+                    Column(
+                        verticalArrangement = Arrangement.Top,
+                        modifier = Modifier
+                    ) {
+                        Spacer(Modifier.height(14.dp))
+                        Row(
+                            Modifier
+                                .fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f)
+                                    .wrapContentHeight()
+
+                            ) {
+                                val colorPaletteOrange = toPalette(orange)
+                                Button(
+                                    modifier = Modifier.padding(end = 5.dp),
+                                    onClick = { expenseDropDownStatus = !expenseDropDownStatus },
+                                    colors = ButtonColors(
+                                        containerColor = colorPaletteOrange.container.copy(alpha = 0.3f),
+                                        contentColor = colorPaletteOrange.onContainer,
+                                        disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
+                                        disabledContentColor = MaterialTheme.colorScheme.onPrimary
+                                    ),
+                                    contentPadding = PaddingValues(
+                                        start = 20.dp, end = 10.dp, top = 16.dp, bottom = 16.dp
+                                    )
+                                ) {
+                                    Row {
+                                        Row(Modifier.weight(0.8f)) {
+                                            val image =
+                                                rememberAsyncImagePainter(
+                                                    IconState.fromNumber(
+                                                        selectedExpenseCategory.categoryIconNumber
+                                                    )
+                                                )
+                                            AnimatedContent(image) {
+                                                Image(
+                                                    painter = it,
+                                                    contentDescription = "Test Image",
+                                                    modifier = Modifier.size(24.dp),
+                                                )
+                                            }
+                                            AnimatedContent(selectedExpenseCategory.categoryName) {
+                                                Text(
+                                                    text = it,
+                                                    modifier = Modifier
+                                                        .weight(0.6f)
+                                                        .padding(start = 8.dp),
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
+                                        }
+                                        Icon(
+                                            Icons.Filled.KeyboardArrowDown,
+                                            "backIcon",
+                                            modifier = Modifier.weight(0.2f)
+                                        )
+                                    }
+                                }
+                                DropDownMenu(
+                                    Modifier,
+                                    expenseDropDownStatus,
+                                    colorPaletteOrange,
+                                    onDismiss = { expenseDropDownStatus = false },
+                                    expenseCategoryList,
+                                    selectedCategorySetter = {
+                                        scope.launch {
+                                            viewModel.preferencesViewModel.setLastUsedExpenseCategoryId(
+                                                it.categoryId
+                                            )
+                                        }
+                                    },
+                                )
+
+                            }
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .weight(1f)
+                                    .wrapContentHeight()
+
+                            ) {
+                                val colorPalletGreen = toPalette(greenColor)
+                                Button(
+                                    modifier = Modifier.padding(end = 5.dp),
+                                    onClick = { incomeDropDownStatus = !incomeDropDownStatus },
+                                    colors = ButtonColors(
+                                        containerColor = colorPalletGreen.container.copy(alpha = 0.3f),
+                                        contentColor = colorPalletGreen.onContainer,
+                                        disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
+                                        disabledContentColor = MaterialTheme.colorScheme.onPrimary
+                                    ),
+                                    contentPadding = PaddingValues(
+                                        start = 20.dp, end = 10.dp, top = 16.dp, bottom = 16.dp
+                                    )
+                                ) {
+                                    Row {
+                                        Row(Modifier.weight(0.8f)) {
+                                            val image =
+                                                rememberAsyncImagePainter(
+                                                    IconState.fromNumber(
+                                                        selectedIncomeCategory.categoryIconNumber
+                                                    )
+                                                )
+                                            AnimatedContent(image) {
+                                                Image(
+                                                    painter = it,
+                                                    contentDescription = "Test Image",
+                                                    modifier = Modifier.size(24.dp),
+                                                )
+                                            }
+                                            AnimatedContent(selectedIncomeCategory.categoryName) {
+                                                Text(
+                                                    text = it,
+                                                    modifier = Modifier
+                                                        .weight(0.6f)
+                                                        .padding(start = 8.dp),
+                                                    maxLines = 1,
+                                                    overflow = TextOverflow.Ellipsis
+                                                )
+                                            }
+                                        }
+                                        Icon(
+                                            Icons.Filled.KeyboardArrowDown,
+                                            "backIcon",
+                                            modifier = Modifier.weight(0.2f)
+                                        )
+                                    }
+                                }
+                                DropDownMenu(
+                                    Modifier,
+                                    incomeDropDownStatus,
+                                    colorPalletGreen,
+                                    onDismiss = { incomeDropDownStatus = false },
+                                    incomeCategoryList,
+                                    selectedCategorySetter = {
+                                        scope.launch {
+                                            viewModel.preferencesViewModel.setLastUsedIncomeCategoryId(
+                                                it.categoryId
+                                            )
+                                        }
+                                    },
+                                )
+                            }
+
+                        }
+                    }
+                }
+            }
         }
     }
     if (showCurrencyDialog) {
@@ -247,43 +491,6 @@ fun SettingsScreenContent(
         }
     }
 }
-
-fun getCountryCurrencyList(): List<CurrencyClass> {
-    val countryList = mutableListOf<CurrencyClass>()
-
-    Locale.getISOCountries().forEach { countryCode ->
-        val locale = Locale("", countryCode)
-        val countryName = locale.displayCountry
-        val currency = try {
-            Currency.getInstance(locale)
-        } catch (e: Exception) {
-            null
-        }
-        val currencyCode = currency?.currencyCode ?: "N/A"
-        val currencySymbol = currency?.symbol ?: "N/A"
-        val currencyDisplayName = currency?.displayName ?: "N/A"
-        val flag = getCountryFlagEmoji(countryCode)
-
-        countryList.add(
-            CurrencyClass(
-                countryName,
-                currencyCode,
-                currencyDisplayName,
-                currencySymbol,
-                flag
-            )
-        )
-
-    }
-    return countryList.sortedBy { it.countryName }
-}
-
-fun getCountryFlagEmoji(countryCode: String): String {
-    return countryCode.uppercase().map { char ->
-        Character.toChars(127397 + char.code).joinToString("")
-    }.joinToString("")
-}
-
 
 @Composable
 fun WorldCurrencyChooserContent(

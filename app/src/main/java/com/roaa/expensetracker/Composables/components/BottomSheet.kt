@@ -236,6 +236,9 @@ fun BottomSheetContentItemAddContent(
     val lastIncomeCategoryId by viewModel.preferencesViewModel.getLastIncomeCategory.collectAsState(
         0L
     )
+    val isDefaultCategorySet by viewModel.preferencesViewModel.getPreDefaultCategoryStatus.collectAsState(
+        false
+    )
     var selectedCategory by remember {
         mutableStateOf(
             firstSampleClass
@@ -380,7 +383,7 @@ fun BottomSheetContentItemAddContent(
                         )
                     ) {
                         Row {
-                            Row (Modifier.weight(0.8f)){
+                            Row(Modifier.weight(0.8f)) {
                                 val image =
                                     rememberAsyncImagePainter(IconState.fromNumber(selectedCategory.categoryIconNumber))
                                 AnimatedContent(image) {
@@ -613,11 +616,17 @@ fun BottomSheetContentItemAddContent(
                         selectedDate,
                         selectedPaymentMethod,
                         scope,
+                        isDefaultCategorySet,
                         viewModel
                     )
-                }, Modifier
+                },
+                Modifier
                     .fillMaxWidth()
-                    .height(48.dp)
+                    .height(48.dp),
+                colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
             ) {
                 Text("Save")
             }
@@ -1010,11 +1019,15 @@ fun BottomSheetContentItemEditContent(
                         selectedDate,
                         selectedPaymentMethod,
                         scope,
+                        false,
                         viewModel,
                     )
                 }, Modifier
                     .fillMaxWidth()
-                    .height(48.dp)
+                    .height(48.dp),colors = ButtonDefaults.filledTonalButtonColors(
+                    containerColor = MaterialTheme.colorScheme.primary,
+                    contentColor = MaterialTheme.colorScheme.onPrimary
+                ),
             ) {
                 Text("Save")
             }
@@ -1035,6 +1048,7 @@ fun validateTransactionData(
     selectedDate: Long?,
     selectedPaymentMethod: BankAccountsClass,
     scope: CoroutineScope,
+    isDefaultCategorySet: Boolean,
     viewModel: AllViewModel,
 ) {
 
@@ -1069,10 +1083,12 @@ fun validateTransactionData(
             it.categoryId = selectedCategory.categoryId
             it.bankAccountId = selectedPaymentMethod.bankAccountId
         })
-        if (type == EXPENSE) {
-            viewModel.preferencesViewModel.setLastUsedExpenseCategoryId(selectedCategory.categoryId)
-        } else {
-            viewModel.preferencesViewModel.setLastUsedIncomeCategoryId(selectedCategory.categoryId)
+        if (!isDefaultCategorySet) {
+            if (type == EXPENSE) {
+                viewModel.preferencesViewModel.setLastUsedExpenseCategoryId(selectedCategory.categoryId)
+            } else {
+                viewModel.preferencesViewModel.setLastUsedIncomeCategoryId(selectedCategory.categoryId)
+            }
         }
 
         closeBottomSheet()
