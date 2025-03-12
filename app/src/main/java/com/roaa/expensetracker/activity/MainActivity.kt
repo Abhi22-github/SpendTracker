@@ -140,7 +140,11 @@ class ComposeMainActivity : ComponentActivity() {
                 animationViewModel = hiltViewModel()
             )
             val context = LocalContext.current
-
+            val onboardingCompletedStatus by allViewModels.preferencesViewModel.isUserOnboarded.collectAsState(
+                false
+            )
+            val startDestination =
+                if (onboardingCompletedStatus) Destinations.ListScreen else Destinations.WelcomeScreen
 
             NotificationPermissionHandler(
                 onPermissionGranted = {
@@ -186,7 +190,12 @@ class ComposeMainActivity : ComponentActivity() {
                         LocalErrorMessage provides errorMessage,
                         LocalCurrency provides localCurrencyClass
                     ) {
-                        NavigationDrawer(rootNavController, navigationManager, allViewModels)
+                        NavigationDrawer(
+                            rootNavController,
+                            navigationManager,
+                            allViewModels,
+                            startDestination
+                        )
                         LaunchedEffect(Unit) {
                             // App rendered and splash screen can be hidden
                             isDone.value = true
@@ -204,7 +213,8 @@ class ComposeMainActivity : ComponentActivity() {
 fun NavigationDrawer(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
-    allViewModels: AllViewModel
+    allViewModels: AllViewModel,
+    startDestination: Destinations
 ) {
 
     val section1 = section1Items
@@ -366,7 +376,7 @@ fun NavigationDrawer(
         val scrollBehavior = TopAppBarDefaults.enterAlwaysScrollBehavior()
         CompositionLocalProvider() {
             if (!showAppBar) {
-                AppNavGraph(rootNavController, navigationManager, allViewModels)
+                AppNavGraph(rootNavController, navigationManager, allViewModels, startDestination)
             } else {
                 Scaffold(
                     modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
@@ -465,7 +475,12 @@ fun NavigationDrawer(
                     },
                 ) { innerPadding ->
                     Column(Modifier.padding(innerPadding)) {
-                        RootNavGraph(rootNavController, navigationManager, allViewModels)
+                        RootNavGraph(
+                            rootNavController,
+                            navigationManager,
+                            allViewModels,
+                            startDestination
+                        )
                     }
 
                 }

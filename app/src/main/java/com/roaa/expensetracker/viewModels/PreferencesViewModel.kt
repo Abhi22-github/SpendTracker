@@ -11,6 +11,7 @@ import com.roaa.expensetracker.utilities.preferenceManger.CURRENT_BUDGET_MONTH_N
 import com.roaa.expensetracker.utilities.preferenceManger.CURRENT_BUDGET_START_DATE
 import com.roaa.expensetracker.utilities.preferenceManger.IS_APP_FIRST_STARTUP
 import com.roaa.expensetracker.utilities.preferenceManger.IS_BUDGET_SET
+import com.roaa.expensetracker.utilities.preferenceManger.IS_ONBOARDING_COMPLETED
 import com.roaa.expensetracker.utilities.preferenceManger.IS_ONE_DEFAULT_CATEGORY_SET
 import com.roaa.expensetracker.utilities.preferenceManger.LAST_USED_EXPENSE_CATEGORY_ID
 import com.roaa.expensetracker.utilities.preferenceManger.LAST_USED_INCOME_CATEGORY_ID
@@ -36,6 +37,13 @@ class PreferencesViewModel @Inject constructor(private val preferenceManager: Pr
 
     val getThemeMode = preferenceManager.getThemeValue(THEME_MODE)
 
+    fun saveOnboardingState(state: Boolean) {
+        viewModelScope.launch {
+            preferenceManager.saveBooleanValue(state, IS_ONBOARDING_COMPLETED)
+        }
+    }
+
+    val isUserOnboarded = preferenceManager.getBooleanValue(IS_ONBOARDING_COMPLETED)
 
     fun setExperimentalComponentsState(state: Boolean) {
         viewModelScope.launch {

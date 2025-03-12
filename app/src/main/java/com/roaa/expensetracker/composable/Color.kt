@@ -31,6 +31,14 @@ val color7 = Color(0xFF9CA1AD)
 val color8 = Color(0xFFF79066)
 
 
+val onboardingColor1 = Color(0xFFE8DBC9)
+val onboardingColor2 = Color(0xFFCCCCCC)
+val onboardingColor3 = Color(0xFFACD8D3)
+val onboardingColor4 = Color(0xFFF1CE9C)
+val onboardingColor5 = Color(0xFFEFC8B0)
+val onboardingColor6 = Color(0xFFE0E7F3)
+val onboardingColor7 = Color(0xFFE8DBC9)
+val onboardingColor8 = Color(0xFFC6EFDD)
 
 val cardBackgroundColor
     @Composable

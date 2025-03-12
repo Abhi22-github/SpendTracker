@@ -112,3 +112,10 @@ private fun darkFromCorePalette(color: Color): HarmonizedColorPalette {
         onSurfaceVariant = Color(contentOfPalette.n1.tone(80)),
     )
 }
+
+fun Color.darken(factor: Float = 0.4f): Color {
+    val red = (red * (1 - factor)).coerceIn(0f, 1f)
+    val green = (green * (1 - factor)).coerceIn(0f, 1f)
+    val blue = (blue * (1 - factor)).coerceIn(0f, 1f)
+    return Color(red, green, blue, alpha)
+}

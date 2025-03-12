@@ -54,6 +54,9 @@ sealed class Destinations(){
 
     @Serializable
     data class BudgetSetupScreen(val type:ActionTypes,val budgetId:Long) : Destinations()
+
+    @Serializable
+    data object WelcomeScreen:Destinations()
 }
 
 

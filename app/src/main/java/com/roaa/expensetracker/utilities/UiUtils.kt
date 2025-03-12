@@ -1,5 +1,6 @@
 package com.roaa.expensetracker.utilities
 
+import com.roaa.expensetracker.R
 import com.roaa.expensetracker.composable.color1
 import com.roaa.expensetracker.composable.color2
 import com.roaa.expensetracker.composable.color3
@@ -7,7 +8,12 @@ import com.roaa.expensetracker.composable.color4
 import com.roaa.expensetracker.composable.color5
 import com.roaa.expensetracker.composable.color6
 import com.roaa.expensetracker.composable.color7
+import com.roaa.expensetracker.composable.onboardingColor1
+import com.roaa.expensetracker.composable.onboardingColor2
+import com.roaa.expensetracker.composable.onboardingColor3
+import com.roaa.expensetracker.composable.onboardingColor4
 import com.roaa.expensetracker.model.uiDataModels.BarChartExpenseModel
+import com.roaa.expensetracker.model.uiDataModels.OnboardingContent
 import com.roaa.expensetracker.model.uiDataModels.TotalExpenseIncomeClass
 import com.roaa.expensetracker.utilities.utilityModalClass.DeleteActionsModelClass
 import java.math.BigDecimal
@@ -40,7 +46,8 @@ val colorList = listOf(
 )
 
 fun convertDataToSeries(
-    allDays: List<LocalDate>, totalValuesPerDayForMonthMap: HashMap<Long, Pair<BigDecimal, BigDecimal>>
+    allDays: List<LocalDate>,
+    totalValuesPerDayForMonthMap: HashMap<Long, Pair<BigDecimal, BigDecimal>>
 ): Pair<LinkedHashMap<String, Int>, LinkedHashMap<String, Int>> {
     val expenseListPerDayHashMap = LinkedHashMap<String, Int>()
     val incomeListPerDayHashMap = LinkedHashMap<String, Int>()
@@ -75,5 +82,38 @@ val deleteActionList = listOf(
         "Delete All",
         "Permanently delete this Bank account and all transactions",
         DeleteAction.DELETE_ALL
+    )
+)
+
+val onboardingPageContentList = listOf(
+    OnboardingContent(
+        "Take Control of Your Finances!",
+        "Track expenses, manage budgets, and save smarter—all in one app.",
+        onboardingColor1,
+        R.drawable.onboarding_1
+    ),
+    OnboardingContent(
+        "Effortlessly Track Every Expense",
+        "Log your expenses in seconds and categorize them for better insights.",
+        onboardingColor2,
+        R.drawable.onboarding_2
+    ),
+    OnboardingContent(
+        "Effortlessly Track Every Expense",
+        "Log your expenses in seconds and categorize them for better insights.",
+        onboardingColor2,
+        R.drawable.test1
+    ),
+    OnboardingContent(
+        "Set Budgets & Stay on Track",
+        "Create budgets and get alerts when you're about to exceed them",
+        onboardingColor3,
+        R.drawable.onboarding_3
+    ),
+    OnboardingContent(
+        "Understand Your Spending Habits",
+        "A pie chart or graph showing categorized spending.",
+        onboardingColor4,
+        R.drawable.onboarding_4
     )
 )

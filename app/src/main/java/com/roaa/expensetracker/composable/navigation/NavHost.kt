@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import androidx.navigation.toRoute
 import com.roaa.expensetracker.composable.components.TransactionsListCompose
+import com.roaa.expensetracker.composable.onBoarding.OnboardingScreen
 import com.roaa.expensetracker.composable.screens.AddCategory
 import com.roaa.expensetracker.composable.screens.BudgetScreen
 import com.roaa.expensetracker.composable.screens.BudgetSetupScreen
@@ -38,6 +39,7 @@ fun RootNavGraph(
     rooNavController: NavHostController,
     navigationManager: NavigationManager,
     viewModel: AllViewModel,
+    startDestination: Destinations
 ) {
     SharedTransitionLayout {
         val context = LocalContext.current
@@ -46,7 +48,7 @@ fun RootNavGraph(
             startDestination = NavRoutes.HomeScreen,
         ) {
 
-            navigation<NavRoutes.HomeScreen>(startDestination = Destinations.ListScreen) {
+            navigation<NavRoutes.HomeScreen>(startDestination = startDestination) {
                 composable<Destinations.ListScreen> {
                     TransactionsListCompose(
                         navigationManager,
@@ -66,7 +68,11 @@ fun RootNavGraph(
                 }
                 composable<Destinations.DayScreen> {
                     val args = it.toRoute<Destinations.DayScreen>()
-                    DayViewScreen(rooNavController, navigationManager, viewModel,args.date)
+                    DayViewScreen(rooNavController, navigationManager, viewModel, args.date)
+                }
+
+                composable<Destinations.WelcomeScreen> {
+                    OnboardingScreen(rooNavController, navigationManager, viewModel)
                 }
             }
 
@@ -116,11 +122,11 @@ fun RootNavGraph(
                     )
                 }
                 composable<Destinations.SettingScreen>() {
-                    SettingsScreen(rooNavController, navigationManager,viewModel, {})
+                    SettingsScreen(rooNavController, navigationManager, viewModel, {})
                 }
 
                 composable<Destinations.StatisticsScreen>() {
-                    StatisticsScreenTest(rooNavController, navigationManager,viewModel,)
+                    StatisticsScreenTest(rooNavController, navigationManager, viewModel)
                 }
             }
             composable<Destinations.DetailsScreen> {
@@ -144,7 +150,13 @@ fun RootNavGraph(
             }
             composable<Destinations.BudgetSetupScreen> {
                 val args = it.toRoute<Destinations.BudgetSetupScreen>()
-                BudgetSetupScreen(rooNavController, navigationManager,viewModel,args.type,args.budgetId)
+                BudgetSetupScreen(
+                    rooNavController,
+                    navigationManager,
+                    viewModel,
+                    args.type,
+                    args.budgetId
+                )
             }
         }
 
@@ -156,7 +168,8 @@ fun RootNavGraph(
 fun AppNavGraph(
     rooNavController: NavHostController,
     navigationManager: NavigationManager,
-    viewModel: AllViewModel
+    viewModel: AllViewModel,
+    startDestination: Destinations
 ) {
     SharedTransitionLayout {
         val context = LocalContext.current
@@ -165,7 +178,7 @@ fun AppNavGraph(
             startDestination = NavRoutes.HomeScreen,
         ) {
 
-            navigation<NavRoutes.HomeScreen>(startDestination = Destinations.ListScreen) {
+            navigation<NavRoutes.HomeScreen>(startDestination = startDestination) {
                 composable<Destinations.ListScreen> {
                     TransactionsListCompose(
                         navigationManager,
@@ -185,7 +198,10 @@ fun AppNavGraph(
                 }
                 composable<Destinations.DayScreen> {
                     val args = it.toRoute<Destinations.DayScreen>()
-                    DayViewScreen(rooNavController, navigationManager, viewModel,args.date)
+                    DayViewScreen(rooNavController, navigationManager, viewModel, args.date)
+                }
+                composable<Destinations.WelcomeScreen> {
+                    OnboardingScreen(rooNavController, navigationManager, viewModel)
                 }
             }
 
@@ -235,10 +251,10 @@ fun AppNavGraph(
                     )
                 }
                 composable<Destinations.SettingScreen>() {
-                    SettingsScreen(rooNavController, navigationManager,viewModel, {})
+                    SettingsScreen(rooNavController, navigationManager, viewModel, {})
                 }
                 composable<Destinations.StatisticsScreen>() {
-                    StatisticsScreenTest(rooNavController, navigationManager,viewModel,)
+                    StatisticsScreenTest(rooNavController, navigationManager, viewModel)
                 }
             }
             composable<Destinations.DetailsScreen> {
@@ -262,7 +278,13 @@ fun AppNavGraph(
             }
             composable<Destinations.BudgetSetupScreen> {
                 val args = it.toRoute<Destinations.BudgetSetupScreen>()
-                BudgetSetupScreen(rooNavController, navigationManager,viewModel,args.type,args.budgetId)
+                BudgetSetupScreen(
+                    rooNavController,
+                    navigationManager,
+                    viewModel,
+                    args.type,
+                    args.budgetId
+                )
             }
         }
 
