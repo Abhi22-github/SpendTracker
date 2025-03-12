@@ -29,7 +29,7 @@ class DatabaseModule() {
             context.applicationContext, AppDatabase::class.java, "database1"
         )
             .addMigrations(MIGRATION_1_2)
-            .addCallback(prePopulateData).allowMainThreadQueries()
+            .addCallback(prePopulateData)
             .fallbackToDestructiveMigration()
             .build()
     }

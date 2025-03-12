@@ -46,7 +46,7 @@ val emptyBudgetClass = BudgetModelClass(
 
 val emptyBudgetDayClass = BudgetDayModelClass(
     budgetDayId = 0L,
-    date = 0L,
+    date = 20250101L,
     budgetAmount = BigDecimal.ZERO,
     totalExpense = BigDecimal.ZERO,
     totalIncome = BigDecimal.ZERO,

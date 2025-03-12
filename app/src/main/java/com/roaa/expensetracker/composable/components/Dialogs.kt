@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -50,8 +51,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
 import com.airbnb.lottie.compose.rememberLottieComposition
@@ -91,28 +94,30 @@ fun ConfirmationAlertDialog(
     dialogTitle: String,
     dialogText: String,
     icon: ImageVector,
+    confirmText: String = "Confirm",
+    dismissText: String = "Cancel"
 ) {
     AlertDialog(icon = {
-        Icon(icon, contentDescription = "Example Icon")
+        Icon(icon, contentDescription = "Example Icon",modifier = Modifier.size(36.dp))
     }, title = {
-        Text(text = dialogTitle)
+        Text(text = dialogTitle, textAlign = TextAlign.Center)
     }, text = {
-        Text(text = dialogText)
+        Text(text = dialogText, textAlign = TextAlign.Start)
     }, onDismissRequest = {
         onDismissRequest()
     }, confirmButton = {
         TextButton(onClick = {
             onConfirmation()
         }) {
-            Text("Confirm")
+            Text(confirmText)
         }
     }, dismissButton = {
         TextButton(onClick = {
             onDismissRequest()
         }) {
-            Text("Cancel")
+            Text(dismissText)
         }
-    })
+    }, modifier =  Modifier.fillMaxWidth(0.8f), properties = DialogProperties(usePlatformDefaultWidth = false))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -138,15 +143,17 @@ fun ActionConfirmation(
         selectedBankAccountForMigration = filteredBankAccountList[0]
     }
 
-    ModalBottomSheet(onDismissRequest = {
-        onDismissRequest()
-    },
+    ModalBottomSheet(
+        onDismissRequest = {
+            onDismissRequest()
+        },
         sheetState = sheetState,
         modifier = Modifier
             .imePadding()
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
-        ActionConfirmationBottomSheetContent(Modifier,
+        ActionConfirmationBottomSheetContent(
+            Modifier,
             selectedItem,
             shouldEnableTheMigration,
             filteredBankAccountList,
@@ -176,7 +183,8 @@ fun ActionConfirmationBottomSheetContent(
             .padding(bottom = 8.dp)
     ) {
         deleteActionList.forEach {
-            SingleActionItem(modifier,
+            SingleActionItem(
+                modifier,
                 it.header,
                 it.body,
                 it.action == selectedItem,
@@ -291,7 +299,8 @@ fun SingleActionItem(
                                 bankAccountMenuExpanded = !bankAccountMenuExpanded
                             }
                         }
-                        DropDownMenuForBankAccounts(bankAccountMenuExpanded,
+                        DropDownMenuForBankAccounts(
+                            bankAccountMenuExpanded,
                             selectedBankAccountForMigration,
                             colorPalette,
                             onDismiss = { bankAccountMenuExpanded = false },
@@ -336,7 +345,8 @@ fun MigrationSelections(
 @Composable
 private fun ActionConfirmationPreview() {
 
-    ActionConfirmationBottomSheetContent(modifier = Modifier.padding(16.dp, 16.dp),
+    ActionConfirmationBottomSheetContent(
+        modifier = Modifier.padding(16.dp, 16.dp),
         selectedItem = DeleteAction.DELETE_AND_MIGRATE,
         shouldEnableTheMigration = true,
         bankAccountList = listOf<BankAccountsClass>(),
