@@ -34,6 +34,7 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +47,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.composable.ExpenseTrackerTheme
+import com.roaa.expensetracker.composable.components.CircularProgress
 import com.roaa.expensetracker.composable.components.TopBar
 import com.roaa.expensetracker.composable.greenColor
 import com.roaa.expensetracker.composable.navigation.Destinations
@@ -57,6 +59,7 @@ import com.roaa.expensetracker.composable.utils.combineColors
 import com.roaa.expensetracker.hilt.AllViewModel
 import com.roaa.expensetracker.model.CategoryClass
 import com.roaa.expensetracker.utilities.Constants.EXPENSE
+import com.roaa.expensetracker.utilities.UiState
 
 @OptIn(ExperimentalSharedTransitionApi::class)
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -64,7 +67,7 @@ import com.roaa.expensetracker.utilities.Constants.EXPENSE
 fun CategoryScreen(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
-    viewModel:AllViewModel,
+    viewModel: AllViewModel,
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
 ) {
@@ -125,30 +128,37 @@ fun SharedTransitionScope.ScaffoldContent(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
 ) {
+    val uiState by viewModel.categoryViewModel.uiState.collectAsState()
     val allExpenseCategory by viewModel.categoryViewModel.onlyExpenseCategoryNames.collectAsStateWithLifecycle()
     val allIncomeCategory by viewModel.categoryViewModel.onlyIncomeCategoryNames.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
 
-    Column(
-        modifier
-            .verticalScroll(scrollState)
-    ) {
+    when (uiState) {
+        is UiState.Loading -> {
+            CircularProgress()
+        }
 
-        Spacer(Modifier.height(12.dp))
+        is UiState.Success -> {
+            Column(
+                modifier
+                    .verticalScroll(scrollState)
+            ) {
 
-        Text(
-            text = "Income Category", style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(startEndPadding, topBottomPadding)
-        )
-        Text(
-            text = "This categories will be shown when the transaction type is expense",
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurface.copy(0.6f),
-            modifier = Modifier.padding(startEndPadding, topBottomPadding)
-        )
+                Spacer(Modifier.height(12.dp))
 
-        Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "Income Category", style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(startEndPadding, topBottomPadding)
+                )
+                Text(
+                    text = "This categories will be shown when the transaction type is expense",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface.copy(0.6f),
+                    modifier = Modifier.padding(startEndPadding, topBottomPadding)
+                )
+
+                Spacer(Modifier.height(4.dp))
 
 //        LazyVerticalGrid(
 //            columns = GridCells.Fixed(2), // 2 columns
@@ -182,135 +192,139 @@ fun SharedTransitionScope.ScaffoldContent(
 //        }
 
 
-        Column {
-            for (i in allIncomeCategory.chunked(2)) {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Spacer(Modifier.width(16.dp))
-                    // First item in the row
-                    i.getOrNull(0)?.let {
-                        SingleCategory(
-                            Modifier
-                                .weight(0.5f)
-                                .padding(
-                                    top = 8.dp,
-                                    bottom = 8.dp
-                                ),
-                            it,
-                            sharedTransitionScope, animatedVisibilityScope
-                        ) {
-                            navigationManager.navController.navigate(
-                                Destinations.CategoryDetailsScreen(
-                                    it.categoryId,
-                                    it.categoryName,
-                                    it.categoryIconNumber,
-                                    it.categoryType
-                                )
-                            )
+                Column {
+                    for (i in allIncomeCategory.chunked(2)) {
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            Spacer(Modifier.width(16.dp))
+                            // First item in the row
+                            i.getOrNull(0)?.let {
+                                SingleCategory(
+                                    Modifier
+                                        .weight(0.5f)
+                                        .padding(
+                                            top = 8.dp,
+                                            bottom = 8.dp
+                                        ),
+                                    it,
+                                    sharedTransitionScope, animatedVisibilityScope
+                                ) {
+                                    navigationManager.navController.navigate(
+                                        Destinations.CategoryDetailsScreen(
+                                            it.categoryId,
+                                            it.categoryName,
+                                            it.categoryIconNumber,
+                                            it.categoryType
+                                        )
+                                    )
+                                }
+                            }
+
+                            // Second item in the row
+                            i.getOrNull(1)?.let {
+                                Spacer(Modifier.width(16.dp))
+                                SingleCategory(
+                                    Modifier
+                                        .weight(0.5f)
+                                        .padding(
+                                            top = 8.dp,
+                                            bottom = 8.dp
+                                        ),
+                                    it,
+                                    sharedTransitionScope, animatedVisibilityScope
+                                ) {
+                                    navigationManager.navController.navigate(
+                                        Destinations.CategoryDetailsScreen(
+                                            it.categoryId,
+                                            it.categoryName,
+                                            it.categoryIconNumber,
+                                            it.categoryType
+                                        )
+                                    )
+                                }
+
+                            }
+                            Spacer(Modifier.width(16.dp))
                         }
                     }
+                }
 
-                    // Second item in the row
-                    i.getOrNull(1)?.let {
-                        Spacer(Modifier.width(16.dp))
-                        SingleCategory(
-                            Modifier
-                                .weight(0.5f)
-                                .padding(
-                                    top = 8.dp,
-                                    bottom = 8.dp
-                                ),
-                            it,
-                            sharedTransitionScope, animatedVisibilityScope
-                        ) {
-                            navigationManager.navController.navigate(
-                                Destinations.CategoryDetailsScreen(
-                                    it.categoryId,
-                                    it.categoryName,
-                                    it.categoryIconNumber,
-                                    it.categoryType
-                                )
-                            )
+                Spacer(Modifier.height(24.dp))
+
+                Text(
+                    text = "Income Category", style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onSurface,
+                    modifier = Modifier.padding(startEndPadding, topBottomPadding)
+                )
+                Text(
+                    text = "This categories will be shown when the transaction type is expense",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurface.copy(0.6f),
+                    modifier = Modifier.padding(startEndPadding, topBottomPadding)
+                )
+
+                Spacer(Modifier.height(4.dp))
+
+                Column {
+                    for (i in allExpenseCategory.chunked(2)) {
+                        Row(modifier = Modifier.fillMaxWidth()) {
+                            Spacer(Modifier.width(16.dp))
+                            // First item in the row
+                            i.getOrNull(0)?.let {
+                                SingleCategory(
+                                    Modifier
+                                        .weight(0.5f)
+                                        .padding(
+                                            top = 8.dp,
+                                            bottom = 8.dp
+                                        ),
+                                    it,
+                                    sharedTransitionScope, animatedVisibilityScope
+                                ) {
+                                    navigationManager.navController.navigate(
+                                        Destinations.CategoryDetailsScreen(
+                                            it.categoryId,
+                                            it.categoryName,
+                                            it.categoryIconNumber,
+                                            it.categoryType
+                                        )
+                                    )
+                                }
+                            }
+
+                            // Second item in the row
+                            i.getOrNull(1)?.let {
+                                Spacer(Modifier.width(16.dp))
+                                SingleCategory(
+                                    Modifier
+                                        .weight(0.5f)
+                                        .padding(
+                                            top = 8.dp,
+                                            bottom = 8.dp
+                                        ),
+                                    it,
+                                    sharedTransitionScope, animatedVisibilityScope
+                                ) {
+                                    navigationManager.navController.navigate(
+                                        Destinations.CategoryDetailsScreen(
+                                            it.categoryId,
+                                            it.categoryName,
+                                            it.categoryIconNumber,
+                                            it.categoryType
+                                        )
+                                    )
+                                }
+                            }
+                            Spacer(Modifier.width(16.dp))
                         }
 
                     }
-                    Spacer(Modifier.width(16.dp))
+
+                    Spacer(Modifier.height(64.dp))
                 }
             }
         }
 
-        Spacer(Modifier.height(24.dp))
-
-        Text(
-            text = "Income Category", style = MaterialTheme.typography.titleMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(startEndPadding, topBottomPadding)
-        )
-        Text(
-            text = "This categories will be shown when the transaction type is expense",
-            style = MaterialTheme.typography.labelLarge,
-            color = MaterialTheme.colorScheme.onSurface.copy(0.6f),
-            modifier = Modifier.padding(startEndPadding, topBottomPadding)
-        )
-
-        Spacer(Modifier.height(4.dp))
-
-        Column {
-            for (i in allExpenseCategory.chunked(2)) {
-                Row(modifier = Modifier.fillMaxWidth()) {
-                    Spacer(Modifier.width(16.dp))
-                    // First item in the row
-                    i.getOrNull(0)?.let {
-                        SingleCategory(
-                            Modifier
-                                .weight(0.5f)
-                                .padding(
-                                    top = 8.dp,
-                                    bottom = 8.dp
-                                ),
-                            it,
-                            sharedTransitionScope, animatedVisibilityScope
-                        ) {
-                            navigationManager.navController.navigate(
-                                Destinations.CategoryDetailsScreen(
-                                    it.categoryId,
-                                    it.categoryName,
-                                    it.categoryIconNumber,
-                                    it.categoryType
-                                )
-                            )
-                        }
-                    }
-
-                    // Second item in the row
-                    i.getOrNull(1)?.let {
-                        Spacer(Modifier.width(16.dp))
-                        SingleCategory(
-                            Modifier
-                                .weight(0.5f)
-                                .padding(
-                                    top = 8.dp,
-                                    bottom = 8.dp
-                                ),
-                            it,
-                            sharedTransitionScope, animatedVisibilityScope
-                        ) {
-                            navigationManager.navController.navigate(
-                                Destinations.CategoryDetailsScreen(
-                                    it.categoryId,
-                                    it.categoryName,
-                                    it.categoryIconNumber,
-                                    it.categoryType
-                                )
-                            )
-                        }
-                    }
-                    Spacer(Modifier.width(16.dp))
-                }
-
-            }
-
-            Spacer(Modifier.height(64.dp))
-        }
+        is UiState.Error -> {}
     }
 }
 

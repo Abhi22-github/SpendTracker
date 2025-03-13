@@ -67,6 +67,7 @@ import com.roaa.expensetracker.composable.color8
 import com.roaa.expensetracker.composable.components.ActionConfirmation
 import com.roaa.expensetracker.composable.components.AddPaymentMethodBottomSheet
 import com.roaa.expensetracker.composable.components.BottomSheetContentItemDetails
+import com.roaa.expensetracker.composable.components.CircularProgress
 import com.roaa.expensetracker.composable.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.composable.components.DropDownBankAccountOption
 import com.roaa.expensetracker.composable.components.EditPaymentMethodBottomSheet
@@ -92,6 +93,7 @@ import com.roaa.expensetracker.utilities.Constants.EXPENSE
 import com.roaa.expensetracker.utilities.Constants.INCOME
 import com.roaa.expensetracker.utilities.DeleteAction
 import com.roaa.expensetracker.utilities.LongMillisToNormalLong
+import com.roaa.expensetracker.utilities.UiState
 import com.roaa.expensetracker.utilities.convertTotalExpenseIncomeClassToMap
 import com.roaa.expensetracker.utilities.getCalendarForMonthFromDate
 import com.roaa.expensetracker.utilities.parseAmount
@@ -116,10 +118,11 @@ fun PaymentMethodScreen(
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     var showEditBottomSheet by remember { mutableStateOf(false) }
-    val bankAccountsList by viewModel.bankAccountsViewModel.getAllBankAccountsExceptCashCompose()
+    val bankAccountsList by viewModel.bankAccountsViewModel.allBankAccountListExceptCash
         .collectAsState(
             listOf(emptyBank)
         )
+    val uiState by viewModel.bankAccountsViewModel.uiState.collectAsState()
 
     var actionConfirmationFlag by remember { mutableStateOf(false) }
 
@@ -151,34 +154,50 @@ fun PaymentMethodScreen(
             text = { Text(text = "Add Payment Method") },
         )
     }) { paddingValue ->
-        if (!bankAccountsList.isEmpty()) {
-            Column(
-                modifier = Modifier
-                    .padding(paddingValue)
-                    .padding(horizontal = 16.dp)
-                    .fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
-                LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    items(bankAccountsList) {
-                        PaymentCard(Modifier,viewModel, it, { bankAccounts ->
-                            bankAccountsClass = bankAccounts
-                            showEditBottomSheet = !showEditBottomSheet
-                        }, { bankAccount ->
-                            actionConfirmationFlag = true
-                            bankAccountsClass = bankAccount
-                        }, { bankAccount ->
-                            navigationManager.navigateTo(Destinations.BankDetailsScreen(bankAccount.bankAccountId))
-                        })
+
+        when (uiState) {
+            is UiState.Loading -> {
+                CircularProgress()
+            }
+
+            is UiState.Success -> {
+                Column(
+                    modifier = Modifier
+                        .padding(paddingValue)
+                        .padding(horizontal = 16.dp)
+                        .fillMaxSize(),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    if (!bankAccountsList.isEmpty()) {
+                        LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                            items(bankAccountsList) {
+                                PaymentCard(Modifier, viewModel, it, { bankAccounts ->
+                                    bankAccountsClass = bankAccounts
+                                    showEditBottomSheet = !showEditBottomSheet
+                                }, { bankAccount ->
+                                    actionConfirmationFlag = true
+                                    bankAccountsClass = bankAccount
+                                }, { bankAccount ->
+                                    navigationManager.navigateTo(
+                                        Destinations.BankDetailsScreen(
+                                            bankAccount.bankAccountId
+                                        )
+                                    )
+                                })
+                            }
+                        }
+                    } else {
+                        EmptyScreen("No Bank Account Found")
                     }
                 }
             }
-        } else {
-            EmptyScreen("No Bank Account Found")
+
+            is UiState.Error -> {}
         }
+
     }
     if (showBottomSheet) {
-        AddPaymentMethodBottomSheet(viewModel = viewModel,{ showBottomSheet = !showBottomSheet })
+        AddPaymentMethodBottomSheet(viewModel = viewModel, { showBottomSheet = !showBottomSheet })
     }
     if (showEditBottomSheet) {
         EditPaymentMethodBottomSheet(
@@ -209,7 +228,9 @@ fun PaymentMethodScreen(
                     }
 
                     DeleteAction.DELETE_ALL -> {
-                        viewModel.bankAccountsViewModel.deleteBankAccountWithTransactions(bankAccountsClass)
+                        viewModel.bankAccountsViewModel.deleteBankAccountWithTransactions(
+                            bankAccountsClass
+                        )
                     }
 
                 }
@@ -444,7 +465,11 @@ fun PaymentCard(
                                 bankAccountsClass.bankAccountId
                             )
                         }
-                        scope.launch { viewModel.preferencesViewModel.setPrimaryAccount(bankAccountsClass) }
+                        scope.launch {
+                            viewModel.preferencesViewModel.setPrimaryAccount(
+                                bankAccountsClass
+                            )
+                        }
                         showOptionMenu = false
                     },
                     editClicked = {
@@ -891,12 +916,20 @@ fun PaymentDetailsScreen(
                                 SingleInfoBox(
                                     Modifier.weight(1f),
                                     "Total Expense",
-                                    "${LocalCurrency.current.currencySymbol} ${parseAmount(totalExpense)}",
+                                    "${LocalCurrency.current.currencySymbol} ${
+                                        parseAmount(
+                                            totalExpense
+                                        )
+                                    }",
                                 )
                                 SingleInfoBox(
                                     Modifier.weight(1f),
                                     "Total Income",
-                                    "${LocalCurrency.current.currencySymbol} ${parseAmount(totalIncome)}",
+                                    "${LocalCurrency.current.currencySymbol} ${
+                                        parseAmount(
+                                            totalIncome
+                                        )
+                                    }",
                                 )
                             }
 //                            Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {

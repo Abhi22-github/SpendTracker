@@ -7,10 +7,13 @@ import com.roaa.expensetracker.database.BudgetRepository
 import com.roaa.expensetracker.database.relations.BudgetWithDayDetails
 import com.roaa.expensetracker.model.BudgetModelClass
 import com.roaa.expensetracker.utilities.UiState
+import com.roaa.expensetracker.utilities.utilityModalClass.emptyBudgetClass
+import com.roaa.expensetracker.utilities.utilityModalClass.emptyBudgetDayClass
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import javax.inject.Inject
@@ -27,9 +30,21 @@ enum class DaileBudgetState {
 class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRepository) :
     ViewModel() {
 
+    init {
+        getCurrentBudgetWithDetails()
+    }
+
     //flow for Ui states
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState: StateFlow<UiState> = _uiState
+
+    //for  currentBudget with days and details
+    private val _getCurrentBudget = MutableStateFlow(
+        BudgetWithDayDetails(
+            emptyBudgetClass, listOf(emptyBudgetDayClass)
+        )
+    )
+    val getCurrentBudget: StateFlow<BudgetWithDayDetails> = _getCurrentBudget
 
     fun getCurrentBudget(): Flow<BudgetModelClass> {
         return budgetRepository.getCurrentBudget
@@ -37,6 +52,17 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
 
     fun getCurrentBudgetWithDetails(): Flow<BudgetWithDayDetails?> {
         return budgetRepository.getCurrentBudgetWithDays
+    }
+
+    fun getCurrentBudgetWithDetailsForCompose() {
+        viewModelScope.launch {
+            loading()
+            budgetRepository.getCurrentBudgetWithDays.catch { error(it) }.collect {
+                _getCurrentBudget.value =
+                    it ?: BudgetWithDayDetails(emptyBudgetClass, listOf(emptyBudgetDayClass))
+                completed()
+            }
+        }
     }
 
     fun getBudgetWithDays(budgetId: Long): Flow<BudgetWithDayDetails?> {
@@ -53,7 +79,7 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
         }
     }
 
-    fun updateBudget(budgetModelClass: BudgetModelClass){
+    fun updateBudget(budgetModelClass: BudgetModelClass) {
         viewModelScope.launch {
             budgetRepository.update(budgetModelClass)
         }
@@ -101,7 +127,11 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
         } else {
             //updating existing account
             viewModelScope.launch {
-                budgetRepository.updateWithDetails(budgetModelClass,validDatesListFromLong,budgetSummaryWithDay.budgetAllDays)
+                budgetRepository.updateWithDetails(
+                    budgetModelClass,
+                    validDatesListFromLong,
+                    budgetSummaryWithDay.budgetAllDays
+                )
             }
         }
     }

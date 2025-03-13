@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -67,6 +68,7 @@ import com.roaa.expensetracker.R
 import com.roaa.expensetracker.activity.LocalCurrency
 import com.roaa.expensetracker.composable.color1
 import com.roaa.expensetracker.composable.components.BudgetTopBar
+import com.roaa.expensetracker.composable.components.CircularProgress
 import com.roaa.expensetracker.composable.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.composable.components.EmptyScreen
 import com.roaa.expensetracker.composable.components.SpendsBudgetCard
@@ -87,6 +89,7 @@ import com.roaa.expensetracker.hilt.AllViewModel
 import com.roaa.expensetracker.model.uiDataModels.BarChartExpenseModel
 import com.roaa.expensetracker.utilities.CalenderDayState
 import com.roaa.expensetracker.utilities.DayState
+import com.roaa.expensetracker.utilities.UiState
 import com.roaa.expensetracker.utilities.datesListForMonth
 import com.roaa.expensetracker.utilities.dayNameList
 import com.roaa.expensetracker.utilities.getDayDifference
@@ -116,12 +119,16 @@ fun BudgetScreen(
     viewModel: AllViewModel,
     modifier: Modifier = Modifier,
 ) {
-    val getCurrentBudgetFromRoom by viewModel.budgetViewModel.getCurrentBudgetWithDetails()
+    val uiState by viewModel.budgetViewModel.uiState.collectAsState()
+    val getCurrentBudgetFromRoom by viewModel.budgetViewModel.getCurrentBudget
         .collectAsState(
             BudgetWithDayDetails(
                 emptyBudgetClass, listOf(emptyBudgetDayClass)
             )
         )
+    LaunchedEffect(Unit) {
+        viewModel.budgetViewModel.getCurrentBudgetWithDetailsForCompose()
+    }
     val scope = rememberCoroutineScope()
     var getCurrentBudget by remember {
         mutableStateOf(
@@ -143,6 +150,7 @@ fun BudgetScreen(
     BackHandler {
         handleBackNavigation(navigationManager)
     }
+
     Scaffold(
         topBar = {
             BudgetTopBar(
@@ -159,289 +167,305 @@ fun BudgetScreen(
             )
         },
     ) {
-        Column(modifier = Modifier.padding(it)) {
-            if (isBudgetSet) {
-                var currentBudgetLocal by remember { mutableStateOf(BigDecimal.ZERO) }
-                var currentExpenseLocal by remember { mutableStateOf(BigDecimal.ZERO) }
-                var remainingBudget by remember { mutableStateOf(currentBudgetLocal - currentExpenseLocal) }
-                var remainingDaysPercentage by remember { mutableStateOf(BigDecimal.ZERO) }
-
-                val barChartDataList = getCurrentBudget.budgetAllDays.map {
-                    BarChartExpenseModel(
-                        date = it.date,
-                        dayName = it.date.toLocalDate().toDayMonthFormat(),
-                        expenseAmount = it.totalExpense,
-                        incomeAmount = it.totalIncome
-                    )
-                }
-                val cumulativeBudgetList =
-                    getCurrentBudget.budgetAllDays.runningFold(BigDecimal.ZERO) { sum, item -> sum + item.totalExpense }
-                        .drop(1)
-
-
-                val lineChartDataList = getCurrentBudget.budgetAllDays.mapIndexed { index, item ->
-                    item.date.toLocalDate().toDayMonthFormat() to
-                            cumulativeBudgetList[index]
-                }.toMap()
-
-
-                LaunchedEffect(getCurrentBudget) {
-
-                    if (getCurrentBudget.budgetSummary.totalBudgetAmount == BigDecimal.ZERO) {
-                        currentBudgetLocal = getCurrentBudget.budgetSummary.totalBudgetAmount
-                    } else {
-                        currentBudgetLocal = getCurrentBudget.budgetSummary.totalBudgetAmount
-                    }
-                    currentExpenseLocal =
-                        getCurrentBudget.budgetAllDays.fold(BigDecimal.ZERO) { acc, i ->
-                            acc + i.totalExpense
-                        }
-                    remainingBudget = currentBudgetLocal - currentExpenseLocal
+        Column(modifier = Modifier.padding(it).fillMaxSize()) {
+            when (uiState) {
+                is UiState.Loading -> {
+                    CircularProgress()
                 }
 
-                LaunchedEffect(getCurrentBudget) {
-                    if (getCurrentBudget.budgetSummary.budgetTotalDays != 0L) {
-                        remainingDaysPercentage =
-                            (getDaysRemaining(getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate()).toBigDecimal()
-                                .div(getCurrentBudget.budgetSummary.budgetTotalDays.toBigDecimal()))
-                    } else {
-                        remainingDaysPercentage = BigDecimal.ONE
-                    }
-                }
+                is UiState.Success -> {
+                    Column() {
+                        if (isBudgetSet) {
+                            var currentBudgetLocal by remember { mutableStateOf(BigDecimal.ZERO) }
+                            var currentExpenseLocal by remember { mutableStateOf(BigDecimal.ZERO) }
+                            var remainingBudget by remember { mutableStateOf(currentBudgetLocal - currentExpenseLocal) }
+                            var remainingDaysPercentage by remember { mutableStateOf(BigDecimal.ZERO) }
 
-                Column(Modifier.verticalScroll(rememberScrollState())) {
+                            val barChartDataList = getCurrentBudget.budgetAllDays.map {
+                                BarChartExpenseModel(
+                                    date = it.date,
+                                    dayName = it.date.toLocalDate().toDayMonthFormat(),
+                                    expenseAmount = it.totalExpense,
+                                    incomeAmount = it.totalIncome
+                                )
+                            }
+                            val cumulativeBudgetList =
+                                getCurrentBudget.budgetAllDays.runningFold(BigDecimal.ZERO) { sum, item -> sum + item.totalExpense }
+                                    .drop(1)
 
-                    Text(
-                        text = "${LocalCurrency.current.currencySymbol} ${getCurrentBudget.budgetSummary.totalBudgetAmount}",
-                        modifier = modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        style = typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                    Text(
-                        text = "Budget initial amount",
-                        modifier = modifier.fillMaxWidth(),
-                        textAlign = TextAlign.Center,
-                        style = typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                    )
-                    Spacer(Modifier.height(24.dp))
-                    Column(
-                        Modifier
-                            .padding(horizontal = 20.dp, vertical = 16.dp)
-                            .fillMaxWidth()
-                    ) {
-                        Row(
-                            Modifier
-                                .fillMaxWidth(),
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceAround
-                        ) {
-                            Text(
-                                text = getCurrentBudget.budgetSummary.budgetStartDate.toLocalDate()
-                                    .toDayMonthFormat(),
-                                modifier = modifier,
-                                textAlign = TextAlign.Center,
-                                style = typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            )
-                            DayProgressIndicator(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .padding(horizontal = 12.dp),
-                                totalDays = getCurrentBudget.budgetSummary.budgetTotalDays,
-                                totalAmount = currentBudgetLocal,
-                                expenseAmount = currentExpenseLocal,
-                                day = getDayDifference(
-                                    getCurrentBudget.budgetSummary.budgetStartDate.toLocalDate(),
-                                    LocalDate.now()
-                                ),
-                                height = 36f,
-                                dayName = LocalDate.now().toDayMonthFormat(),
-                                isInBudget = (LocalDate.now()
-                                    .toLong() <= getCurrentBudget.budgetSummary.budgetEndDate && LocalDate.now()
-                                    .toLong() >= getCurrentBudget.budgetSummary.budgetStartDate)
 
-                            )
-                            Text(
-                                text = getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate()
-                                    .toDayMonthFormat(),
-                                modifier = modifier,
-                                textAlign = TextAlign.Center,
-                                style = typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            )
-                        }
-                        val remainingBudgetDays = getDayDifference(
-                            getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate(),
-                            LocalDate.now()
-                        )
-                        Text(
-                            text = if (remainingBudget > BigDecimal.ZERO) {
-                                "You can spend ${LocalCurrency.current.currencySymbol}${
-                                    (remainingBudget).div(
-                                        BigDecimal(if (remainingBudgetDays == 0L) 1L else remainingBudgetDays)
+                            val lineChartDataList = getCurrentBudget.budgetAllDays.mapIndexed { index, item ->
+                                item.date.toLocalDate().toDayMonthFormat() to
+                                        cumulativeBudgetList[index]
+                            }.toMap()
+
+
+                            LaunchedEffect(getCurrentBudget) {
+
+                                if (getCurrentBudget.budgetSummary.totalBudgetAmount == BigDecimal.ZERO) {
+                                    currentBudgetLocal = getCurrentBudget.budgetSummary.totalBudgetAmount
+                                } else {
+                                    currentBudgetLocal = getCurrentBudget.budgetSummary.totalBudgetAmount
+                                }
+                                currentExpenseLocal =
+                                    getCurrentBudget.budgetAllDays.fold(BigDecimal.ZERO) { acc, i ->
+                                        acc + i.totalExpense
+                                    }
+                                remainingBudget = currentBudgetLocal - currentExpenseLocal
+                            }
+
+                            LaunchedEffect(getCurrentBudget) {
+                                if (getCurrentBudget.budgetSummary.budgetTotalDays != 0L) {
+                                    remainingDaysPercentage =
+                                        (getDaysRemaining(getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate()).toBigDecimal()
+                                            .div(getCurrentBudget.budgetSummary.budgetTotalDays.toBigDecimal()))
+                                } else {
+                                    remainingDaysPercentage = BigDecimal.ONE
+                                }
+                            }
+
+                            Column(Modifier.verticalScroll(rememberScrollState())) {
+
+                                Text(
+                                    text = "${LocalCurrency.current.currencySymbol} ${getCurrentBudget.budgetSummary.totalBudgetAmount}",
+                                    modifier = modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
+                                    style = typography.headlineMedium,
+                                    color = MaterialTheme.colorScheme.onSurface
+                                )
+                                Text(
+                                    text = "Budget initial amount",
+                                    modifier = modifier.fillMaxWidth(),
+                                    textAlign = TextAlign.Center,
+                                    style = typography.bodyMedium,
+                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                )
+                                Spacer(Modifier.height(24.dp))
+                                Column(
+                                    Modifier
+                                        .padding(horizontal = 20.dp, vertical = 16.dp)
+                                        .fillMaxWidth()
+                                ) {
+                                    Row(
+                                        Modifier
+                                            .fillMaxWidth(),
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.SpaceAround
+                                    ) {
+                                        Text(
+                                            text = getCurrentBudget.budgetSummary.budgetStartDate.toLocalDate()
+                                                .toDayMonthFormat(),
+                                            modifier = modifier,
+                                            textAlign = TextAlign.Center,
+                                            style = typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                        )
+                                        DayProgressIndicator(
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .padding(horizontal = 12.dp),
+                                            totalDays = getCurrentBudget.budgetSummary.budgetTotalDays,
+                                            totalAmount = currentBudgetLocal,
+                                            expenseAmount = currentExpenseLocal,
+                                            day = getDayDifference(
+                                                getCurrentBudget.budgetSummary.budgetStartDate.toLocalDate(),
+                                                LocalDate.now()
+                                            ),
+                                            height = 36f,
+                                            dayName = LocalDate.now().toDayMonthFormat(),
+                                            isInBudget = (LocalDate.now()
+                                                .toLong() <= getCurrentBudget.budgetSummary.budgetEndDate && LocalDate.now()
+                                                .toLong() >= getCurrentBudget.budgetSummary.budgetStartDate)
+
+                                        )
+                                        Text(
+                                            text = getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate()
+                                                .toDayMonthFormat(),
+                                            modifier = modifier,
+                                            textAlign = TextAlign.Center,
+                                            style = typography.bodyMedium,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                        )
+                                    }
+                                    val remainingBudgetDays = getDayDifference(
+                                        getCurrentBudget.budgetSummary.budgetEndDate.toLocalDate(),
+                                        LocalDate.now()
                                     )
-                                }/day for ${remainingBudgetDays} more days"
-                            } else {
-                                "This budget is over. You have exceeded your budget limit"
-                            },
-                            modifier = modifier
-                                .fillMaxWidth()
-                                .padding(top = 16.dp),
-                            textAlign = TextAlign.Center,
-                            style = typography.bodyMedium,
-                            color = if (remainingBudget > BigDecimal.ZERO) MaterialTheme.colorScheme.onSurface.copy(
-                                alpha = 0.6f
-                            ) else MaterialTheme.colorScheme.error
-                        )
-                    }
+                                    Text(
+                                        text = if (remainingBudget > BigDecimal.ZERO) {
+                                            "You can spend ${LocalCurrency.current.currencySymbol}${
+                                                (remainingBudget).div(
+                                                    BigDecimal(if (remainingBudgetDays == 0L) 1L else remainingBudgetDays)
+                                                )
+                                            }/day for ${remainingBudgetDays} more days"
+                                        } else {
+                                            "This budget is over. You have exceeded your budget limit"
+                                        },
+                                        modifier = modifier
+                                            .fillMaxWidth()
+                                            .padding(top = 16.dp),
+                                        textAlign = TextAlign.Center,
+                                        style = typography.bodyMedium,
+                                        color = if (remainingBudget > BigDecimal.ZERO) MaterialTheme.colorScheme.onSurface.copy(
+                                            alpha = 0.6f
+                                        ) else MaterialTheme.colorScheme.error
+                                    )
+                                }
 
 
 
-                    Spacer(Modifier.height(12.dp))
+                                Spacer(Modifier.height(12.dp))
 
 //
 
-                    Row(
-                        Modifier
-                            .height(150.dp)
-                            .padding(horizontalPadding, verticalPadding)
-                    ) {
-                        SpendsBudgetCard(
-                            Modifier,
-                            if (currentBudgetLocal == BigDecimal.ZERO) BigDecimal.ONE else currentBudgetLocal,
-                            if (currentExpenseLocal == BigDecimal.ZERO) BigDecimal.ONE else currentExpenseLocal,
-                        )
-                    }
-                    Spacer(Modifier.height(12.dp))
+                                Row(
+                                    Modifier
+                                        .height(150.dp)
+                                        .padding(horizontalPadding, verticalPadding)
+                                ) {
+                                    SpendsBudgetCard(
+                                        Modifier,
+                                        if (currentBudgetLocal == BigDecimal.ZERO) BigDecimal.ONE else currentBudgetLocal,
+                                        if (currentExpenseLocal == BigDecimal.ZERO) BigDecimal.ONE else currentExpenseLocal,
+                                    )
+                                }
+                                Spacer(Modifier.height(12.dp))
 
-                    Spacer(Modifier.height(24.dp))
+                                Spacer(Modifier.height(24.dp))
 
-                    Column(
-                        modifier = Modifier
-                    ) {
-                        Text(
-                            text = "Total Budget Analysis",
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp),
-                            style = typography.titleMedium
-                        )
-                        Text(
-                            text = "total cumulative expense by day for budget period",
-                            modifier = Modifier.padding(
-                                horizontal = 16.dp, vertical = 0.dp
-                            ),
-                            style = typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                        )
+                                Column(
+                                    modifier = Modifier
+                                ) {
+                                    Text(
+                                        text = "Total Budget Analysis",
+                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp),
+                                        style = typography.titleMedium
+                                    )
+                                    Text(
+                                        text = "total cumulative expense by day for budget period",
+                                        modifier = Modifier.padding(
+                                            horizontal = 16.dp, vertical = 0.dp
+                                        ),
+                                        style = typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                    )
 
-                    }
-                    LineChartBudgetTotalUsage(
-                        Modifier,
-                        toPalette(color1), lineChartDataList,
-                        getCurrentBudget.budgetSummary.totalBudgetAmount
-                    )
-                    Spacer(Modifier.height(42.dp))
-
-                    Column(
-                        modifier = Modifier
-                    ) {
-                        Text(
-                            text = "Expense Per Day Analysis",
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp),
-                            style = typography.titleMedium
-                        )
-                        Text(
-                            text = "total cumulative expense by day for budget period",
-                            modifier = Modifier.padding(
-                                horizontal = 16.dp, vertical = 0.dp
-                            ),
-                            style = typography.labelLarge,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                        )
-
-                    }
-                    BarChartBudgetUsage(
-                        Modifier,
-                        toPalette(orange),
-                        barChartDataList,
-                        getCurrentBudget.budgetSummary.budgetAmountPerDay
-                    )
-                    Spacer(Modifier.height(24.dp))
-                    SpendCalender(Modifier, getCurrentBudget)
-
-                    Row(
-                        Modifier
-                            .fillMaxWidth()
-                    ) {
-                        Row(Modifier.padding(horizontalPadding, vertical = 16.dp)) {
-                            FilledTonalButton(
-                                onClick = { finishButtonClickStatus = !finishButtonClickStatus },
-                                modifier = Modifier.fillMaxWidth(),
-                                colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.error)
-                            ) {
-                                Icon(
-                                    Icons.Rounded.Close,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onError
+                                }
+                                LineChartBudgetTotalUsage(
+                                    Modifier,
+                                    toPalette(color1), lineChartDataList,
+                                    getCurrentBudget.budgetSummary.totalBudgetAmount
                                 )
-                                Spacer(Modifier.width(4.dp))
-                                Text("Finish Early", color = MaterialTheme.colorScheme.onError)
+                                Spacer(Modifier.height(42.dp))
+
+                                Column(
+                                    modifier = Modifier
+                                ) {
+                                    Text(
+                                        text = "Expense Per Day Analysis",
+                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp),
+                                        style = typography.titleMedium
+                                    )
+                                    Text(
+                                        text = "total cumulative expense by day for budget period",
+                                        modifier = Modifier.padding(
+                                            horizontal = 16.dp, vertical = 0.dp
+                                        ),
+                                        style = typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                    )
+
+                                }
+                                BarChartBudgetUsage(
+                                    Modifier,
+                                    toPalette(orange),
+                                    barChartDataList,
+                                    getCurrentBudget.budgetSummary.budgetAmountPerDay
+                                )
+                                Spacer(Modifier.height(24.dp))
+                                SpendCalender(Modifier, getCurrentBudget)
+
+                                Row(
+                                    Modifier
+                                        .fillMaxWidth()
+                                ) {
+                                    Row(Modifier.padding(horizontalPadding, vertical = 16.dp)) {
+                                        FilledTonalButton(
+                                            onClick = { finishButtonClickStatus = !finishButtonClickStatus },
+                                            modifier = Modifier.fillMaxWidth(),
+                                            colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.error)
+                                        ) {
+                                            Icon(
+                                                Icons.Rounded.Close,
+                                                contentDescription = null,
+                                                tint = MaterialTheme.colorScheme.onError
+                                            )
+                                            Spacer(Modifier.width(4.dp))
+                                            Text("Finish Early", color = MaterialTheme.colorScheme.onError)
+                                        }
+                                    }
+                                }
+                            }
+                        } else {
+                            ConstraintLayout() {
+                                val (emptyBudget, addBudgetButton) = createRefs()
+                                Box(Modifier.constrainAs(emptyBudget) {
+                                    top.linkTo(parent.top)
+                                    bottom.linkTo(parent.bottom)
+                                    start.linkTo(parent.start)
+                                    end.linkTo(parent.end)
+                                }) {
+                                    EmptyScreen(text = "No Budget Found")
+                                }
+                                FilledTonalButton(onClick = {
+                                    navigationManager.navigateTo(
+                                        Destinations.BudgetSetupScreen(
+                                            ActionTypes.ADD, getCurrentBudget.budgetSummary.budgetId
+                                        )
+                                    )
+                                }, Modifier.constrainAs(addBudgetButton) {
+                                    top.linkTo(parent.top, 300.dp)
+                                    bottom.linkTo(parent.bottom)
+                                    start.linkTo(parent.start)
+                                    end.linkTo(parent.end)
+                                }) {
+                                    Text("Add Budget", Modifier.align(Alignment.CenterVertically))
+                                }
                             }
                         }
-                    }
-                }
-            } else {
-                ConstraintLayout() {
-                    val (emptyBudget, addBudgetButton) = createRefs()
-                    Box(Modifier.constrainAs(emptyBudget) {
-                        top.linkTo(parent.top)
-                        bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }) {
-                        EmptyScreen(text = "No Budget Found")
-                    }
-                    FilledTonalButton(onClick = {
-                        navigationManager.navigateTo(
-                            Destinations.BudgetSetupScreen(
-                                ActionTypes.ADD, getCurrentBudget.budgetSummary.budgetId
-                            )
-                        )
-                    }, Modifier.constrainAs(addBudgetButton) {
-                        top.linkTo(parent.top, 300.dp)
-                        bottom.linkTo(parent.bottom)
-                        start.linkTo(parent.start)
-                        end.linkTo(parent.end)
-                    }) {
-                        Text("Add Budget", Modifier.align(Alignment.CenterVertically))
-                    }
-                }
-            }
-            Spacer(Modifier.height(36.dp))
+                        Spacer(Modifier.height(36.dp))
 
-            if (finishButtonClickStatus) {
-                ConfirmationAlertDialog(
-                    onDismissRequest = { finishButtonClickStatus = !finishButtonClickStatus },
-                    onConfirmation = {
-                        scope.launch {
-                            isBudgetSet = false
-                            viewModel.budgetViewModel.updateBudget(
-                                getCurrentBudget.budgetSummary.copy(
-                                    isActive = false
-                                )
+                        if (finishButtonClickStatus) {
+                            ConfirmationAlertDialog(
+                                onDismissRequest = { finishButtonClickStatus = !finishButtonClickStatus },
+                                onConfirmation = {
+                                    scope.launch {
+                                        isBudgetSet = false
+                                        viewModel.budgetViewModel.updateBudget(
+                                            getCurrentBudget.budgetSummary.copy(
+                                                isActive = false
+                                            )
+                                        )
+                                        finishButtonClickStatus = !finishButtonClickStatus
+                                    }
+                                },
+                                dialogTitle = "Finish budget",
+                                dialogText = "Your current budget will be completed and further expense will not be added to this budget",
+                                icon = ImageVector.vectorResource(R.drawable.round_info_24),
+                                confirmText = "Finish budget",
+                                dismissText = "Cancel"
                             )
-                            finishButtonClickStatus = !finishButtonClickStatus
                         }
-                    },
-                    dialogTitle = "Finish budget",
-                    dialogText = "Your current budget will be completed and further expense will not be added to this budget",
-                    icon = ImageVector.vectorResource(R.drawable.round_info_24),
-                    confirmText = "Finish budget",
-                    dismissText = "Cancel"
-                )
+                    }
+                }
+
+                is UiState.Error -> {
+
+                }
+
             }
         }
+
     }
 }
 

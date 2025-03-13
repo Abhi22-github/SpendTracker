@@ -332,6 +332,9 @@ fun getRemainingDaysInCurrentMonth(): Long = run {
 
 fun getCurrentDate() = run { LocalDate.now().toLong() }
 
+fun getMonthStartDate() =
+    run { LocalDate.now().withDayOfMonth(1).toLong() }
+
 fun getMonthEndDate() =
     run { LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()).toLong() }
 
