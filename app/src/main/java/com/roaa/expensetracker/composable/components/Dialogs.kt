@@ -97,27 +97,36 @@ fun ConfirmationAlertDialog(
     confirmText: String = "Confirm",
     dismissText: String = "Cancel"
 ) {
-    AlertDialog(icon = {
-        Icon(icon, contentDescription = "Example Icon",modifier = Modifier.size(36.dp))
-    }, title = {
-        Text(text = dialogTitle, textAlign = TextAlign.Center)
-    }, text = {
-        Text(text = dialogText, textAlign = TextAlign.Start)
-    }, onDismissRequest = {
-        onDismissRequest()
-    }, confirmButton = {
-        TextButton(onClick = {
-            onConfirmation()
-        }) {
-            Text(confirmText)
-        }
-    }, dismissButton = {
-        TextButton(onClick = {
+    AlertDialog(
+        icon = {
+            Icon(icon, contentDescription = "Example Icon", modifier = Modifier.size(36.dp))
+        },
+        title = {
+            Text(text = dialogTitle, textAlign = TextAlign.Center)
+        },
+        text = {
+            Text(text = dialogText, textAlign = TextAlign.Start)
+        },
+        onDismissRequest = {
             onDismissRequest()
-        }) {
-            Text(dismissText)
-        }
-    }, modifier =  Modifier.fillMaxWidth(0.8f), properties = DialogProperties(usePlatformDefaultWidth = false))
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                onConfirmation()
+            }) {
+                Text(confirmText)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = {
+                onDismissRequest()
+            }) {
+                Text(dismissText)
+            }
+        },
+        modifier = Modifier.fillMaxWidth(0.8f),
+        properties = DialogProperties(usePlatformDefaultWidth = false)
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -150,6 +159,7 @@ fun ActionConfirmation(
         sheetState = sheetState,
         modifier = Modifier
             .imePadding()
+            .navigationBarsPadding()
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
         ActionConfirmationBottomSheetContent(
@@ -179,7 +189,6 @@ fun ActionConfirmationBottomSheetContent(
 
     Column(
         Modifier
-            .navigationBarsPadding()
             .padding(bottom = 8.dp)
     ) {
         deleteActionList.forEach {

@@ -2,15 +2,18 @@ package com.roaa.expensetracker.composable.screens
 
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.ime
+import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -50,6 +53,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.SoftwareKeyboardController
@@ -59,6 +63,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavHostController
@@ -108,11 +113,12 @@ fun BudgetSetupScreen(
         ActionTypes.ADD -> "Setup Budget"
         ActionTypes.EDIT -> "Edit Budget"
     }
-    val budgetWithSummaryFromRoom by viewModel.budgetViewModel.getBudgetWithDays(budgetId).collectAsState(
-        BudgetWithDayDetails(
-            emptyBudgetClass, listOf(emptyBudgetDayClass)
+    val budgetWithSummaryFromRoom by viewModel.budgetViewModel.getBudgetWithDays(budgetId)
+        .collectAsState(
+            BudgetWithDayDetails(
+                emptyBudgetClass, listOf(emptyBudgetDayClass)
+            )
         )
-    )
     var budgetWithSummary by remember {
         mutableStateOf(
             BudgetWithDayDetails(
@@ -140,7 +146,7 @@ fun BudgetSetupScreen(
         Column(Modifier.padding(it)) {
             key(budgetWithSummary) {
                 BudgetContentController(
-                    isBudgetSet, navigationManager, viewModel,budgetWithSummary
+                    isBudgetSet, navigationManager, viewModel, budgetWithSummary
                 )
             }
         }
@@ -206,7 +212,7 @@ fun BudgetContentController(
                 } else {
                     SaveBudgetDetailsInDatabase(
                         budgetWithSummary,
-                       viewModel,
+                        viewModel,
                         totalAmountText,
                         totalAmountPerDay,
                         totalDaysRemaining,
@@ -300,7 +306,7 @@ fun BottomSheetBudgetContent(
     saveButtonClicked: (String, Long, Long, Long, DistributionMethod, BigDecimal, BigDecimal) -> Unit,
     errorStatus: Boolean,
     removeError: () -> Unit,
-    setError:() -> Unit
+    setError: () -> Unit
 ) {
     val focusRequester = remember {
         FocusRequester()
@@ -339,7 +345,13 @@ fun BottomSheetBudgetContent(
     val notificationSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val restDistributionSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showNotificationPicker by remember { mutableStateOf(false) }
-    var notificationUsageValue by remember { mutableStateOf(if (isBudgetSet) budgetWithSummary.budgetSummary.notificationForBudgetUsage else BigDecimal(20)) }
+    var notificationUsageValue by remember {
+        mutableStateOf(
+            if (isBudgetSet) budgetWithSummary.budgetSummary.notificationForBudgetUsage else BigDecimal(
+                20
+            )
+        )
+    }
     var restDistribution by remember { mutableStateOf(false) }
     var restDistributionValue by remember {
         mutableStateOf(
@@ -357,7 +369,8 @@ fun BottomSheetBudgetContent(
             endDate.toLocalDate()
         )
         if (totalAmountText.text.isNotEmpty() && totalAmountText.text.toBigDecimal() != BigDecimal.ZERO) {
-            totalAmountPerDay = totalAmountText.text.toBigDecimal().div(totalDaysRemaining.toBigDecimal())
+            totalAmountPerDay =
+                totalAmountText.text.toBigDecimal().div(totalDaysRemaining.toBigDecimal())
         } else {
             totalAmountPerDay = BigDecimal.ZERO
         }
@@ -367,7 +380,11 @@ fun BottomSheetBudgetContent(
             removeError()
         }
     }
-    ConstraintLayout(Modifier.fillMaxSize()) {
+    ConstraintLayout(
+        Modifier
+            .fillMaxSize()
+            .background(Color.Green)
+    ) {
         val (content, button) = createRefs()
         Column(Modifier.constrainAs(content) {
             top.linkTo(parent.top)
@@ -561,11 +578,15 @@ fun BottomSheetBudgetContent(
             )
             Spacer(Modifier.height(16.dp))
         }
-        Column(modifier.constrainAs(button) { bottom.linkTo(parent.bottom) }) {
+        val padding = getImePadding()
+        Column(
+            modifier
+                .constrainAs(button) { bottom.linkTo(parent.bottom,padding+8.dp) }
+
+        ) {
             FilledTonalButton(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .imePadding(),
+                    .fillMaxWidth(),
                 onClick = {
                     saveButtonClicked(
                         totalAmountText.text,
@@ -612,6 +633,15 @@ fun BottomSheetBudgetContent(
             sheetState = notificationSheetState,
             saveNotificationValue = { notificationUsageValue = it.toBigDecimal() },
             closeBottomSheet = { showNotificationPicker = !showNotificationPicker })
+    }
+}
+@Composable
+fun getImePadding(): Dp {
+    val imeHeight = WindowInsets.ime.getBottom(LocalDensity.current)
+    val navBarHeight = WindowInsets.navigationBars.getBottom(LocalDensity.current)
+
+    return with(LocalDensity.current) {
+        (imeHeight - navBarHeight).coerceAtLeast(0).toDp() // Ensure non-negative padding
     }
 }
 

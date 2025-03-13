@@ -170,6 +170,7 @@ fun BottomSheetContentAddItem(
         sheetState = sheetState,
         modifier = Modifier
             .imePadding()
+            .navigationBarsPadding()
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
         BottomSheetContentItemAddContent(
@@ -196,6 +197,7 @@ fun BottomSheetContentEdit(
         sheetState = sheetState,
         modifier = Modifier
             .imePadding()
+            .navigationBarsPadding()
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
         BottomSheetContentItemEditContent(
@@ -318,7 +320,6 @@ fun BottomSheetContentItemAddContent(
     Column(
         modifier
             .fillMaxWidth()
-            .imePadding()
     ) {
         Column() {
             Text(
@@ -632,7 +633,7 @@ fun BottomSheetContentItemAddContent(
                 Text("Save")
             }
         }
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(8.dp))
     }
 }
 
@@ -726,7 +727,6 @@ fun BottomSheetContentItemEditContent(
     Column(
         modifier
             .fillMaxWidth()
-            .imePadding()
     ) {
         Column() {
             Text(
@@ -1034,7 +1034,7 @@ fun BottomSheetContentItemEditContent(
                 Text("Save")
             }
         }
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(8.dp))
     }
 }
 
@@ -1216,6 +1216,7 @@ fun BottomRow(
 }
 
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddBottomSheet(
@@ -1611,7 +1612,7 @@ fun AddPaymentMethodBottomSheet(
             closeBottomSheet()
         },
         sheetState = bottomSheetState,
-        modifier = Modifier
+        modifier = Modifier.navigationBarsPadding()
             .imePadding()
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
@@ -1669,6 +1670,7 @@ fun EditPaymentMethodBottomSheet(
         sheetState = bottomSheetState,
         modifier = Modifier
             .imePadding()
+            .navigationBarsPadding()
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
 
@@ -1933,7 +1935,7 @@ fun BottomSheetContentPaymentMethodAddContentNew(
         ) {
             Text(text = "Save", color = MaterialTheme.colorScheme.onPrimary)
         }
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(8.dp))
     }
 }
 
@@ -2163,7 +2165,7 @@ fun BottomSheetContentPaymentMethodEditContentNew(
         ) {
             Text(text = "Save", color = MaterialTheme.colorScheme.onPrimary)
         }
-        Spacer(Modifier.height(32.dp))
+        Spacer(Modifier.height(8.dp))
     }
 }
 
