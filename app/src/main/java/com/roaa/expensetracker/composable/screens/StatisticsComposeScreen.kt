@@ -106,7 +106,6 @@ import com.roaa.expensetracker.composable.statisticsComponent.BarChartStatistics
 import com.roaa.expensetracker.composable.statisticsComponent.BarChartTest
 import com.roaa.expensetracker.composable.statisticsComponent.PieData
 import com.roaa.expensetracker.composable.statisticsComponent.Test
-import com.roaa.expensetracker.composable.statisticsComponent.generateDynamicColors
 import com.roaa.expensetracker.composable.utils.IconState
 import com.roaa.expensetracker.composable.utils.toPalette
 import com.roaa.expensetracker.database.relations.TransactionWithDetails
@@ -134,6 +133,7 @@ import com.roaa.expensetracker.utilities.utilityModalClass.emptyTotalExpenseInco
 import com.roaa.expensetracker.utilities.utilityModalClass.emptyTransactionWithDetailsClass
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDate
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -576,7 +576,8 @@ fun StatisticsScreenTest(
     categoryListData.onEachIndexed { index, entry ->
         entry.value.color = colorList[index]
         entry.value.percentage =
-            ((entry.value.totalAmount / if (totalAmount == BigDecimal.ZERO) BigDecimal.ONE else totalAmount) * BigDecimal(100))
+            ((entry.value.totalAmount.divide(if(totalAmount == BigDecimal.ZERO) BigDecimal.ONE else totalAmount,2,
+                RoundingMode.HALF_UP)).multiply(BigDecimal(100)))
     }
     val sortedCategoryListData = categoryListData.toList()
         .sortedByDescending { it.second.totalAmount } // Sort by value
@@ -637,48 +638,6 @@ fun StatisticsScreenTest(
                     })
                 }
             }
-
-            //          Spacer(Modifier.height(16.dp))
-//            Column(
-//                Modifier.padding(horizontal = 16.dp),
-//                verticalArrangement = Arrangement.spacedBy(8.dp)
-//            ) {
-//                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-//                    SingleInfoBox(
-//                        Modifier.weight(1f),
-//                        "Total Expense",
-//                        "${LocalCurrency.current.currencySymbol} ${parseAmount(totalExpense)}"
-//                    )
-//                    SingleInfoBox(
-//                        Modifier.weight(1f),
-//                        "Total Income",
-//                        "${LocalCurrency.current.currencySymbol} ${parseAmount(totalIncome)}"
-//                    )
-//                }
-//                Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-//                    SingleInfoBox(
-//                        Modifier.weight(1f),
-//                        "Average Expense",
-//                        "${LocalCurrency.current.currencySymbol} ${
-//                            parseAmount(
-//                                totalExpense /
-//                                        expenseTransactions.size
-//                            )
-//                        }"
-//                    )
-//                    SingleInfoBox(
-//                        Modifier.weight(1f),
-//                        "Average Income",
-//                        "${LocalCurrency.current.currencySymbol} ${
-//                            parseAmount(
-//                                totalIncome /
-//                                        incomeTransaction.size
-//                            )
-//                        }"
-//                    )
-//                }
-//            }
-
             Spacer(Modifier.height(24.dp))
             Column {
                 Row(
@@ -771,13 +730,6 @@ fun StatisticsScreenTest(
                                 color = it.value.color,
                             )
                         }
-                        val colors = generateDynamicColors(6)
-//                        AnimatedGapPieChart(
-//                            Modifier.size(240.dp),pieDataList
-//                        )
-//                        Box(Modifier) {
-//                            DonutChartSample(pieDataList)
-//                        }
                         key(sortedCategoryListData) {
                             Test(
                                 Modifier,
@@ -786,7 +738,6 @@ fun StatisticsScreenTest(
                                 MaterialTheme.colorScheme.surface
                             )
                         }
-                        // Text("Testing")
                     }
                     Spacer(Modifier.height(24.dp))
                     Column {

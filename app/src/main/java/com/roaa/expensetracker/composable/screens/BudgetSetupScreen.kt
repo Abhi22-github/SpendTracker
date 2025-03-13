@@ -2,7 +2,6 @@ package com.roaa.expensetracker.composable.screens
 
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -383,7 +382,6 @@ fun BottomSheetBudgetContent(
     ConstraintLayout(
         Modifier
             .fillMaxSize()
-            .background(Color.Green)
     ) {
         val (content, button) = createRefs()
         Column(Modifier.constrainAs(content) {

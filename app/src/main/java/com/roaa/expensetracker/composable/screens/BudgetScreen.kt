@@ -277,17 +277,23 @@ fun BudgetScreen(
                             LocalDate.now()
                         )
                         Text(
-                            text = "You can spend ${LocalCurrency.current.currencySymbol}${
-                                (currentBudgetLocal - currentExpenseLocal).div(
-                                    BigDecimal(if(remainingBudgetDays == 0L) 1L else remainingBudgetDays)
-                                )
-                            }/day for ${remainingBudgetDays} more days",
+                            text = if (remainingBudget > BigDecimal.ZERO) {
+                                "You can spend ${LocalCurrency.current.currencySymbol}${
+                                    (remainingBudget).div(
+                                        BigDecimal(if (remainingBudgetDays == 0L) 1L else remainingBudgetDays)
+                                    )
+                                }/day for ${remainingBudgetDays} more days"
+                            } else {
+                                "This budget is over. You have exceeded your budget limit"
+                            },
                             modifier = modifier
                                 .fillMaxWidth()
                                 .padding(top = 16.dp),
                             textAlign = TextAlign.Center,
                             style = typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                            color = if (remainingBudget > BigDecimal.ZERO) MaterialTheme.colorScheme.onSurface.copy(
+                                alpha = 0.6f
+                            ) else MaterialTheme.colorScheme.error
                         )
                     }
 
@@ -697,8 +703,9 @@ fun DayProgressIndicator(
     val lineColor = MaterialTheme.colorScheme.surfaceContainer
     val completedColor = MaterialTheme.colorScheme.primaryContainer
     val decorationColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
-    val progress =
+    var progress =
         if (expenseAmount == BigDecimal.ZERO) BigDecimal.ONE else expenseAmount / if (totalAmount == BigDecimal.ZERO) BigDecimal.ONE else totalAmount
+    progress = if (progress > BigDecimal.ONE) BigDecimal.ONE else progress
     Box(
         modifier = modifier, contentAlignment = Alignment.Center
     ) {

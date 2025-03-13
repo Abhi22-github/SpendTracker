@@ -81,7 +81,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.roaa.expensetracker.R
-import com.roaa.expensetracker.composable.CustomFonts
 import com.roaa.expensetracker.composable.ExpenseTrackerTheme
 import com.roaa.expensetracker.composable.navigation.AppNavGraph
 import com.roaa.expensetracker.composable.navigation.Destinations
@@ -399,9 +398,7 @@ fun NavigationDrawer(
                                         Spacer(Modifier.width(8.dp))
                                         Text(
                                             text = convertToWholeMonthName(selectedMonth),
-                                            style = MaterialTheme.typography.titleLarge.copy(
-                                                fontFamily = CustomFonts.numberFont
-                                            )
+                                            style = MaterialTheme.typography.titleLarge
                                         )
                                         Icon(Icons.Filled.ArrowDropDown, contentDescription = null)
                                     }
