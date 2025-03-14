@@ -102,6 +102,7 @@ import com.roaa.expensetracker.utilities.utilityModalClass.emptyBudgetClass
 import com.roaa.expensetracker.utilities.utilityModalClass.emptyBudgetDayClass
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDate
 import java.time.format.TextStyle
 import java.util.Locale
@@ -167,7 +168,11 @@ fun BudgetScreen(
             )
         },
     ) {
-        Column(modifier = Modifier.padding(it).fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .padding(it)
+                .fillMaxSize()
+        ) {
             when (uiState) {
                 is UiState.Loading -> {
                     CircularProgress()
@@ -194,18 +199,21 @@ fun BudgetScreen(
                                     .drop(1)
 
 
-                            val lineChartDataList = getCurrentBudget.budgetAllDays.mapIndexed { index, item ->
-                                item.date.toLocalDate().toDayMonthFormat() to
-                                        cumulativeBudgetList[index]
-                            }.toMap()
+                            val lineChartDataList =
+                                getCurrentBudget.budgetAllDays.mapIndexed { index, item ->
+                                    item.date.toLocalDate().toDayMonthFormat() to
+                                            cumulativeBudgetList[index]
+                                }.toMap()
 
 
                             LaunchedEffect(getCurrentBudget) {
 
                                 if (getCurrentBudget.budgetSummary.totalBudgetAmount == BigDecimal.ZERO) {
-                                    currentBudgetLocal = getCurrentBudget.budgetSummary.totalBudgetAmount
+                                    currentBudgetLocal =
+                                        getCurrentBudget.budgetSummary.totalBudgetAmount
                                 } else {
-                                    currentBudgetLocal = getCurrentBudget.budgetSummary.totalBudgetAmount
+                                    currentBudgetLocal =
+                                        getCurrentBudget.budgetSummary.totalBudgetAmount
                                 }
                                 currentExpenseLocal =
                                     getCurrentBudget.budgetAllDays.fold(BigDecimal.ZERO) { acc, i ->
@@ -316,8 +324,6 @@ fun BudgetScreen(
 
                                 Spacer(Modifier.height(12.dp))
 
-//
-
                                 Row(
                                     Modifier
                                         .height(150.dp)
@@ -338,7 +344,10 @@ fun BudgetScreen(
                                 ) {
                                     Text(
                                         text = "Total Budget Analysis",
-                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp),
+                                        modifier = Modifier.padding(
+                                            horizontal = 16.dp,
+                                            vertical = 0.dp
+                                        ),
                                         style = typography.titleMedium
                                     )
                                     Text(
@@ -363,7 +372,10 @@ fun BudgetScreen(
                                 ) {
                                     Text(
                                         text = "Expense Per Day Analysis",
-                                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp),
+                                        modifier = Modifier.padding(
+                                            horizontal = 16.dp,
+                                            vertical = 0.dp
+                                        ),
                                         style = typography.titleMedium
                                     )
                                     Text(
@@ -391,9 +403,13 @@ fun BudgetScreen(
                                 ) {
                                     Row(Modifier.padding(horizontalPadding, vertical = 16.dp)) {
                                         FilledTonalButton(
-                                            onClick = { finishButtonClickStatus = !finishButtonClickStatus },
+                                            onClick = {
+                                                finishButtonClickStatus = !finishButtonClickStatus
+                                            },
                                             modifier = Modifier.fillMaxWidth(),
-                                            colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.error)
+                                            colors = ButtonDefaults.filledTonalButtonColors(
+                                                containerColor = MaterialTheme.colorScheme.error
+                                            )
                                         ) {
                                             Icon(
                                                 Icons.Rounded.Close,
@@ -401,7 +417,10 @@ fun BudgetScreen(
                                                 tint = MaterialTheme.colorScheme.onError
                                             )
                                             Spacer(Modifier.width(4.dp))
-                                            Text("Finish Early", color = MaterialTheme.colorScheme.onError)
+                                            Text(
+                                                "Finish Early",
+                                                color = MaterialTheme.colorScheme.onError
+                                            )
                                         }
                                     }
                                 }
@@ -437,7 +456,9 @@ fun BudgetScreen(
 
                         if (finishButtonClickStatus) {
                             ConfirmationAlertDialog(
-                                onDismissRequest = { finishButtonClickStatus = !finishButtonClickStatus },
+                                onDismissRequest = {
+                                    finishButtonClickStatus = !finishButtonClickStatus
+                                },
                                 onConfirmation = {
                                     scope.launch {
                                         isBudgetSet = false
@@ -728,8 +749,13 @@ fun DayProgressIndicator(
     val completedColor = MaterialTheme.colorScheme.primaryContainer
     val decorationColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
     var progress =
-        if (expenseAmount == BigDecimal.ZERO) BigDecimal.ONE else expenseAmount / if (totalAmount == BigDecimal.ZERO) BigDecimal.ONE else totalAmount
-    progress = if (progress > BigDecimal.ONE) BigDecimal.ONE else progress
+        (expenseAmount).divide(if (totalAmount == BigDecimal.ZERO) BigDecimal.ONE else totalAmount)
+            .setScale(
+                2,
+                RoundingMode.HALF_UP
+            )
+
+   // progress = if (progress > BigDecimal.ZERO) BigDecimal.ONE else progress
     Box(
         modifier = modifier, contentAlignment = Alignment.Center
     ) {

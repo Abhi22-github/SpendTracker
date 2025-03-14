@@ -47,11 +47,14 @@ fun SpendsBudgetCard(
 ) {
     var flipCard by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val percent = BigDecimal.ONE.minus(spend.div(budget))
+    val temp = spend.divide(budget, 4, RoundingMode.HALF_UP)
+    val percent = BigDecimal.ONE.minus(temp)
 
-    val bigDecimal = BigDecimal((1 - percent.toDouble()) * 100).setScale(2, RoundingMode.HALF_UP)
-    val percentFormatted = bigDecimal.toFloat()
-    val showPercent = percentFormatted
+    val showPercentSpent = temp.multiply(BigDecimal(100)).setScale(2, RoundingMode.HALF_UP)
+    val showPercentRemaining = BigDecimal.ONE.minus(temp).multiply(BigDecimal(100)).setScale(
+        2,
+        RoundingMode.HALF_UP
+    )
 
 //    val percentFormatted =  remember{
 //        val formatter = NumberFormat.getNumberInstance(Locale.getDefault())
@@ -98,7 +101,9 @@ fun SpendsBudgetCard(
     )
 
     StatCard(
-        modifier = modifier.clip(MaterialTheme.shapes.extraLarge ).clickable { flipCard = !flipCard },
+        modifier = modifier
+            .clip(MaterialTheme.shapes.extraLarge)
+            .clickable { flipCard = !flipCard },
         colors = CardDefaults.cardColors(
             containerColor = harmonizedColor.container,
             contentColor = harmonizedColor.onContainer,
@@ -113,7 +118,7 @@ fun SpendsBudgetCard(
         content = {
             Spacer(modifier = Modifier.height(6.dp))
             Text(
-                text = if (flipCard) "${100f - showPercent}% of budget remaining" else "${showPercent}% of budget spent",
+                text = if (flipCard) "${showPercentRemaining}% of budget remaining" else "${showPercentSpent}% of budget spent",
                 style = MaterialTheme.typography.bodyMedium,
             )
         },
