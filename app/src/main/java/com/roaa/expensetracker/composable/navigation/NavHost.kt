@@ -1,7 +1,6 @@
 package com.roaa.expensetracker.composable.navigation
 
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
@@ -41,124 +40,118 @@ fun RootNavGraph(
     viewModel: AllViewModel,
     startDestination: Destinations
 ) {
-    SharedTransitionLayout {
-        val context = LocalContext.current
-        NavHost(
-            navController = rooNavController,
-            startDestination = NavRoutes.HomeScreen,
-        ) {
+    val context = LocalContext.current
+    NavHost(
+        navController = rooNavController,
+        startDestination = NavRoutes.HomeScreen,
+    ) {
 
-            navigation<NavRoutes.HomeScreen>(startDestination = startDestination) {
-                composable<Destinations.ListScreen> {
-                    TransactionsListCompose(
-                        navigationManager,
-                        viewModel,
-                        modifier = Modifier,
-                        showSingleDateTransactions = false,
-                        date = LocalDate.now().toLong(),
-                    )
-                }
-                composable<Destinations.MonthScreen> {
-                    MonthViewScreen(
-                        rooNavController,
-                        navigationManager,
-                        viewModel,
-                        modifier = Modifier,
-                    )
-                }
-                composable<Destinations.DayScreen> {
-                    val args = it.toRoute<Destinations.DayScreen>()
-                    DayViewScreen(rooNavController, navigationManager, viewModel, args.date)
-                }
-
-                composable<Destinations.WelcomeScreen> {
-                    OnboardingScreen(rooNavController, navigationManager, viewModel)
-                }
-            }
-
-            navigation<NavRoutes.AppScreen>(startDestination = Destinations.BudgetScreen) {
-
-                composable<Destinations.CategoryScreen>() {
-                    CategoryScreen(
-                        rooNavController,
-                        navigationManager,
-                        viewModel,
-                        sharedTransitionScope = this@SharedTransitionLayout,
-                        animatedVisibilityScope = this
-                    )
-                }
-                composable<Destinations.CategoryDetailsScreen> {
-                    val args = it.toRoute<Destinations.CategoryDetailsScreen>()
-                    AddCategory(
-                        rooNavController,
-                        navigationManager,
-                        viewModel,
-                        args.categoryId,
-                        args.categoryName,
-                        args.categoryIconNumber,
-                        args.categoryType,
-                        sharedTransitionScope = this@SharedTransitionLayout,
-                        animatedVisibilityScope = this
-                    )
-                }
-
-
-                composable<Destinations.BudgetScreen>() {
-                    BudgetScreen(
-                        rooNavController,
-                        navigationManager,
-                        viewModel,
-                        modifier = Modifier
-                    )
-                }
-
-                composable<Destinations.BankAccountScreen>() {
-                    PaymentMethodScreen(
-                        rooNavController,
-                        navigationManager,
-                        viewModel,
-                    )
-                }
-                composable<Destinations.SettingScreen>() {
-                    SettingsScreen(rooNavController, navigationManager, viewModel, {})
-                }
-
-                composable<Destinations.StatisticsScreen>() {
-                    StatisticsScreenTest(rooNavController, navigationManager, viewModel)
-                }
-            }
-            composable<Destinations.DetailsScreen> {
-                val args = it.toRoute<Destinations.DetailsScreen>()
-                TransactionDetailsScreen(
+        navigation<NavRoutes.HomeScreen>(startDestination = startDestination) {
+            composable<Destinations.ListScreen> {
+                TransactionsListCompose(
+                    navigationManager,
+                    viewModel,
                     modifier = Modifier,
+                    showSingleDateTransactions = false,
+                    date = LocalDate.now().toLong(),
+                )
+            }
+            composable<Destinations.MonthScreen> {
+                MonthViewScreen(
                     rooNavController,
                     navigationManager,
                     viewModel,
-                )
-            }
-            composable<Destinations.BankDetailsScreen> {
-                val args = it.toRoute<Destinations.BankDetailsScreen>()
-                PaymentDetailsScreen(
-                    rootNavController = rooNavController,
-                    navigationManager = navigationManager,
-                    viewModel = viewModel,
                     modifier = Modifier,
-                    bankAccountId = args.bankAccountId,
                 )
             }
-            composable<Destinations.BudgetSetupScreen> {
-                val args = it.toRoute<Destinations.BudgetSetupScreen>()
-                BudgetSetupScreen(
-                    rooNavController,
-                    navigationManager,
-                    viewModel,
-                    args.type,
-                    args.budgetId
-                )
+            composable<Destinations.DayScreen> {
+                val args = it.toRoute<Destinations.DayScreen>()
+                DayViewScreen(rooNavController, navigationManager, viewModel, args.date)
+            }
+
+            composable<Destinations.WelcomeScreen> {
+                OnboardingScreen(rooNavController, navigationManager, viewModel)
             }
         }
 
+        navigation<NavRoutes.AppScreen>(startDestination = Destinations.BudgetScreen) {
+
+            composable<Destinations.CategoryScreen>() {
+                CategoryScreen(
+                    rooNavController,
+                    navigationManager,
+                    viewModel,
+                )
+            }
+            composable<Destinations.CategoryDetailsScreen> {
+                val args = it.toRoute<Destinations.CategoryDetailsScreen>()
+                AddCategory(
+                    rooNavController,
+                    navigationManager,
+                    viewModel,
+                    args.categoryId,
+                    args.categoryName,
+                    args.categoryIconNumber,
+                    args.categoryType,
+                )
+            }
+
+
+            composable<Destinations.BudgetScreen>() {
+                BudgetScreen(
+                    rooNavController,
+                    navigationManager,
+                    viewModel,
+                    modifier = Modifier
+                )
+            }
+
+            composable<Destinations.BankAccountScreen>() {
+                PaymentMethodScreen(
+                    rooNavController,
+                    navigationManager,
+                    viewModel,
+                )
+            }
+            composable<Destinations.SettingScreen>() {
+                SettingsScreen(rooNavController, navigationManager, viewModel, {})
+            }
+
+            composable<Destinations.StatisticsScreen>() {
+                StatisticsScreenTest(rooNavController, navigationManager, viewModel)
+            }
+        }
+        composable<Destinations.DetailsScreen> {
+            val args = it.toRoute<Destinations.DetailsScreen>()
+            TransactionDetailsScreen(
+                modifier = Modifier,
+                rooNavController,
+                navigationManager,
+                viewModel,
+            )
+        }
+        composable<Destinations.BankDetailsScreen> {
+            val args = it.toRoute<Destinations.BankDetailsScreen>()
+            PaymentDetailsScreen(
+                rootNavController = rooNavController,
+                navigationManager = navigationManager,
+                viewModel = viewModel,
+                modifier = Modifier,
+                bankAccountId = args.bankAccountId,
+            )
+        }
+        composable<Destinations.BudgetSetupScreen> {
+            val args = it.toRoute<Destinations.BudgetSetupScreen>()
+            BudgetSetupScreen(
+                rooNavController,
+                navigationManager,
+                viewModel,
+                args.type,
+                args.budgetId
+            )
+        }
     }
+
 }
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -169,121 +162,114 @@ fun AppNavGraph(
     viewModel: AllViewModel,
     startDestination: Destinations
 ) {
-    SharedTransitionLayout {
-        val context = LocalContext.current
-        NavHost(
-            navController = rooNavController,
-            startDestination = NavRoutes.HomeScreen,
-        ) {
+    val context = LocalContext.current
+    NavHost(
+        navController = rooNavController,
+        startDestination = NavRoutes.HomeScreen,
+    ) {
 
-            navigation<NavRoutes.HomeScreen>(startDestination = startDestination) {
-                composable<Destinations.ListScreen> {
-                    TransactionsListCompose(
-                        navigationManager,
-                        viewModel,
-                        modifier = Modifier,
-                        showSingleDateTransactions = false,
-                        date = LocalDate.now().toLong(),
-                    )
-                }
-                composable<Destinations.MonthScreen> {
-                    MonthViewScreen(
-                        rooNavController,
-                        navigationManager,
-                        viewModel,
-                        modifier = Modifier,
-                    )
-                }
-                composable<Destinations.DayScreen> {
-                    val args = it.toRoute<Destinations.DayScreen>()
-                    DayViewScreen(rooNavController, navigationManager, viewModel, args.date)
-                }
-                composable<Destinations.WelcomeScreen> {
-                    OnboardingScreen(rooNavController, navigationManager, viewModel)
-                }
-            }
-
-            navigation<NavRoutes.AppScreen>(startDestination = Destinations.BudgetScreen) {
-
-                composable<Destinations.CategoryScreen>() {
-                    CategoryScreen(
-                        rooNavController,
-                        navigationManager,
-                        viewModel,
-                        sharedTransitionScope = this@SharedTransitionLayout,
-                        animatedVisibilityScope = this
-                    )
-                }
-                composable<Destinations.CategoryDetailsScreen> {
-                    val args = it.toRoute<Destinations.CategoryDetailsScreen>()
-                    AddCategory(
-                        rooNavController,
-                        navigationManager,
-                        viewModel,
-                        args.categoryId,
-                        args.categoryName,
-                        args.categoryIconNumber,
-                        args.categoryType,
-                        sharedTransitionScope = this@SharedTransitionLayout,
-                        animatedVisibilityScope = this
-                    )
-                }
-
-
-                composable<Destinations.BudgetScreen>() {
-                    BudgetScreen(
-                        rooNavController,
-                        navigationManager,
-                        viewModel,
-                        modifier = Modifier
-                    )
-                }
-
-                composable<Destinations.BankAccountScreen>() {
-                    PaymentMethodScreen(
-                        rooNavController,
-                        navigationManager,
-                        viewModel,
-                    )
-                }
-                composable<Destinations.SettingScreen>() {
-                    SettingsScreen(rooNavController, navigationManager, viewModel, {})
-                }
-                composable<Destinations.StatisticsScreen>() {
-                    StatisticsScreenTest(rooNavController, navigationManager, viewModel)
-                }
-            }
-            composable<Destinations.DetailsScreen> {
-                val args = it.toRoute<Destinations.DetailsScreen>()
-                TransactionDetailsScreen(
+        navigation<NavRoutes.HomeScreen>(startDestination = startDestination) {
+            composable<Destinations.ListScreen> {
+                TransactionsListCompose(
+                    navigationManager,
+                    viewModel,
                     modifier = Modifier,
+                    showSingleDateTransactions = false,
+                    date = LocalDate.now().toLong(),
+                )
+            }
+            composable<Destinations.MonthScreen> {
+                MonthViewScreen(
                     rooNavController,
                     navigationManager,
                     viewModel,
-                )
-            }
-            composable<Destinations.BankDetailsScreen> {
-                val args = it.toRoute<Destinations.BankDetailsScreen>()
-                PaymentDetailsScreen(
-                    rootNavController = rooNavController,
-                    navigationManager = navigationManager,
-                    viewModel = viewModel,
                     modifier = Modifier,
-                    args.bankAccountId,
                 )
             }
-            composable<Destinations.BudgetSetupScreen>() {
-                val args = it.toRoute<Destinations.BudgetSetupScreen>()
-                BudgetSetupScreen(
-                    rooNavController,
-                    navigationManager,
-                    viewModel,
-                    args.type,
-                    args.budgetId
-                )
+            composable<Destinations.DayScreen> {
+                val args = it.toRoute<Destinations.DayScreen>()
+                DayViewScreen(rooNavController, navigationManager, viewModel, args.date)
+            }
+            composable<Destinations.WelcomeScreen> {
+                OnboardingScreen(rooNavController, navigationManager, viewModel)
             }
         }
 
+        navigation<NavRoutes.AppScreen>(startDestination = Destinations.BudgetScreen) {
+
+            composable<Destinations.CategoryScreen>() {
+                CategoryScreen(
+                    rooNavController,
+                    navigationManager,
+                    viewModel,
+                )
+            }
+            composable<Destinations.CategoryDetailsScreen> {
+                val args = it.toRoute<Destinations.CategoryDetailsScreen>()
+                AddCategory(
+                    rooNavController,
+                    navigationManager,
+                    viewModel,
+                    args.categoryId,
+                    args.categoryName,
+                    args.categoryIconNumber,
+                    args.categoryType,
+                )
+            }
+
+
+            composable<Destinations.BudgetScreen>() {
+                BudgetScreen(
+                    rooNavController,
+                    navigationManager,
+                    viewModel,
+                    modifier = Modifier
+                )
+            }
+
+            composable<Destinations.BankAccountScreen>() {
+                PaymentMethodScreen(
+                    rooNavController,
+                    navigationManager,
+                    viewModel,
+                )
+            }
+            composable<Destinations.SettingScreen>() {
+                SettingsScreen(rooNavController, navigationManager, viewModel, {})
+            }
+            composable<Destinations.StatisticsScreen>() {
+                StatisticsScreenTest(rooNavController, navigationManager, viewModel)
+            }
+        }
+        composable<Destinations.DetailsScreen> {
+            val args = it.toRoute<Destinations.DetailsScreen>()
+            TransactionDetailsScreen(
+                modifier = Modifier,
+                rooNavController,
+                navigationManager,
+                viewModel,
+            )
+        }
+        composable<Destinations.BankDetailsScreen> {
+            val args = it.toRoute<Destinations.BankDetailsScreen>()
+            PaymentDetailsScreen(
+                rootNavController = rooNavController,
+                navigationManager = navigationManager,
+                viewModel = viewModel,
+                modifier = Modifier,
+                args.bankAccountId,
+            )
+        }
+        composable<Destinations.BudgetSetupScreen>() {
+            val args = it.toRoute<Destinations.BudgetSetupScreen>()
+            BudgetSetupScreen(
+                rooNavController,
+                navigationManager,
+                viewModel,
+                args.type,
+                args.budgetId
+            )
+        }
     }
 }
 

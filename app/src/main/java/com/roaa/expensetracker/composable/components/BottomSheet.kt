@@ -129,6 +129,7 @@ import com.roaa.expensetracker.composable.utils.DistributionMethod
 import com.roaa.expensetracker.composable.utils.IconState
 import com.roaa.expensetracker.composable.utils.IconStateForType
 import com.roaa.expensetracker.composable.utils.colorList
+import com.roaa.expensetracker.composable.utils.combineColors
 import com.roaa.expensetracker.composable.utils.distributionChoiceList
 import com.roaa.expensetracker.composable.utils.iconsList
 import com.roaa.expensetracker.composable.utils.toPalette
@@ -3069,4 +3070,109 @@ fun BankDetailsBottomSheetContent(
 @Composable
 private fun BankDetailsBottomSheetContentPreview() {
     BankDetailsBottomSheetContent(emptyBank, {}, {}, {}, {})
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun CategoryDetailsBottomSheet(
+    categoryClass: CategoryClass,
+    onDismiss: () -> Unit,
+    editButtonClicked: (CategoryClass) -> Unit,
+    deleteButtonClicked: (CategoryClass) -> Unit,
+    statAnalysisClicked: (CategoryClass) -> Unit,
+    specificTransactionsClicked: (CategoryClass) -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    ModalBottomSheet(
+        onDismissRequest = { onDismiss() },
+        sheetState = sheetState,
+        modifier = Modifier
+            .imePadding()
+            .navigationBarsPadding()
+    ) {
+        CategoryDetailsBottomSheetContent(
+            categoryClass,
+            {
+                editButtonClicked(categoryClass)
+            },
+            { deleteButtonClicked(categoryClass) },
+            { statAnalysisClicked(categoryClass) },
+            { specificTransactionsClicked(categoryClass) })
+    }
+}
+
+@Composable
+fun CategoryDetailsBottomSheetContent(
+    categoryClass: CategoryClass,
+    editButtonClicked: () -> Unit,
+    deleteButtonClicked: () -> Unit,
+    statAnalysisClicked: () -> Unit,
+    specificTransactionsClicked: () -> Unit
+) {
+    val containerColor by animateColorAsState(
+        targetValue = combineColors(
+            MaterialTheme.colorScheme.surface,
+            if (categoryClass.categoryType == EXPENSE) orange else greenColor,
+            angle = 0.1f,
+        )
+    )
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Box() {
+            Surface(
+                shape = RoundedCornerShape(20),
+                modifier = Modifier
+                    .size(160.dp)
+                    .fillMaxSize(),
+                color = containerColor
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(24.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+
+                    val image =
+                        rememberAsyncImagePainter(IconState.fromNumber(categoryClass.categoryIconNumber))
+                    Image(
+                        painter = image,
+                        contentDescription = "Image ${categoryClass.categoryIconNumber}",
+                        modifier = Modifier
+                            .size(96.dp)
+
+                    )
+                }
+            }
+        }
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = categoryClass.categoryName,
+            modifier = Modifier.fillMaxWidth(),
+            textAlign = TextAlign.Center,
+            style = typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+        Spacer(Modifier.height(24.dp))
+        FilledTonalButton(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth(), onClick = { statAnalysisClicked() }) {
+            Text(text = "View Statistical Analysis")
+        }
+        Spacer(Modifier.height(8.dp))
+        FilledTonalButton(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth(), onClick = { specificTransactionsClicked() }) {
+            Text(text = "View specific transactions")
+        }
+        ViewItemBottomRow(Modifier, { editButtonClicked() }, { deleteButtonClicked() })
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun CategoryDetailsBottomSheetContentPreview() {
+    CategoryDetailsBottomSheetContent(emptyCategoryClass, {}, {}, {}, {})
 }

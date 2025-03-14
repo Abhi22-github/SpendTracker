@@ -2,9 +2,7 @@ package com.roaa.expensetracker.composable.screens
 
 import android.annotation.SuppressLint
 import androidx.activity.compose.BackHandler
-import androidx.compose.animation.AnimatedContentScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
-import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.animateDpAsState
@@ -105,8 +103,6 @@ fun AddCategory(
     categoryName: String,
     categoryIcon: Int,
     categoryType: String,
-    sharedTransitionScope: SharedTransitionScope,
-    animatedVisibilityScope: AnimatedContentScope,
 ) {
     val categoryClass = CategoryClass(categoryId, categoryName, 1, categoryIcon, categoryType, true)
     val showDeleteButton by remember { mutableStateOf(if (categoryClass.categoryId == 0L) false else true) }
@@ -121,27 +117,24 @@ fun AddCategory(
         handleBackNavigation(navigationManager)
     }
 
-    with(sharedTransitionScope) {
-        ExpenseTrackerTheme {
-            Scaffold(topBar = {
-                TopBar(
-                    title = if (categoryId == 0L) "Add Category" else "Edit Category",
-                    showDelete = true,
-                    sendUserBackToPreviousActivity = { handleBackNavigation(navigationManager) },
-                    delete = {
-                        confirmationDialogType = 1
-                        showConfirmationDialog = true
-                    }
-                )
-            }) { paddingValues ->
-                ScaffoldContentDetails(
-                    Modifier.padding(paddingValues),
-                    viewModel,
-                    categoryClass,
-                    { rootNavController.onBackPressed() },
-                    animatedVisibilityScope
-                )
-            }
+    ExpenseTrackerTheme {
+        Scaffold(topBar = {
+            TopBar(
+                title = if (categoryId == 0L) "Add Category" else "Edit Category",
+                showDelete = showDeleteButton,
+                sendUserBackToPreviousActivity = { handleBackNavigation(navigationManager) },
+                delete = {
+                    confirmationDialogType = 1
+                    showConfirmationDialog = true
+                }
+            )
+        }) { paddingValues ->
+            ScaffoldContentDetails(
+                Modifier.padding(paddingValues),
+                viewModel,
+                categoryClass,
+                { rootNavController.onBackPressed() },
+            )
         }
     }
     if (showConfirmationDialog) {
@@ -163,8 +156,8 @@ fun AddCategory(
                 modifier = Modifier,
                 shouldEnableTheMigration = true,
                 categoryClass = categoryClass,
-                categoryClassList = if(categoryClass.categoryType == EXPENSE) allExpenseCategoryList else allIncomeCategoryList,
-                performAction = {action, targetCategoryClass ->
+                categoryClassList = if (categoryClass.categoryType == EXPENSE) allExpenseCategoryList else allIncomeCategoryList,
+                performAction = { action, targetCategoryClass ->
                     when (action) {
                         DeleteAction.DELETE -> {
                             scope.launch {
@@ -192,7 +185,7 @@ fun AddCategory(
                         navigationManager
                     )
                 },
-                onDismissRequest = {showConfirmationDialog = !showConfirmationDialog}
+                onDismissRequest = { showConfirmationDialog = !showConfirmationDialog }
             )
         }
         //for confirming the update action
@@ -212,15 +205,15 @@ fun AddCategory(
     }
 }
 
+
 @SuppressLint("UnusedBoxWithConstraintsScope")
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalSharedTransitionApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun SharedTransitionScope.ScaffoldContentDetails(
+fun ScaffoldContentDetails(
     modifier: Modifier = Modifier,
     viewModel: AllViewModel,
     categoryClass: CategoryClass,
     backButtonClick: () -> Unit,
-    animatedVisibilityScope: AnimatedContentScope,
 ) {
     var categoryName by remember { mutableStateOf(categoryClass.categoryName) }
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
@@ -298,12 +291,7 @@ fun SharedTransitionScope.ScaffoldContentDetails(
                             contentDescription = "Image ${categoryClass.categoryIconNumber}",
                             modifier = Modifier
                                 .size(96.dp)
-                                .sharedElement(
-                                    state = rememberSharedContentState(key = "image/${categoryClass.categoryId}"),
-                                    animatedVisibilityScope = animatedVisibilityScope,
-                                ),
                         )
-                        //  }
                     }
                 }
                 FilledTonalIconButton(
@@ -325,17 +313,13 @@ fun SharedTransitionScope.ScaffoldContentDetails(
                 onValueChange = { newText ->
                     categoryName = newText
                     scope.launch {
-                       viewModel.uiViewModel.errorStatusInAddCategory.emit(false)
+                        viewModel.uiViewModel.errorStatusInAddCategory.emit(false)
                     }
                 },
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(30.dp, 8.dp)
-                    .sharedElement(
-                        state = rememberSharedContentState(key = "text/${categoryClass.categoryId}"),
-                        animatedVisibilityScope = animatedVisibilityScope,
-                    ),
+                    .padding(30.dp, 8.dp),
                 placeholder = {
                     Text(
                         "Category Name",
@@ -399,12 +383,11 @@ fun SharedTransitionScope.ScaffoldContentDetails(
                 )
             }
 
-
         }
     }
 
     if (bottomSheetStatus) {
-        BottomSheetIconPicker(bottomSheetState,viewModel) {
+        BottomSheetIconPicker(bottomSheetState, viewModel) {
             bottomSheetStatus = !bottomSheetStatus
         }
     }
@@ -501,34 +484,38 @@ fun TextSwitch(
 
             )
 
-            Row(modifier = Modifier
-                .fillMaxWidth()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
 
-                .drawWithContent {
+                    .drawWithContent {
 
-                    //   This is for setting black text while drawing on white background
-                    val padding = 8.dp.toPx()
-                    drawRoundRect(
-                        topLeft = Offset(x = indicatorOffset.toPx() + padding, padding),
-                        size = Size(size.width / 2 - padding * 2, size.height - padding * 2),
-                        color = selectedButtonTextColor,
-                        cornerRadius = CornerRadius(x = 35.dp.toPx(), y = 35.dp.toPx()),
-                    )
-
-                    drawWithLayer {
-                        drawContent()
-
-                        // This is white top rounded rectangle
+                        //   This is for setting black text while drawing on white background
+                        val padding = 8.dp.toPx()
                         drawRoundRect(
-                            topLeft = Offset(x = indicatorOffset.toPx(), 0f),
-                            size = Size(size.width / 2, size.height),
-                            color = selectedButtonColor,
+                            topLeft = Offset(x = indicatorOffset.toPx() + padding, padding),
+                            size = Size(
+                                size.width / 2 - padding * 2,
+                                size.height - padding * 2
+                            ),
+                            color = selectedButtonTextColor,
                             cornerRadius = CornerRadius(x = 35.dp.toPx(), y = 35.dp.toPx()),
-                            blendMode = BlendMode.SrcOut
                         )
-                    }
 
-                }
+                        drawWithLayer {
+                            drawContent()
+
+                            // This is white top rounded rectangle
+                            drawRoundRect(
+                                topLeft = Offset(x = indicatorOffset.toPx(), 0f),
+                                size = Size(size.width / 2, size.height),
+                                color = selectedButtonColor,
+                                cornerRadius = CornerRadius(x = 35.dp.toPx(), y = 35.dp.toPx()),
+                                blendMode = BlendMode.SrcOut
+                            )
+                        }
+
+                    }
             ) {
                 items.forEachIndexed { index, text ->
                     Box(
@@ -598,34 +585,35 @@ fun ThreeOptionTextSwitch(
 
             )
 
-            Row(modifier = Modifier
-                .fillMaxWidth()
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
 
-                .drawWithContent {
+                    .drawWithContent {
 
-                    //   This is for setting black text while drawing on white background
-                    val padding = 8.dp.toPx()
-                    drawRoundRect(
-                        topLeft = Offset(x = indicatorOffset.toPx() + padding, padding),
-                        size = Size(size.width / 3 - padding , size.height - padding * 2),
-                        color = selectedButtonTextColor,
-                        cornerRadius = CornerRadius(x = 35.dp.toPx(), y = 35.dp.toPx()),
-                    )
-
-                    drawWithLayer {
-                        drawContent()
-
-                        // This is white top rounded rectangle
+                        //   This is for setting black text while drawing on white background
+                        val padding = 8.dp.toPx()
                         drawRoundRect(
-                            topLeft = Offset(x = indicatorOffset.toPx(), 0f),
-                            size = Size(size.width / 3, size.height),
-                            color = selectedButtonColor,
-                            cornerRadius = CornerRadius(x = 25.dp.toPx(), y = 25.dp.toPx()),
-                            blendMode = BlendMode.SrcOut
+                            topLeft = Offset(x = indicatorOffset.toPx() + padding, padding),
+                            size = Size(size.width / 3 - padding, size.height - padding * 2),
+                            color = selectedButtonTextColor,
+                            cornerRadius = CornerRadius(x = 35.dp.toPx(), y = 35.dp.toPx()),
                         )
-                    }
 
-                }
+                        drawWithLayer {
+                            drawContent()
+
+                            // This is white top rounded rectangle
+                            drawRoundRect(
+                                topLeft = Offset(x = indicatorOffset.toPx(), 0f),
+                                size = Size(size.width / 3, size.height),
+                                color = selectedButtonColor,
+                                cornerRadius = CornerRadius(x = 25.dp.toPx(), y = 25.dp.toPx()),
+                                blendMode = BlendMode.SrcOut
+                            )
+                        }
+
+                    }
             ) {
                 items.forEachIndexed { index, text ->
                     Box(
