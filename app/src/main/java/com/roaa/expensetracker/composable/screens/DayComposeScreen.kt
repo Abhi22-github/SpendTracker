@@ -92,6 +92,7 @@ import com.roaa.expensetracker.utilities.utilityModalClass.emptyBudgetClass
 import com.roaa.expensetracker.utilities.utilityModalClass.emptyBudgetDayClass
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
+import java.math.RoundingMode
 import java.time.LocalDate
 
 @Composable
@@ -106,7 +107,7 @@ fun DayScreen(
         scope.launch { viewModel.uiViewModel.selectedMonth.emit(currentMonth) }
     }
     Column {
-        TransactionsListCompose(navigationManager,viewModel, Modifier, true, date )
+        TransactionsListCompose(navigationManager, viewModel, Modifier, true, date)
     }
 }
 
@@ -190,26 +191,23 @@ fun DayViewScreen(
             emptyBudgetClass, listOf(emptyBudgetDayClass)
         )
     }
-    val oldPercent = if (getCurrentBudget.budgetSummary.budgetAmountPerDay != BigDecimal.ZERO) {
-        // Safe division: Handle division by zero and null values
-        getTotalAmountForDateExcludingLast / getCurrentBudget.budgetSummary.budgetAmountPerDay
-    } else {
-        // Handle edge case (division by zero or null value)
-        BigDecimal.ZERO  // or use another default value, depending on your requirements
-    }
-    val percent = if (getCurrentBudget.budgetSummary.budgetAmountPerDay != BigDecimal.ZERO) {
-        // Safe division: Handle division by zero and null values
-        getTotalExpenseAmountForDate / getCurrentBudget.budgetSummary.budgetAmountPerDay
-    } else {
-        // Handle edge case (division by zero or null value)
-        BigDecimal.ZERO  // or use another default value, depending on your requirements
-    }
 
-    LaunchedEffect(pagerState.currentPage,getCurrentBudget) {
+    val oldPercent = getTotalAmountForDateExcludingLast.divide(
+        if (getCurrentBudget.budgetSummary.budgetAmountPerDay == BigDecimal.ZERO) BigDecimal.ONE else getCurrentBudget.budgetSummary.budgetAmountPerDay,
+        2,
+        RoundingMode.HALF_UP
+    )
+
+    val percent = getTotalExpenseAmountForDate.divide(
+        if (getCurrentBudget.budgetSummary.budgetAmountPerDay == BigDecimal.ZERO) BigDecimal.ONE else getCurrentBudget.budgetSummary.budgetAmountPerDay,
+        2,
+        RoundingMode.HALF_UP
+    )
+
+    LaunchedEffect(pagerState.currentPage, getCurrentBudget) {
 
         currentDay = calculateCurrentPageDay(pagerState.currentPage, 250, date.toLocalDate())
-        if (currentDay.toLong() <= getCurrentBudget.budgetSummary.budgetEndDate && currentDay.toLong() >= getCurrentBudget.budgetSummary.budgetStartDate
-        ) {
+        if (currentDay.toLong() <= getCurrentBudget.budgetSummary.budgetEndDate && currentDay.toLong() >= getCurrentBudget.budgetSummary.budgetStartDate) {
             isBudgetSet = true
         } else {
             isBudgetSet = false
@@ -257,16 +255,12 @@ fun DayViewScreen(
         }
         Spacer(Modifier.height(8.dp))
         HorizontalPager(
-            state = pagerState,
-            modifier = Modifier.padding(top = 0.dp)
+            state = pagerState, modifier = Modifier.padding(top = 0.dp)
         ) { page ->
             val selectedDay = calculateCurrentPageDay(page, 250, date.toLocalDate())
             Column {
                 DayScreen(
-                    navigationManager,
-                    false,
-                    selectedDay.toLong(),
-                    viewModel
+                    navigationManager, false, selectedDay.toLong(), viewModel
                 )
             }
         }
@@ -287,18 +281,18 @@ fun TabItem(
 
     val dataSplit = data.split(",")
     Box(Modifier.padding(horizontal = 5.dp)) {
-        Box(modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .clickable { onClick() }
-            .background(
+        Box(
+            modifier = Modifier
+                .clip(RoundedCornerShape(50))
+                .clickable { onClick() }
+                .background(
 //                if (isSelected) MaterialTheme.colorScheme.primaryContainer else MaterialTheme.colorScheme.primaryContainer.copy(
 //                    alpha = 0.4f
 //                ),
-                Color.Transparent,
-                RoundedCornerShape(10.dp)
-            )
-            .width(tabSize)
-            .onGloballyPositioned { tabRef.value = it }) {
+                    Color.Transparent, RoundedCornerShape(10.dp)
+                )
+                .width(tabSize)
+                .onGloballyPositioned { tabRef.value = it }) {
             Column(
                 verticalArrangement = Arrangement.Center,
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -323,8 +317,7 @@ fun TabItem(
                         .background(
                             if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.primaryContainer.copy(
                                 alpha = 0.3f
-                            ),
-                            RoundedCornerShape(50)
+                            ), RoundedCornerShape(50)
                         )
                         .aspectRatio(1f)
                 ) {
@@ -347,9 +340,7 @@ fun TabItem(
 }
 
 private fun calculateCurrentPageDay(
-    page: Int,
-    initialPage: Int,
-    currentDate: LocalDate
+    page: Int, initialPage: Int, currentDate: LocalDate
 ): LocalDate {
     val monthsOffset = (page - initialPage).toLong()
     return currentDate.plusDays(monthsOffset)
@@ -383,8 +374,7 @@ fun DayStatCard(
                     colorGood,
                 ),
                 percentWithNewSpentAnimated.coerceIn(0f, 1f),
-            ),
-            colorEditor
+            ), colorEditor
         )
     )
 
@@ -406,18 +396,19 @@ fun DayStatCard(
             Modifier
         ) {
             val (content, decoration1, decoration2) = createRefs()
-            Column(Modifier
-                .constrainAs(content) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                }.animateContentSize()
-                .zIndex(1f)) {
+            Column(
+                Modifier
+                    .constrainAs(content) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    }
+                    .animateContentSize()
+                    .zIndex(1f)) {
                 Box(Modifier.clickable { mainContentVisibility = !mainContentVisibility }) {
                     Row(
-                        Modifier
-                            .padding(vertical = 12.dp),
+                        Modifier.padding(vertical = 12.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Spacer(Modifier.width(24.dp))
@@ -463,13 +454,11 @@ fun DayStatCard(
                         Spacer(Modifier.width(24.dp))
                     }
                 }
-                if (false)
-                    HorizontalDivider(
-                        thickness = 0.7.dp,
-                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                        modifier = Modifier
-                            .padding(horizontal = 12.dp)
-                    )
+                if (false) HorizontalDivider(
+                    thickness = 0.7.dp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                    modifier = Modifier.padding(horizontal = 12.dp)
+                )
                 BoxWithConstraints {
                     val width by animateDpAsState(if (isBudgetSet) maxWidth / 3 else maxWidth / 2)
                     Row(
@@ -490,7 +479,8 @@ fun DayStatCard(
                                 Modifier
                                     .width(width)
                                     .wrapContentHeight(),
-                                parseAmount(budgetAmountPerDay), "Budget"
+                                parseAmount(budgetAmountPerDay),
+                                "Budget"
                             )
                         }
                     }
@@ -500,8 +490,7 @@ fun DayStatCard(
                     HorizontalDivider(
                         thickness = 0.7.dp,
                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
-                        modifier = Modifier
-                            .padding(horizontal = 12.dp)
+                        modifier = Modifier.padding(horizontal = 12.dp)
                     )
                     Row(modifier = Modifier.padding(12.dp, 16.dp)) {
                         RestBudgetPill(
@@ -520,7 +509,8 @@ fun DayStatCard(
                     .constrainAs(decoration1) {
                         top.linkTo(parent.top, margin = -30.dp)
                         end.linkTo(parent.end, margin = -30.dp)
-                    }, colorFilter = ColorFilter.tint(harmonizedColor.container)
+                    },
+                colorFilter = ColorFilter.tint(harmonizedColor.container)
             )
         }
     }
