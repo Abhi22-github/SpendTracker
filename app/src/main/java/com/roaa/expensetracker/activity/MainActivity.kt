@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -44,7 +45,6 @@ import androidx.compose.material3.NavigationDrawerItemDefaults
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
@@ -256,114 +256,121 @@ fun NavigationDrawer(
         drawerContent = {
             CompositionLocalProvider(
             ) {
-                ModalDrawerSheet(Modifier.width(320.dp))
-                {
-                    Spacer(modifier = Modifier.height(16.dp)) //space (margin) from top
-                    Row(
-                        modifier = Modifier.padding(20.dp, 8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                Box(Modifier.fillMaxSize().clickable { scope.launch { drawerState.close() }}) {
+                    ModalDrawerSheet(
+                        Modifier
+                            .width(320.dp)
+                            .clickable(enabled = drawerState.isOpen) { // Close on outside tap
+                                scope.launch { drawerState.close() }
+                            })
+                    {
+                        Spacer(modifier = Modifier.height(16.dp)) //space (margin) from top
+                        Row(
+                            modifier = Modifier.padding(20.dp, 8.dp),
+                            verticalAlignment = Alignment.CenterVertically
 
-                    ) {
-                        Image(
-                            painter = painterResource(R.drawable.app_icon),
-                            contentDescription = "App icon",
-                            modifier = Modifier.size(24.dp),
-                        )
+                        ) {
+                            Image(
+                                painter = painterResource(R.drawable.app_icon),
+                                contentDescription = "App icon",
+                                modifier = Modifier.size(24.dp),
+                            )
 
-                        Text(
-                            text = "Expense Tracker",
-                            modifier = Modifier.padding(12.dp, 0.dp),
-                            style = MaterialTheme.typography.titleMedium,
-                        )
-                    }
+                            Text(
+                                text = "Expense Tracker",
+                                modifier = Modifier.padding(12.dp, 0.dp),
+                                style = MaterialTheme.typography.titleMedium,
+                            )
+                        }
 
-                    Spacer(Modifier.height(24.dp))
-                    section1.forEachIndexed { index, item ->
-                        NavigationDrawerItem(
-                            label = {
-                                Text(
-                                    text = item.title,
-                                    modifier = Modifier.padding(12.dp, 0.dp),
-                                    style = MaterialTheme.typography.labelLarge
-                                )
-                            },
-                            selected = index == selectedItemIndex,
-                            onClick = {
-                                selectedItemIndex = index
-                                scope.launch {
-                                    drawerState.close()
-                                }
-                                rootNavController.navigateToWithSingleTop(item.route)
-                            },
-                            icon = {
-                                Icon(
-                                    imageVector = if (index == selectedItemIndex) {
-                                        ImageVector.vectorResource(item.selectedIcon)
-                                    } else ImageVector.vectorResource(item.unselectedIcon),
-                                    contentDescription = item.title,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            },
-                            badge = {  // Show Badge
-                                item.badgeCount?.let {
+                        Spacer(Modifier.height(24.dp))
+                        section1.forEachIndexed { index, item ->
+                            NavigationDrawerItem(
+                                label = {
                                     Text(
-                                        text = item.badgeCount.toString(),
+                                        text = item.title,
+                                        modifier = Modifier.padding(12.dp, 0.dp),
                                         style = MaterialTheme.typography.labelLarge
                                     )
-                                }
-                            },
-                            modifier = Modifier
-                                .padding(NavigationDrawerItemDefaults.ItemPadding) //padding between items
+                                },
+                                selected = index == selectedItemIndex,
+                                onClick = {
+                                    selectedItemIndex = index
+                                    scope.launch {
+                                        drawerState.close()
+                                    }
+                                    rootNavController.navigateToWithSingleTop(item.route)
+                                },
+                                icon = {
+                                    Icon(
+                                        imageVector = if (index == selectedItemIndex) {
+                                            ImageVector.vectorResource(item.selectedIcon)
+                                        } else ImageVector.vectorResource(item.unselectedIcon),
+                                        contentDescription = item.title,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                },
+                                badge = {  // Show Badge
+                                    item.badgeCount?.let {
+                                        Text(
+                                            text = item.badgeCount.toString(),
+                                            style = MaterialTheme.typography.labelLarge
+                                        )
+                                    }
+                                },
+                                modifier = Modifier
+                                    .padding(NavigationDrawerItemDefaults.ItemPadding) //padding between items
+                            )
+                        }
+
+                        HorizontalDivider(
+                            Modifier.padding(5.dp),
+                            color = (MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 1f))
                         )
-                    }
 
-                    HorizontalDivider(
-                        Modifier.padding(5.dp),
-                        color = (MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 1f))
-                    )
-
-                    section2.forEachIndexed { index, item ->
-                        NavigationDrawerItem(
-                            label = {
-                                Text(
-                                    text = item.title,
-                                    modifier = Modifier.padding(12.dp, 0.dp),
-                                    style = MaterialTheme.typography.labelLarge
-                                )
-                            },
-                            selected = false,
-                            onClick = {
-                                scope.launch {
-                                    drawerState.close()
-                                }
-                                rootNavController.navigateToWithSingleTop(item.route)
-
-                            },
-                            icon = {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(item.unselectedIcon),
-                                    contentDescription = item.title,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            },
-                            badge = {  // Show Badge
-                                item.badgeCount?.let {
+                        section2.forEachIndexed { index, item ->
+                            NavigationDrawerItem(
+                                label = {
                                     Text(
-                                        text = item.badgeCount.toString(),
+                                        text = item.title,
+                                        modifier = Modifier.padding(12.dp, 0.dp),
                                         style = MaterialTheme.typography.labelLarge
                                     )
-                                }
-                            },
-                            modifier = Modifier
-                                .padding(NavigationDrawerItemDefaults.ItemPadding) //padding between items
-                        )
-                    }
+                                },
+                                selected = false,
+                                onClick = {
+                                    scope.launch {
+                                        drawerState.close()
+                                    }
+                                    rootNavController.navigateToWithSingleTop(item.route)
 
+                                },
+                                icon = {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(item.unselectedIcon),
+                                        contentDescription = item.title,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                },
+                                badge = {  // Show Badge
+                                    item.badgeCount?.let {
+                                        Text(
+                                            text = item.badgeCount.toString(),
+                                            style = MaterialTheme.typography.labelLarge
+                                        )
+                                    }
+                                },
+                                modifier = Modifier
+                                    .padding(NavigationDrawerItemDefaults.ItemPadding) //padding between items
+                            )
+                        }
+
+                    }
                 }
             }
         },
 
-        gesturesEnabled = true
+        gesturesEnabled = false
     ) {
         val currentYear = currentYear
         val lazyMonthListState = rememberLazyListState()
@@ -381,7 +388,7 @@ fun NavigationDrawer(
                     modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
                     topBar = { //TopBar to show title
                         Column {
-                            TopAppBar(
+                            CenterAlignedTopAppBar(
                                 // colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Blue),
                                 title = {
                                     TextButton(
@@ -423,7 +430,7 @@ fun NavigationDrawer(
                                     Card(
                                         modifier = Modifier
                                             .size(36.dp)
-                                            .clip(RoundedCornerShape(5.dp))
+                                            .clip(RoundedCornerShape(25.dp))
                                             .clickable {
                                                 scope.launch {
                                                     lazyMonthListState.animateScrollToItem(250)

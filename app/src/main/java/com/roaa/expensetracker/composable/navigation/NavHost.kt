@@ -276,7 +276,7 @@ fun AppNavGraph(
                     args.bankAccountId,
                 )
             }
-            composable<Destinations.BudgetSetupScreen> {
+            composable<Destinations.BudgetSetupScreen>() {
                 val args = it.toRoute<Destinations.BudgetSetupScreen>()
                 BudgetSetupScreen(
                     rooNavController,

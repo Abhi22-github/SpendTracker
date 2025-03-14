@@ -151,12 +151,12 @@ fun SharedTransitionScope.ScaffoldContent(
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(startEndPadding, topBottomPadding)
                 )
-                Text(
-                    text = "This categories will be shown when the transaction type is expense",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurface.copy(0.6f),
-                    modifier = Modifier.padding(startEndPadding, topBottomPadding)
-                )
+//                Text(
+//                    text = "This categories will be shown when the transaction type is expense",
+//                    style = MaterialTheme.typography.labelLarge,
+//                    color = MaterialTheme.colorScheme.onSurface.copy(0.6f),
+//                    modifier = Modifier.padding(startEndPadding, topBottomPadding)
+//                )
 
                 Spacer(Modifier.height(4.dp))
 
@@ -251,16 +251,16 @@ fun SharedTransitionScope.ScaffoldContent(
                 Spacer(Modifier.height(24.dp))
 
                 Text(
-                    text = "Income Category", style = MaterialTheme.typography.titleMedium,
+                    text = "Expense Category", style = MaterialTheme.typography.titleMedium,
                     color = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.padding(startEndPadding, topBottomPadding)
                 )
-                Text(
-                    text = "This categories will be shown when the transaction type is expense",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurface.copy(0.6f),
-                    modifier = Modifier.padding(startEndPadding, topBottomPadding)
-                )
+//                Text(
+//                    text = "This categories will be shown when the transaction type is expense",
+//                    style = MaterialTheme.typography.labelLarge,
+//                    color = MaterialTheme.colorScheme.onSurface.copy(0.6f),
+//                    modifier = Modifier.padding(startEndPadding, topBottomPadding)
+//                )
 
                 Spacer(Modifier.height(4.dp))
 

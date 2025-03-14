@@ -111,6 +111,7 @@ fun SettingsScreen(
     BackHandler() {
         handleBackNavigation(navigationManager)
     }
+
     Scaffold(
         topBar = {
             TopBar(

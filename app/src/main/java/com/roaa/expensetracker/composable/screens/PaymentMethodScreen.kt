@@ -213,7 +213,7 @@ fun PaymentMethodScreen(
             bankAccountsList,
             { action, targetBankAccountClass ->
                 when (action) {
-                    DeleteAction.DELETE_BANK_ACCOUNT -> {
+                    DeleteAction.DELETE -> {
                         scope.launch {
                             viewModel.bankAccountsViewModel.storeBankAccount(bankAccountsClass.apply {
                                 this.isActive = false
@@ -227,7 +227,7 @@ fun PaymentMethodScreen(
                         )
                     }
 
-                    DeleteAction.DELETE_ALL -> {
+                    DeleteAction.DELETE_ALL_WITH_TRANSACTIONS -> {
                         viewModel.bankAccountsViewModel.deleteBankAccountWithTransactions(
                             bankAccountsClass
                         )
@@ -1017,7 +1017,7 @@ fun PaymentDetailsScreen(
                 bankAccountsList,
                 { action, targetBankAccountClass ->
                     when (action) {
-                        DeleteAction.DELETE_BANK_ACCOUNT -> {
+                        DeleteAction.DELETE -> {
                             scope.launch {
                                 viewModel.bankAccountsViewModel.storeBankAccount(bankAccountsClass.apply {
                                     this.isActive = false
@@ -1031,7 +1031,7 @@ fun PaymentDetailsScreen(
                             )
                         }
 
-                        DeleteAction.DELETE_ALL -> {
+                        DeleteAction.DELETE_ALL_WITH_TRANSACTIONS -> {
                             viewModel.bankAccountsViewModel.deleteBankAccountWithTransactions(
                                 bankAccountsClass
                             )

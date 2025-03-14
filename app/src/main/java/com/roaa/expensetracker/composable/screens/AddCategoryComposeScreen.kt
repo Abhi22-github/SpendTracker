@@ -68,17 +68,19 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.composable.ExpenseTrackerTheme
 import com.roaa.expensetracker.composable.components.BottomSheetIconPicker
+import com.roaa.expensetracker.composable.components.CategoryActionConfirmation
 import com.roaa.expensetracker.composable.components.ConfirmationAlertDialog
 import com.roaa.expensetracker.composable.components.ErrorRow
 import com.roaa.expensetracker.composable.components.TopBar
 import com.roaa.expensetracker.composable.greenColor
-import com.roaa.expensetracker.composable.navigation.Destinations
 import com.roaa.expensetracker.composable.navigation.NavigationManager
+import com.roaa.expensetracker.composable.navigation.handleBackNavigation
 import com.roaa.expensetracker.composable.navigation.onBackPressed
 import com.roaa.expensetracker.composable.orange
 import com.roaa.expensetracker.composable.secondaryAlpha
@@ -88,6 +90,7 @@ import com.roaa.expensetracker.hilt.AllViewModel
 import com.roaa.expensetracker.model.CategoryClass
 import com.roaa.expensetracker.utilities.Constants.EXPENSE
 import com.roaa.expensetracker.utilities.Constants.INCOME
+import com.roaa.expensetracker.utilities.DeleteAction
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -105,24 +108,17 @@ fun AddCategory(
     sharedTransitionScope: SharedTransitionScope,
     animatedVisibilityScope: AnimatedContentScope,
 ) {
-    val category = CategoryClass(categoryId, categoryName, 1, categoryIcon, categoryType, true)
-    val showDeleteButton by remember { mutableStateOf(if (category.categoryId == 0L) false else true) }
+    val categoryClass = CategoryClass(categoryId, categoryName, 1, categoryIcon, categoryType, true)
+    val showDeleteButton by remember { mutableStateOf(if (categoryClass.categoryId == 0L) false else true) }
+    val scope = rememberCoroutineScope()
     var showConfirmationDialog by remember { mutableStateOf(false) }
     var confirmationDialogType by remember { mutableIntStateOf(1) }
+    val allExpenseCategoryList by viewModel.categoryViewModel.onlyExpenseCategoryNames.collectAsStateWithLifecycle()
+    val allIncomeCategoryList by viewModel.categoryViewModel.onlyIncomeCategoryNames.collectAsStateWithLifecycle()
     val context = LocalContext.current
 
-    fun handleBackNavigation() {
-        if (navigationManager.navController.previousBackStackEntry != null) {
-            navigationManager.navController.popBackStack() // Pop one screen if there is a back stack
-        } else {
-            navigationManager.navController.navigate(Destinations.ListScreen) {
-                popUpTo(Destinations.ListScreen) { inclusive = true }
-            }
-        }
-    }
-
     BackHandler() {
-        handleBackNavigation()
+        handleBackNavigation(navigationManager)
     }
 
     with(sharedTransitionScope) {
@@ -131,7 +127,7 @@ fun AddCategory(
                 TopBar(
                     title = if (categoryId == 0L) "Add Category" else "Edit Category",
                     showDelete = true,
-                    sendUserBackToPreviousActivity = { handleBackNavigation() },
+                    sendUserBackToPreviousActivity = { handleBackNavigation(navigationManager) },
                     delete = {
                         confirmationDialogType = 1
                         showConfirmationDialog = true
@@ -141,7 +137,7 @@ fun AddCategory(
                 ScaffoldContentDetails(
                     Modifier.padding(paddingValues),
                     viewModel,
-                    category,
+                    categoryClass,
                     { rootNavController.onBackPressed() },
                     animatedVisibilityScope
                 )
@@ -151,17 +147,52 @@ fun AddCategory(
     if (showConfirmationDialog) {
         //for confirming the delete action
         if (confirmationDialogType == 1) {
-            ConfirmationAlertDialog(
-                onDismissRequest = { showConfirmationDialog = !showConfirmationDialog },
-                onConfirmation = {
-                    viewModel.categoryViewModel.deleteCategoryFromDatabase(category)
-                    showConfirmationDialog = !showConfirmationDialog
-                    rootNavController.onBackPressed()
+//            ConfirmationAlertDialog(
+//                onDismissRequest = { showConfirmationDialog = !showConfirmationDialog },
+//                onConfirmation = {
+//                    viewModel.categoryViewModel.deleteCategoryFromDatabase(category)
+//                    showConfirmationDialog = !showConfirmationDialog
+//                    rootNavController.onBackPressed()
+//
+//                },
+//                dialogTitle = "Delete Category",
+//                dialogText = "Are you sure, you want to delete the current category",
+//                icon = ImageVector.vectorResource(R.drawable.icon_expense)
+//            )
+            CategoryActionConfirmation(
+                modifier = Modifier,
+                shouldEnableTheMigration = true,
+                categoryClass = categoryClass,
+                categoryClassList = if(categoryClass.categoryType == EXPENSE) allExpenseCategoryList else allIncomeCategoryList,
+                performAction = {action, targetCategoryClass ->
+                    when (action) {
+                        DeleteAction.DELETE -> {
+                            scope.launch {
+                                viewModel.categoryViewModel.storeCategoryInDatabase(categoryClass.apply {
+                                    this.isActive = false
+                                })
+                            }
+                        }
 
+                        DeleteAction.DELETE_AND_MIGRATE -> {
+                            viewModel.categoryViewModel.migrateCategoryTransactions(
+                                categoryClass, targetCategoryClass
+                            )
+                        }
+
+                        DeleteAction.DELETE_ALL_WITH_TRANSACTIONS -> {
+                            viewModel.categoryViewModel.deleteCategoryWithTransactions(
+                                categoryClass
+                            )
+                        }
+
+                    }
+                    showConfirmationDialog = !showConfirmationDialog
+                    handleBackNavigation(
+                        navigationManager
+                    )
                 },
-                dialogTitle = "Delete Category",
-                dialogText = "Are you sure, you want to delete the current category",
-                icon = ImageVector.vectorResource(R.drawable.icon_expense)
+                onDismissRequest = {showConfirmationDialog = !showConfirmationDialog}
             )
         }
         //for confirming the update action
@@ -169,7 +200,7 @@ fun AddCategory(
             ConfirmationAlertDialog(
                 onDismissRequest = { showConfirmationDialog = !showConfirmationDialog },
                 onConfirmation = {
-                    viewModel.categoryViewModel.deleteCategoryFromDatabase(category)
+                    viewModel.categoryViewModel.deleteCategoryFromDatabase(categoryClass)
                     showConfirmationDialog = !showConfirmationDialog
                     rootNavController.onBackPressed()
                 },
@@ -207,14 +238,17 @@ fun SharedTransitionScope.ScaffoldContentDetails(
         )
     )
     LaunchedEffect(selectedIcon) {
-
         scope.launch {
             viewModel.uiViewModel.errorStatusInAddCategory.emit(false)
             if (categoryClass.categoryIconNumber != 99) {
-                viewModel.uiViewModel.selectedIconFromBottomSheet.emit(categoryClass.categoryIconNumber)
+                viewModel.uiViewModel.selectedIconFromBottomSheet.emit(selectedIcon)
             }
         }
-
+    }
+    LaunchedEffect(Unit) {
+        scope.launch {
+            viewModel.uiViewModel.selectedIconFromBottomSheet.emit(categoryClass.categoryIconNumber)
+        }
     }
 
 

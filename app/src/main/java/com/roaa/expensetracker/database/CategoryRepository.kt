@@ -38,5 +38,13 @@ class CategoryRepository @Inject constructor(private val categoryDao: CategoryDa
         categoryDao.deleteAllCategory()
     }
 
+    suspend fun migrateCategoryTransactions(firstCategory: CategoryClass, secondCategory: CategoryClass){
+        categoryDao.migrateTransactionToAnotherCategoryAndDeleteIt(firstCategory,secondCategory)
+    }
+
+    suspend fun deleteCategoryWithTransactions(categoryClass: CategoryClass){
+        categoryDao.deleteCategoryWithTransactions(categoryClass)
+    }
+
 
 }

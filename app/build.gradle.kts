@@ -65,7 +65,6 @@ android {
 dependencies {
     implementation(libs.appcompat)
     implementation(libs.androidx.material3)
-    implementation(libs.constraintlayout)
     implementation(libs.material)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)

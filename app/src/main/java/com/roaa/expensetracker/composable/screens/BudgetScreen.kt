@@ -749,13 +749,13 @@ fun DayProgressIndicator(
     val completedColor = MaterialTheme.colorScheme.primaryContainer
     val decorationColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
     var progress =
-        (expenseAmount).divide(if (totalAmount == BigDecimal.ZERO) BigDecimal.ONE else totalAmount)
-            .setScale(
-                2,
-                RoundingMode.HALF_UP
-            )
+        (expenseAmount).divide(
+            if (totalAmount == BigDecimal.ZERO) BigDecimal.ONE else totalAmount,
+            2,
+            RoundingMode.HALF_UP
+        )
 
-   // progress = if (progress > BigDecimal.ZERO) BigDecimal.ONE else progress
+    // progress = if (progress > BigDecimal.ZERO) BigDecimal.ONE else progress
     Box(
         modifier = modifier, contentAlignment = Alignment.Center
     ) {

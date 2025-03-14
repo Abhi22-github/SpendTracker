@@ -106,7 +106,7 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
         }
     }
 
-    private fun storeCategoryInDatabase(categoryClass: CategoryClass) {
+     fun storeCategoryInDatabase(categoryClass: CategoryClass) {
         if (categoryClass.categoryId == 0L) {
             //new category insert
             viewModelScope.launch {
@@ -120,6 +120,16 @@ class CategoryViewModel @Inject constructor(private val categoryRepository: Cate
         }
     }
 
+    fun migrateCategoryTransactions(firstCategory: CategoryClass, secondCategory: CategoryClass) {
+        viewModelScope.launch {
+            categoryRepository.migrateCategoryTransactions(firstCategory, secondCategory)
+        }
+    }
+    fun deleteCategoryWithTransactions(categoryClass: CategoryClass) {
+        viewModelScope.launch {
+            categoryRepository.deleteCategoryWithTransactions(categoryClass)
+        }
+    }
     fun loading() {
         _uiState.value = UiState.Loading
     }

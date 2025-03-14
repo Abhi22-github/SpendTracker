@@ -66,14 +66,14 @@ fun convertDataToSeries(
 }
 
 enum class DeleteAction {
-    DELETE_BANK_ACCOUNT, DELETE_AND_MIGRATE, DELETE_ALL
+    DELETE, DELETE_AND_MIGRATE, DELETE_ALL_WITH_TRANSACTIONS
 }
 
-val deleteActionList = listOf(
+val bankdeleteActionList = listOf(
     DeleteActionsModelClass(
         "Delete Bank Account",
         "The Bank account will be deleted, but transactions will remain.",
-        DeleteAction.DELETE_BANK_ACCOUNT
+        DeleteAction.DELETE
     ), DeleteActionsModelClass(
         "Delete and Migrate Transactions",
         "Delete this Bank account and move transactions to another Bank Account.",
@@ -81,7 +81,23 @@ val deleteActionList = listOf(
     ), DeleteActionsModelClass(
         "Delete All",
         "Permanently delete this Bank account and all transactions",
-        DeleteAction.DELETE_ALL
+        DeleteAction.DELETE_ALL_WITH_TRANSACTIONS
+    )
+)
+
+val categoryDeleteActionList = listOf(
+    DeleteActionsModelClass(
+        "Delete Category",
+        "This category will be deleted, but transactions will remain.",
+        DeleteAction.DELETE
+    ), DeleteActionsModelClass(
+        "Delete and Migrate Transactions",
+        "Delete this Category and move transactions to another Category.",
+        DeleteAction.DELETE_AND_MIGRATE
+    ), DeleteActionsModelClass(
+        "Delete All",
+        "Permanently delete this Category and all transactions",
+        DeleteAction.DELETE_ALL_WITH_TRANSACTIONS
     )
 )
 

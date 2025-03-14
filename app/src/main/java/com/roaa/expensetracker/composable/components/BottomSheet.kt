@@ -1295,6 +1295,7 @@ fun BottomSheetContentItemDetails(
         sheetState = sheetState,
         modifier = Modifier
             .imePadding()
+            .navigationBarsPadding()
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
         BottomSheetContentItemDetailsContent(

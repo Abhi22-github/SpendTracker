@@ -178,6 +178,48 @@ fun DropDownMenuForBankAccounts(
 }
 
 @Composable
+fun DropDownMenuForCategory(
+    menuExpanded: Boolean,
+    selectedCategoryClass: CategoryClass,
+    colorPallet: HarmonizedColorPalette,
+    onDismiss: () -> Unit,
+    itemList: List<CategoryClass>,
+    selectedCategorySetter: (CategoryClass) -> Unit
+) {
+    DropdownMenu(
+        expanded = menuExpanded,
+        onDismissRequest = { onDismiss() },
+        containerColor = colorPallet.surface,
+        shape = RoundedCornerShape(20.dp),
+    ) {
+//        if (type == 1) {
+        itemList.forEach { categoryClass ->
+            val selectedModifier =
+                if (selectedCategoryClass.categoryId == categoryClass.categoryId) Modifier.background(
+                    colorPallet.surfaceVariant
+                ) else Modifier
+            val selectedIcon =
+                rememberAsyncImagePainter(IconState.fromNumber(categoryClass.categoryIconNumber))
+            DropdownMenuItem(
+                text = { Text(text = categoryClass.categoryName) },
+                leadingIcon = {
+                    Image(
+                        painter = selectedIcon,
+                        contentDescription = "",
+                        modifier = Modifier.size(24.dp),
+                    )
+                },
+                onClick = {
+                    selectedCategorySetter(categoryClass)
+                    onDismiss()
+                }, modifier = selectedModifier
+            )
+        }
+
+    }
+}
+
+@Composable
 fun SummaryCard(color: Color) {
     Card(
         shape = RoundedCornerShape(12.dp), modifier = Modifier
