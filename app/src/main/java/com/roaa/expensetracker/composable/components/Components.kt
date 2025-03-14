@@ -17,7 +17,10 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
@@ -34,6 +37,7 @@ import androidx.compose.material3.ProgressIndicatorDefaults
 import androidx.compose.material3.ProgressIndicatorDefaults.drawStopIndicator
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -486,4 +490,70 @@ fun CircularProgress(modifier: Modifier = Modifier) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         CircularProgressIndicator()
     }
+}
+
+
+@Composable
+fun ViewItemBottomRow(
+    modifier: Modifier = Modifier,
+    editButtonClicked: () -> Unit,
+    deleteButtonClicked: () -> Unit
+) {
+    Row(
+        Modifier.padding(bottomSheetStartEndPadding, bottomSheetTopBottomPadding)
+    ) {
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .weight(1f)
+                .padding(0.dp, 8.dp),
+        ) {
+            Column {
+                Row(
+                    horizontalArrangement = Arrangement.Start,
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Row(
+                        Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.Start,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        TextButton(onClick = { editButtonClicked() }) {
+                            Icon(
+                                Icons.Filled.Edit,
+                                contentDescription = "edit",
+                                modifier = Modifier.padding(end = 4.dp)
+                            )
+                            Text("Edit")
+                        }
+                    }
+                    Row(
+                        Modifier.weight(1f),
+                        horizontalArrangement = Arrangement.End,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+
+                        TextButton(
+                            onClick = {
+                                deleteButtonClicked()
+                            },
+                            colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error),
+
+                            ) {
+                            Icon(
+                                Icons.Filled.Delete,
+                                contentDescription = "delete",
+                                modifier = Modifier.padding(end = 4.dp)
+                            )
+                            Text("Delete")
+                        }
+                    }
+                }
+
+            }
+        }
+    }
+
 }

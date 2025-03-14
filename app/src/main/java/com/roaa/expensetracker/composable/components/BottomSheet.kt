@@ -119,6 +119,7 @@ import com.roaa.expensetracker.composable.blueColor
 import com.roaa.expensetracker.composable.greenColor
 import com.roaa.expensetracker.composable.orange
 import com.roaa.expensetracker.composable.screens.LivePaymentCard
+import com.roaa.expensetracker.composable.screens.PaymentCard
 import com.roaa.expensetracker.composable.screens.ValueLabelList
 import com.roaa.expensetracker.composable.secondaryAlpha
 import com.roaa.expensetracker.composable.secondaryAlphaForElements
@@ -321,7 +322,7 @@ fun BottomSheetContentItemAddContent(
         modifier
             .fillMaxWidth()
     ) {
-        Column() {
+        Column {
             Text(
                 text = "Add Transaction",
                 modifier = modifier.fillMaxWidth(),
@@ -669,7 +670,7 @@ fun BottomSheetContentItemEditContent(
 
     //animations
     var expanded by remember { mutableStateOf(false) }
-    var typeToggle by remember { mutableStateOf(if (singleTransaction.transaction.type == EXPENSE) true else false) }
+    var typeToggle by remember { mutableStateOf(singleTransaction.transaction.type == EXPENSE) }
     val boxSize by animateDpAsState(
         targetValue = if (expanded) 160.dp else 56.dp, animationSpec = tween(500)
     )
@@ -728,7 +729,7 @@ fun BottomSheetContentItemEditContent(
         modifier
             .fillMaxWidth()
     ) {
-        Column() {
+        Column {
             Text(
                 text = "Edit Transaction",
                 modifier = modifier.fillMaxWidth(),
@@ -1024,9 +1025,11 @@ fun BottomSheetContentItemEditContent(
                         false,
                         viewModel,
                     )
-                }, Modifier
+                },
+                Modifier
                     .fillMaxWidth()
-                    .height(48.dp),colors = ButtonDefaults.filledTonalButtonColors(
+                    .height(48.dp),
+                colors = ButtonDefaults.filledTonalButtonColors(
                     containerColor = MaterialTheme.colorScheme.primary,
                     contentColor = MaterialTheme.colorScheme.onPrimary
                 ),
@@ -1168,7 +1171,7 @@ fun BottomRow(
         }
         Row(modifier = modifier.weight(1f), horizontalArrangement = Arrangement.End) {
             var bankAccountMenuExpanded by remember { mutableStateOf(false) }
-            Box() {
+            Box {
                 FilledTonalButton(
                     onClick = {
                         // selectedPaymentMethodSetter(selectedBankAccount)
@@ -1230,7 +1233,7 @@ fun AddBottomSheet(
         val windowSizeClass = LocalWindowSize.current
         val localDensity = LocalDensity.current
         val systemKeyboardHeight = WindowInsets.ime.asPaddingValues().calculateBottomPadding()
-        val isShowSystemKeyboard = systemKeyboardHeight != 0.dp && true
+        systemKeyboardHeight != 0.dp && true
 //        val isRequestedShowSystemKeyboard =
 //            systemKeyboardHeight != 0.dp || appViewModel.showSystemKeyboard.value
         val internalKeyboardHeight = if (windowSizeClass == WindowWidthSizeClass.Compact) {
@@ -1613,7 +1616,8 @@ fun AddPaymentMethodBottomSheet(
             closeBottomSheet()
         },
         sheetState = bottomSheetState,
-        modifier = Modifier.navigationBarsPadding()
+        modifier = Modifier
+            .navigationBarsPadding()
             .imePadding()
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
@@ -1727,7 +1731,7 @@ fun BottomSheetContentPaymentMethodAddContentNew(
     val color = ColorState.fromNumber(selectedColor)!!
     val title = "Add Bank Account"
 
-    Column() {
+    Column {
         Text(
             text = title,
             modifier = modifier.fillMaxWidth(),
@@ -1957,7 +1961,7 @@ fun BottomSheetContentPaymentMethodEditContentNew(
     val color = ColorState.fromNumber(selectedColor)!!
     val title = "Edit Bank Account"
 
-    Column() {
+    Column {
         Text(
             text = title,
             modifier = modifier.fillMaxWidth(),
@@ -2368,9 +2372,7 @@ fun BottomSheetContentItemAddContentTest(
     Column(
         modifier.fillMaxWidth()
     ) {
-        Column(
-
-        ) {
+        Column {
             Text(
                 text = "Add Transaction",
                 modifier = modifier.fillMaxWidth(),
@@ -2669,7 +2671,7 @@ fun BottomSheetContentItemAddContentTest(
                 })
             }
 
-            androidx.compose.animation.AnimatedVisibility(
+            AnimatedVisibility(
                 visible = !isKeyboardVisible,
                 enter = fadeIn(
                     tween(
@@ -3003,12 +3005,68 @@ private fun NotificationPercentChooserBottomSheetContentPreview() {
 }
 
 
-//@Preview
-//@Composable
-//fun BottomSheetPreview() {
-//    ExpenseTrackerTheme {
-//        Surface {
-//            BottomSheetContentItemAddContent(Modifier, 0L, {})
-//        }
-//    }
-//}
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun BankDetailsBottomSheet(
+    bankAccountClass: BankAccountsClass,
+    onDismiss: () -> Unit,
+    editButtonClicked: (BankAccountsClass) -> Unit,
+    deleteButtonClicked: (BankAccountsClass) -> Unit,
+    statAnalysisClicked: (BankAccountsClass) -> Unit,
+    specificTransactionsClicked: (BankAccountsClass) -> Unit
+) {
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    ModalBottomSheet(
+        onDismissRequest = { onDismiss() },
+        sheetState = sheetState,
+        modifier = Modifier
+            .imePadding()
+            .navigationBarsPadding()
+    ) {
+        BankDetailsBottomSheetContent(
+            bankAccountClass,
+            {
+                editButtonClicked(bankAccountClass)
+            },
+            { deleteButtonClicked(bankAccountClass) },
+            { statAnalysisClicked(bankAccountClass) },
+            { specificTransactionsClicked(bankAccountClass) })
+    }
+}
+
+@Composable
+fun BankDetailsBottomSheetContent(
+    bankAccountClass: BankAccountsClass,
+    editButtonClicked: () -> Unit,
+    deleteButtonClicked: () -> Unit,
+    statAnalysisClicked: () -> Unit,
+    specificTransactionsClicked: () -> Unit
+) {
+    Column {
+        PaymentCard(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            bankAccountsClass = bankAccountClass,
+        ) { }
+        Spacer(Modifier.height(16.dp))
+        FilledTonalButton(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth(), onClick = { statAnalysisClicked() }) {
+            Text(text = "View Statistical Analysis")
+        }
+        Spacer(Modifier.height(8.dp))
+        FilledTonalButton(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth(), onClick = { specificTransactionsClicked() }) {
+            Text(text = "View specific transactions")
+        }
+        ViewItemBottomRow(Modifier, { editButtonClicked() }, { deleteButtonClicked() })
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun BankDetailsBottomSheetContentPreview() {
+    BankDetailsBottomSheetContent(emptyBank, {}, {}, {}, {})
+}

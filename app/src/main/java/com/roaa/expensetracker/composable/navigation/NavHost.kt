@@ -117,8 +117,6 @@ fun RootNavGraph(
                         rooNavController,
                         navigationManager,
                         viewModel,
-                        Modifier,
-                        {}
                     )
                 }
                 composable<Destinations.SettingScreen>() {
@@ -246,8 +244,6 @@ fun AppNavGraph(
                         rooNavController,
                         navigationManager,
                         viewModel,
-                        Modifier,
-                        {}
                     )
                 }
                 composable<Destinations.SettingScreen>() {

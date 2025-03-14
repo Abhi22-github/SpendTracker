@@ -28,7 +28,6 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
@@ -48,14 +47,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
-import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.constraintlayout.compose.ConstraintLayout
-import androidx.constraintlayout.compose.Dimension
 import androidx.navigation.NavHostController
 import coil.compose.AsyncImagePainter
 import coil.compose.rememberAsyncImagePainter
@@ -66,10 +61,9 @@ import com.roaa.expensetracker.composable.color4
 import com.roaa.expensetracker.composable.color8
 import com.roaa.expensetracker.composable.components.ActionConfirmation
 import com.roaa.expensetracker.composable.components.AddPaymentMethodBottomSheet
+import com.roaa.expensetracker.composable.components.BankDetailsBottomSheet
 import com.roaa.expensetracker.composable.components.BottomSheetContentItemDetails
 import com.roaa.expensetracker.composable.components.CircularProgress
-import com.roaa.expensetracker.composable.components.ConfirmationAlertDialog
-import com.roaa.expensetracker.composable.components.DropDownBankAccountOption
 import com.roaa.expensetracker.composable.components.EditPaymentMethodBottomSheet
 import com.roaa.expensetracker.composable.components.EmptyScreen
 import com.roaa.expensetracker.composable.components.SingleTransaction
@@ -113,11 +107,10 @@ fun PaymentMethodScreen(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
     viewModel: AllViewModel,
-    modifier: Modifier = Modifier,
-    sendUserBack: () -> Unit,
 ) {
     var showBottomSheet by remember { mutableStateOf(false) }
     var showEditBottomSheet by remember { mutableStateOf(false) }
+    var showBankDetailsBottomSheet by remember { mutableStateOf(false) }
     val bankAccountsList by viewModel.bankAccountsViewModel.allBankAccountListExceptCash
         .collectAsState(
             listOf(emptyBank)
@@ -133,7 +126,6 @@ fun PaymentMethodScreen(
             emptyBank
         )
     }
-
 
     BackHandler {
         handleBackNavigation(navigationManager)
@@ -171,18 +163,9 @@ fun PaymentMethodScreen(
                     if (!bankAccountsList.isEmpty()) {
                         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                             items(bankAccountsList) {
-                                PaymentCard(Modifier, viewModel, it, { bankAccounts ->
-                                    bankAccountsClass = bankAccounts
-                                    showEditBottomSheet = !showEditBottomSheet
-                                }, { bankAccount ->
-                                    actionConfirmationFlag = true
+                                PaymentCard(Modifier, it, { bankAccount ->
                                     bankAccountsClass = bankAccount
-                                }, { bankAccount ->
-                                    navigationManager.navigateTo(
-                                        Destinations.BankDetailsScreen(
-                                            bankAccount.bankAccountId
-                                        )
-                                    )
+                                    showBankDetailsBottomSheet = !showBankDetailsBottomSheet
                                 })
                             }
                         }
@@ -204,6 +187,28 @@ fun PaymentMethodScreen(
             viewModel,
             bankAccountsClass,
             { showEditBottomSheet = !showEditBottomSheet })
+    }
+    if (showBankDetailsBottomSheet) {
+        BankDetailsBottomSheet(
+            bankAccountClass = bankAccountsClass,
+            { showBankDetailsBottomSheet = !showBankDetailsBottomSheet },
+            {
+                bankAccountsClass = it
+                showEditBottomSheet = !showEditBottomSheet
+            },
+            {
+                bankAccountsClass = it
+                actionConfirmationFlag = !actionConfirmationFlag
+            },
+            {
+                navigationManager.navigateTo(Destinations.StatisticsScreen)
+                showBankDetailsBottomSheet = !showBankDetailsBottomSheet
+            },
+            {
+                navigationManager.navigateTo(Destinations.StatisticsScreen)
+                showBankDetailsBottomSheet = !showBankDetailsBottomSheet
+            }
+        )
     }
     if (actionConfirmationFlag) {
         ActionConfirmation(
@@ -246,17 +251,11 @@ fun PaymentMethodScreen(
 @Composable
 fun PaymentCard(
     modifier: Modifier,
-    viewModel: AllViewModel,
     bankAccountsClass: BankAccountsClass,
-    editClicked: (bankAccountsClass: BankAccountsClass) -> Unit,
-    deleteClicked: (bankAccountClass: BankAccountsClass) -> Unit,
     onSingleItemClick: (bankAccountsClass: BankAccountsClass) -> Unit,
 ) {
     val color = ColorState.fromNumber(bankAccountsClass.cardColorNumber)!!
-    val scope = rememberCoroutineScope()
     var showOptionMenu by remember { mutableStateOf(false) }
-    var showConfirmationDeleteDialog by remember { mutableStateOf(false) }
-
     Card(
         shape = RoundedCornerShape(25.dp),
         modifier = modifier
@@ -389,8 +388,6 @@ fun PaymentCard(
                         )
                     }
                 }
-
-
                 Spacer(modifier = Modifier.width(16.dp))
                 Column(
                     modifier = Modifier
@@ -406,26 +403,7 @@ fun PaymentCard(
                         )
                     }
                 }
-
-
             }
-
-            if (false)
-                LinearProgressIndicator(
-                    progress = { Math.random().toFloat() },
-                    modifier = Modifier
-                        .height(30.dp)
-                        .constrainAs(progress) {
-                            top.linkTo(balanceLabel.bottom, 20.dp)
-                            start.linkTo(parent.start, 24.dp)
-                            end.linkTo(parent.end, 24.dp)
-                            width = Dimension.fillToConstraints
-                        },
-                    color = color.copy(alpha = 0.50f),
-                    trackColor = color.copy(alpha = 0.10f),
-                    strokeCap = StrokeCap.Round,
-                    gapSize = -30.dp,
-                )
             Image(
                 painter = image,
                 contentDescription = "Test Image",
@@ -453,47 +431,9 @@ fun PaymentCard(
                         Icons.Filled.MoreVert, contentDescription = null,
                     )
                 }
-                val colorPallet =
-                    toPalette(ColorState.fromNumber(bankAccountsClass.cardColorNumber)!!)
-                if (showOptionMenu) DropDownBankAccountOption(
-                    menuExpanded = showOptionMenu,
-                    colorPallet = colorPallet,
-                    { showOptionMenu = false },
-                    onPrimaryClicked = {
-                        scope.launch {
-                            viewModel.preferencesViewModel.setPrimaryAccountNumber(
-                                bankAccountsClass.bankAccountId
-                            )
-                        }
-                        scope.launch {
-                            viewModel.preferencesViewModel.setPrimaryAccount(
-                                bankAccountsClass
-                            )
-                        }
-                        showOptionMenu = false
-                    },
-                    editClicked = {
-                        editClicked(bankAccountsClass)
-                    },
-                    deleteClicked = {
-                        deleteClicked(bankAccountsClass)
-                        //showConfirmationDeleteDialog = !showConfirmationDeleteDialog
-                    })
             }
         }
     }
-    //need to remove this changed the flow
-    if (showConfirmationDeleteDialog) ConfirmationAlertDialog(
-        onDismissRequest = { showConfirmationDeleteDialog = !showConfirmationDeleteDialog },
-        onConfirmation = {
-            viewModel.bankAccountsViewModel.deleteBankAccount(bankAccountsClass)
-            showConfirmationDeleteDialog = !showConfirmationDeleteDialog
-        },
-        dialogTitle = "Confirm Delete?",
-        dialogText = "Are you sure, that you want to delete this bank account?",
-        icon = ImageVector.vectorResource(R.drawable.icon_expense)
-    )
-
 }
 
 @Composable
@@ -866,16 +806,16 @@ fun PaymentDetailsScreen(
                         PaymentCard(
                             modifier = modifierWithHorizontalPadding,
                             bankAccountsClass = bankAccount,
-                            editClicked = { bankAccounts ->
-                                bankAccountsClass = bankAccounts
-                                showEditBottomSheet = !showEditBottomSheet
-                            },
-                            deleteClicked = { bankAccount ->
-                                actionConfirmationFlag = true
-                                bankAccountsClass = bankAccount
-                            },
+//                            editClicked = { bankAccounts ->
+//                                bankAccountsClass = bankAccounts
+//                                showEditBottomSheet = !showEditBottomSheet
+//                            },
+//                            deleteClicked = { bankAccount ->
+//                                actionConfirmationFlag = true
+//                                bankAccountsClass = bankAccount
+//                            },
                             onSingleItemClick = {},
-                            viewModel = viewModel
+                            //viewModel = viewModel
                         )
                         Spacer(Modifier.height(16.dp))
                         Text(
