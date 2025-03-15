@@ -53,6 +53,8 @@ import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Payment
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.DateRange
+import androidx.compose.material.icons.rounded.FilterList
+import androidx.compose.material.icons.rounded.PieChart
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
 import androidx.compose.material3.ButtonDefaults
@@ -117,6 +119,7 @@ import com.roaa.expensetracker.activity.LocalCurrency
 import com.roaa.expensetracker.composable.CustomFonts.numberFont
 import com.roaa.expensetracker.composable.blueColor
 import com.roaa.expensetracker.composable.greenColor
+import com.roaa.expensetracker.composable.infoColor
 import com.roaa.expensetracker.composable.orange
 import com.roaa.expensetracker.composable.screens.LivePaymentCard
 import com.roaa.expensetracker.composable.screens.PaymentCard
@@ -3016,7 +3019,7 @@ fun BankDetailsBottomSheet(
     statAnalysisClicked: (BankAccountsClass) -> Unit,
     specificTransactionsClicked: (BankAccountsClass) -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
         onDismissRequest = { onDismiss() },
         sheetState = sheetState,
@@ -3043,24 +3046,68 @@ fun BankDetailsBottomSheetContent(
     statAnalysisClicked: () -> Unit,
     specificTransactionsClicked: () -> Unit
 ) {
+    val infoCardColors = toPalette(infoColor)
     Column {
         PaymentCard(
             modifier = Modifier.padding(horizontal = 16.dp),
             bankAccountsClass = bankAccountClass,
         ) { }
-        Spacer(Modifier.height(16.dp))
-        FilledTonalButton(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .fillMaxWidth(), onClick = { statAnalysisClicked() }) {
-            Text(text = "View Statistical Analysis")
-        }
-        Spacer(Modifier.height(8.dp))
-        FilledTonalButton(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .fillMaxWidth(), onClick = { specificTransactionsClicked() }) {
-            Text(text = "View specific transactions")
+        Spacer(Modifier.height(24.dp))
+        Card(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            shape = MaterialTheme.shapes.extraLarge,
+            colors = CardDefaults.cardColors(containerColor = infoCardColors.main.copy(alpha = 0.1f))
+        ) {
+            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
+                Text(
+                    text = "Statistics",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = infoCardColors.onSurface
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "You have made 300 transactions this month, totaling ₹3,00,000 in expenses. You have spend around 3200/day in current Month",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = infoCardColors.onSurface.copy(alpha = 0.6f)
+                )
+                Spacer(Modifier.height(16.dp))
+                FilledTonalButton(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    onClick = { statAnalysisClicked() },
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = infoCardColors.container,
+                        contentColor = infoCardColors.onContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = "View Statistical analysis")
+                        Icon(Icons.Rounded.PieChart, contentDescription = null)
+                    }
+                }
+                Spacer(Modifier.height(4.dp))
+                FilledTonalButton(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    onClick = { specificTransactionsClicked() },
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = infoCardColors.container,
+                        contentColor = infoCardColors.onContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = "View specific transactions")
+                        Icon(Icons.Rounded.FilterList, contentDescription = null)
+                    }
+
+                }
+            }
         }
         ViewItemBottomRow(Modifier, { editButtonClicked() }, { deleteButtonClicked() })
     }
@@ -3082,7 +3129,7 @@ fun CategoryDetailsBottomSheet(
     statAnalysisClicked: (CategoryClass) -> Unit,
     specificTransactionsClicked: (CategoryClass) -> Unit
 ) {
-    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = false)
+    val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     ModalBottomSheet(
         onDismissRequest = { onDismiss() },
         sheetState = sheetState,
@@ -3109,10 +3156,13 @@ fun CategoryDetailsBottomSheetContent(
     statAnalysisClicked: () -> Unit,
     specificTransactionsClicked: () -> Unit
 ) {
+    val color = toPalette(if (categoryClass.categoryType == EXPENSE) orange else greenColor)
+    val infoCardColors = toPalette(infoColor)
+
     val containerColor by animateColorAsState(
         targetValue = combineColors(
             MaterialTheme.colorScheme.surface,
-            if (categoryClass.categoryType == EXPENSE) orange else greenColor,
+            color.main,
             angle = 0.1f,
         )
     )
@@ -3150,23 +3200,68 @@ fun CategoryDetailsBottomSheetContent(
             text = categoryClass.categoryName,
             modifier = Modifier.fillMaxWidth(),
             textAlign = TextAlign.Center,
-            style = typography.titleMedium,
+            style = typography.titleLarge,
             color = MaterialTheme.colorScheme.onSurface
         )
         Spacer(Modifier.height(24.dp))
-        FilledTonalButton(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .fillMaxWidth(), onClick = { statAnalysisClicked() }) {
-            Text(text = "View Statistical Analysis")
+
+        Card(
+            modifier = Modifier.padding(horizontal = 16.dp),
+            shape = MaterialTheme.shapes.extraLarge,
+            colors = CardDefaults.cardColors(containerColor = infoCardColors.main.copy(alpha = 0.1f))
+        ) {
+            Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
+                Text(
+                    text = "Statistics",
+                    style = MaterialTheme.typography.titleMedium,
+                    color = infoCardColors.onSurface
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "You have made 300 transactions this month, totaling ₹3,00,000 in expenses. You have spend around 3200/day in current Month",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = infoCardColors.onSurface.copy(alpha = 0.6f)
+                )
+                Spacer(Modifier.height(16.dp))
+                FilledTonalButton(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    onClick = { statAnalysisClicked() },
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = infoCardColors.container,
+                        contentColor = infoCardColors.onContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = "View Statistical analysis")
+                        Icon(Icons.Rounded.PieChart, contentDescription = null)
+                    }
+                }
+                Spacer(Modifier.height(4.dp))
+                FilledTonalButton(
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    onClick = { specificTransactionsClicked() },
+                    colors = ButtonDefaults.filledTonalButtonColors(
+                        containerColor = infoCardColors.container,
+                        contentColor = infoCardColors.onContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween
+                    ) {
+                        Text(text = "View specific transactions")
+                        Icon(Icons.Rounded.FilterList, contentDescription = null)
+                    }
+
+                }
+            }
         }
-        Spacer(Modifier.height(8.dp))
-        FilledTonalButton(
-            modifier = Modifier
-                .padding(horizontal = 16.dp)
-                .fillMaxWidth(), onClick = { specificTransactionsClicked() }) {
-            Text(text = "View specific transactions")
-        }
+
         ViewItemBottomRow(Modifier, { editButtonClicked() }, { deleteButtonClicked() })
     }
 }

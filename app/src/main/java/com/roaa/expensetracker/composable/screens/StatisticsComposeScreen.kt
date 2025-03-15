@@ -80,6 +80,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.aay.compose.donutChart.model.PieChartData
@@ -94,8 +95,10 @@ import com.roaa.expensetracker.composable.color5
 import com.roaa.expensetracker.composable.color6
 import com.roaa.expensetracker.composable.color7
 import com.roaa.expensetracker.composable.color8
+import com.roaa.expensetracker.composable.components.BottomSheetContentItemDetails
 import com.roaa.expensetracker.composable.components.DatePickerModal
 import com.roaa.expensetracker.composable.components.ErrorRow
+import com.roaa.expensetracker.composable.components.Header
 import com.roaa.expensetracker.composable.components.SingleTransaction
 import com.roaa.expensetracker.composable.components.TopBar
 import com.roaa.expensetracker.composable.navigation.NavigationManager
@@ -108,11 +111,13 @@ import com.roaa.expensetracker.composable.statisticsComponent.PieData
 import com.roaa.expensetracker.composable.statisticsComponent.Test
 import com.roaa.expensetracker.composable.utils.IconState
 import com.roaa.expensetracker.composable.utils.toPalette
+import com.roaa.expensetracker.converters.TransactionConverter
 import com.roaa.expensetracker.database.relations.TransactionWithDetails
 import com.roaa.expensetracker.hilt.AllViewModel
 import com.roaa.expensetracker.model.BankAccountsClass
 import com.roaa.expensetracker.utilities.Constants.EXPENSE
 import com.roaa.expensetracker.utilities.Constants.INCOME
+import com.roaa.expensetracker.utilities.LongMillisToNormalLong
 import com.roaa.expensetracker.utilities.colorList
 import com.roaa.expensetracker.utilities.createListForBarGraph
 import com.roaa.expensetracker.utilities.currentYear
@@ -123,6 +128,7 @@ import com.roaa.expensetracker.utilities.getPreviousAndNext100Weeks
 import com.roaa.expensetracker.utilities.getPreviousAndNext500Days
 import com.roaa.expensetracker.utilities.getPreviousAndNext500DaysForFilter
 import com.roaa.expensetracker.utilities.parseAmount
+import com.roaa.expensetracker.utilities.toDisplayDate
 import com.roaa.expensetracker.utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.utilities.toLocalDate
 import com.roaa.expensetracker.utilities.toLong
@@ -496,7 +502,7 @@ fun CategoryStatEntry(modifier: Modifier = Modifier, color: Color) {
             }
             Text(
                 text = parseAmount(BigDecimal(34735)),
-                style =typography.bodyLarge.copy(fontFamily = CustomFonts.numberFont)
+                style = typography.bodyLarge.copy(fontFamily = CustomFonts.numberFont)
             )
         }
     }
@@ -523,6 +529,7 @@ fun StatisticsScreenTest(
     var endDate by remember { mutableStateOf<Long>(LocalDate.now().toLong()) }
     val scrollState = rememberScrollState()
     var showFilterBottomSheet by remember { mutableStateOf(false) }
+    val detailsBottomSheet = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var showBankAccountAnalysisBottomSheet by remember { mutableStateOf(false) }
     var showCategoryAnalysisBottomSheet by remember { mutableStateOf(false) }
 
@@ -533,6 +540,11 @@ fun StatisticsScreenTest(
         listOf(emptyTransactionWithDetailsClass)
     )
     val bankAccountList by viewModel.bankAccountsViewModel.allBankAccountList.collectAsState()
+    val allExpenseCategoryList by viewModel.categoryViewModel.onlyExpenseCategoryNames.collectAsStateWithLifecycle()
+    val allIncomeCategoryList by viewModel.categoryViewModel.onlyIncomeCategoryNames.collectAsStateWithLifecycle()
+    var showTransactionDetailsBottomSheet by remember { mutableStateOf(false) }
+    var selectedTransaction by remember { mutableStateOf(emptyTransactionWithDetailsClass) }
+    val allTransactionsList by viewModel.transactionsViewModel.allTransactions.collectAsState(listOf())
     var selectedBankAccountClass by remember { mutableStateOf(emptyBank) }
     val totalAmountListForTimePeriodFromRoom by viewModel.transactionsViewModel.getListOfTotalAmountPerDayForRangeForCompose(
         startDate, endDate
@@ -568,21 +580,33 @@ fun StatisticsScreenTest(
                 CategorySummaryClass(
                     category,
                     list.size,
-                    ((list.size.toBigDecimal().div(transactionCount.toBigDecimal())) * BigDecimal(100)),
-                    list.sumOf { it.transaction.amount},
+                    ((list.size.toBigDecimal().div(transactionCount.toBigDecimal())) * BigDecimal(
+                        100
+                    )),
+                    list.sumOf { it.transaction.amount },
                     colorList.random()
                 )
             }
     categoryListData.onEachIndexed { index, entry ->
         entry.value.color = colorList[index]
         entry.value.percentage =
-            ((entry.value.totalAmount.divide(if(totalAmount == BigDecimal.ZERO) BigDecimal.ONE else totalAmount,2,
-                RoundingMode.HALF_UP)).multiply(BigDecimal(100)))
+            ((entry.value.totalAmount.divide(
+                if (totalAmount == BigDecimal.ZERO) BigDecimal.ONE else totalAmount, 2,
+                RoundingMode.HALF_UP
+            )).multiply(BigDecimal(100)))
     }
     val sortedCategoryListData = categoryListData.toList()
         .sortedByDescending { it.second.totalAmount } // Sort by value
         .toMap()
 
+    val transactionsMap =
+        allTransactionsList.sortedByDescending { it.transaction.date }
+            .groupBy { it.transaction.date }
+            .toSortedMap()
+
+    val transactionConverterList = transactionsMap.map {
+        TransactionConverter(it.key.toString(), it.value)
+    }.reversed()
 
 
     BackHandler() {
@@ -601,228 +625,284 @@ fun StatisticsScreenTest(
             modifier = Modifier
                 .padding(it)
                 .fillMaxSize()
-                .verticalScroll(scrollState)
                 .animateContentSize(), horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Row {
-                Column {
-                    FilledTonalButton(
-                        onClick = { showFilterBottomSheet = !showFilterBottomSheet },
-                        contentPadding = PaddingValues(
-                            start = 24.dp, top = 12.dp, end = 20.dp, bottom = 12.dp
-                        ),
-                        colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                            contentColor = MaterialTheme.colorScheme.onSurface
-                        )
-                    ) {
-                        Text(
-                            text = "${
-                                startDate.toLocalDate().toDisplayStringForMonthWithYear()
-                                    .split(",")[0]
-                            }-${endDate.toLocalDate().toDisplayStringForMonthWithYear()}",
-                            style =typography.titleMedium
-                        )
-                        Spacer(Modifier.width(4.dp))
-                        Icon(Icons.Rounded.FilterList, contentDescription = "Settings")
-
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(8.dp))
-            Row {
-                Column {
-                    TextSwitch(selectedIndex = selectedIndex, items = options, onSelectionChange = {
-                        selectedIndex = it
-                    })
-                }
-            }
-            Spacer(Modifier.height(24.dp))
-            Column {
-                Row(
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Column(
-                        modifier = Modifier
-                    ) {
-                        AnimatedContent(targetState = title) {
-                            Text(
-                                text = it,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                                style = typography.bodyMedium,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
-                            )
-                        }
-                        AnimatedContent(targetState = amount) {
-                            Text(
-                                text = "${LocalCurrency.current.currencySymbol} ${parseAmount(it)}",
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 0.dp),
-                                style = typography.headlineMedium.copy(fontFamily = CustomFonts.numberFont)
-                            )
-                        }
-                        AnimatedContent(targetState = transactionCount) {
-                            Text(
-                                text = "${it} Transaction",
-                                modifier = Modifier.padding(
-                                    horizontal = 16.dp, vertical = 8.dp
+            LazyColumn(Modifier.fillMaxSize()) {
+                item {
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                        Column {
+                            FilledTonalButton(
+                                onClick = { showFilterBottomSheet = !showFilterBottomSheet },
+                                contentPadding = PaddingValues(
+                                    start = 24.dp, top = 12.dp, end = 20.dp, bottom = 12.dp
                                 ),
-                                style = typography.labelLarge,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
-                            )
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSurface
+                                )
+                            ) {
+                                Text(
+                                    text = "${
+                                        startDate.toLocalDate().toDisplayStringForMonthWithYear()
+                                            .split(",")[0]
+                                    }-${endDate.toLocalDate().toDisplayStringForMonthWithYear()}",
+                                    style = typography.titleMedium
+                                )
+                                Spacer(Modifier.width(4.dp))
+                                Icon(Icons.Rounded.FilterList, contentDescription = "Settings")
+
+                            }
                         }
                     }
-                    FilledTonalButton(
-                        onClick = {}, contentPadding = PaddingValues(
-                            start = 24.dp, top = 12.dp, end = 20.dp, bottom = 12.dp
-                        ), colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                            contentColor = MaterialTheme.colorScheme.onSurface
-                        ), modifier = Modifier.padding(horizontal = 16.dp)
-                    ) {
-                        Text(
-                            text = "Daily", style = typography.bodyMedium
-                        )
-                        Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = "Settings")
 
-                    }
-                }
-
-                key(currentTimePeriodExpenseAllDayAndDatesListAndMaxValue.first) {
-                    Column {
-                        val palette = toPalette(orange)
-                        BarChartStatisticsScreen(
-                            modifier = Modifier,
-                            currentTimePeriodExpenseAllDayAndDatesListAndMaxValue.first,
-                            palette = palette,
-                            selectedIndex = selectedIndex
-                        )
-                    }
-                }
-            }
-
-            Spacer(Modifier.height(24.dp))
-            Column(
-                verticalArrangement = Arrangement.Top,
-                modifier = Modifier.fillMaxWidth(),
-                horizontalAlignment = Alignment.Start
-            ) {
-                Text(
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
-                    text = "Category",
-                    style = typography.titleMedium,
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-                Column {
-                    Spacer(Modifier.height(16.dp))
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .aspectRatio(1f)
-                    ) {
-                        val pieDataList = sortedCategoryListData.map {
-                            PieChartData(
-                                partName = it.key.categoryName,
-                                data = if (it.value.totalAmount == BigDecimal.ZERO) 1.0 else it.value.totalAmount.toDouble(),
-                                color = it.value.color,
-                            )
-                        }
-                        key(sortedCategoryListData) {
-                            Test(
-                                Modifier,
-                                sortedCategoryListData,
-                                MaterialTheme.colorScheme.onSurface,
-                                MaterialTheme.colorScheme.surface
-                            )
+                    Spacer(Modifier.height(8.dp))
+                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                        Column {
+                            TextSwitch(
+                                selectedIndex = selectedIndex,
+                                items = options,
+                                onSelectionChange = {
+                                    selectedIndex = it
+                                })
                         }
                     }
                     Spacer(Modifier.height(24.dp))
                     Column {
-                        sortedCategoryListData.values.toList().forEach {
-                            CategoryStatEntryTest(Modifier, it)
-                        }
-                    }
-                }
-            }
-            //bottom statistics
-            if (false) {
-                Spacer(Modifier.height(24.dp))
-                Row(Modifier.padding(horizontal = 16.dp)) {
-                    FilledTonalButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            showBankAccountAnalysisBottomSheet = !showBankAccountAnalysisBottomSheet
-                        },
-                        contentPadding = PaddingValues(
-                            start = 24.dp, top = 12.dp, end = 20.dp, bottom = 12.dp
-                        ),
-                        colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                            contentColor = MaterialTheme.colorScheme.onSurface
-                        )
-                    ) {
                         Row(
-                            Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row {
-                                Icon(
-                                    Icons.Rounded.BarChart,
-                                    contentDescription = "Settings",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(Modifier.width(8.dp))
+                            Column(
+                                modifier = Modifier
+                            ) {
+                                AnimatedContent(targetState = title) {
+                                    Text(
+                                        text = it,
+                                        modifier = Modifier.padding(
+                                            horizontal = 16.dp,
+                                            vertical = 4.dp
+                                        ),
+                                        style = typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+                                    )
+                                }
+                                AnimatedContent(targetState = amount) {
+                                    Text(
+                                        text = "${LocalCurrency.current.currencySymbol} ${
+                                            parseAmount(
+                                                it
+                                            )
+                                        }",
+                                        modifier = Modifier.padding(
+                                            horizontal = 16.dp,
+                                            vertical = 0.dp
+                                        ),
+                                        style = typography.headlineMedium.copy(fontFamily = CustomFonts.numberFont)
+                                    )
+                                }
+                                AnimatedContent(targetState = transactionCount) {
+                                    Text(
+                                        text = "${it} Transaction",
+                                        modifier = Modifier.padding(
+                                            horizontal = 16.dp, vertical = 8.dp
+                                        ),
+                                        style = typography.labelLarge,
+                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                    )
+                                }
+                            }
+                            FilledTonalButton(
+                                onClick = {}, contentPadding = PaddingValues(
+                                    start = 24.dp, top = 12.dp, end = 20.dp, bottom = 12.dp
+                                ), colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSurface
+                                ), modifier = Modifier.padding(horizontal = 16.dp)
+                            ) {
                                 Text(
-                                    text = "Bank Account Analysis",
-                                    style = typography.titleMedium
+                                    text = "Daily", style = typography.bodyMedium
+                                )
+                                Icon(
+                                    Icons.Rounded.KeyboardArrowDown,
+                                    contentDescription = "Settings"
+                                )
+
+                            }
+                        }
+
+                        key(currentTimePeriodExpenseAllDayAndDatesListAndMaxValue.first) {
+                            Column {
+                                val palette = toPalette(orange)
+                                BarChartStatisticsScreen(
+                                    modifier = Modifier,
+                                    currentTimePeriodExpenseAllDayAndDatesListAndMaxValue.first,
+                                    palette = palette,
+                                    selectedIndex = selectedIndex
                                 )
                             }
-
-                            Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = "Settings")
                         }
                     }
-                }
-                Spacer(Modifier.height(8.dp))
-                Row(Modifier.padding(horizontal = 16.dp)) {
-                    FilledTonalButton(
+
+                    Spacer(Modifier.height(24.dp))
+                    Column(
+                        verticalArrangement = Arrangement.Top,
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = {
-                            showCategoryAnalysisBottomSheet = !showCategoryAnalysisBottomSheet
-                        },
-                        contentPadding = PaddingValues(
-                            start = 24.dp, top = 12.dp, end = 20.dp, bottom = 12.dp
-                        ),
-                        colors = ButtonDefaults.filledTonalButtonColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceContainer,
-                            contentColor = MaterialTheme.colorScheme.onSurface
-                        )
+                        horizontalAlignment = Alignment.Start
                     ) {
-                        Row(
-                            Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween
-                        ) {
-                            Row {
-                                Icon(
-                                    Icons.Rounded.BubbleChart,
-                                    contentDescription = "pie chart",
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                                Spacer(Modifier.width(8.dp))
-                                Text(
-                                    text = "Category Wise Analysis",
-                                    style = typography.titleMedium
-                                )
+                        Text(
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            text = "Category",
+                            style = typography.titleMedium,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                        Column {
+                            Spacer(Modifier.height(16.dp))
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .aspectRatio(1f)
+                            ) {
+                                val pieDataList = sortedCategoryListData.map {
+                                    PieChartData(
+                                        partName = it.key.categoryName,
+                                        data = if (it.value.totalAmount == BigDecimal.ZERO) 1.0 else it.value.totalAmount.toDouble(),
+                                        color = it.value.color,
+                                    )
+                                }
+                                key(sortedCategoryListData) {
+                                    Test(
+                                        Modifier,
+                                        sortedCategoryListData,
+                                        MaterialTheme.colorScheme.onSurface,
+                                        MaterialTheme.colorScheme.surface
+                                    )
+                                }
                             }
-
-                            Icon(Icons.AutoMirrored.Rounded.ArrowForward, contentDescription = "Settings")
+                            Spacer(Modifier.height(24.dp))
+                            Column {
+                                sortedCategoryListData.values.toList().forEach {
+                                    CategoryStatEntryTest(Modifier, it)
+                                }
+                            }
                         }
                     }
+                    //bottom statistics
+                    if (false) {
+                        Spacer(Modifier.height(24.dp))
+                        Row(Modifier.padding(horizontal = 16.dp)) {
+                            FilledTonalButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                    showBankAccountAnalysisBottomSheet =
+                                        !showBankAccountAnalysisBottomSheet
+                                },
+                                contentPadding = PaddingValues(
+                                    start = 24.dp, top = 12.dp, end = 20.dp, bottom = 12.dp
+                                ),
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSurface
+                                )
+                            ) {
+                                Row(
+                                    Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Row {
+                                        Icon(
+                                            Icons.Rounded.BarChart,
+                                            contentDescription = "Settings",
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            text = "Bank Account Analysis",
+                                            style = typography.titleMedium
+                                        )
+                                    }
+
+                                    Icon(
+                                        Icons.AutoMirrored.Rounded.ArrowForward,
+                                        contentDescription = "Settings"
+                                    )
+                                }
+                            }
+                        }
+                        Spacer(Modifier.height(8.dp))
+                        Row(Modifier.padding(horizontal = 16.dp)) {
+                            FilledTonalButton(
+                                modifier = Modifier.fillMaxWidth(),
+                                onClick = {
+                                    showCategoryAnalysisBottomSheet =
+                                        !showCategoryAnalysisBottomSheet
+                                },
+                                contentPadding = PaddingValues(
+                                    start = 24.dp, top = 12.dp, end = 20.dp, bottom = 12.dp
+                                ),
+                                colors = ButtonDefaults.filledTonalButtonColors(
+                                    containerColor = MaterialTheme.colorScheme.surfaceContainer,
+                                    contentColor = MaterialTheme.colorScheme.onSurface
+                                )
+                            ) {
+                                Row(
+                                    Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Row {
+                                        Icon(
+                                            Icons.Rounded.BubbleChart,
+                                            contentDescription = "pie chart",
+                                            tint = MaterialTheme.colorScheme.primary
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                        Text(
+                                            text = "Category Wise Analysis",
+                                            style = typography.titleMedium
+                                        )
+                                    }
+
+                                    Icon(
+                                        Icons.AutoMirrored.Rounded.ArrowForward,
+                                        contentDescription = "Settings"
+                                    )
+                                }
+                            }
+                        }
+                    }
+                    Spacer(Modifier.height(24.dp))
                 }
+                item {
+                    Spacer(Modifier.height(16.dp))
+                    Text(
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                        text = "Transactions",
+                        style = typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                    Spacer(Modifier.height(0.dp))
+                }
+                transactionConverterList.forEach { (date, transactionList) ->
+                    val newdate = transactionList.get(0).transaction.date
+                    item {
+                        Header(
+                            if (newdate == System.currentTimeMillis()
+                                    .LongMillisToNormalLong()
+                            ) "Today"
+                            else date.toLocalDate().toDisplayDate()
+                        )
+                    }
+                    items(transactionList, key = { it.transaction.id }) { item ->
+                        SingleTransaction(item, onSingleItemClick = {
+                            selectedTransaction = it
+                            showTransactionDetailsBottomSheet = !showTransactionDetailsBottomSheet
+                        })
+                    }
+                }
+
+                //Spacer(Modifier.height(32.dp))
             }
-            Spacer(Modifier.height(32.dp))
         }
     }
 
@@ -838,6 +918,14 @@ fun StatisticsScreenTest(
                 showFilterBottomSheet = !showFilterBottomSheet
                 selectedBankAccountClass = bankAccountClassFinal
             })
+    }
+
+    if (showTransactionDetailsBottomSheet) {
+        BottomSheetContentItemDetails(
+            detailsBottomSheet,
+            viewModel,
+            selectedTransaction,
+            { showTransactionDetailsBottomSheet = !showTransactionDetailsBottomSheet })
     }
 
     if (showBankAccountAnalysisBottomSheet) {
@@ -987,7 +1075,9 @@ fun FilterBottomSheet(
     }
     ModalBottomSheet(onDismissRequest = closeBottomSheet, sheetState = bottomSheetState) {
         FilterBottomSheetContent(
-            Modifier.navigationBarsPadding().padding(horizontal = 16.dp),
+            Modifier
+                .navigationBarsPadding()
+                .padding(horizontal = 16.dp),
             closeBottomSheet,
             bankAccountList,
             selectedBankAccount,
@@ -1113,6 +1203,38 @@ fun FilterBottomSheetContent(
             Text(
                 modifier = modifier,
                 text = "Account",
+                style = typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            FlowRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = modifier
+            ) {
+                bankAccountList.forEachIndexed { index, bankAccountsClass ->
+                    BankChips(
+                        selectedBankAccount, bankAccountsClass
+                    ) { setSelectedChip(it) }
+                }
+            }
+            Spacer(Modifier.height(24.dp))
+            Text(
+                modifier = modifier,
+                text = "Category Type",
+                style = typography.titleMedium,
+                color = MaterialTheme.colorScheme.onSurface
+            )
+            Column {
+                TextSwitch(
+                    selectedIndex = 1,
+                    items = listOf("Expense","Income"),
+                    onSelectionChange = {
+                      //  selectedIndex = it
+                    })
+            }
+
+            Spacer(Modifier.height(12.dp))
+            Text(
+                modifier = modifier,
+                text = "Category",
                 style = typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )

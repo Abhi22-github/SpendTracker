@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -23,6 +25,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.DeleteForever
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
@@ -35,6 +38,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
@@ -54,6 +58,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -592,6 +597,50 @@ fun CategoryMigrationSelections(
         ) {
             Text(text = selectedCategory.categoryName, modifier = Modifier.weight(0.8f))
             Icon(Icons.Rounded.KeyboardArrowDown, contentDescription = null)
+        }
+    }
+}
+
+@Composable
+fun FilterTransactionScreenDialog(modifier: Modifier = Modifier, onDismiss: () -> Unit) {
+    Dialog(
+        onDismissRequest = { onDismiss() },
+        properties = DialogProperties(usePlatformDefaultWidth = false),
+    ) {
+        Card(
+            Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(), shape = RoundedCornerShape(25.dp)
+        ) {
+            Column {
+                Row(
+                    modifier = Modifier
+                        .clickable {}
+                        .fillMaxWidth()) {
+                    Row(
+                        Modifier
+                            .padding(horizontal = 16.dp, vertical = 8.dp)
+                            .fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Row(modifier = Modifier.weight(1f)) {
+                            IconButton(onClick = {}) {
+                                Icon(
+                                    Icons.Rounded.Close,
+                                    contentDescription = null,
+                                )
+                            }
+                        }
+                        Text(
+                            text = "Filter",
+                            modifier = Modifier
+                                .weight(1f),
+                            textAlign = TextAlign.Center
+                        )
+                        Spacer(Modifier.weight(1f))
+                    }
+                }
+            }
         }
     }
 }

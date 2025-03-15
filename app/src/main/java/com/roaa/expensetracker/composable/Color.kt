@@ -20,6 +20,7 @@ val blueColor = Color(0xFF1A73E8)
 val purpleColor = Color(0xFF6C3BAA)
 val greenColor = Color(0xFF216C34)
 val orange = Color(0xFFDF7D1A)
+val infoColor = Color(0xFFFFC107)
 
 val color1 = Color(0xFFCD6A65)
 val color2 = Color(0xFFD06DA6)

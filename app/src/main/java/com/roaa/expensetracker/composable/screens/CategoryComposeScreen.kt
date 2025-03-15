@@ -50,6 +50,7 @@ import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.composable.components.CategoryActionConfirmation
 import com.roaa.expensetracker.composable.components.CategoryDetailsBottomSheet
 import com.roaa.expensetracker.composable.components.CircularProgress
+import com.roaa.expensetracker.composable.components.FilterTransactionScreenDialog
 import com.roaa.expensetracker.composable.components.TopBar
 import com.roaa.expensetracker.composable.greenColor
 import com.roaa.expensetracker.composable.navigation.Destinations
@@ -127,6 +128,7 @@ fun ScaffoldContent(
     val allExpenseCategoryList by viewModel.categoryViewModel.onlyExpenseCategoryNames.collectAsStateWithLifecycle()
     val allIncomeCategoryList by viewModel.categoryViewModel.onlyIncomeCategoryNames.collectAsStateWithLifecycle()
     val scrollState = rememberScrollState()
+    var specificTransactionButtonClicked by remember { mutableStateOf(false) }
     var showCategoryDetailBottomSheet by remember { mutableStateOf(false) }
     var categoryClass by remember { mutableStateOf(emptyCategoryClass) }
     var showDeleteConfirmationDialog by remember { mutableStateOf(false) }
@@ -315,7 +317,9 @@ fun ScaffoldContent(
 
             deleteButtonClicked = { showDeleteConfirmationDialog = !showDeleteConfirmationDialog },
             statAnalysisClicked = { navigationManager.navigateTo(Destinations.StatisticsScreen) },
-            specificTransactionsClicked = { navigationManager.navigateTo(Destinations.StatisticsScreen) }
+            specificTransactionsClicked = {
+                specificTransactionButtonClicked = !specificTransactionButtonClicked
+            }
         )
     }
     if (showDeleteConfirmationDialog) {
@@ -354,6 +358,10 @@ fun ScaffoldContent(
             },
             onDismissRequest = { showDeleteConfirmationDialog = !showDeleteConfirmationDialog }
         )
+    }
+    if (specificTransactionButtonClicked) {
+        FilterTransactionScreenDialog(modifier = Modifier,
+            { specificTransactionButtonClicked = !specificTransactionButtonClicked })
     }
 }
 
