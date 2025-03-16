@@ -6,7 +6,7 @@ import com.roaa.expensetracker.database.BankAccountRepository
 import com.roaa.expensetracker.model.BankAccountsClass
 import com.roaa.expensetracker.utilities.Constants.PRIMARY
 import com.roaa.expensetracker.utilities.UiState
-import com.roaa.expensetracker.utilities.utilityModalClass.emptyBank
+import com.roaa.expensetracker.utilities.utilityModalClass.defaultBank
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -39,13 +39,13 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
 
     //flow to get singleBankAccount
     private var _singleBankAccount = MutableStateFlow<BankAccountsClass>(
-        emptyBank
+        defaultBank
     )
     val singleBankAccount: StateFlow<BankAccountsClass> =
         _singleBankAccount
 
     var selectedBankAccount = MutableStateFlow<BankAccountsClass>(
-        emptyBank
+        defaultBank
     )
 
     init {

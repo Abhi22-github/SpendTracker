@@ -13,7 +13,7 @@ import com.roaa.expensetracker.utilities.Constants.CASH
 import com.roaa.expensetracker.utilities.Constants.EXPENSE
 import java.math.BigDecimal
 
-val emptyBank = BankAccountsClass(
+val defaultBank = BankAccountsClass(
     1L,
     BigDecimal.ZERO,
     BigDecimal.ZERO,
@@ -23,9 +23,27 @@ val emptyBank = BankAccountsClass(
     CASH,
     isActive = true
 )
-val emptyCategoryClass = CategoryClass(
+val emptyBank = BankAccountsClass(
+    0L,
+    BigDecimal.ZERO,
+    BigDecimal.ZERO,
+    "",
+    1,
+    25,
+    CASH,
+    isActive = true
+)
+val defaultCategoryClass = CategoryClass(
     categoryId = 1L,
     categoryName = "Default",
+    categoryColorNumber = 1,
+    categoryIconNumber = 99,
+    categoryType = EXPENSE,
+    isActive = true
+)
+val emptyCategoryClass = CategoryClass(
+    categoryId = 0L,
+    categoryName = "",
     categoryColorNumber = 1,
     categoryIconNumber = 99,
     categoryType = EXPENSE,
@@ -63,11 +81,11 @@ val emptyTransactionClass = TransactionClass(0L,EXPENSE, BigDecimal.ZERO, "", 0L
 
 val emptyTransactionWithDetailsClass = TransactionWithDetails(
     emptyTransactionClass,
-    emptyCategoryClass, emptyBank
+    defaultCategoryClass, defaultBank
 )
 
 val firstSampleClass = CategoryClass(
-    -1, "Select Category", 1, -99, EXPENSE, isActive = false
+    -1, "Select Category", 1, 99, EXPENSE, isActive = false
 )
 
 val defaultCurrency = CurrencyClass("India", "INR", "Indian Rupees", "₹","🇮🇳" )

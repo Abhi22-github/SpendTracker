@@ -51,9 +51,9 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.Cable
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Payment
+import androidx.compose.material.icons.rounded.AddCircle
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.DateRange
-import androidx.compose.material.icons.rounded.FilterList
 import androidx.compose.material.icons.rounded.PieChart
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonColors
@@ -153,13 +153,12 @@ import com.roaa.expensetracker.utilities.parseAmount
 import com.roaa.expensetracker.utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.utilities.toLocalDate
 import com.roaa.expensetracker.utilities.toLongMillis
-import com.roaa.expensetracker.utilities.utilityModalClass.emptyBank
-import com.roaa.expensetracker.utilities.utilityModalClass.emptyCategoryClass
+import com.roaa.expensetracker.utilities.utilityModalClass.defaultBank
+import com.roaa.expensetracker.utilities.utilityModalClass.defaultCategoryClass
 import com.roaa.expensetracker.utilities.utilityModalClass.emptyTransactionClass
 import com.roaa.expensetracker.utilities.utilityModalClass.firstSampleClass
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
 
@@ -231,11 +230,17 @@ fun BottomSheetContentItemAddContent(
     var expenseValue by remember { mutableStateOf(TextFieldValue("")) }
     var comment by remember { mutableStateOf(TextFieldValue("")) }
     var selectedDate by remember { mutableStateOf<Long?>(date) }
-    var selectedPaymentMethod by remember { mutableStateOf<BankAccountsClass>(emptyBank) }
     val focusRequester = remember { FocusRequester() }
     val expenseType = TransactionTypeClass(1, EXPENSE)
     val incomeType = TransactionTypeClass(2, INCOME)
     var selectedType by remember { mutableStateOf(expenseType.type) }
+    val bankAccountsList by viewModel.bankAccountsViewModel.allBankAccountList.collectAsState()
+    var selectedPaymentMethod by remember { mutableStateOf<BankAccountsClass>(defaultBank) }
+
+    val isAddFromSpecificCategoryOrBank by viewModel.uiViewModel.addCategorySpecificOrBankSpecificTransaction.collectAsState()
+    val specificBankAccount by viewModel.uiViewModel.addSpecificBankForTransaction.collectAsState()
+    val specificCategory by viewModel.uiViewModel.addSpecificCategoryForTransaction.collectAsState()
+
     val categoryList by viewModel.categoryViewModel.categoryList.collectAsState()
     val lastExpenseCategoryId by viewModel.preferencesViewModel.getLastExpenseCategory.collectAsState(
         0L
@@ -251,29 +256,75 @@ fun BottomSheetContentItemAddContent(
             firstSampleClass
         )
     }
-    LaunchedEffect(lastExpenseCategoryId, lastIncomeCategoryId, categoryList, selectedType) {
-        if (categoryList.isNotEmpty()) {
-            if (selectedType == expenseType.type) {
-                val expenseCategoryPresent =
-                    categoryList.any { it.categoryId == lastExpenseCategoryId }
-                if (expenseCategoryPresent) {
-                    selectedCategory = categoryList.first { it.categoryId == lastExpenseCategoryId }
+    var typeToggle by remember { mutableStateOf(true) }
+    LaunchedEffect(
+        lastExpenseCategoryId,
+        lastIncomeCategoryId,
+        categoryList,
+        selectedType,
+        isAddFromSpecificCategoryOrBank,
+        specificBankAccount,
+        specificCategory
+    ) {
+        if (isAddFromSpecificCategoryOrBank) {
+            if (specificBankAccount.bankAccountId != 0L) {
+                if (bankAccountsList.isNotEmpty()) {
+                    val bankAccountPresent =
+                        bankAccountsList.any { it.bankAccountId == specificBankAccount.bankAccountId }
+                    if (bankAccountPresent) {
+                        selectedPaymentMethod =
+                            bankAccountsList.first { it.bankAccountId == specificBankAccount.bankAccountId }
+                    }
                 }
-            } else {
-                val incomeCategoryPresent =
-                    categoryList.any { it.categoryId == lastIncomeCategoryId }
-                if (incomeCategoryPresent) {
-                    selectedCategory = categoryList.first { it.categoryId == lastIncomeCategoryId }
+            }
+            if (specificCategory.categoryId != 0L) {
+                if (categoryList.isNotEmpty()) {
+                    if (specificCategory.categoryType == expenseType.type) {
+                        val expenseCategoryPresent =
+                            categoryList.any { it.categoryId == specificCategory.categoryId }
+                        if (expenseCategoryPresent) {
+                            selectedCategory =
+                                categoryList.first { it.categoryId == specificCategory.categoryId }
+                        }
+                        typeToggle = true
+                    } else {
+                        val incomeCategoryPresent =
+                            categoryList.any { it.categoryId == specificCategory.categoryId }
+                        if (incomeCategoryPresent) {
+                            selectedCategory =
+                                categoryList.first { it.categoryId == specificCategory.categoryId }
+                        }
+                        typeToggle = false
+                    }
+                }
+            }
+            viewModel.categoryViewModel.getCorrespondingList(if (typeToggle) expenseType.type else incomeType.type)
+        } else {
+            if (categoryList.isNotEmpty()) {
+                if (selectedType == expenseType.type) {
+                    val expenseCategoryPresent =
+                        categoryList.any { it.categoryId == lastExpenseCategoryId }
+                    if (expenseCategoryPresent) {
+                        selectedCategory =
+                            categoryList.first { it.categoryId == lastExpenseCategoryId }
+                    }
+                } else {
+                    val incomeCategoryPresent =
+                        categoryList.any { it.categoryId == lastIncomeCategoryId }
+                    if (incomeCategoryPresent) {
+                        selectedCategory =
+                            categoryList.first { it.categoryId == lastIncomeCategoryId }
+                    }
                 }
             }
         }
+
     }
 
     val errorStatus by viewModel.uiViewModel.errorStatusInAddBottomSheet.collectAsState(false)
 
 
     //animations
-    var typeToggle by remember { mutableStateOf(true) }
     val colorAnimate by animateColorAsState(
         targetValue = if (typeToggle) orange.copy(alpha = .20f) else successColor.copy(
             alpha = 0.20f
@@ -599,6 +650,8 @@ fun BottomSheetContentItemAddContent(
                 viewModel,
                 selectedDate,
                 { selectedDate = it },
+                bankAccountsList,
+                selectedPaymentMethod,
                 { selectedPaymentMethod = it },
             )
         }
@@ -612,7 +665,7 @@ fun BottomSheetContentItemAddContent(
                 onClick = {
                     validateTransactionData(
                         TransactionWithDetails(
-                            emptyTransactionClass, emptyCategoryClass, emptyBank
+                            emptyTransactionClass, defaultCategoryClass, defaultBank
                         ),
                         INSERT,
                         closeBottomSheet = closeBottomSheet,
@@ -664,6 +717,7 @@ fun BottomSheetContentItemEditContent(
             singleTransaction.category
         )
     }
+    val bankAccountsList by viewModel.bankAccountsViewModel.allBankAccountList.collectAsState()
 
     val expenseType = TransactionTypeClass(1, EXPENSE)
     val incomeType = TransactionTypeClass(2, INCOME)
@@ -1004,6 +1058,8 @@ fun BottomSheetContentItemEditContent(
                 viewModel,
                 selectedDate,
                 { selectedDate = it },
+                bankAccountsList,
+                selectedPaymentMethod,
                 { selectedPaymentMethod = it },
             )
         }
@@ -1113,29 +1169,16 @@ fun BottomRow(
     viewModel: AllViewModel,
     selectedDate: Long?,
     selectedDateSetter: (Long?) -> Unit,
+    bankAccountsList: List<BankAccountsClass>,
+    selectedBankAccount: BankAccountsClass,
     selectedPaymentMethodSetter: (BankAccountsClass) -> Unit,
 ) {
     var showDatePicker by remember { mutableStateOf(false) }
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = selectedDate?.toLocalDate()?.toLongMillis()
     )
-    val bankAccountsList by viewModel.bankAccountsViewModel.allBankAccountList.collectAsState()
-
     val colorPalletBlue = toPalette(blueColor)
     val scope = rememberCoroutineScope()
-
-    val primaryBankAccount by viewModel.preferencesViewModel.getPrimaryAccount.collectAsState(
-        emptyBank
-    )
-    var selectedBankAccount by remember {
-        mutableStateOf(emptyBank)
-    }
-    LaunchedEffect(primaryBankAccount) {
-        viewModel.preferencesViewModel.getPrimaryAccount.take(1).collect { data ->
-            selectedBankAccount = data
-        }
-        selectedPaymentMethodSetter(selectedBankAccount)
-    }
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -1205,7 +1248,7 @@ fun BottomRow(
                     onDismiss = { bankAccountMenuExpanded = false },
                     bankAccountsList,
                     selectedBankAccountSetter = {
-                        selectedBankAccount = it
+                       // selectedBankAccount = it
                         selectedPaymentMethodSetter(selectedBankAccount)
                         scope.launch {
                             viewModel.uiViewModel.errorStatusInAddBottomSheet.emit(false)
@@ -2192,7 +2235,7 @@ private fun PaymentAddContentPreview() {
 @Composable
 private fun PaymentEditContentPreview() {
     BottomSheetContentPaymentMethodEditContentNew(
-        modifier = Modifier.padding(16.dp, 0.dp), emptyBank,
+        modifier = Modifier.padding(16.dp, 0.dp), defaultBank,
         showError = true, false, {},
         saveButtonClicked = { a, b, c -> },
     )
@@ -3102,8 +3145,8 @@ fun BankDetailsBottomSheetContent(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(text = "View specific transactions")
-                        Icon(Icons.Rounded.FilterList, contentDescription = null)
+                        Text(text = "Add Transaction")
+                        Icon(Icons.Rounded.AddCircle, contentDescription = null)
                     }
 
                 }
@@ -3116,7 +3159,7 @@ fun BankDetailsBottomSheetContent(
 @Preview(showBackground = true)
 @Composable
 private fun BankDetailsBottomSheetContentPreview() {
-    BankDetailsBottomSheetContent(emptyBank, {}, {}, {}, {})
+    BankDetailsBottomSheetContent(defaultBank, {}, {}, {}, {})
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -3254,8 +3297,8 @@ fun CategoryDetailsBottomSheetContent(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
-                        Text(text = "View specific transactions")
-                        Icon(Icons.Rounded.FilterList, contentDescription = null)
+                        Text(text = "Add Transaction")
+                        Icon(Icons.Rounded.AddCircle, contentDescription = null)
                     }
 
                 }
@@ -3269,5 +3312,5 @@ fun CategoryDetailsBottomSheetContent(
 @Preview(showBackground = true)
 @Composable
 private fun CategoryDetailsBottomSheetContentPreview() {
-    CategoryDetailsBottomSheetContent(emptyCategoryClass, {}, {}, {}, {})
+    CategoryDetailsBottomSheetContent(defaultCategoryClass, {}, {}, {}, {})
 }

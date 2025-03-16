@@ -93,8 +93,8 @@ import com.roaa.expensetracker.utilities.getFirstAndLastMonth
 import com.roaa.expensetracker.utilities.parseAmount
 import com.roaa.expensetracker.utilities.toDisplayDate
 import com.roaa.expensetracker.utilities.toLocalDate
-import com.roaa.expensetracker.utilities.utilityModalClass.emptyBank
-import com.roaa.expensetracker.utilities.utilityModalClass.emptyCategoryClass
+import com.roaa.expensetracker.utilities.utilityModalClass.defaultBank
+import com.roaa.expensetracker.utilities.utilityModalClass.defaultCategoryClass
 import com.roaa.expensetracker.utilities.utilityModalClass.emptyTotalExpenseIncomeClass
 import com.roaa.expensetracker.utilities.utilityModalClass.emptyTransactionClass
 import kotlinx.coroutines.launch
@@ -106,12 +106,13 @@ import java.math.BigDecimal
 @Composable
 fun TransactionsListCompose(
     navigationManager: NavigationManager,
-    viewModel:AllViewModel,
+    viewModel: AllViewModel,
     modifier: Modifier,
     showSingleDateTransactions: Boolean,
     date: Long,
 ) {
-    var showAddBottomSheet by remember { mutableStateOf(false) }
+    val categoryOrBankSpecificAdd by viewModel.uiViewModel.addCategorySpecificOrBankSpecificTransaction.collectAsState()
+    var showAddBottomSheet by remember { mutableStateOf(categoryOrBankSpecificAdd) }
     val currentSelectedMonth by viewModel.uiViewModel.selectedMonth.collectAsState()
     val monthName =
         convertMonthShortToFullName(currentSelectedMonth)
@@ -151,14 +152,16 @@ fun TransactionsListCompose(
     val showExperimentalComponents by viewModel.preferencesViewModel.showExperimentalComponent.collectAsState(
         false
     )
-    Scaffold(floatingActionButton = {
-        ExtendedFloatingActionButton(
-            onClick = {
-                showAddBottomSheet = !showAddBottomSheet
-            },
-            icon = { Icon(Icons.Filled.Add, "Localized description") },
-            text = { Text(text = "Add") },
-        )},
+    Scaffold(
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = {
+                    showAddBottomSheet = !showAddBottomSheet
+                },
+                icon = { Icon(Icons.Filled.Add, "Localized description") },
+                text = { Text(text = "Add") },
+            )
+        },
         floatingActionButtonPosition = FabPosition.EndOverlay
     ) {
 
@@ -167,8 +170,8 @@ fun TransactionsListCompose(
             mutableStateOf(
                 TransactionWithDetails(
                     emptyTransactionClass,
-                    emptyCategoryClass,
-                    emptyBank
+                    defaultCategoryClass,
+                    defaultBank
                 )
             )
         }
@@ -292,7 +295,14 @@ fun TransactionsListCompose(
                     { bottomSheet = !bottomSheet })
             }
             if (showAddBottomSheet) {
-                AddBottomSheet(date,viewModel, { showAddBottomSheet = !showAddBottomSheet })
+                AddBottomSheet(date, viewModel, {
+                    showAddBottomSheet = !showAddBottomSheet
+                    scope.launch {
+                        viewModel.uiViewModel.addCategorySpecificOrBankSpecificTransaction.emit(
+                            false
+                        )
+                    }
+                })
             }
         }
     }
@@ -452,14 +462,15 @@ fun HomeStatCardNew(
                 .fillMaxSize()
         ) {
             val (content, decoration1, decoration2) = createRefs()
-            Column(Modifier
-                .constrainAs(content) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                }
-                .zIndex(1f)) {
+            Column(
+                Modifier
+                    .constrainAs(content) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    }
+                    .zIndex(1f)) {
                 Box(Modifier.clickable { mainContentVisibility = !mainContentVisibility }) {
                     Row(
                         Modifier

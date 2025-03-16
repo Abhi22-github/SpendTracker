@@ -94,8 +94,8 @@ import com.roaa.expensetracker.utilities.parseAmount
 import com.roaa.expensetracker.utilities.toDisplayDate
 import com.roaa.expensetracker.utilities.toLocalDate
 import com.roaa.expensetracker.utilities.toLong
-import com.roaa.expensetracker.utilities.utilityModalClass.emptyBank
-import com.roaa.expensetracker.utilities.utilityModalClass.emptyCategoryClass
+import com.roaa.expensetracker.utilities.utilityModalClass.defaultBank
+import com.roaa.expensetracker.utilities.utilityModalClass.defaultCategoryClass
 import com.roaa.expensetracker.utilities.utilityModalClass.emptyTransactionClass
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
@@ -113,7 +113,7 @@ fun PaymentMethodScreen(
     var showBankDetailsBottomSheet by remember { mutableStateOf(false) }
     val bankAccountsList by viewModel.bankAccountsViewModel.allBankAccountListExceptCash
         .collectAsState(
-            listOf(emptyBank)
+            listOf(defaultBank)
         )
     val uiState by viewModel.bankAccountsViewModel.uiState.collectAsState()
 
@@ -123,7 +123,7 @@ fun PaymentMethodScreen(
 
     var bankAccountsClass by remember {
         mutableStateOf(
-            emptyBank
+            defaultBank
         )
     }
 
@@ -205,8 +205,12 @@ fun PaymentMethodScreen(
                 showBankDetailsBottomSheet = !showBankDetailsBottomSheet
             },
             {
-                navigationManager.navigateTo(Destinations.StatisticsScreen)
+                navigationManager.navigateTo(Destinations.ListScreen)
                 showBankDetailsBottomSheet = !showBankDetailsBottomSheet
+                scope.launch {
+                    viewModel.uiViewModel.addCategorySpecificOrBankSpecificTransaction.emit(true)
+                    viewModel.uiViewModel.addSpecificBankForTransaction.emit(bankAccountsClass)
+                }
             }
         )
     }
@@ -721,12 +725,12 @@ fun PaymentDetailsScreen(
     bankAccountId: Long,
 ) {
     val bankAccount by viewModel.bankAccountsViewModel.getSingleBankAccountForCompose(bankAccountId)
-        .collectAsState(emptyBank)
+        .collectAsState(defaultBank)
     var showEditBottomSheet by remember { mutableStateOf(false) }
     var actionConfirmationFlag by remember { mutableStateOf(false) }
     var bankAccountsClass by remember {
         mutableStateOf(
-            emptyBank
+            defaultBank
         )
     }
     val transactionListForBankAccount by viewModel.transactionsViewModel.getTransactionsListForBankAccountId(
@@ -745,7 +749,7 @@ fun PaymentDetailsScreen(
 
     val bankAccountsList by viewModel.bankAccountsViewModel.getAllBankAccountsExceptCashCompose()
         .collectAsState(
-            listOf(emptyBank)
+            listOf(defaultBank)
         )
     val scope = rememberCoroutineScope()
     val currentMonthStart = LocalDate.now()
@@ -778,8 +782,8 @@ fun PaymentDetailsScreen(
         mutableStateOf(
             TransactionWithDetails(
                 emptyTransactionClass,
-                emptyCategoryClass,
-                emptyBank
+                defaultCategoryClass,
+                defaultBank
             )
         )
     }

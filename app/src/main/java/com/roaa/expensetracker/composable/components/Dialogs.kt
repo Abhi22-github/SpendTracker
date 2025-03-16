@@ -70,8 +70,8 @@ import com.roaa.expensetracker.model.CategoryClass
 import com.roaa.expensetracker.utilities.DeleteAction
 import com.roaa.expensetracker.utilities.bankDeleteActionList
 import com.roaa.expensetracker.utilities.categoryDeleteActionList
-import com.roaa.expensetracker.utilities.utilityModalClass.emptyBank
-import com.roaa.expensetracker.utilities.utilityModalClass.emptyCategoryClass
+import com.roaa.expensetracker.utilities.utilityModalClass.defaultBank
+import com.roaa.expensetracker.utilities.utilityModalClass.defaultCategoryClass
 
 
 @Composable
@@ -152,7 +152,7 @@ fun ActionConfirmation(
     var selectedItem by remember { mutableStateOf(DeleteAction.DELETE) }
     var filteredBankAccountList = remember { bankAccountList }
     var selectedBankAccountForMigration by remember {
-        mutableStateOf(emptyBank)
+        mutableStateOf(defaultBank)
     }
     if (shouldEnableTheMigration) {
         filteredBankAccountList =
@@ -367,7 +367,7 @@ private fun ActionConfirmationPreview() {
         selectedItem = DeleteAction.DELETE_AND_MIGRATE,
         shouldEnableTheMigration = true,
         bankAccountList = listOf<BankAccountsClass>(),
-        selectedBankAccountForMigration = emptyBank,
+        selectedBankAccountForMigration = defaultBank,
         setSelectedBankAccountForMigration = {},
         setSelectedItem = { },
         confirmButtonClick = {})
@@ -376,7 +376,7 @@ private fun ActionConfirmationPreview() {
 @Preview
 @Composable
 private fun MigrationSelectionsPreview() {
-    MigrationSelections(Modifier, emptyBank, {})
+    MigrationSelections(Modifier, defaultBank, {})
 }
 
 //for Category confirmation
@@ -395,7 +395,7 @@ fun CategoryActionConfirmation(
     var selectedItem by remember { mutableStateOf(DeleteAction.DELETE) }
     var filteredCategoryList = remember { categoryClassList }
     var selectedCategoryForMigration by remember {
-        mutableStateOf(emptyCategoryClass)
+        mutableStateOf(defaultCategoryClass)
     }
     if (shouldEnableTheMigration) {
         filteredCategoryList =

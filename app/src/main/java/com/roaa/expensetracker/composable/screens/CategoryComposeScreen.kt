@@ -50,7 +50,6 @@ import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.composable.components.CategoryActionConfirmation
 import com.roaa.expensetracker.composable.components.CategoryDetailsBottomSheet
 import com.roaa.expensetracker.composable.components.CircularProgress
-import com.roaa.expensetracker.composable.components.FilterTransactionScreenDialog
 import com.roaa.expensetracker.composable.components.TopBar
 import com.roaa.expensetracker.composable.greenColor
 import com.roaa.expensetracker.composable.navigation.Destinations
@@ -64,7 +63,7 @@ import com.roaa.expensetracker.model.CategoryClass
 import com.roaa.expensetracker.utilities.Constants.EXPENSE
 import com.roaa.expensetracker.utilities.DeleteAction
 import com.roaa.expensetracker.utilities.UiState
-import com.roaa.expensetracker.utilities.utilityModalClass.emptyCategoryClass
+import com.roaa.expensetracker.utilities.utilityModalClass.defaultCategoryClass
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalSharedTransitionApi::class)
@@ -130,7 +129,7 @@ fun ScaffoldContent(
     val scrollState = rememberScrollState()
     var specificTransactionButtonClicked by remember { mutableStateOf(false) }
     var showCategoryDetailBottomSheet by remember { mutableStateOf(false) }
-    var categoryClass by remember { mutableStateOf(emptyCategoryClass) }
+    var categoryClass by remember { mutableStateOf(defaultCategoryClass) }
     var showDeleteConfirmationDialog by remember { mutableStateOf(false) }
     var scope = rememberCoroutineScope()
 
@@ -316,9 +315,19 @@ fun ScaffoldContent(
             },
 
             deleteButtonClicked = { showDeleteConfirmationDialog = !showDeleteConfirmationDialog },
-            statAnalysisClicked = { navigationManager.navigateTo(Destinations.StatisticsScreen) },
+            statAnalysisClicked = {
+                navigationManager.navigateTo(Destinations.StatisticsScreen)
+                showCategoryDetailBottomSheet = !showCategoryDetailBottomSheet
+            },
             specificTransactionsClicked = {
-                specificTransactionButtonClicked = !specificTransactionButtonClicked
+                navigationManager.navigateTo(Destinations.ListScreen)
+                showCategoryDetailBottomSheet = !showCategoryDetailBottomSheet
+                scope.launch {
+                    viewModel.uiViewModel.addCategorySpecificOrBankSpecificTransaction.emit(
+                        true
+                    )
+                    viewModel.uiViewModel.addSpecificCategoryForTransaction.emit(categoryClass)
+                }
             }
         )
     }
@@ -359,10 +368,11 @@ fun ScaffoldContent(
             onDismissRequest = { showDeleteConfirmationDialog = !showDeleteConfirmationDialog }
         )
     }
-    if (specificTransactionButtonClicked) {
-        FilterTransactionScreenDialog(modifier = Modifier,
-            { specificTransactionButtonClicked = !specificTransactionButtonClicked })
-    }
+//    if (specificTransactionButtonClicked) {
+//        FilterTransactionScreenDialog(
+//            modifier = Modifier,
+//            { specificTransactionButtonClicked = !specificTransactionButtonClicked })
+//    }
 }
 
 //@Composable

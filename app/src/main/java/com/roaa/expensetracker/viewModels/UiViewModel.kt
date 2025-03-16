@@ -4,6 +4,8 @@ import androidx.lifecycle.ViewModel
 import com.roaa.expensetracker.database.relations.TransactionWithDetails
 import com.roaa.expensetracker.utilities.ErrorManager
 import com.roaa.expensetracker.utilities.currentMonth
+import com.roaa.expensetracker.utilities.utilityModalClass.defaultBank
+import com.roaa.expensetracker.utilities.utilityModalClass.defaultCategoryClass
 import com.roaa.expensetracker.utilities.utilityModalClass.emptyBank
 import com.roaa.expensetracker.utilities.utilityModalClass.emptyCategoryClass
 import com.roaa.expensetracker.utilities.utilityModalClass.emptyTransactionClass
@@ -13,7 +15,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class UiViewModel @Inject constructor() : ViewModel() {
-    var transactionDetailBottomSheetValue = MutableStateFlow<Boolean>(false)
+    //when user clicks on add transaction from specific bank or category
+    var addCategorySpecificOrBankSpecificTransaction = MutableStateFlow<Boolean>(false)
+    var addSpecificCategoryForTransaction = MutableStateFlow(emptyCategoryClass)
+    var addSpecificBankForTransaction = MutableStateFlow(emptyBank)
     var errorStatusInAddBottomSheet = MutableStateFlow<Boolean>(false)
     var errorStatusInAddCategory = MutableStateFlow<Boolean>(false)
     var errorStatusInBankAccountAdd = MutableStateFlow<Boolean>(false)
@@ -34,7 +39,7 @@ class UiViewModel @Inject constructor() : ViewModel() {
     //data Related
     var transactionDetailsWithViewModelFlow = MutableStateFlow(
         TransactionWithDetails(
-            emptyTransactionClass, emptyCategoryClass, emptyBank
+            emptyTransactionClass, defaultCategoryClass, defaultBank
         )
     )
 
