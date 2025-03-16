@@ -10,6 +10,9 @@ import com.roaa.expensetracker.composable.color5
 import com.roaa.expensetracker.composable.color6
 import com.roaa.expensetracker.composable.color7
 import com.roaa.expensetracker.composable.color8
+import com.roaa.expensetracker.composable.utils.ColorState.values
+import com.roaa.expensetracker.composable.utils.IconState.values
+import com.roaa.expensetracker.composable.utils.IconStateForType.values
 
 enum class IconState(val number: Int, val drawableResId: Int) {
     ICON_1(1, R.drawable.ic_category_1),
@@ -51,8 +54,8 @@ enum class IconState(val number: Int, val drawableResId: Int) {
 
     companion object {
         // This function maps a number to the corresponding Icon enum constant
-        fun fromNumber(number: Int): Int? {
-            return values().firstOrNull { it.number == number }?.drawableResId
+        fun fromNumber(number: Int): Int {
+            return values().firstOrNull { it.number == number }?.drawableResId ?: R.drawable.ic_category_1
         }
     }
 }

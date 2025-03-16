@@ -1,5 +1,7 @@
 package com.roaa.expensetracker.utilities
 
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.composable.color1
 import com.roaa.expensetracker.composable.color2
@@ -12,6 +14,8 @@ import com.roaa.expensetracker.composable.onboardingColor1
 import com.roaa.expensetracker.composable.onboardingColor2
 import com.roaa.expensetracker.composable.onboardingColor3
 import com.roaa.expensetracker.composable.onboardingColor4
+import com.roaa.expensetracker.model.BankAccountsClass
+import com.roaa.expensetracker.model.CategoryClass
 import com.roaa.expensetracker.model.uiDataModels.BarChartExpenseModel
 import com.roaa.expensetracker.model.uiDataModels.OnboardingContent
 import com.roaa.expensetracker.model.uiDataModels.TotalExpenseIncomeClass
@@ -69,7 +73,7 @@ enum class DeleteAction {
     DELETE, DELETE_AND_MIGRATE, DELETE_ALL_WITH_TRANSACTIONS
 }
 
-val bankdeleteActionList = listOf(
+val bankDeleteActionList = listOf(
     DeleteActionsModelClass(
         "Delete Bank Account",
         "The Bank account will be deleted, but transactions will remain.",
@@ -133,3 +137,7 @@ val onboardingPageContentList = listOf(
         R.drawable.onboarding_4
     )
 )
+
+data class CategoryChipItem(val categoryClass: CategoryClass, var isSelected: MutableState<Boolean> = mutableStateOf(true))
+
+data class BankChipItem(val bankAccountsClass: BankAccountsClass, var isSelected: MutableState<Boolean> = mutableStateOf(true))

@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -69,7 +68,7 @@ import com.roaa.expensetracker.composable.utils.toPalette
 import com.roaa.expensetracker.model.BankAccountsClass
 import com.roaa.expensetracker.model.CategoryClass
 import com.roaa.expensetracker.utilities.DeleteAction
-import com.roaa.expensetracker.utilities.bankdeleteActionList
+import com.roaa.expensetracker.utilities.bankDeleteActionList
 import com.roaa.expensetracker.utilities.categoryDeleteActionList
 import com.roaa.expensetracker.utilities.utilityModalClass.emptyBank
 import com.roaa.expensetracker.utilities.utilityModalClass.emptyCategoryClass
@@ -200,7 +199,7 @@ fun ActionConfirmationBottomSheetContent(
         Modifier
             .padding(bottom = 8.dp)
     ) {
-        bankdeleteActionList.forEach {
+        bankDeleteActionList.forEach {
             SingleActionItem(
                 modifier,
                 it.header,

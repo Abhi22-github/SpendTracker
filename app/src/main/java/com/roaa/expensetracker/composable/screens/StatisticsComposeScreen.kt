@@ -37,7 +37,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.rounded.ArrowForward
-import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.rounded.AccessTime
 import androidx.compose.material.icons.rounded.BarChart
 import androidx.compose.material.icons.rounded.BubbleChart
@@ -49,9 +48,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -95,7 +91,11 @@ import com.roaa.expensetracker.composable.color5
 import com.roaa.expensetracker.composable.color6
 import com.roaa.expensetracker.composable.color7
 import com.roaa.expensetracker.composable.color8
+import com.roaa.expensetracker.composable.components.BankChips
 import com.roaa.expensetracker.composable.components.BottomSheetContentItemDetails
+import com.roaa.expensetracker.composable.components.CategoryChips
+import com.roaa.expensetracker.composable.components.CategoryTypeChips
+import com.roaa.expensetracker.composable.components.ChipsForFilter
 import com.roaa.expensetracker.composable.components.DatePickerModal
 import com.roaa.expensetracker.composable.components.ErrorRow
 import com.roaa.expensetracker.composable.components.Header
@@ -112,15 +112,16 @@ import com.roaa.expensetracker.composable.statisticsComponent.Test
 import com.roaa.expensetracker.composable.utils.IconState
 import com.roaa.expensetracker.composable.utils.toPalette
 import com.roaa.expensetracker.converters.TransactionConverter
-import com.roaa.expensetracker.database.relations.TransactionWithDetails
 import com.roaa.expensetracker.hilt.AllViewModel
 import com.roaa.expensetracker.model.BankAccountsClass
+import com.roaa.expensetracker.model.CategoryClass
+import com.roaa.expensetracker.utilities.BankChipItem
+import com.roaa.expensetracker.utilities.CategoryChipItem
 import com.roaa.expensetracker.utilities.Constants.EXPENSE
 import com.roaa.expensetracker.utilities.Constants.INCOME
 import com.roaa.expensetracker.utilities.LongMillisToNormalLong
 import com.roaa.expensetracker.utilities.colorList
 import com.roaa.expensetracker.utilities.createListForBarGraph
-import com.roaa.expensetracker.utilities.currentYear
 import com.roaa.expensetracker.utilities.getDatesBetween
 import com.roaa.expensetracker.utilities.getDayDifference
 import com.roaa.expensetracker.utilities.getPreviousAndNext100Months
@@ -134,7 +135,6 @@ import com.roaa.expensetracker.utilities.toLocalDate
 import com.roaa.expensetracker.utilities.toLong
 import com.roaa.expensetracker.utilities.toLongMillis
 import com.roaa.expensetracker.utilities.utilityModalClass.CategorySummaryClass
-import com.roaa.expensetracker.utilities.utilityModalClass.emptyBank
 import com.roaa.expensetracker.utilities.utilityModalClass.emptyTotalExpenseIncomeClass
 import com.roaa.expensetracker.utilities.utilityModalClass.emptyTransactionWithDetailsClass
 import kotlinx.coroutines.launch
@@ -380,67 +380,6 @@ fun StatisticsScreen(
     }
 }
 
-@Composable
-fun ChipsForFilter(
-    index: Int, selectedIndexForFilterChip: Int, text: String, selectChip: (Int) -> Unit
-) {
-    val temp = if (text.split(",").get(1) == currentYear) text.split(",")[0] else text
-    FilterChip(
-        onClick = { selectChip(index) },
-        label = {
-            Text(text = temp)
-        },
-        selected = index == selectedIndexForFilterChip,
-        leadingIcon = if (index == selectedIndexForFilterChip) {
-            {
-                Icon(
-                    imageVector = Icons.Filled.Done,
-                    contentDescription = "Done icon",
-                    modifier = Modifier.size(FilterChipDefaults.IconSize)
-                )
-            }
-        } else {
-            null
-        },
-        shape = RoundedCornerShape(12.dp),
-        border = BorderStroke(0.1.dp, MaterialTheme.colorScheme.outline),
-        colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh))
-}
-
-@Composable
-fun BankChips(
-    selectedBankAccountsClass: BankAccountsClass,
-    bankAccountsClass: BankAccountsClass,
-    selectChip: (BankAccountsClass) -> Unit
-) {
-    FilterChip(
-        onClick = { selectChip(bankAccountsClass) },
-        label = {
-            Text(
-                text = bankAccountsClass.bankName,
-                modifier = Modifier.padding(vertical = 8.dp),
-                style = typography.bodyMedium
-            )
-        },
-        selected = selectedBankAccountsClass.bankAccountId == bankAccountsClass.bankAccountId,
-        leadingIcon = if (selectedBankAccountsClass.bankAccountId == bankAccountsClass.bankAccountId) {
-            {
-                Icon(
-                    imageVector = Icons.Filled.Done,
-                    contentDescription = "Done icon",
-                    modifier = Modifier.size(FilterChipDefaults.IconSize)
-                )
-            }
-        } else {
-            null
-        },
-        shape = RoundedCornerShape(25.dp),
-        border = if (selectedBankAccountsClass.bankAccountId == bankAccountsClass.bankAccountId) BorderStroke(
-            1.dp,
-            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
-        ) else BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)),
-        colors = FilterChipDefaults.filterChipColors())
-}
 
 @Composable
 fun CategoryStatEntry(modifier: Modifier = Modifier, color: Color) {
@@ -529,6 +468,7 @@ fun StatisticsScreenTest(
     var endDate by remember { mutableStateOf<Long>(LocalDate.now().toLong()) }
     val scrollState = rememberScrollState()
     var showFilterBottomSheet by remember { mutableStateOf(false) }
+    var categoryType by remember { mutableStateOf(EXPENSE) }
     val detailsBottomSheet = rememberModalBottomSheetState(skipPartiallyExpanded = false)
     var showBankAccountAnalysisBottomSheet by remember { mutableStateOf(false) }
     var showCategoryAnalysisBottomSheet by remember { mutableStateOf(false) }
@@ -544,25 +484,23 @@ fun StatisticsScreenTest(
     val allIncomeCategoryList by viewModel.categoryViewModel.onlyIncomeCategoryNames.collectAsStateWithLifecycle()
     var showTransactionDetailsBottomSheet by remember { mutableStateOf(false) }
     var selectedTransaction by remember { mutableStateOf(emptyTransactionWithDetailsClass) }
-    val allTransactionsList by viewModel.transactionsViewModel.allTransactions.collectAsState(listOf())
-    var selectedBankAccountClass by remember { mutableStateOf(emptyBank) }
     val totalAmountListForTimePeriodFromRoom by viewModel.transactionsViewModel.getListOfTotalAmountPerDayForRangeForCompose(
         startDate, endDate
     ).collectAsState(listOf(emptyTotalExpenseIncomeClass))
 
+    var selectedCategoryTypeIndex by remember { mutableIntStateOf(if (categoryType == EXPENSE) 0 else 1) }
     val totalAmountMap = totalAmountListForTimePeriodFromRoom.associateBy { it.date }
+    var selectedCategoryList by remember { mutableStateOf(allExpenseCategoryList) }
+    var selectedBankAccountList by remember { mutableStateOf(bankAccountList) }
+    val filteredTransactions =
+        transactionsForTimePeriodFromRoom.filter { it.transaction.type == categoryType }
+            .filter { it.category in selectedCategoryList }
+            .filter { it.BankAccount in selectedBankAccountList }
+    val filteredTransactionsTotalAmount = filteredTransactions.sumOf { it.transaction.amount }
 
-    val expenseTransactions =
-        transactionsForTimePeriodFromRoom.filter { it.transaction.type == EXPENSE }
-    val totalExpense = expenseTransactions.sumOf { it.transaction.amount }
-    val incomeTransaction =
-        transactionsForTimePeriodFromRoom.filter { it.transaction.type == INCOME }
-    val totalIncome = incomeTransaction.sumOf { it.transaction.amount }
 
-    val title = if (selectedIndex == 0) "Total Expense" else "Total Income"
-    val amount = if (selectedIndex == 0) totalExpense else totalIncome
-    val transactionCount =
-        if (selectedIndex == 0) expenseTransactions.size else incomeTransaction.size
+    val title = if (categoryType == EXPENSE) "Total Expense" else "Total Income"
+    val transactionCount = filteredTransactions.size
 
 
     var currentTimePeriodExpenseAllDayAndDatesListAndMaxValue = createListForBarGraph(
@@ -574,7 +512,7 @@ fun StatisticsScreenTest(
     var totalAmount = BigDecimal.ZERO
 
     val categoryListData =
-        (if (selectedIndex == 0) expenseTransactions else incomeTransaction).groupBy { it.category }
+        filteredTransactions.groupBy { it.category }
             .mapValues { (category, list) ->
                 totalAmount += list.fold(BigDecimal.ZERO) { acc, i -> acc + i.transaction.amount }
                 CategorySummaryClass(
@@ -600,7 +538,7 @@ fun StatisticsScreenTest(
         .toMap()
 
     val transactionsMap =
-        allTransactionsList.sortedByDescending { it.transaction.date }
+        filteredTransactions.sortedByDescending { it.transaction.date }
             .groupBy { it.transaction.date }
             .toSortedMap()
 
@@ -656,16 +594,16 @@ fun StatisticsScreenTest(
                     }
 
                     Spacer(Modifier.height(8.dp))
-                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-                        Column {
-                            TextSwitch(
-                                selectedIndex = selectedIndex,
-                                items = options,
-                                onSelectionChange = {
-                                    selectedIndex = it
-                                })
-                        }
-                    }
+//                    Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+//                        Column {
+//                            TextSwitch(
+//                                selectedIndex = selectedIndex,
+//                                items = options,
+//                                onSelectionChange = {
+//                                    selectedIndex = it
+//                                })
+//                        }
+//                    }
                     Spacer(Modifier.height(24.dp))
                     Column {
                         Row(
@@ -687,7 +625,7 @@ fun StatisticsScreenTest(
                                         color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                                     )
                                 }
-                                AnimatedContent(targetState = amount) {
+                                AnimatedContent(targetState = filteredTransactionsTotalAmount) {
                                     Text(
                                         text = "${LocalCurrency.current.currencySymbol} ${
                                             parseAmount(
@@ -905,19 +843,31 @@ fun StatisticsScreenTest(
             }
         }
     }
-
     if (showFilterBottomSheet) {
         FilterBottomSheet(
-            Modifier,
-            viewModel,
-            { showFilterBottomSheet = !showFilterBottomSheet },
-            bankAccountList,
-            { startDateFinal, endDateFinal, DurationFinal, bankAccountClassFinal ->
+            modifier = Modifier,
+            viewModel = viewModel,
+            closeBottomSheet = { showFilterBottomSheet = !showFilterBottomSheet },
+            startDateOuter = startDate,
+            endDateOuter = endDate,
+            bankAccountList = bankAccountList,
+            selectedBankAccount = selectedBankAccountList,
+            categoryTypeList = options,
+            selectedCategoryTypeIndexOuter = selectedCategoryTypeIndex,
+            selectedCategoryList = selectedCategoryList,
+            allExpenseCategoryList = allExpenseCategoryList,
+            allIncomeCategoryList = allIncomeCategoryList,
+            saveButtonClicked = { startDateFinal, endDateFinal, durationFinal, bankAccountListInner, type, selectedCategoryListInner ->
                 startDate = startDateFinal
                 endDate = endDateFinal
+                selectedBankAccountList = bankAccountListInner
+                selectedCategoryTypeIndex = if (type == EXPENSE) 0 else 1
+                categoryType = type
+                selectedCategoryList = selectedCategoryListInner
                 showFilterBottomSheet = !showFilterBottomSheet
-                selectedBankAccountClass = bankAccountClassFinal
-            })
+
+            },
+        )
     }
 
     if (showTransactionDetailsBottomSheet) {
@@ -929,12 +879,12 @@ fun StatisticsScreenTest(
     }
 
     if (showBankAccountAnalysisBottomSheet) {
-        BankAnalysisBottomSheet(
-            Modifier,
-            { showBankAccountAnalysisBottomSheet = !showBankAccountAnalysisBottomSheet },
-            bankAccountList,
-            transactionsForTimePeriodFromRoom
-        )
+//        BankAnalysisBottomSheet(
+//            Modifier,
+//            { showBankAccountAnalysisBottomSheet = !showBankAccountAnalysisBottomSheet },
+//            bankAccountList,
+//            transactionsForTimePeriodFromRoom
+//        )
     }
 
     if (showCategoryAnalysisBottomSheet) {
@@ -1044,13 +994,33 @@ fun FilterBottomSheet(
     modifier: Modifier = Modifier,
     viewModel: AllViewModel,
     closeBottomSheet: () -> Unit,
+    startDateOuter: Long,
+    endDateOuter: Long,
     bankAccountList: List<BankAccountsClass>,
-    saveButtonClicked: (Long, Long, Long, BankAccountsClass) -> Unit,
+    selectedBankAccount: List<BankAccountsClass>,
+    categoryTypeList: List<String>,
+    selectedCategoryTypeIndexOuter: Int,
+    selectedCategoryList: List<CategoryClass>,
+    allExpenseCategoryList: List<CategoryClass>,
+    allIncomeCategoryList: List<CategoryClass>,
+    saveButtonClicked: (Long, Long, Long, List<BankAccountsClass>, String, List<CategoryClass>) -> Unit,
 ) {
+    var startDate by remember { mutableStateOf<Long>(startDateOuter) }
+    var endDate by remember { mutableStateOf<Long>(endDateOuter) }
+    var selectedCategoryTypeIndex by remember { mutableStateOf(selectedCategoryTypeIndexOuter) }
+
+    val uiCategoryList =
+        if (selectedCategoryTypeIndex == 0) allExpenseCategoryList.map { CategoryChipItem(it) } else allIncomeCategoryList.map {
+            CategoryChipItem(it)
+        }
+    val selectedCategorySet = selectedCategoryList.toSet()
+    uiCategoryList.forEach { it.isSelected.value = it.categoryClass in selectedCategorySet }
+
+    val uiBankAccountList = bankAccountList.map { BankChipItem(it) }
+    val selectedBankAccountSet = selectedBankAccount.toSet()
+    uiBankAccountList.forEach { it.isSelected.value = it.bankAccountsClass in selectedBankAccount }
+
     val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var selectedBankAccount by remember { mutableStateOf(bankAccountList.get(0)) }
-    var startDate by remember { mutableStateOf<Long>(LocalDate.now().minusMonths(1).toLong()) }
-    var endDate by remember { mutableStateOf<Long>(LocalDate.now().toLong()) }
     var selectedDuration by remember {
         mutableStateOf(
             getDayDifference(
@@ -1079,16 +1049,34 @@ fun FilterBottomSheet(
                 .navigationBarsPadding()
                 .padding(horizontal = 16.dp),
             closeBottomSheet,
-            bankAccountList,
-            selectedBankAccount,
-            { selectedBankAccount = it },
             startDate,
             { startDate = it },
             endDate,
             { endDate = it },
             selectedDuration,
+            uiBankAccountList,
+            selectedBankAccount,
+            categoryTypeList,
+            selectedCategoryTypeIndex,
+            { selectedCategoryTypeIndex = it },
+            uiCategoryList,
             showErrorStatus,
-            { saveButtonClicked(startDate, endDate, selectedDuration, selectedBankAccount) }
+            { startDate, endDate, selectedTypeIndex ->
+                val selectedBankAccountList =
+                    uiBankAccountList.filter { it.isSelected.value == true }
+                        .map { it.bankAccountsClass }
+                val selectedCategoryList =
+                    uiCategoryList.filter { it.isSelected.value == true }.map { it.categoryClass }
+                val type = if (selectedCategoryTypeIndex == 0) EXPENSE else INCOME
+                saveButtonClicked(
+                    startDate,
+                    endDate,
+                    selectedDuration,
+                    selectedBankAccountList,
+                    type,
+                    selectedCategoryList
+                )
+            }
         )
     }
 }
@@ -1098,16 +1086,19 @@ fun FilterBottomSheet(
 fun FilterBottomSheetContent(
     modifier: Modifier = Modifier,
     closeBottomSheet: () -> Unit,
-    bankAccountList: List<BankAccountsClass>,
-    selectedBankAccount: BankAccountsClass,
-    setSelectedChip: (BankAccountsClass) -> Unit,
     startDate: Long,
     setStartDate: (Long) -> Unit,
     endDate: Long,
     setEndDate: (Long) -> Unit,
     selectedDuration: Long,
+    uiBankAccountList: List<BankChipItem>,
+    selectedBankAccountList: List<BankAccountsClass>,
+    categoryTypeList: List<String>,
+    selectedCategoryTypeIndex: Int,
+    setSelectedCategoryTypeIndex: (Int) -> Unit,
+    uiCategoryList: List<CategoryChipItem>,
     showErrorStatus: Boolean,
-    saveButtonClicked: () -> Unit
+    saveButtonClicked: (Long, Long, Int) -> Unit
 ) {
     val startDatePickerState =
         rememberDatePickerState(initialSelectedDateMillis = startDate.toLocalDate().toLongMillis())
@@ -1209,10 +1200,13 @@ fun FilterBottomSheetContent(
             FlowRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = modifier
             ) {
-                bankAccountList.forEachIndexed { index, bankAccountsClass ->
+                uiBankAccountList.forEachIndexed { index, chipItem ->
                     BankChips(
-                        selectedBankAccount, bankAccountsClass
-                    ) { setSelectedChip(it) }
+                        bankAccountsClass = chipItem.bankAccountsClass,
+                        isSelected = chipItem.isSelected.value,
+                        setChipAsSelected = {
+                            chipItem.isSelected.value = !chipItem.isSelected.value
+                        })
                 }
             }
             Spacer(Modifier.height(24.dp))
@@ -1222,13 +1216,17 @@ fun FilterBottomSheetContent(
                 style = typography.titleMedium,
                 color = MaterialTheme.colorScheme.onSurface
             )
-            Column {
-                TextSwitch(
-                    selectedIndex = 1,
-                    items = listOf("Expense","Income"),
-                    onSelectionChange = {
-                      //  selectedIndex = it
-                    })
+            Row(modifier = modifier, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                categoryTypeList.forEachIndexed { index, categoryType ->
+                    CategoryTypeChips(
+                        index = index,
+                        selectedIndex = selectedCategoryTypeIndex,
+                        text = categoryType,
+                        selectChip = {
+                            setSelectedCategoryTypeIndex(index)
+                        }
+                    )
+                }
             }
 
             Spacer(Modifier.height(12.dp))
@@ -1239,12 +1237,17 @@ fun FilterBottomSheetContent(
                 color = MaterialTheme.colorScheme.onSurface
             )
             FlowRow(
-                horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = modifier
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = modifier.animateContentSize()
             ) {
-                bankAccountList.forEachIndexed { index, bankAccountsClass ->
-                    BankChips(
-                        selectedBankAccount, bankAccountsClass
-                    ) { setSelectedChip(it) }
+                uiCategoryList.forEachIndexed { index, chipItem ->
+                    CategoryChips(
+                        categoryClass = chipItem.categoryClass,
+                        isSelected = chipItem.isSelected.value,
+                        setChipAsSelected = {
+                            chipItem.isSelected.value = !chipItem.isSelected.value
+                        }
+                    )
                 }
             }
             Spacer(Modifier.height(12.dp))
@@ -1252,7 +1255,13 @@ fun FilterBottomSheetContent(
             Spacer(Modifier.height(12.dp))
             FilledTonalButton(
                 enabled = !showErrorStatus,
-                onClick = { saveButtonClicked() },
+                onClick = {
+                    saveButtonClicked(
+                        startDate,
+                        endDate,
+                        selectedCategoryTypeIndex,
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp),
@@ -1274,148 +1283,158 @@ fun FilterBottomSheetContent(
         Spacer(Modifier.height(8.dp))
     }
     if (showStartDateDayPicker) {
-        DatePickerModal(startDatePickerState, { setStartDate(it ?: LocalDate.now().toLong()) }) {
+        DatePickerModal(startDatePickerState, {
+            setStartDate(it ?: LocalDate.now().toLong())
+        }) {
             showStartDateDayPicker = !showStartDateDayPicker
         }
     }
     if (showEndDateDayPicker) {
-        DatePickerModal(endDatePickerState, { setEndDate(it ?: LocalDate.now().toLong()) }) {
+        DatePickerModal(endDatePickerState, {
+            setEndDate(it ?: LocalDate.now().toLong())
+        }) {
             showEndDateDayPicker = !showEndDateDayPicker
         }
     }
 }
 
-@Preview(showBackground = true)
-@Composable
-private fun FilterBottomSheetContentPreview() {
-    FilterBottomSheetContent(
-        Modifier.padding(horizontal = 16.dp),
-        { },
-        listOf(),
-        emptyBank,
-        {},
-        0L,
-        {},
-        0L,
-        {}, 3L,
-        false, {}
-    )
-}
+//@Preview(showBackground = true)
+//@Composable
+//private fun FilterBottomSheetContentPreview() {
+//    FilterBottomSheetContent(
+//        modifier = Modifier,
+//        closeBottomSheet = {},
+//        bankAccountList = listOf(),
+//        selectedBankAccount = emptyBank,
+//        setSelectedChip = {},
+//        startDate = 1L,
+//        setStartDate = {},
+//        endDate = 1L,
+//        setEndDate = {},
+//        selectedDuration = 3L,
+//        categoryTypeList = listOf(),
+//        selectedCategoryTypeIndex = 0,
+//        setSelectedCategoryTypeIndex = {},
+//        list = listOf(),
+//        showErrorStatus = false,
+//        saveButtonClicked = {}
+//    )
+//}
 
 //Bank Analysis Bottom sheet
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun BankAnalysisBottomSheet(
-    modifier: Modifier = Modifier,
-    dismissBottomSheet: () -> Unit,
-    bankAccountList: List<BankAccountsClass>,
-    transactionsForTimePeriodFromRoom: List<TransactionWithDetails>
-) {
-    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var selectedBankAccount by remember { mutableStateOf(bankAccountList.get(0)) }
-    ModalBottomSheet(sheetState = bottomSheetState, onDismissRequest = { dismissBottomSheet() }) {
-        BankAnalysisBottomSheetContent(
-            Modifier.padding(horizontal = 16.dp),
-            bankAccountList, transactionsForTimePeriodFromRoom,
-            selectedBankAccount,
-        ) {
-            selectedBankAccount = it
-        }
-    }
-}
+//@OptIn(ExperimentalMaterial3Api::class)
+//@Composable
+//fun BankAnalysisBottomSheet(
+//    modifier: Modifier = Modifier,
+//    dismissBottomSheet: () -> Unit,
+//    bankAccountList: List<BankAccountsClass>,
+//    transactionsForTimePeriodFromRoom: List<TransactionWithDetails>
+//) {
+//    val bottomSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+//    var selectedBankAccount by remember { mutableStateOf(bankAccountList.get(0)) }
+//    ModalBottomSheet(sheetState = bottomSheetState, onDismissRequest = { dismissBottomSheet() }) {
+//        BankAnalysisBottomSheetContent(
+//            Modifier.padding(horizontal = 16.dp),
+//            bankAccountList, transactionsForTimePeriodFromRoom,
+//            selectedBankAccount,
+//        ) {
+//            selectedBankAccount = it
+//        }
+//    }
+//}
+//
+//@OptIn(ExperimentalLayoutApi::class)
+//@Composable
+//fun BankAnalysisBottomSheetContent(
+//    modifier: Modifier = Modifier,
+//    bankAccountList: List<BankAccountsClass>,
+//    transactionsForTimePeriodFromRoom: List<TransactionWithDetails>,
+//    selectedBankAccount: BankAccountsClass,
+//    setSelectedBankAccount: (BankAccountsClass) -> Unit
+//) {
+//    Column(modifier = Modifier.fillMaxWidth()) {
+//        Row(modifier) {
+//            Text(
+//                modifier = Modifier,
+//                text = "Account",
+//                style = typography.titleMedium,
+//                color = MaterialTheme.colorScheme.onSurface
+//            )
+//        }
+//        Spacer(Modifier.height(16.dp))
+//        FlowRow(
+//            horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = modifier.fillMaxWidth()
+//        ) {
+//            bankAccountList.forEachIndexed { index, bankAccountsClass ->
+//                BankChips(
+//                    selectedBankAccount, bankAccountsClass
+//                ) { setSelectedBankAccount(it) }
+//            }
+//        }
+//        Spacer(Modifier.height(12.dp))
+//        HorizontalDivider(
+//            modifier = modifier,
+//            thickness = 1.dp,
+//            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
+//        )
+//        Spacer(Modifier.height(12.dp))
+//
+//        LazyColumn() {
+//            item {
+//                Column(
+//                    Modifier.padding(horizontal = 16.dp),
+//                    verticalArrangement = Arrangement.spacedBy(8.dp)
+//                ) {
+//                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+//                        SingleInfoBox(
+//                            Modifier.weight(1f),
+//                            "Minimum Spend",
+//                            "${LocalCurrency.current.currencySymbol} 3000",
+//                        )
+//                        SingleInfoBox(
+//                            Modifier.weight(1f),
+//                            "Maximum Spend",
+//                            "${LocalCurrency.current.currencySymbol} 3000",
+//                        )
+//                    }
+//                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
+//                        SingleInfoBox(
+//                            Modifier.weight(1f),
+//                            "Total Transactions",
+//                            "39",
+//                        )
+//                    }
+//                }
+//                BarChartTest(Modifier, palette = toPalette(orange))
+//            }
+//            item {
+//                if (transactionsForTimePeriodFromRoom.isNotEmpty()) {
+//                    Text(
+//                        modifier = modifier.padding(vertical = 8.dp),
+//                        text = "Transactions",
+//                        style = typography.titleMedium,
+//                        color = MaterialTheme.colorScheme.onSurface
+//                    )
+//                }
+//            }
+//            items(transactionsForTimePeriodFromRoom, key = { it.transaction.id }) {
+//                SingleTransaction(it) {
+////                    singleTransaction = it
+////                    bottomSheet = !bottomSheet
+//                }
+//            }
+//        }
+//    }
+//}
 
-@OptIn(ExperimentalLayoutApi::class)
-@Composable
-fun BankAnalysisBottomSheetContent(
-    modifier: Modifier = Modifier,
-    bankAccountList: List<BankAccountsClass>,
-    transactionsForTimePeriodFromRoom: List<TransactionWithDetails>,
-    selectedBankAccount: BankAccountsClass,
-    setSelectedBankAccount: (BankAccountsClass) -> Unit
-) {
-    Column(modifier = Modifier.fillMaxWidth()) {
-        Row(modifier) {
-            Text(
-                modifier = Modifier,
-                text = "Account",
-                style = typography.titleMedium,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-        }
-        Spacer(Modifier.height(16.dp))
-        FlowRow(
-            horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = modifier.fillMaxWidth()
-        ) {
-            bankAccountList.forEachIndexed { index, bankAccountsClass ->
-                BankChips(
-                    selectedBankAccount, bankAccountsClass
-                ) { setSelectedBankAccount(it) }
-            }
-        }
-        Spacer(Modifier.height(12.dp))
-        HorizontalDivider(
-            modifier = modifier,
-            thickness = 1.dp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f)
-        )
-        Spacer(Modifier.height(12.dp))
-
-        LazyColumn() {
-            item {
-                Column(
-                    Modifier.padding(horizontal = 16.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        SingleInfoBox(
-                            Modifier.weight(1f),
-                            "Minimum Spend",
-                            "${LocalCurrency.current.currencySymbol} 3000",
-                        )
-                        SingleInfoBox(
-                            Modifier.weight(1f),
-                            "Maximum Spend",
-                            "${LocalCurrency.current.currencySymbol} 3000",
-                        )
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(16.dp)) {
-                        SingleInfoBox(
-                            Modifier.weight(1f),
-                            "Total Transactions",
-                            "39",
-                        )
-                    }
-                }
-                BarChartTest(Modifier, palette = toPalette(orange))
-            }
-            item {
-                if (transactionsForTimePeriodFromRoom.isNotEmpty()) {
-                    Text(
-                        modifier = modifier.padding(vertical = 8.dp),
-                        text = "Transactions",
-                        style = typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface
-                    )
-                }
-            }
-            items(transactionsForTimePeriodFromRoom, key = { it.transaction.id }) {
-                SingleTransaction(it) {
-//                    singleTransaction = it
-//                    bottomSheet = !bottomSheet
-                }
-            }
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-private fun BankAnalysisBottomSheetContentPreview() {
-    BankAnalysisBottomSheetContent(
-        modifier = Modifier.padding(horizontal = 16.dp),
-        transactionsForTimePeriodFromRoom = listOf(),
-        bankAccountList = listOf(emptyBank, emptyBank, emptyBank),
-        selectedBankAccount = emptyBank,
-        setSelectedBankAccount = { })
-}
+//@Preview(showBackground = true)
+//@Composable
+//private fun BankAnalysisBottomSheetContentPreview() {
+//    BankAnalysisBottomSheetContent(
+//        modifier = Modifier.padding(horizontal = 16.dp),
+//        transactionsForTimePeriodFromRoom = listOf(),
+//        bankAccountList = listOf(emptyBank, emptyBank, emptyBank),
+//        selectedBankAccount = emptyBank,
+//        setSelectedBankAccount = { })
+//}
 

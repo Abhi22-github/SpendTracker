@@ -1,5 +1,6 @@
 package com.roaa.expensetracker.composable.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -18,6 +19,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ButtonDefaults
@@ -26,6 +28,8 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.InputChip
@@ -49,6 +53,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -62,6 +67,7 @@ import com.roaa.expensetracker.composable.utils.IconState
 import com.roaa.expensetracker.composable.utils.combineColors
 import com.roaa.expensetracker.model.BankAccountsClass
 import com.roaa.expensetracker.model.CategoryClass
+import com.roaa.expensetracker.utilities.currentYear
 
 
 @Composable
@@ -490,6 +496,137 @@ fun CircularProgress(modifier: Modifier = Modifier) {
     Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
         CircularProgressIndicator()
     }
+}
+
+@Composable
+fun ChipsForFilter(
+    index: Int, selectedIndexForFilterChip: Int, text: String, selectChip: (Int) -> Unit
+) {
+    val temp = if (text.split(",").get(1) == currentYear) text.split(",")[0] else text
+    FilterChip(
+        onClick = { selectChip(index) },
+        label = {
+            Text(text = temp)
+        },
+        selected = index == selectedIndexForFilterChip,
+        leadingIcon = if (index == selectedIndexForFilterChip) {
+            {
+                Icon(
+                    imageVector = Icons.Filled.Done,
+                    contentDescription = "Done icon",
+                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                )
+            }
+        } else {
+            null
+        },
+        shape = RoundedCornerShape(12.dp),
+        border = BorderStroke(0.1.dp, MaterialTheme.colorScheme.outline),
+        colors = FilterChipDefaults.filterChipColors(selectedContainerColor = MaterialTheme.colorScheme.surfaceContainerHigh))
+}
+
+@Composable
+fun BankChips(
+    bankAccountsClass: BankAccountsClass,
+    isSelected: Boolean,
+    setChipAsSelected: (BankAccountsClass) -> Unit
+) {
+    FilterChip(
+        onClick = { setChipAsSelected(bankAccountsClass) },
+        label = {
+            Text(
+                text = bankAccountsClass.bankName,
+                modifier = Modifier.padding(vertical = 8.dp),
+                style = typography.bodyMedium
+            )
+        },
+        selected = isSelected,
+        leadingIcon = if (isSelected) {
+            {
+                Icon(
+                    imageVector = Icons.Filled.Done,
+                    contentDescription = "Done icon",
+                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                )
+            }
+        } else {
+            null
+        },
+        shape = RoundedCornerShape(25.dp),
+        border = if (isSelected) BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+        ) else BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)),
+        colors = FilterChipDefaults.filterChipColors())
+}
+
+@Composable
+fun CategoryTypeChips(
+    index: Int,
+    selectedIndex: Int,
+    text: String,
+    selectChip: (Int) -> Unit
+) {
+    FilterChip(
+        onClick = { selectChip(index) },
+        label = {
+            Text(
+                text = text,
+                modifier = Modifier.padding(vertical = 8.dp),
+                style = typography.bodyMedium
+            )
+        },
+        selected = index == selectedIndex,
+        leadingIcon = if (index == selectedIndex) {
+            {
+                Icon(
+                    imageVector = Icons.Filled.Done,
+                    contentDescription = "Done icon",
+                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                )
+            }
+        } else {
+            null
+        },
+        shape = RoundedCornerShape(25.dp),
+        border = if (index == selectedIndex) BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+        ) else BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)),
+        colors = FilterChipDefaults.filterChipColors())
+}
+
+@Composable
+fun CategoryChips(
+    categoryClass: CategoryClass,
+    isSelected: Boolean,
+    setChipAsSelected: (CategoryClass) -> Unit
+) {
+    FilterChip(
+        onClick = { setChipAsSelected(categoryClass) },
+        label = {
+            Text(
+                text = categoryClass.categoryName,
+                modifier = Modifier.padding(vertical = 8.dp),
+                style = typography.bodyMedium
+            )
+        },
+        selected = isSelected,
+        leadingIcon =
+            {
+                Image(
+                    painter = painterResource(IconState.fromNumber(categoryClass.categoryIconNumber)),
+                    contentDescription = "Done icon",
+                    modifier = Modifier.size(FilterChipDefaults.IconSize)
+                )
+            },
+        shape = RoundedCornerShape(25.dp),
+        border = if (isSelected) BorderStroke(
+            1.dp,
+            MaterialTheme.colorScheme.primary.copy(alpha = 0.2f)
+        ) else BorderStroke(1.dp, MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)),
+        colors = FilterChipDefaults.filterChipColors()
+    )
 }
 
 
