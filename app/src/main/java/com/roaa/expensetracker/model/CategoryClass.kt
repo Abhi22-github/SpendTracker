@@ -8,7 +8,7 @@ import kotlinx.serialization.Serializable
 
 @Entity(
     tableName = "category_table",
-    indices = [Index(value = ["categoryName", "categoryType"], unique = true)]
+    indices = [Index(value = ["categoryId","categoryName", "categoryType"], unique = true)]
 )
 @Serializable
 data class CategoryClass(
