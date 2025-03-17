@@ -3,12 +3,12 @@ package com.roaa.expensetracker.hilt
 import android.content.Context
 import androidx.room.Room.databaseBuilder
 import com.roaa.expensetracker.database.AppDatabase
-import com.roaa.expensetracker.database.AppDatabase.Companion.MIGRATION_1_2
 import com.roaa.expensetracker.database.AppDatabase.Companion.prePopulateData
 import com.roaa.expensetracker.database.BankAccountDao
 import com.roaa.expensetracker.database.BudgetDao
 import com.roaa.expensetracker.database.BudgetDayDao
 import com.roaa.expensetracker.database.CategoryDao
+import com.roaa.expensetracker.database.DailyBalanceDao
 import com.roaa.expensetracker.database.TransactionDao
 import dagger.Module
 import dagger.Provides
@@ -26,9 +26,8 @@ class DatabaseModule() {
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
         return databaseBuilder(
-            context.applicationContext, AppDatabase::class.java, "database1"
+            context.applicationContext, AppDatabase::class.java, "database2"
         )
-            .addMigrations(MIGRATION_1_2)
             .addCallback(prePopulateData)
             .fallbackToDestructiveMigration()
             .build()
@@ -50,6 +49,12 @@ class DatabaseModule() {
     @Singleton
     fun provideBankAccountDao(database: AppDatabase): BankAccountDao {
         return database.bankAccountsDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideBankAccountsDailyBalance(database: AppDatabase): DailyBalanceDao {
+        return database.dailyBalanceDao()
     }
 
     @Provides

@@ -9,6 +9,8 @@ import com.roaa.expensetracker.database.BudgetDayRepository
 import com.roaa.expensetracker.database.BudgetRepository
 import com.roaa.expensetracker.database.CategoryDao
 import com.roaa.expensetracker.database.CategoryRepository
+import com.roaa.expensetracker.database.DailyBalanceDao
+import com.roaa.expensetracker.database.DailyBalanceRepository
 import com.roaa.expensetracker.database.TransactionDao
 import com.roaa.expensetracker.database.TransactionRepository
 import dagger.Module
@@ -32,6 +34,11 @@ class RepositoryModule() {
     @Provides
     fun provideBankAccountRepository(bankAccountDao: BankAccountDao): BankAccountRepository {
         return BankAccountRepository(bankAccountDao)
+    }
+
+    @Provides
+    fun provideBankAccountDailyBalanceRepository(dailyBalanceDao: DailyBalanceDao): DailyBalanceRepository {
+        return DailyBalanceRepository(dailyBalanceDao)
     }
 
     @Provides

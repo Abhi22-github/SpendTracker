@@ -4,11 +4,12 @@ import com.roaa.expensetracker.model.BankAccountsClass
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 
-class BankAccountRepository @Inject constructor( private val bankAccountsDao: BankAccountDao ) {
+class BankAccountRepository @Inject constructor(private val bankAccountsDao: BankAccountDao) {
 
 
     // below method is to read all category from database.
-    val allBankAccountsExceptCash: Flow<List<BankAccountsClass>> = bankAccountsDao.allBankAccountsClassExceptCash
+    val allBankAccountsExceptCash: Flow<List<BankAccountsClass>> =
+        bankAccountsDao.allBankAccountsClassExceptCash
     val allBankAccounts: Flow<List<BankAccountsClass>> = bankAccountsDao.allBankAccountsClass
 
     // creating a method to insert the data to our database.
@@ -20,11 +21,11 @@ class BankAccountRepository @Inject constructor( private val bankAccountsDao: Ba
         return bankAccountsDao.getSingleBankAccount(id)
     }
 
-    suspend fun migrateTransactions(firstBank:BankAccountsClass, secondBank:BankAccountsClass){
-        bankAccountsDao.migrateTransactionToAnotherBankAccountAndDeleteIt(firstBank,secondBank)
+    suspend fun migrateTransactions(firstBank: BankAccountsClass, secondBank: BankAccountsClass) {
+        bankAccountsDao.migrateTransactionToAnotherBankAccountAndDeleteIt(firstBank, secondBank)
     }
 
-    suspend fun deleteBankAccountWithTransactions(bank:BankAccountsClass){
+    suspend fun deleteBankAccountWithTransactions(bank: BankAccountsClass) {
         bankAccountsDao.deleteBankAccountWithTransactions(bank)
     }
 
@@ -41,5 +42,9 @@ class BankAccountRepository @Inject constructor( private val bankAccountsDao: Ba
     // below is the method to delete all the category.
     suspend fun deleteAllBankAccounts() {
         bankAccountsDao.deleteAllBankAccounts()
+    }
+
+    suspend fun insertWithDailyBalance(bankAccountsClass: BankAccountsClass) {
+        bankAccountsDao.insertWithDailyBalance(bankAccountsClass)
     }
 }

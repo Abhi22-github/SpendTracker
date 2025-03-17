@@ -4,19 +4,19 @@ package com.roaa.expensetracker.database
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import androidx.room.TypeConverters
-import androidx.room.migration.Migration
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.roaa.expensetracker.database.databaseUtils.RoomConverters
 import com.roaa.expensetracker.model.BankAccountsClass
 import com.roaa.expensetracker.model.BudgetDayModelClass
 import com.roaa.expensetracker.model.BudgetModelClass
 import com.roaa.expensetracker.model.CategoryClass
+import com.roaa.expensetracker.model.DailyBalancesClass
 import com.roaa.expensetracker.model.TransactionClass
 
 
 @TypeConverters(RoomConverters::class)
 @Database(
-    entities = [TransactionClass::class, CategoryClass::class, BankAccountsClass::class, BudgetModelClass::class, BudgetDayModelClass::class],
+    entities = [TransactionClass::class, CategoryClass::class, BankAccountsClass::class, BudgetModelClass::class, BudgetDayModelClass::class, DailyBalancesClass::class],
     version = 1,
     exportSchema = true,
     autoMigrations = [
@@ -31,61 +31,9 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun bankAccountsDao(): BankAccountDao
     abstract fun budgetDao(): BudgetDao
     abstract fun budgetDayDao(): BudgetDayDao
+    abstract fun dailyBalanceDao(): DailyBalanceDao
 
     companion object {
-        val MIGRATION_1_2 = object : Migration(1, 2) {
-            override fun migrate(database: SupportSQLiteDatabase) {
-                // For example, adding a new column
-                database.execSQL(
-                    """
-            CREATE TABLE bank_accounts_temp (
-                bankAccountId INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-                initialAmount Float NOT NULL, 
-                currentAmount Float NOT NULL,
-                bankName TEXT NOT NULL,
-                cardColorNumber INTEGER NOT NULL,
-                cardIconNumber INTEGER NOT NULL,
-                accountType TEXT NOT NULL,
-                isActive INTEGER NOT NULL
-            )
-            """
-                )
-
-                // Step 2: Copy data from the old table to the new table
-                database.execSQL(
-                    """
-            INSERT INTO bank_accounts_temp (
-                bankAccountId, 
-                initialAmount, 
-                currentAmount, 
-                bankName, 
-                cardColorNumber, 
-                cardIconNumber, 
-                accountType, 
-                isActive
-            )
-            SELECT 
-                bankAccountId, 
-                CAST(initialAmount AS Float), 
-                CAST(currentAmount AS Float), 
-                bankName, 
-                cardColorNumber, 
-                cardIconNumber, 
-                accountType, 
-                isActive
-            FROM bank_accounts
-            """
-                )
-
-                // Step 3: Drop the old table
-                database.execSQL("DROP TABLE bank_accounts")
-
-                // Step 4: Rename the new table to the original table name
-                database.execSQL("ALTER TABLE bank_accounts_temp RENAME TO bank_accounts")
-
-            }
-        }
-
         // below line is to create a callback for our room database.
         val prePopulateData: Callback = object : Callback() {
             override fun onCreate(db: SupportSQLiteDatabase) {

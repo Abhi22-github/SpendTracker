@@ -128,7 +128,7 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
         if (bankAccountsClass.bankAccountId == 0L) {
             //adding new bank Accounts
             viewModelScope.launch {
-                bankAccountRepository.insert(bankAccountsClass)
+                bankAccountRepository.insertWithDailyBalance(bankAccountsClass)
             }
         } else {
             //updating existing account

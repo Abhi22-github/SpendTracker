@@ -8,13 +8,18 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.roaa.expensetracker.model.BankAccountsClass
+import com.roaa.expensetracker.model.DailyBalancesClass
 import com.roaa.expensetracker.model.TransactionClass
+import com.roaa.expensetracker.utilities.Constants.EXPENSE
+import com.roaa.expensetracker.utilities.toLong
 import kotlinx.coroutines.flow.Flow
+import java.math.BigDecimal
+import java.time.LocalDate
 
 @Dao
 interface BankAccountDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(bankAccountsClass: BankAccountsClass)
+    suspend fun insert(bankAccountsClass: BankAccountsClass):Long
 
     @Delete
     suspend fun delete(bankAccountsClass: BankAccountsClass)
@@ -45,8 +50,32 @@ interface BankAccountDao {
     @Delete
     suspend fun delete(transactionClass: TransactionClass)
 
+    @Query("SELECT SUM(amount) FROM transaction_table where date = :date and type = :type")
+    suspend fun getTotalAmountForDate(date: Long, type: String): BigDecimal?
+
+    @Insert
+    suspend fun insert(dailyBalancesClass: DailyBalancesClass): Long
+
 
     //Transactions
+    @Transaction
+    suspend fun insertWithDailyBalance(bankAccountsClass: BankAccountsClass) {
+        val id = insert(bankAccountsClass)
+        val dailyBalance = DailyBalancesClass(
+            id = 0,
+            bankAccountId = id,
+            date = LocalDate.now().toLong(),
+            remBankBalance = bankAccountsClass.currentAmount,
+            dayTotalExpense = getTotalAmountForDate(LocalDate.now().toLong(), EXPENSE)
+                ?: BigDecimal.ZERO,
+            dayTotalIncome = getTotalAmountForDate(LocalDate.now().toLong(), EXPENSE)
+                ?: BigDecimal.ZERO,
+            isSetByUser = true
+        )
+        insert(dailyBalance)
+    }
+
+
     @Transaction
     suspend fun migrateTransactionToAnotherBankAccountAndDeleteIt(
         firstBankAccount: BankAccountsClass,
