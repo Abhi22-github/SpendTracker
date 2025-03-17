@@ -3,7 +3,9 @@ package com.roaa.expensetracker.notification
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -15,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
 import com.roaa.expensetracker.R
+import com.roaa.expensetracker.activity.ComposeMainActivity
 import com.roaa.expensetracker.utilities.preferenceManger.PREFERENCES_NAME
 
 
@@ -68,17 +71,34 @@ fun createNotificationChannel(
     }
 }
 
-fun sendNotification(context: Context, notificationChannel: NotificationChannelInfoClass, title: String, message: String) {
+fun sendNotification(
+    context: Context,
+    notificationChannel: NotificationChannelInfoClass,
+    title: String,
+    message: String
+) {
+
+    val intent = Intent(context, ComposeMainActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+    }
+    // Create a PendingIntent to launch the app
+    val pendingIntent = PendingIntent.getActivity(
+        context, 0, intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+    )
+
     val notificationManager =
         context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
 
     val notificationId = 1 // Unique ID for the notification
-    val notificationBuilder = NotificationCompat.Builder(context, notificationChannel.notificationChannelId)
-        .setSmallIcon(R.drawable.notification_icon) // Notification icon
-        .setContentTitle(title) // Title of the notification
-        .setContentText(message) // Message of the notification
-        .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-        .setAutoCancel(true) // Automatically dismiss the notification when tapped
+    val notificationBuilder =
+        NotificationCompat.Builder(context, notificationChannel.notificationChannelId)
+            .setSmallIcon(R.drawable.notification_icon) // Notification icon
+            .setContentTitle(title) // Title of the notification
+            .setContentText(message) // Message of the notification
+            .setContentIntent(pendingIntent)
+            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setAutoCancel(true) // Automatically dismiss the notification when tapped
 
     notificationManager.notify(notificationId, notificationBuilder.build())
 }

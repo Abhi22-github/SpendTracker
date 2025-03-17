@@ -17,7 +17,7 @@ class NotificationWorker(
            context = context,
            notificationChannel = generalNotificationChannel,
            title = "Expense Tracker",
-           message = "Have you recorded your transactions today?"
+           message = "Have you recorded your transactions today? "
        )
         return Result.success()
     }

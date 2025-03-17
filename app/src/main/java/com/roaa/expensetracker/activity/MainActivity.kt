@@ -1,6 +1,7 @@
 package com.roaa.expensetracker.activity
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -92,7 +93,9 @@ import com.roaa.expensetracker.composable.syncTheme
 import com.roaa.expensetracker.hilt.AllViewModel
 import com.roaa.expensetracker.notification.NotificationPermissionHandler
 import com.roaa.expensetracker.notification.createNotificationChannel
+import com.roaa.expensetracker.notification.generalNotificationChannel
 import com.roaa.expensetracker.notification.notificationChannelList
+import com.roaa.expensetracker.notification.sendNotification
 import com.roaa.expensetracker.notification.workManager.scheduleDailyNotification
 import com.roaa.expensetracker.utilities.appStartingChecks
 import com.roaa.expensetracker.utilities.convertToWholeMonthName
@@ -117,6 +120,7 @@ val LocalCurrency = compositionLocalOf { defaultCurrency }
 class ComposeMainActivity : ComponentActivity() {
     private val isDone: MutableState<Boolean> = mutableStateOf(false)
     private val isReady: MutableState<Boolean> = mutableStateOf(false)
+    private val isNotificationClicked = mutableStateOf(false)
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -125,6 +129,7 @@ class ComposeMainActivity : ComponentActivity() {
         installSplashScreen().setKeepOnScreenCondition { !isDone.value }
         this.deleteDatabase("database")
         setContent {
+            val scope = rememberCoroutineScope()
             val localContext = LocalContext.current
             val rootNavController = rememberNavController()
             val navigationManager = remember { NavigationManager(rootNavController) }
@@ -150,6 +155,13 @@ class ComposeMainActivity : ComponentActivity() {
                 },
                 onPermissionDenied = {
                 }
+            )
+
+            sendNotification(
+                context = context,
+                notificationChannel = generalNotificationChannel,
+                title = "Expense Tracker",
+                message = "Have you recorded your transactions today? "
             )
             scheduleDailyNotification(this)
             allViewModels.preferencesViewModel.setFirstStartupCompleted()
@@ -198,13 +210,25 @@ class ComposeMainActivity : ComponentActivity() {
                         LaunchedEffect(Unit) {
                             // App rendered and splash screen can be hidden
                             isDone.value = true
+                            if (isNotificationClicked.value) {
+                                scope.launch {
+                                    allViewModels.uiViewModel.addCategorySpecificOrBankSpecificTransaction.emit(true)
+                                }
+                            }
                         }
                     }
                 }
             }
         }
     }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        // Handle any additional logic here if needed
+        isNotificationClicked.value = true
+    }
 }
+
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -256,7 +280,10 @@ fun NavigationDrawer(
         drawerContent = {
             CompositionLocalProvider(
             ) {
-                Box(Modifier.fillMaxSize().clickable { scope.launch { drawerState.close() }}) {
+                Box(
+                    Modifier
+                        .fillMaxSize()
+                        .clickable { scope.launch { drawerState.close() } }) {
                     ModalDrawerSheet(
                         Modifier
                             .width(320.dp)
