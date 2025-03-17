@@ -1221,7 +1221,7 @@ fun BottomRow(
             Box {
                 FilledTonalButton(
                     onClick = {
-                        // selectedPaymentMethodSetter(selectedBankAccount)
+                         //selectedPaymentMethodSetter(selectedBankAccount)
                         bankAccountMenuExpanded = true
                     }, colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.onSurface.copy(
@@ -1249,7 +1249,7 @@ fun BottomRow(
                     bankAccountsList,
                     selectedBankAccountSetter = {
                        // selectedBankAccount = it
-                        selectedPaymentMethodSetter(selectedBankAccount)
+                        selectedPaymentMethodSetter(it)
                         scope.launch {
                             viewModel.uiViewModel.errorStatusInAddBottomSheet.emit(false)
                         }
