@@ -7,6 +7,7 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.roaa.expensetracker.database.relations.TransactionWithDetails
+import com.roaa.expensetracker.model.BankAccountsClass
 import com.roaa.expensetracker.model.BudgetDayModelClass
 import com.roaa.expensetracker.model.BudgetModelClass
 import com.roaa.expensetracker.model.TransactionClass
@@ -87,12 +88,20 @@ interface TransactionDao {
     @Query("SELECT SUM(amount) FROM transaction_table where date == :date and type == :type")
     fun getTotalAmountForDateWithoutFlow(date: Long, type: String): BigDecimal?
 
-    @Query("SELECT SUM(amount) FROM transaction_table where date == :date and type == :type and bankAccountId == :bankAccountID")
+    //update bank
+    @Update
+    suspend fun update(bankAccountsClass: BankAccountsClass)
+
+    @Query("SELECT SUM(amount) FROM transaction_table where date >= :startDate AND date<= :endDate and type == :type and bankAccountId == :bankAccountID")
     fun getTotalAmountForBankWithDateWithoutFlow(
-        date: Long,
+        startDate: Long,
+        endDate: Long,
         type: String,
         bankAccountID: Long
     ): BigDecimal?
+
+    @Query("SELECT * FROM bank_accounts WHERE bankAccountId = :id")
+    fun getSingleBankAccountWithoutFlow(id: Long): BankAccountsClass
 
     @Query("SELECT SUM(amount) FROM transaction_table where date == :date and type == :type and includeInRespectiveBudget ==:includeInBudget")
     fun getTotalAmountForDateForBudgetOptTransactionWithoutFlow(
@@ -117,17 +126,26 @@ interface TransactionDao {
         val expense = getTotalAmountForDateWithoutFlow(transactionClass.date, EXPENSE)
         val income = getTotalAmountForDateWithoutFlow(transactionClass.date, INCOME)
 
+        val bankAccount = getSingleBankAccountWithoutFlow(transactionClass.bankAccountId)
+
         val bankExpense = getTotalAmountForBankWithDateWithoutFlow(
+            bankAccount.accountAddedDate,
             transactionClass.date,
             EXPENSE,
             transactionClass.bankAccountId
-        )
+        ) ?: BigDecimal.ZERO
 
         val bankIncome = getTotalAmountForBankWithDateWithoutFlow(
+            bankAccount.accountAddedDate,
             transactionClass.date,
             INCOME,
             transactionClass.bankAccountId
+        ) ?: BigDecimal.ZERO
+        val remBalance = bankAccount.initialAmount - (bankExpense - bankIncome )
+        val updatedBank = bankAccount.copy(
+            currentAmount = remBalance
         )
+        update(updatedBank)
 
         val currentBudget = getCurrentBudget
 
@@ -141,9 +159,6 @@ interface TransactionDao {
                 singleDay?.let { updateSingleDay(it) }
             }
         }
-        
-
-
 
     }
 
@@ -152,6 +167,27 @@ interface TransactionDao {
         update(transactionClass)
         val expense = getTotalAmountForDateWithoutFlow(transactionClass.date, EXPENSE)
         val income = getTotalAmountForDateWithoutFlow(transactionClass.date, INCOME)
+
+        val bankAccount = getSingleBankAccountWithoutFlow(transactionClass.bankAccountId)
+
+        val bankExpense = getTotalAmountForBankWithDateWithoutFlow(
+            bankAccount.accountAddedDate,
+            transactionClass.date,
+            EXPENSE,
+            transactionClass.bankAccountId
+        ) ?: BigDecimal.ZERO
+
+        val bankIncome = getTotalAmountForBankWithDateWithoutFlow(
+            bankAccount.accountAddedDate,
+            transactionClass.date,
+            INCOME,
+            transactionClass.bankAccountId
+        ) ?: BigDecimal.ZERO
+        val remBalance = bankAccount.initialAmount - (bankExpense - bankIncome )
+        val updatedBank = bankAccount.copy(
+            currentAmount = remBalance
+        )
+        update(updatedBank)
 
         val currentBudget = getCurrentBudget
 
@@ -201,6 +237,27 @@ interface TransactionDao {
         delete(transactionClass)
         val expense = getTotalAmountForDateWithoutFlow(transactionClass.date, EXPENSE)
         val income = getTotalAmountForDateWithoutFlow(transactionClass.date, EXPENSE)
+
+        val bankAccount = getSingleBankAccountWithoutFlow(transactionClass.bankAccountId)
+
+        val bankExpense = getTotalAmountForBankWithDateWithoutFlow(
+            bankAccount.accountAddedDate,
+            transactionClass.date,
+            EXPENSE,
+            transactionClass.bankAccountId
+        ) ?: BigDecimal.ZERO
+
+        val bankIncome = getTotalAmountForBankWithDateWithoutFlow(
+            bankAccount.accountAddedDate,
+            transactionClass.date,
+            INCOME,
+            transactionClass.bankAccountId
+        ) ?: BigDecimal.ZERO
+        val remBalance = bankAccount.initialAmount - (bankExpense - bankIncome )
+        val updatedBank = bankAccount.copy(
+            currentAmount = remBalance
+        )
+        update(updatedBank)
 
         val currentBudget = getCurrentBudget
 

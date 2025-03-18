@@ -244,6 +244,7 @@ fun PaymentMethodScreen(
 
                 }
                 actionConfirmationFlag = !actionConfirmationFlag
+                showBankDetailsBottomSheet = !showBankDetailsBottomSheet
             }) {
             actionConfirmationFlag = !actionConfirmationFlag
         }
