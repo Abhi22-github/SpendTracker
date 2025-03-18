@@ -5,16 +5,15 @@ import androidx.room.PrimaryKey
 import java.math.BigDecimal
 
 @Entity(
-    tableName = "daily_balances",
+    tableName = "bank_balance_corrections",
 //    indices = [Index(value = ["categoryName", "categoryType"], unique = true)]
 )
-data class DailyBalancesClass(
+data class BankAmountCorrectionsClass(
     @PrimaryKey(autoGenerate = true)
     var id: Long,
     var bankAccountId: Long,
     var date: Long,
-    var remBankBalance: BigDecimal,
-    var dayTotalExpense: BigDecimal,
-    var dayTotalIncome: BigDecimal,
-    var isSetByUser: Boolean,
+    var finalAmount: BigDecimal,
+    var difference: BigDecimal,
+    var startingAmount: BigDecimal,
 )

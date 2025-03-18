@@ -7,16 +7,16 @@ import androidx.room.TypeConverters
 import androidx.sqlite.db.SupportSQLiteDatabase
 import com.roaa.expensetracker.database.databaseUtils.RoomConverters
 import com.roaa.expensetracker.model.BankAccountsClass
+import com.roaa.expensetracker.model.BankAmountCorrectionsClass
 import com.roaa.expensetracker.model.BudgetDayModelClass
 import com.roaa.expensetracker.model.BudgetModelClass
 import com.roaa.expensetracker.model.CategoryClass
-import com.roaa.expensetracker.model.DailyBalancesClass
 import com.roaa.expensetracker.model.TransactionClass
 
 
 @TypeConverters(RoomConverters::class)
 @Database(
-    entities = [TransactionClass::class, CategoryClass::class, BankAccountsClass::class, BudgetModelClass::class, BudgetDayModelClass::class, DailyBalancesClass::class],
+    entities = [TransactionClass::class, CategoryClass::class, BankAccountsClass::class, BudgetModelClass::class, BudgetDayModelClass::class, BankAmountCorrectionsClass::class],
     version = 1,
     exportSchema = true,
     autoMigrations = [
@@ -31,7 +31,7 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun bankAccountsDao(): BankAccountDao
     abstract fun budgetDao(): BudgetDao
     abstract fun budgetDayDao(): BudgetDayDao
-    abstract fun dailyBalanceDao(): DailyBalanceDao
+    abstract fun dailyBalanceDao(): BankAccountCorrectionsDao
 
     companion object {
         // below line is to create a callback for our room database.
@@ -62,7 +62,7 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("INSERT INTO category_table(categoryName, categoryColorNumber, categoryIconNumber, categoryType,isActive) VALUES('Other',1,99,'Income',true) ")
 
                 //payment method cash
-                db.execSQL("INSERT INTO bank_accounts(initialAmount, currentAmount, bankName, cardColorNumber,cardIconNumber,accountType,isActive) VALUES('0','0','Cash',1,25,'CASH',true) ")
+                db.execSQL("INSERT INTO bank_accounts(initialAmount, currentAmount, bankName, accountAddedDate, balanceLastUpdatedDate,cardColorNumber,cardIconNumber,accountType,isActive) VALUES('0','0','Cash',20250101,20250101,1,25,'CASH',true) ")
             }
         }
     }

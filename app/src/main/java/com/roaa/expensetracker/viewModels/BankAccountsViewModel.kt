@@ -6,6 +6,7 @@ import com.roaa.expensetracker.database.BankAccountRepository
 import com.roaa.expensetracker.model.BankAccountsClass
 import com.roaa.expensetracker.utilities.Constants.PRIMARY
 import com.roaa.expensetracker.utilities.UiState
+import com.roaa.expensetracker.utilities.toLong
 import com.roaa.expensetracker.utilities.utilityModalClass.defaultBank
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.Flow
@@ -13,6 +14,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -115,6 +117,8 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
             bankAccountId = id,
             initialAmount = bankAmount.toBigDecimal(),
             currentAmount = bankAmount.toBigDecimal(),
+            accountAddedDate = LocalDate.now().toLong(),
+            balanceLastUpdatedDate = LocalDate.now().toLong(),
             bankName = bankName,
             cardColorNumber = selectedColor,
             cardIconNumber = 24,

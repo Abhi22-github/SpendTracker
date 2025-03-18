@@ -361,9 +361,10 @@ fun ScaffoldContent(
 
                 }
                 showDeleteConfirmationDialog = !showDeleteConfirmationDialog
-                handleBackNavigation(
-                    navigationManager
-                )
+                showCategoryDetailBottomSheet = !showCategoryDetailBottomSheet
+//                handleBackNavigation(
+//                    navigationManager
+//                )
             },
             onDismissRequest = { showDeleteConfirmationDialog = !showDeleteConfirmationDialog }
         )

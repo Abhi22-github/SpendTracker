@@ -17,6 +17,7 @@ val defaultBank = BankAccountsClass(
     1L,
     BigDecimal.ZERO,
     BigDecimal.ZERO,
+    20250101, 20250101,
     "Cash",
     1,
     25,
@@ -27,6 +28,7 @@ val emptyBank = BankAccountsClass(
     0L,
     BigDecimal.ZERO,
     BigDecimal.ZERO,
+    20250101, 20250101,
     "",
     1,
     25,
@@ -73,11 +75,13 @@ val emptyBudgetDayClass = BudgetDayModelClass(
     budgetId = 0L
 )
 
-val emptyTotalAmountClass = TotalAmountClass(20250101L,BigDecimal.ZERO)
+val emptyTotalAmountClass = TotalAmountClass(20250101L, BigDecimal.ZERO)
 
-val emptyTotalExpenseIncomeClass = TotalExpenseIncomeClass(20250101L, BigDecimal.ZERO, BigDecimal.ZERO)
+val emptyTotalExpenseIncomeClass =
+    TotalExpenseIncomeClass(20250101L, BigDecimal.ZERO, BigDecimal.ZERO)
 
-val emptyTransactionClass = TransactionClass(0L,EXPENSE, BigDecimal.ZERO, "", 0L, 20250101L, true,1L, 1L)
+val emptyTransactionClass =
+    TransactionClass(0L, EXPENSE, BigDecimal.ZERO, "", 0L, 20250101L, true, 1L, 1L)
 
 val emptyTransactionWithDetailsClass = TransactionWithDetails(
     emptyTransactionClass,
@@ -88,4 +92,4 @@ val firstSampleClass = CategoryClass(
     -1, "Select Category", 1, 99, EXPENSE, isActive = false
 )
 
-val defaultCurrency = CurrencyClass("India", "INR", "Indian Rupees", "₹","🇮🇳" )
+val defaultCurrency = CurrencyClass("India", "INR", "Indian Rupees", "₹", "🇮🇳")

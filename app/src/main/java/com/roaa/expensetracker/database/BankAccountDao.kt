@@ -8,9 +8,8 @@ import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
 import com.roaa.expensetracker.model.BankAccountsClass
-import com.roaa.expensetracker.model.DailyBalancesClass
+import com.roaa.expensetracker.model.BankAmountCorrectionsClass
 import com.roaa.expensetracker.model.TransactionClass
-import com.roaa.expensetracker.utilities.Constants.EXPENSE
 import com.roaa.expensetracker.utilities.toLong
 import kotlinx.coroutines.flow.Flow
 import java.math.BigDecimal
@@ -19,7 +18,7 @@ import java.time.LocalDate
 @Dao
 interface BankAccountDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    suspend fun insert(bankAccountsClass: BankAccountsClass):Long
+    suspend fun insert(bankAccountsClass: BankAccountsClass): Long
 
     @Delete
     suspend fun delete(bankAccountsClass: BankAccountsClass)
@@ -54,26 +53,24 @@ interface BankAccountDao {
     suspend fun getTotalAmountForDate(date: Long, type: String): BigDecimal?
 
     @Insert
-    suspend fun insert(dailyBalancesClass: DailyBalancesClass): Long
+    suspend fun insert(bankAmountCorrectionsClass: BankAmountCorrectionsClass): Long
 
 
     //Transactions
     @Transaction
     suspend fun insertWithDailyBalance(bankAccountsClass: BankAccountsClass) {
         val id = insert(bankAccountsClass)
-        val dailyBalance = DailyBalancesClass(
+        val dailyBalance = BankAmountCorrectionsClass(
             id = 0,
             bankAccountId = id,
             date = LocalDate.now().toLong(),
-            remBankBalance = bankAccountsClass.currentAmount,
-            dayTotalExpense = getTotalAmountForDate(LocalDate.now().toLong(), EXPENSE)
-                ?: BigDecimal.ZERO,
-            dayTotalIncome = getTotalAmountForDate(LocalDate.now().toLong(), EXPENSE)
-                ?: BigDecimal.ZERO,
-            isSetByUser = true
+            finalAmount = bankAccountsClass.currentAmount,
+            difference = bankAccountsClass.currentAmount.minus(bankAccountsClass.initialAmount),
+            startingAmount = BigDecimal.ZERO,
         )
         insert(dailyBalance)
     }
+
 
 
     @Transaction

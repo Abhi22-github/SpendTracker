@@ -4,11 +4,11 @@ import android.content.Context
 import androidx.room.Room.databaseBuilder
 import com.roaa.expensetracker.database.AppDatabase
 import com.roaa.expensetracker.database.AppDatabase.Companion.prePopulateData
+import com.roaa.expensetracker.database.BankAccountCorrectionsDao
 import com.roaa.expensetracker.database.BankAccountDao
 import com.roaa.expensetracker.database.BudgetDao
 import com.roaa.expensetracker.database.BudgetDayDao
 import com.roaa.expensetracker.database.CategoryDao
-import com.roaa.expensetracker.database.DailyBalanceDao
 import com.roaa.expensetracker.database.TransactionDao
 import dagger.Module
 import dagger.Provides
@@ -53,7 +53,7 @@ class DatabaseModule() {
 
     @Provides
     @Singleton
-    fun provideBankAccountsDailyBalance(database: AppDatabase): DailyBalanceDao {
+    fun provideBankAccountsDailyBalance(database: AppDatabase): BankAccountCorrectionsDao {
         return database.dailyBalanceDao()
     }
 

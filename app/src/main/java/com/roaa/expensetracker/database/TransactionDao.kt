@@ -51,7 +51,7 @@ interface TransactionDao {
         startDate: Long,
         endDate: Long,
         type: String,
-        budgetStatus:Boolean
+        budgetStatus: Boolean
     ): Flow<TotalAmountClass>
 
     @Query("SELECT date,SUM(CASE WHEN type == \"Expense\" then amount else 0 END) AS totalExpense,SUM(CASE WHEN type == \"Income\" then amount else 0 END) AS totalIncome from transaction_table where date >= :startDate and date <= :endDate group by date")
@@ -87,6 +87,13 @@ interface TransactionDao {
     @Query("SELECT SUM(amount) FROM transaction_table where date == :date and type == :type")
     fun getTotalAmountForDateWithoutFlow(date: Long, type: String): BigDecimal?
 
+    @Query("SELECT SUM(amount) FROM transaction_table where date == :date and type == :type and bankAccountId == :bankAccountID")
+    fun getTotalAmountForBankWithDateWithoutFlow(
+        date: Long,
+        type: String,
+        bankAccountID: Long
+    ): BigDecimal?
+
     @Query("SELECT SUM(amount) FROM transaction_table where date == :date and type == :type and includeInRespectiveBudget ==:includeInBudget")
     fun getTotalAmountForDateForBudgetOptTransactionWithoutFlow(
         date: Long,
@@ -110,6 +117,18 @@ interface TransactionDao {
         val expense = getTotalAmountForDateWithoutFlow(transactionClass.date, EXPENSE)
         val income = getTotalAmountForDateWithoutFlow(transactionClass.date, INCOME)
 
+        val bankExpense = getTotalAmountForBankWithDateWithoutFlow(
+            transactionClass.date,
+            EXPENSE,
+            transactionClass.bankAccountId
+        )
+
+        val bankIncome = getTotalAmountForBankWithDateWithoutFlow(
+            transactionClass.date,
+            INCOME,
+            transactionClass.bankAccountId
+        )
+
         val currentBudget = getCurrentBudget
 
         currentBudget?.let {
@@ -122,6 +141,10 @@ interface TransactionDao {
                 singleDay?.let { updateSingleDay(it) }
             }
         }
+        
+
+
+
     }
 
     @Transaction

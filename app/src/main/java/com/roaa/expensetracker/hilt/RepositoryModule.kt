@@ -1,6 +1,8 @@
 package com.roaa.expensetracker.hilt
 
 
+import com.roaa.expensetracker.database.BankAccountCorrectionsDao
+import com.roaa.expensetracker.database.BankAccountCorrectionsRepository
 import com.roaa.expensetracker.database.BankAccountDao
 import com.roaa.expensetracker.database.BankAccountRepository
 import com.roaa.expensetracker.database.BudgetDao
@@ -9,8 +11,6 @@ import com.roaa.expensetracker.database.BudgetDayRepository
 import com.roaa.expensetracker.database.BudgetRepository
 import com.roaa.expensetracker.database.CategoryDao
 import com.roaa.expensetracker.database.CategoryRepository
-import com.roaa.expensetracker.database.DailyBalanceDao
-import com.roaa.expensetracker.database.DailyBalanceRepository
 import com.roaa.expensetracker.database.TransactionDao
 import com.roaa.expensetracker.database.TransactionRepository
 import dagger.Module
@@ -37,8 +37,8 @@ class RepositoryModule() {
     }
 
     @Provides
-    fun provideBankAccountDailyBalanceRepository(dailyBalanceDao: DailyBalanceDao): DailyBalanceRepository {
-        return DailyBalanceRepository(dailyBalanceDao)
+    fun provideBankAccountDailyBalanceRepository(bankAccountCorrectionsDao: BankAccountCorrectionsDao): BankAccountCorrectionsRepository {
+        return BankAccountCorrectionsRepository(bankAccountCorrectionsDao)
     }
 
     @Provides

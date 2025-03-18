@@ -30,6 +30,8 @@ data class BankAccountsClass(
     val initialAmount: BigDecimal,
     @Serializable(with = BigDecimalSerializer::class)
     val currentAmount: BigDecimal,
+    val accountAddedDate: Long,
+    val balanceLastUpdatedDate: Long,
     val bankName: String,
     val cardColorNumber: Int,
     val cardIconNumber: Int,
@@ -42,7 +44,18 @@ data class BankAccountsClass(
 object BankAccountsSerializer : Serializer<BankAccountsClass> {
 
     override val defaultValue =
-        BankAccountsClass(1, BigDecimal.ZERO, BigDecimal.ZERO, "Cash", 1, 25, CASH, false)
+        BankAccountsClass(
+            1,
+            BigDecimal.ZERO,
+            BigDecimal.ZERO,
+            20250101,
+            20250101,
+            "Cash",
+            1,
+            25,
+            CASH,
+            false
+        )
 
     override suspend fun readFrom(input: InputStream): BankAccountsClass {
         try {
