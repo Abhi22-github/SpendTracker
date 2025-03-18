@@ -11,6 +11,7 @@ import com.roaa.expensetracker.model.BankAccountsClass
 import com.roaa.expensetracker.model.BudgetDayModelClass
 import com.roaa.expensetracker.model.BudgetModelClass
 import com.roaa.expensetracker.model.TransactionClass
+import com.roaa.expensetracker.model.uiDataModels.InfoStatClass
 import com.roaa.expensetracker.model.uiDataModels.TotalAmountClass
 import com.roaa.expensetracker.model.uiDataModels.TotalExpenseIncomeClass
 import com.roaa.expensetracker.utilities.Constants.EXPENSE
@@ -67,6 +68,20 @@ interface TransactionDao {
         endDate: Long,
         bankAccountId: Long
     ): Flow<List<TotalExpenseIncomeClass>>
+
+    @Query("SELECT COUNT(*) AS transactionCount,SUM(CASE WHEN type == \"Expense\" then amount else 0 END) AS totalExpense,SUM(CASE WHEN type == \"Income\" then amount else 0 END) AS totalIncome from transaction_table where date >= :startDate and date <= :endDate and categoryID == :categoryId ")
+    fun getSpecificCategoryStatistics(
+        categoryId: Long,
+        startDate: Long,
+        endDate: Long
+    ): Flow<InfoStatClass>
+
+    @Query("SELECT COUNT(*) AS transactionCount,SUM(CASE WHEN type == \"Expense\" then amount else 0 END) AS totalExpense,SUM(CASE WHEN type == \"Income\" then amount else 0 END) AS totalIncome from transaction_table where date >= :startDate and date <= :endDate and bankAccountId == :bankId ")
+    fun getSpecificBankStatistics(
+        bankId: Long,
+        startDate: Long,
+        endDate: Long
+    ): Flow<InfoStatClass>
 
     //Relations
     @get:Query("SELECT * FROM transaction_table ORDER BY dateWithTime DESC")
@@ -141,7 +156,7 @@ interface TransactionDao {
             INCOME,
             transactionClass.bankAccountId
         ) ?: BigDecimal.ZERO
-        val remBalance = bankAccount.initialAmount - (bankExpense - bankIncome )
+        val remBalance = bankAccount.initialAmount - (bankExpense - bankIncome)
         val updatedBank = bankAccount.copy(
             currentAmount = remBalance
         )
@@ -183,7 +198,7 @@ interface TransactionDao {
             INCOME,
             transactionClass.bankAccountId
         ) ?: BigDecimal.ZERO
-        val remBalance = bankAccount.initialAmount - (bankExpense - bankIncome )
+        val remBalance = bankAccount.initialAmount - (bankExpense - bankIncome)
         val updatedBank = bankAccount.copy(
             currentAmount = remBalance
         )
@@ -253,7 +268,7 @@ interface TransactionDao {
             INCOME,
             transactionClass.bankAccountId
         ) ?: BigDecimal.ZERO
-        val remBalance = bankAccount.initialAmount - (bankExpense - bankIncome )
+        val remBalance = bankAccount.initialAmount - (bankExpense - bankIncome)
         val updatedBank = bankAccount.copy(
             currentAmount = remBalance
         )

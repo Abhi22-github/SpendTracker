@@ -7,6 +7,7 @@ import androidx.lifecycle.viewModelScope
 import com.roaa.expensetracker.database.TransactionRepository
 import com.roaa.expensetracker.database.relations.TransactionWithDetails
 import com.roaa.expensetracker.model.TransactionClass
+import com.roaa.expensetracker.model.uiDataModels.InfoStatClass
 import com.roaa.expensetracker.model.uiDataModels.TotalAmountClass
 import com.roaa.expensetracker.model.uiDataModels.TotalExpenseIncomeClass
 import com.roaa.expensetracker.utilities.Constants.EXPENSE
@@ -205,13 +206,12 @@ class TransactionsViewModel @Inject constructor(
     }
 
     fun getTotalAmountByDateRangeCategoryTypeAndBudgetStatus(
-        startDate: Long, endDate: Long, categoryType: String,budgetStatus:Boolean
+        startDate: Long, endDate: Long, categoryType: String, budgetStatus: Boolean
     ): Flow<TotalAmountClass> {
         return transactionRepository.getTotalAmountByDateRangeCategoryTypeAndBudgetStatus(
-            startDate, endDate, categoryType,budgetStatus
+            startDate, endDate, categoryType, budgetStatus
         )
     }
-
 
 
     fun getListOfTotalAmountPerDayForRange(
@@ -315,6 +315,22 @@ class TransactionsViewModel @Inject constructor(
         } else {
             0
         }
+    }
+
+    fun getSpecificCategoryStatistics(
+        categoryId: Long,
+        startDate: Long,
+        endDate: Long
+    ): Flow<InfoStatClass> {
+        return transactionRepository.getSpecificCategoryStatistics(categoryId, startDate, endDate)
+    }
+
+    fun getSpecificBankStatistics(
+        bankId: Long,
+        startDate: Long,
+        endDate: Long
+    ): Flow<InfoStatClass> {
+        return transactionRepository.getSpecificBankStatistics(bankId, startDate, endDate)
     }
 
     fun loading() {

@@ -7,6 +7,7 @@ import com.roaa.expensetracker.model.BudgetModelClass
 import com.roaa.expensetracker.model.CategoryClass
 import com.roaa.expensetracker.model.TransactionClass
 import com.roaa.expensetracker.model.uiDataModels.CurrencyClass
+import com.roaa.expensetracker.model.uiDataModels.InfoStatClass
 import com.roaa.expensetracker.model.uiDataModels.TotalAmountClass
 import com.roaa.expensetracker.model.uiDataModels.TotalExpenseIncomeClass
 import com.roaa.expensetracker.utilities.Constants.CASH
@@ -93,3 +94,5 @@ val firstSampleClass = CategoryClass(
 )
 
 val defaultCurrency = CurrencyClass("India", "INR", "Indian Rupees", "₹", "🇮🇳")
+
+val emptyInfoStat = InfoStatClass(0, BigDecimal.ZERO, BigDecimal.ZERO)

@@ -191,6 +191,7 @@ fun PaymentMethodScreen(
     if (showBankDetailsBottomSheet) {
         BankDetailsBottomSheet(
             bankAccountClass = bankAccountsClass,
+            viewModel = viewModel,
             { showBankDetailsBottomSheet = !showBankDetailsBottomSheet },
             {
                 bankAccountsClass = it

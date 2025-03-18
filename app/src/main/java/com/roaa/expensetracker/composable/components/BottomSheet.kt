@@ -140,6 +140,7 @@ import com.roaa.expensetracker.database.relations.TransactionWithDetails
 import com.roaa.expensetracker.hilt.AllViewModel
 import com.roaa.expensetracker.model.BankAccountsClass
 import com.roaa.expensetracker.model.CategoryClass
+import com.roaa.expensetracker.model.uiDataModels.InfoStatClass
 import com.roaa.expensetracker.model.uiDataModels.TransactionTypeClass
 import com.roaa.expensetracker.utilities.Constants.EXPENSE
 import com.roaa.expensetracker.utilities.Constants.INCOME
@@ -149,18 +150,24 @@ import com.roaa.expensetracker.utilities.DecimalFilterTransformation
 import com.roaa.expensetracker.utilities.ErrorManager
 import com.roaa.expensetracker.utilities.convertMillisToDateString
 import com.roaa.expensetracker.utilities.extractNumbers
+import com.roaa.expensetracker.utilities.getDayDifference
+import com.roaa.expensetracker.utilities.getMonthEndDate
+import com.roaa.expensetracker.utilities.getMonthStartDate
 import com.roaa.expensetracker.utilities.parseAmount
 import com.roaa.expensetracker.utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.utilities.toLocalDate
 import com.roaa.expensetracker.utilities.toLongMillis
 import com.roaa.expensetracker.utilities.utilityModalClass.defaultBank
 import com.roaa.expensetracker.utilities.utilityModalClass.defaultCategoryClass
+import com.roaa.expensetracker.utilities.utilityModalClass.emptyInfoStat
 import com.roaa.expensetracker.utilities.utilityModalClass.emptyTransactionClass
 import com.roaa.expensetracker.utilities.utilityModalClass.firstSampleClass
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
+import java.math.RoundingMode
+import java.time.LocalDate
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -178,10 +185,7 @@ fun BottomSheetContentAddItem(
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
         BottomSheetContentItemAddContent(
-            modifier = Modifier,
-            viewModel = viewModel,
-            date,
-            closeBottomSheet
+            modifier = Modifier, viewModel = viewModel, date, closeBottomSheet
         )
     }
 }
@@ -205,10 +209,7 @@ fun BottomSheetContentEdit(
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
         BottomSheetContentItemEditContent(
-            modifier = Modifier,
-            viewModel = viewModel,
-            singleTransaction,
-            closeBottomSheet
+            modifier = Modifier, viewModel = viewModel, singleTransaction, closeBottomSheet
         )
     }
 }
@@ -363,8 +364,7 @@ fun BottomSheetContentItemAddContent(
         BigDecimal.ZERO
     }
     viewModel.animationViewModel.method(
-        "${LocalCurrency.current.currencySymbol}$amountInString",
-        percent.toFloat()
+        "${LocalCurrency.current.currencySymbol}$amountInString", percent.toFloat()
     )
 
     LaunchedEffect(percent) {
@@ -374,8 +374,7 @@ fun BottomSheetContentItemAddContent(
     }
 
     Column(
-        modifier
-            .fillMaxWidth()
+        modifier.fillMaxWidth()
     ) {
         Column {
             Text(
@@ -773,8 +772,7 @@ fun BottomSheetContentItemEditContent(
         BigDecimal.ZERO
     }
     viewModel.animationViewModel.method(
-        "${LocalCurrency.current.currencySymbol}$amountInString",
-        percent.toFloat()
+        "${LocalCurrency.current.currencySymbol}$amountInString", percent.toFloat()
     )
 
     LaunchedEffect(percent) {
@@ -784,8 +782,7 @@ fun BottomSheetContentItemEditContent(
     }
 
     Column(
-        modifier
-            .fillMaxWidth()
+        modifier.fillMaxWidth()
     ) {
         Column {
             Text(
@@ -1221,7 +1218,7 @@ fun BottomRow(
             Box {
                 FilledTonalButton(
                     onClick = {
-                         //selectedPaymentMethodSetter(selectedBankAccount)
+                        //selectedPaymentMethodSetter(selectedBankAccount)
                         bankAccountMenuExpanded = true
                     }, colors = ButtonDefaults.outlinedButtonColors(
                         contentColor = MaterialTheme.colorScheme.onSurface.copy(
@@ -1248,7 +1245,7 @@ fun BottomRow(
                     onDismiss = { bankAccountMenuExpanded = false },
                     bankAccountsList,
                     selectedBankAccountSetter = {
-                       // selectedBankAccount = it
+                        // selectedBankAccount = it
                         selectedPaymentMethodSetter(it)
                         scope.launch {
                             viewModel.uiViewModel.errorStatusInAddBottomSheet.emit(false)
@@ -1670,8 +1667,7 @@ fun AddPaymentMethodBottomSheet(
         contentWindowInsets = { WindowInsets.ime }) {
 
         BottomSheetContentPaymentMethodAddContentNew(
-            Modifier
-                .padding(16.dp, 0.dp),
+            Modifier.padding(16.dp, 0.dp),
             showError,
             showExperimentalComponent,
             { scope.launch { viewModel.uiViewModel.errorStatusInBankAccountAdd.emit(false) } },
@@ -1727,8 +1723,7 @@ fun EditPaymentMethodBottomSheet(
         contentWindowInsets = { WindowInsets.ime }) {
 
         BottomSheetContentPaymentMethodEditContentNew(
-            Modifier
-                .padding(16.dp, 0.dp),
+            Modifier.padding(16.dp, 0.dp),
             bankAccountsClass,
             showError,
             showExperimentalComponent,
@@ -2401,8 +2396,7 @@ fun BottomSheetContentItemAddContentTest(
         0f
     }
     viewModel.animationViewModel.method(
-        "${LocalCurrency.current.currencySymbol}$amountInString",
-        percent.toFloat()
+        "${LocalCurrency.current.currencySymbol}$amountInString", percent.toFloat()
     )
 
     LaunchedEffect(percent) {
@@ -2828,8 +2822,7 @@ fun NotificationPercentChooserBottomSheet(
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
         NotificationPercentChooserBottomSheetContent(
-            modifier = Modifier,
-            {
+            modifier = Modifier, {
                 saveNotificationValue(it)
             })
     }
@@ -2837,8 +2830,7 @@ fun NotificationPercentChooserBottomSheet(
 
 @Composable
 fun NotificationPercentChooserBottomSheetContent(
-    modifier: Modifier = Modifier,
-    saveData: (Float) -> Unit
+    modifier: Modifier = Modifier, saveData: (Float) -> Unit
 ) {
     val color = MaterialTheme.colorScheme.primary
     var sliderPosition by remember { mutableFloatStateOf(20f) }
@@ -2938,10 +2930,7 @@ fun DistributionMethodPickerBottomSheet(
             .fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime }) {
         DistributionMethodPickerBottomSheetContent(
-            modifier = Modifier,
-            restDistributionValue,
-            { saveDistributionMethod(it) }
-        )
+            modifier = Modifier, restDistributionValue, { saveDistributionMethod(it) })
     }
 }
 
@@ -3035,8 +3024,7 @@ private fun DistributionRadioButtonsPreview() {
         "The remaining amount will be distributed on the remaining days",
         DistributionMethod.DEFAULT,
         DistributionMethod.DEFAULT,
-        {}
-    )
+        {})
 }
 
 @Preview(showBackground = true)
@@ -3056,6 +3044,7 @@ private fun NotificationPercentChooserBottomSheetContentPreview() {
 @Composable
 fun BankDetailsBottomSheet(
     bankAccountClass: BankAccountsClass,
+    viewModel: AllViewModel,
     onDismiss: () -> Unit,
     editButtonClicked: (BankAccountsClass) -> Unit,
     deleteButtonClicked: (BankAccountsClass) -> Unit,
@@ -3063,6 +3052,9 @@ fun BankDetailsBottomSheet(
     specificTransactionsClicked: (BankAccountsClass) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val bankSpecificStats by viewModel.transactionsViewModel.getSpecificBankStatistics(
+        bankAccountClass.bankAccountId, getMonthStartDate(), getMonthEndDate()
+    ).collectAsState(emptyInfoStat)
     ModalBottomSheet(
         onDismissRequest = { onDismiss() },
         sheetState = sheetState,
@@ -3072,6 +3064,7 @@ fun BankDetailsBottomSheet(
     ) {
         BankDetailsBottomSheetContent(
             bankAccountClass,
+            bankSpecificStats,
             {
                 editButtonClicked(bankAccountClass)
             },
@@ -3084,6 +3077,7 @@ fun BankDetailsBottomSheet(
 @Composable
 fun BankDetailsBottomSheetContent(
     bankAccountClass: BankAccountsClass,
+    bankSpecificStats: InfoStatClass,
     editButtonClicked: () -> Unit,
     deleteButtonClicked: () -> Unit,
     statAnalysisClicked: () -> Unit,
@@ -3107,16 +3101,23 @@ fun BankDetailsBottomSheetContent(
                     style = MaterialTheme.typography.titleMedium,
                     color = infoCardColors.onSurface
                 )
+
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "You have made 300 transactions this month, totaling ₹3,00,000 in expenses. You have spend around 3200/day in current Month",
+                    text = "You have made ${bankSpecificStats.transactionCount} transactions this month, totaling ${bankSpecificStats.totalExpense - bankSpecificStats.totalIncome} in expenses. You have spend around ${LocalCurrency.current.currencySymbol}${
+                        bankSpecificStats.totalExpense.divide(
+                            getDayDifference(
+                                getMonthStartDate().toLocalDate(),
+                                LocalDate.now()
+                            ).toBigDecimal(), 2, RoundingMode.HALF_UP
+                        )
+                    }/day in current Month",
                     style = MaterialTheme.typography.labelLarge,
                     color = infoCardColors.onSurface.copy(alpha = 0.6f)
                 )
                 Spacer(Modifier.height(16.dp))
                 FilledTonalButton(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     onClick = { statAnalysisClicked() },
                     colors = ButtonDefaults.filledTonalButtonColors(
                         containerColor = infoCardColors.container,
@@ -3133,8 +3134,7 @@ fun BankDetailsBottomSheetContent(
                 }
                 Spacer(Modifier.height(4.dp))
                 FilledTonalButton(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     onClick = { specificTransactionsClicked() },
                     colors = ButtonDefaults.filledTonalButtonColors(
                         containerColor = infoCardColors.container,
@@ -3159,13 +3159,14 @@ fun BankDetailsBottomSheetContent(
 @Preview(showBackground = true)
 @Composable
 private fun BankDetailsBottomSheetContentPreview() {
-    BankDetailsBottomSheetContent(defaultBank, {}, {}, {}, {})
+    BankDetailsBottomSheetContent(defaultBank, emptyInfoStat, {}, {}, {}, {})
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CategoryDetailsBottomSheet(
     categoryClass: CategoryClass,
+    viewModel: AllViewModel,
     onDismiss: () -> Unit,
     editButtonClicked: (CategoryClass) -> Unit,
     deleteButtonClicked: (CategoryClass) -> Unit,
@@ -3173,6 +3174,10 @@ fun CategoryDetailsBottomSheet(
     specificTransactionsClicked: (CategoryClass) -> Unit
 ) {
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    val categorySpecificStats by viewModel.transactionsViewModel.getSpecificCategoryStatistics(
+        categoryClass.categoryId, getMonthStartDate(), getMonthEndDate()
+    ).collectAsState(emptyInfoStat)
+
     ModalBottomSheet(
         onDismissRequest = { onDismiss() },
         sheetState = sheetState,
@@ -3182,6 +3187,7 @@ fun CategoryDetailsBottomSheet(
     ) {
         CategoryDetailsBottomSheetContent(
             categoryClass,
+            categorySpecificStats,
             {
                 editButtonClicked(categoryClass)
             },
@@ -3194,6 +3200,7 @@ fun CategoryDetailsBottomSheet(
 @Composable
 fun CategoryDetailsBottomSheetContent(
     categoryClass: CategoryClass,
+    categorySpecificStats: InfoStatClass,
     editButtonClicked: () -> Unit,
     deleteButtonClicked: () -> Unit,
     statAnalysisClicked: () -> Unit,
@@ -3231,8 +3238,7 @@ fun CategoryDetailsBottomSheetContent(
                     Image(
                         painter = image,
                         contentDescription = "Image ${categoryClass.categoryIconNumber}",
-                        modifier = Modifier
-                            .size(96.dp)
+                        modifier = Modifier.size(96.dp)
 
                     )
                 }
@@ -3260,15 +3266,43 @@ fun CategoryDetailsBottomSheetContent(
                     color = infoCardColors.onSurface
                 )
                 Spacer(Modifier.height(4.dp))
+                categorySpecificStats.totalExpense.div(
+                    (getDayDifference(
+                        getMonthStartDate().toLocalDate(), LocalDate.now()
+                    )).toBigDecimal()
+                )
                 Text(
-                    text = "You have made 300 transactions this month, totaling ₹3,00,000 in expenses. You have spend around 3200/day in current Month",
+                    text = "You have made ${categorySpecificStats.transactionCount} transactions this month, totaling ${LocalCurrency.current.currencySymbol}${
+                        if (categoryClass.categoryType == EXPENSE) {
+                            categorySpecificStats.totalExpense
+                        } else categorySpecificStats.totalIncome
+                    } in ${
+                        if (categoryClass.categoryType == EXPENSE) {
+                            "expenses"
+                        } else "income"
+                    }. You have ${
+                        if (categoryClass.categoryType == EXPENSE) {
+                            "spend"
+                        } else "earned"
+                    } around ${LocalCurrency.current.currencySymbol}${
+                        if (categoryClass.categoryType == EXPENSE) {
+                            categorySpecificStats.totalExpense.divide(
+                                (getDayDifference(
+                                    getMonthStartDate().toLocalDate(), LocalDate.now()
+                                )).toBigDecimal(), 2, RoundingMode.HALF_UP
+                            )
+                        } else categorySpecificStats.totalIncome.divide(
+                            (getDayDifference(
+                                getMonthStartDate().toLocalDate(), LocalDate.now()
+                            )).toBigDecimal(), 2, RoundingMode.HALF_UP
+                        )
+                    }/day in current Month",
                     style = MaterialTheme.typography.labelLarge,
                     color = infoCardColors.onSurface.copy(alpha = 0.6f)
                 )
                 Spacer(Modifier.height(16.dp))
                 FilledTonalButton(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     onClick = { statAnalysisClicked() },
                     colors = ButtonDefaults.filledTonalButtonColors(
                         containerColor = infoCardColors.container,
@@ -3285,8 +3319,7 @@ fun CategoryDetailsBottomSheetContent(
                 }
                 Spacer(Modifier.height(4.dp))
                 FilledTonalButton(
-                    modifier = Modifier
-                        .fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth(),
                     onClick = { specificTransactionsClicked() },
                     colors = ButtonDefaults.filledTonalButtonColors(
                         containerColor = infoCardColors.container,
@@ -3312,5 +3345,5 @@ fun CategoryDetailsBottomSheetContent(
 @Preview(showBackground = true)
 @Composable
 private fun CategoryDetailsBottomSheetContentPreview() {
-    CategoryDetailsBottomSheetContent(defaultCategoryClass, {}, {}, {}, {})
+    CategoryDetailsBottomSheetContent(defaultCategoryClass, emptyInfoStat, {}, {}, {}, {})
 }

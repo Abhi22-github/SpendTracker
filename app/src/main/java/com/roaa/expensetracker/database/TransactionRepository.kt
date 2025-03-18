@@ -2,6 +2,7 @@ package com.roaa.expensetracker.database
 
 import com.roaa.expensetracker.database.relations.TransactionWithDetails
 import com.roaa.expensetracker.model.TransactionClass
+import com.roaa.expensetracker.model.uiDataModels.InfoStatClass
 import com.roaa.expensetracker.model.uiDataModels.TotalAmountClass
 import com.roaa.expensetracker.model.uiDataModels.TotalExpenseIncomeClass
 import kotlinx.coroutines.flow.Flow
@@ -25,6 +26,7 @@ class TransactionRepository @Inject constructor(private val transactionDao: Tran
     suspend fun updateAndPropagateChanges(transactionClass: TransactionClass) {
         transactionDao.updateTransactionAndPropagateChanges(transactionClass)
     }
+
     suspend fun updateForBudgetSwitchAndPropagateChanges(transactionClass: TransactionClass) {
         transactionDao.updateTransactionOnlyForBudgetSwitchAndPropagateChanges(transactionClass)
     }
@@ -59,11 +61,12 @@ class TransactionRepository @Inject constructor(private val transactionDao: Tran
             categoryType
         )
     }
+
     fun getTotalAmountByDateRangeCategoryTypeAndBudgetStatus(
         startDate: Long,
         endDate: Long,
         categoryType: String,
-        budgetStatus:Boolean
+        budgetStatus: Boolean
     ): Flow<TotalAmountClass> {
         return transactionDao.getTotalAmountByDateRangeCategoryTypeAndBudgetStatus(
             startDate,
@@ -91,16 +94,34 @@ class TransactionRepository @Inject constructor(private val transactionDao: Tran
     ): Flow<List<TotalExpenseIncomeClass>> {
         return transactionDao.getListOfTotalAmountPerDayForRange(startDate, endDate)
     }
+
     fun getListOfTotalAmountPerDayForRangeForBankAccountId(
         startDate: Long,
         endDate: Long,
         bankAccountId: Long
     ): Flow<List<TotalExpenseIncomeClass>> {
-        return transactionDao.getListOfTotalAmountPerDayForRangeForBankAccountId(startDate, endDate, bankAccountId)
+        return transactionDao.getListOfTotalAmountPerDayForRangeForBankAccountId(
+            startDate,
+            endDate,
+            bankAccountId
+        )
     }
 
+    fun getSpecificCategoryStatistics(
+        categoryId: Long,
+        startDate: Long,
+        endDate: Long
+    ): Flow<InfoStatClass> {
+        return transactionDao.getSpecificCategoryStatistics(categoryId, startDate, endDate)
+    }
 
-
+    fun getSpecificBankStatistics(
+        bankId: Long,
+        startDate: Long,
+        endDate: Long
+    ): Flow<InfoStatClass> {
+        return transactionDao.getSpecificBankStatistics(bankId, startDate, endDate)
+    }
 
     fun getAllTransactionsForDate(date: Long): Flow<List<TransactionWithDetails>> {
         return transactionDao.getAllTransactionsForDate(date)

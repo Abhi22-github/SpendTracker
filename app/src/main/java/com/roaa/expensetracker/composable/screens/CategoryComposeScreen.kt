@@ -301,6 +301,7 @@ fun ScaffoldContent(
     if (showCategoryDetailBottomSheet) {
         CategoryDetailsBottomSheet(
             categoryClass = categoryClass,
+            viewModel = viewModel,
             onDismiss = { showCategoryDetailBottomSheet = !showCategoryDetailBottomSheet },
             editButtonClicked = {
                 showCategoryDetailBottomSheet = !showCategoryDetailBottomSheet
