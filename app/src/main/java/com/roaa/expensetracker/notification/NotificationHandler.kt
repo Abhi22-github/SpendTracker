@@ -79,6 +79,7 @@ fun sendNotification(
 ) {
 
     val intent = Intent(context, ComposeMainActivity::class.java).apply {
+        putExtra("SHOW_ADD_TRANSACTION", true)
         flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
     }
     // Create a PendingIntent to launch the app

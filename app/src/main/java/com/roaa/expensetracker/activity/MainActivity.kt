@@ -6,6 +6,7 @@ import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -107,6 +108,7 @@ import com.roaa.expensetracker.utilities.lockScreenOrientation
 import com.roaa.expensetracker.utilities.section1Items
 import com.roaa.expensetracker.utilities.section2Items
 import com.roaa.expensetracker.utilities.utilityModalClass.defaultCurrency
+import com.roaa.expensetracker.viewModels.UiViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 import java.time.LocalDate
@@ -120,14 +122,18 @@ val LocalCurrency = compositionLocalOf { defaultCurrency }
 class ComposeMainActivity : ComponentActivity() {
     private val isDone: MutableState<Boolean> = mutableStateOf(false)
     private val isReady: MutableState<Boolean> = mutableStateOf(false)
-    private val isNotificationClicked = mutableStateOf(false)
+    private val notificationUiViewModel: UiViewModel by viewModels()
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        if (intent?.getBooleanExtra("SHOW_ADD_TRANSACTION", false) == true) {
+            notificationUiViewModel.isNotificationClicked = true // Update state
+        }
         WindowCompat.setDecorFitsSystemWindows(window, false)
         installSplashScreen().setKeepOnScreenCondition { !isDone.value }
         this.deleteDatabase("database")
+
         setContent {
             val scope = rememberCoroutineScope()
             val localContext = LocalContext.current
@@ -210,9 +216,11 @@ class ComposeMainActivity : ComponentActivity() {
                         LaunchedEffect(Unit) {
                             // App rendered and splash screen can be hidden
                             isDone.value = true
-                            if (isNotificationClicked.value) {
+                            if (notificationUiViewModel.isNotificationClicked) {
                                 scope.launch {
-                                    allViewModels.uiViewModel.addCategorySpecificOrBankSpecificTransaction.emit(true)
+                                    allViewModels.uiViewModel.addCategorySpecificOrBankSpecificTransaction.emit(
+                                        true
+                                    )
                                 }
                             }
                         }
@@ -225,8 +233,11 @@ class ComposeMainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         // Handle any additional logic here if needed
-        isNotificationClicked.value = true
+        if (intent?.getBooleanExtra("SHOW_ADD_TRANSACTION", false) == true) {
+            notificationUiViewModel.isNotificationClicked = true // Update state
+        }
     }
+
 }
 
 

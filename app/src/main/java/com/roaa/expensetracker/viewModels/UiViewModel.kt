@@ -25,6 +25,7 @@ class UiViewModel @Inject constructor() : ViewModel() {
     var errorStatusInBudgetAdd = MutableStateFlow<Boolean>(false)
     var errorStatusInSetupBudget = MutableStateFlow<Boolean>(false)
     var errorStatusInStatisticsFilter = MutableStateFlow(false)
+    var isNotificationClicked = false
     //var errorStatusMessage = MutableStateFlow<String>("")
 
     fun setErrorMessage(message: String) {
