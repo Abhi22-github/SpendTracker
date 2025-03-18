@@ -2,7 +2,7 @@
   "formatVersion": 1,
   "database": {
     "version": 1,
-    "identityHash": "9f2209670e3522f5a8524d82ebdc7c98",
+    "identityHash": "ca0828595d5eb41ecd10d73fd87dbc14",
     "entities": [
       {
         "tableName": "transaction_table",
@@ -122,21 +122,22 @@
         },
         "indices": [
           {
-            "name": "index_category_table_categoryName_categoryType",
+            "name": "index_category_table_categoryId_categoryName_categoryType",
             "unique": true,
             "columnNames": [
+              "categoryId",
               "categoryName",
               "categoryType"
             ],
             "orders": [],
-            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_category_table_categoryName_categoryType` ON `${TABLE_NAME}` (`categoryName`, `categoryType`)"
+            "createSql": "CREATE UNIQUE INDEX IF NOT EXISTS `index_category_table_categoryId_categoryName_categoryType` ON `${TABLE_NAME}` (`categoryId`, `categoryName`, `categoryType`)"
           }
         ],
         "foreignKeys": []
       },
       {
         "tableName": "bank_accounts",
-        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bankAccountId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `initialAmount` TEXT NOT NULL, `currentAmount` TEXT NOT NULL, `bankName` TEXT NOT NULL, `cardColorNumber` INTEGER NOT NULL, `cardIconNumber` INTEGER NOT NULL, `accountType` TEXT NOT NULL, `isActive` INTEGER NOT NULL)",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`bankAccountId` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `initialAmount` TEXT NOT NULL, `currentAmount` TEXT NOT NULL, `accountAddedDate` INTEGER NOT NULL, `balanceLastUpdatedDate` INTEGER NOT NULL, `bankName` TEXT NOT NULL, `cardColorNumber` INTEGER NOT NULL, `cardIconNumber` INTEGER NOT NULL, `accountType` TEXT NOT NULL, `isActive` INTEGER NOT NULL)",
         "fields": [
           {
             "fieldPath": "bankAccountId",
@@ -154,6 +155,18 @@
             "fieldPath": "currentAmount",
             "columnName": "currentAmount",
             "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "accountAddedDate",
+            "columnName": "accountAddedDate",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "balanceLastUpdatedDate",
+            "columnName": "balanceLastUpdatedDate",
+            "affinity": "INTEGER",
             "notNull": true
           },
           {
@@ -325,12 +338,62 @@
         },
         "indices": [],
         "foreignKeys": []
+      },
+      {
+        "tableName": "bank_balance_corrections",
+        "createSql": "CREATE TABLE IF NOT EXISTS `${TABLE_NAME}` (`id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, `bankAccountId` INTEGER NOT NULL, `date` INTEGER NOT NULL, `finalAmount` TEXT NOT NULL, `difference` TEXT NOT NULL, `startingAmount` TEXT NOT NULL)",
+        "fields": [
+          {
+            "fieldPath": "id",
+            "columnName": "id",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "bankAccountId",
+            "columnName": "bankAccountId",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "date",
+            "columnName": "date",
+            "affinity": "INTEGER",
+            "notNull": true
+          },
+          {
+            "fieldPath": "finalAmount",
+            "columnName": "finalAmount",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "difference",
+            "columnName": "difference",
+            "affinity": "TEXT",
+            "notNull": true
+          },
+          {
+            "fieldPath": "startingAmount",
+            "columnName": "startingAmount",
+            "affinity": "TEXT",
+            "notNull": true
+          }
+        ],
+        "primaryKey": {
+          "autoGenerate": true,
+          "columnNames": [
+            "id"
+          ]
+        },
+        "indices": [],
+        "foreignKeys": []
       }
     ],
     "views": [],
     "setupQueries": [
       "CREATE TABLE IF NOT EXISTS room_master_table (id INTEGER PRIMARY KEY,identity_hash TEXT)",
-      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, '9f2209670e3522f5a8524d82ebdc7c98')"
+      "INSERT OR REPLACE INTO room_master_table (id,identity_hash) VALUES(42, 'ca0828595d5eb41ecd10d73fd87dbc14')"
     ]
   }
 }

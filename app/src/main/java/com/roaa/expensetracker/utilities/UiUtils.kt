@@ -108,36 +108,36 @@ val categoryDeleteActionList = listOf(
 val onboardingPageContentList = listOf(
     OnboardingContent(
         "Take Control of Your Finances!",
-        "Track expenses, manage budgets, and save smarter—all in one app.",
+        "Effortlessly track spending, manage budgets, and achieve your savings goals—all in one place.",
         onboardingColor1,
         R.drawable.onboarding_1
     ),
     OnboardingContent(
         "Effortlessly Track Every Expense",
-        "Log your expenses in seconds and categorize them for better insights.",
-        onboardingColor2,
-        R.drawable.onboarding_2
-    ),
-    OnboardingContent(
-        "Effortlessly Track Every Expense",
-        "Log your expenses in seconds and categorize them for better insights.",
+        "Quickly log every expense and categorize them seamlessly for clearer financial insights.",
         onboardingColor2,
         R.drawable.test1
     ),
     OnboardingContent(
-        "Set Budgets & Stay on Track",
-        "Create budgets and get alerts when you're about to exceed them",
+        "Set Smart Budgets & Stay on Track",
+        "Create personalized budgets and receive alerts before you exceed your limits, helping you stay in control of your finances.",
         onboardingColor3,
         R.drawable.onboarding_3
     ),
     OnboardingContent(
         "Understand Your Spending Habits",
-        "A pie chart or graph showing categorized spending.",
+        "Visualize your expenses with an intuitive pie chart, categorizing your spending for better financial awareness",
         onboardingColor4,
         R.drawable.onboarding_4
     )
 )
 
-data class CategoryChipItem(val categoryClass: CategoryClass, var isSelected: MutableState<Boolean> = mutableStateOf(true))
+data class CategoryChipItem(
+    val categoryClass: CategoryClass,
+    var isSelected: MutableState<Boolean> = mutableStateOf(true)
+)
 
-data class BankChipItem(val bankAccountsClass: BankAccountsClass, var isSelected: MutableState<Boolean> = mutableStateOf(true))
+data class BankChipItem(
+    val bankAccountsClass: BankAccountsClass,
+    var isSelected: MutableState<Boolean> = mutableStateOf(true)
+)

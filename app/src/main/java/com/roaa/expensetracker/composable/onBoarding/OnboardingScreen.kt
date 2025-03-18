@@ -62,7 +62,7 @@ fun OnboardingScreen(
 
     Scaffold {
         ConstraintLayout {
-            val (pager, indicator, button) = createRefs()
+            val (pager, indicator, button,skipButton) = createRefs()
             HorizontalPager(state = pagerState, modifier = Modifier.constrainAs(pager) {
                 top.linkTo(parent.top)
                 bottom.linkTo(parent.bottom)
@@ -84,11 +84,11 @@ fun OnboardingScreen(
                 onClick = {
                     scope.launch {
                         pagerState.animateScrollToPage(pagerState.currentPage + 1)
-                        if (pagerState.currentPage == pagerState.pageCount - 1) {
-                            viewModel.preferencesViewModel.saveOnboardingState(true)
-                            navController.popBackStack()
-                            navController.navigate(Destinations.ListScreen)
-                        }
+                    }
+                    if (pagerState.currentPage == pagerState.pageCount - 1) {
+                        viewModel.preferencesViewModel.saveOnboardingState(true)
+                        navController.popBackStack()
+                        navController.navigate(Destinations.ListScreen)
                     }
                 },
                 modifier = Modifier
@@ -105,6 +105,30 @@ fun OnboardingScreen(
                 )) {
                 Text(if (pagerState.currentPage == list.size - 1) "Get Started" else "Next", color = Color.White)
             }
+//            FilledTonalButton(
+//                onClick = {
+//                    scope.launch {
+//                        pagerState.animateScrollToPage(pagerState.currentPage + 1)
+//                    }
+//                    if (pagerState.settledPage == pagerState.pageCount - 1) {
+//                        viewModel.preferencesViewModel.saveOnboardingState(true)
+//                        navController.popBackStack()
+//                        navController.navigate(Destinations.ListScreen)
+//                    }
+//                },
+//                modifier = Modifier
+//                    .constrainAs(skipButton) {
+//                        end.linkTo(parent.end,0.dp)
+//                        top.linkTo(parent.top, 64.dp)
+//                    }
+//                    .animateContentSize(),
+//                colors = ButtonDefaults.textButtonColors(
+//                    contentColor = list[pagerState.currentPage].color.darken(
+//                        0.8f
+//                    )
+//                )) {
+//                Text("Skip")
+//            }
         }
 
     }
