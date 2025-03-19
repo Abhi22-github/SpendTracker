@@ -230,7 +230,8 @@ fun PieChartView(pieDataSet: PieDataSet, onSurface: Int) {
                 ViewGroup.LayoutParams.MATCH_PARENT
             )
             setUsePercentValues(true)
-            description.isEnabled = false
+            setDrawEntryLabels(true)
+            description.isEnabled = true
             setDrawHoleEnabled(true)
             setDrawRoundedSlices(false)
             holeRadius = 50f

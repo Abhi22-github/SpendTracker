@@ -106,7 +106,10 @@ fun BarChart(
                         )
                     )
                 ),
-                // startAxis = VerticalAxis.rememberStart(),
+                // startAxis = VerticalAxis.rememberStart(label = TextComponent(
+                //                    lineCount = 2,
+                //                    color = MaterialTheme.colorScheme.onSurface.toArgb()
+                //                )),
                 bottomAxis = HorizontalAxis.rememberBottom(
                     guideline = LineComponent(fill = Fill.Transparent),
                     itemPlacer = remember { HorizontalAxis.ItemPlacer.segmented() },
@@ -165,7 +168,10 @@ fun BarChartTest(
                         )
                     )
                 ),
-                startAxis = VerticalAxis.rememberStart(itemPlacer = VerticalAxis.ItemPlacer.count({ 3 })),
+                startAxis = VerticalAxis.rememberStart(itemPlacer = VerticalAxis.ItemPlacer.count({ 3 }),label = TextComponent(
+                    lineCount = 2,
+                    color = MaterialTheme.colorScheme.onSurface.toArgb()
+                )),
                 bottomAxis = HorizontalAxis.rememberBottom(
                     guideline = LineComponent(
                         fill = fill(MaterialTheme.colorScheme.onSurface.copy(0.1f)),
@@ -236,7 +242,11 @@ fun BarChartStatisticsScreen(
                 startAxis = VerticalAxis.rememberStart(
                     itemPlacer = VerticalAxis.ItemPlacer.count({ 3 }), line = LineComponent(
                         fill(Color.Transparent)
-                    )
+                    ),
+                            label = TextComponent(
+                            lineCount = 2,
+                    color = MaterialTheme.colorScheme.onSurface.toArgb()
+                )
                 ),
                 bottomAxis = HorizontalAxis.rememberBottom(
                     guideline = LineComponent(
@@ -349,6 +359,10 @@ fun BarChartBudgetUsage(
                     itemPlacer = remember { VerticalAxis.ItemPlacer.count({ 3 }) },
                     size = BaseAxis.Size.Auto(),
                     line = LineComponent(fill = fill(Color.Transparent)),
+                    label = TextComponent(
+                        lineCount = 2,
+                        color = MaterialTheme.colorScheme.onSurface.toArgb()
+                    )
                 ),
                 bottomAxis = HorizontalAxis.rememberBottom(
                     guideline = LineComponent(
@@ -424,6 +438,9 @@ fun BarChartStatisticsScreenBanks(
                 startAxis = VerticalAxis.rememberStart(
                     itemPlacer = VerticalAxis.ItemPlacer.count({ 3 }), line = LineComponent(
                         fill(Color.Transparent)
+                    ),label = TextComponent(
+                        lineCount = 2,
+                        color = MaterialTheme.colorScheme.onSurface.toArgb()
                     )
                 ),
                 bottomAxis = HorizontalAxis.rememberBottom(

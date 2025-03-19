@@ -289,6 +289,10 @@ fun LineChartBudgetTotalUsage(
                 itemPlacer = remember { VerticalAxis.ItemPlacer.count({ 5 }) },
                 line = LineComponent(fill = fill(Color.Transparent)),
                 horizontalLabelPosition = VerticalAxis.HorizontalLabelPosition.Outside,
+                label = TextComponent(
+                    lineCount = 2,
+                    color = MaterialTheme.colorScheme.onSurface.toArgb()
+                )
             ),
             bottomAxis = HorizontalAxis.rememberBottom(
                 guideline = LineComponent(fill = Fill.Transparent),
