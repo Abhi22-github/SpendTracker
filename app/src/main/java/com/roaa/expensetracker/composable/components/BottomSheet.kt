@@ -2833,7 +2833,7 @@ fun NotificationPercentChooserBottomSheetContent(
     modifier: Modifier = Modifier, saveData: (Float) -> Unit
 ) {
     val color = MaterialTheme.colorScheme.primary
-    var sliderPosition by remember { mutableFloatStateOf(20f) }
+    var sliderPosition by remember { mutableFloatStateOf(80f) }
     Column(
         Modifier
             .padding(horizontal = 16.dp, vertical = 16.dp)
@@ -2876,7 +2876,7 @@ fun NotificationPercentChooserBottomSheetContent(
                 Spacer(Modifier.height(8.dp))
                 Text(
                     modifier = Modifier,
-                    text = "get notification when only ${sliderPosition}% of your budget remains",
+                    text = "get notification when you exceed ${sliderPosition}% of your budget",
                     style = typography.labelLarge,
                     color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
                 )

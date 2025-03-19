@@ -56,6 +56,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -82,6 +83,8 @@ import com.roaa.expensetracker.database.relations.TransactionWithDetails
 import com.roaa.expensetracker.hilt.AllViewModel
 import com.roaa.expensetracker.model.TransactionClass
 import com.roaa.expensetracker.model.uiDataModels.BarChartExpenseModel
+import com.roaa.expensetracker.notification.budgetNotificationChannel
+import com.roaa.expensetracker.notification.sendNotification
 import com.roaa.expensetracker.utilities.Constants.EXPENSE
 import com.roaa.expensetracker.utilities.Constants.INCOME
 import com.roaa.expensetracker.utilities.LongMillisToNormalLong
@@ -99,6 +102,7 @@ import com.roaa.expensetracker.utilities.utilityModalClass.emptyTotalExpenseInco
 import com.roaa.expensetracker.utilities.utilityModalClass.emptyTransactionClass
 import kotlinx.coroutines.launch
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -111,12 +115,41 @@ fun TransactionsListCompose(
     showSingleDateTransactions: Boolean,
     date: Long,
 ) {
+    val context = LocalContext.current
     val categoryOrBankSpecificAdd by viewModel.uiViewModel.addCategorySpecificOrBankSpecificTransaction.collectAsState()
     var showAddBottomSheet by remember { mutableStateOf(categoryOrBankSpecificAdd) }
     val currentSelectedMonth by viewModel.uiViewModel.selectedMonth.collectAsState()
     val monthName =
         convertMonthShortToFullName(currentSelectedMonth)
     var selectedMonthString by remember { mutableStateOf(monthName) }
+    val getCurrentBudget by viewModel.budgetViewModel.getCurrentBudget.collectAsState()
+
+    LaunchedEffect(getCurrentBudget) {
+        viewModel.budgetViewModel.getCurrentBudgetWithDetailsForCompose()
+        getCurrentBudget?.let {
+            val currentExpenseLocal =
+                it.budgetAllDays.fold(BigDecimal.ZERO) { acc, i ->
+                    acc + i.totalExpense
+                }
+            val effectivePercentageAmount = it.budgetSummary.totalBudgetAmount.divide(
+                BigDecimal(100), 2,
+                RoundingMode.HALF_UP
+            ).multiply(it.budgetSummary.notificationForBudgetUsage.toDouble().toBigDecimal())
+            if (effectivePercentageAmount < currentExpenseLocal) {
+                if (!viewModel.uiViewModel.isBudgetExceededNotificationIsSent.value) {
+                    sendNotification(
+                        context,
+                        budgetNotificationChannel,
+                        "‼️Budget Alert: ${it.budgetSummary.notificationForBudgetUsage}% Used!",
+                        "You've already spent ${it.budgetSummary.notificationForBudgetUsage}% of your budget. Keep track to stay on top of your expenses!"
+                    )
+                    viewModel.uiViewModel.isBudgetExceededNotificationIsSent.value = true
+                }
+            }
+        }
+
+
+    }
 
     var firstAndLastDates = getFirstAndLastMonth(currentSelectedMonth)
     val totalAmountList by viewModel.transactionsViewModel.getListOfTotalAmountPerDayForRangeForCompose(

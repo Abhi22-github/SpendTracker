@@ -1,6 +1,7 @@
 package com.roaa.expensetracker.composable.screens
 
 import android.annotation.SuppressLint
+import android.content.Context
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -52,6 +53,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -82,6 +84,7 @@ import com.roaa.expensetracker.composable.utils.ActionTypes
 import com.roaa.expensetracker.composable.utils.DistributionMethod
 import com.roaa.expensetracker.database.relations.BudgetWithDayDetails
 import com.roaa.expensetracker.hilt.AllViewModel
+import com.roaa.expensetracker.notification.workManager.scheduleBudgetReminder
 import com.roaa.expensetracker.utilities.DecimalFilterTransformation
 import com.roaa.expensetracker.utilities.LongMillisToNormalLong
 import com.roaa.expensetracker.utilities.getDayDifference
@@ -160,6 +163,7 @@ fun BudgetContentController(
     budgetWithSummary: BudgetWithDayDetails,
 ) {
     val modifier = Modifier.padding(16.dp, 0.dp)
+    val context = LocalContext.current
 
     var shouldShowConfirmation by remember { mutableStateOf(false) }
     val errorStatus by viewModel.uiViewModel.errorStatusInBudgetAdd.collectAsState()
@@ -210,6 +214,7 @@ fun BudgetContentController(
                     shouldShowConfirmation = true
                 } else {
                     SaveBudgetDetailsInDatabase(
+                        context,
                         budgetWithSummary,
                         viewModel,
                         totalAmountText,
@@ -245,6 +250,7 @@ fun BudgetContentController(
             { shouldShowConfirmation = false },
             {
                 SaveBudgetDetailsInDatabase(
+                    context,
                     budgetWithSummary,
                     viewModel,
                     totalAmountText,
@@ -268,6 +274,7 @@ fun BudgetContentController(
 }
 
 fun SaveBudgetDetailsInDatabase(
+    context: Context,
     budgetWithSummary: BudgetWithDayDetails,
     viewModel: AllViewModel,
     totalAmountForMonth: String,
@@ -291,7 +298,7 @@ fun SaveBudgetDetailsInDatabase(
         notificationUsageValue,
         getValidDatesListFromLong(budgetStartDate.toLocalDate(), budgetEndDate.toLocalDate())
     )
-
+    scheduleBudgetReminder(context, budgetEndDate.toLocalDate())
     focusManager.clearFocus()
     keyboardController?.hide()
 }
@@ -579,7 +586,7 @@ fun BottomSheetBudgetContent(
         val padding = getImePadding()
         Column(
             modifier
-                .constrainAs(button) { bottom.linkTo(parent.bottom,padding+8.dp) }
+                .constrainAs(button) { bottom.linkTo(parent.bottom, padding + 8.dp) }
 
         ) {
             FilledTonalButton(
@@ -633,6 +640,7 @@ fun BottomSheetBudgetContent(
             closeBottomSheet = { showNotificationPicker = !showNotificationPicker })
     }
 }
+
 @Composable
 fun getImePadding(): Dp {
     val imeHeight = WindowInsets.ime.getBottom(LocalDensity.current)

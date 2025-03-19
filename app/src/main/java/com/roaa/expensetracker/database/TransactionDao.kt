@@ -6,10 +6,10 @@ import androidx.room.Insert
 import androidx.room.Query
 import androidx.room.Transaction
 import androidx.room.Update
+import com.roaa.expensetracker.database.relations.BudgetWithDayDetails
 import com.roaa.expensetracker.database.relations.TransactionWithDetails
 import com.roaa.expensetracker.model.BankAccountsClass
 import com.roaa.expensetracker.model.BudgetDayModelClass
-import com.roaa.expensetracker.model.BudgetModelClass
 import com.roaa.expensetracker.model.TransactionClass
 import com.roaa.expensetracker.model.uiDataModels.InfoStatClass
 import com.roaa.expensetracker.model.uiDataModels.TotalAmountClass
@@ -18,6 +18,7 @@ import com.roaa.expensetracker.utilities.Constants.EXPENSE
 import com.roaa.expensetracker.utilities.Constants.INCOME
 import kotlinx.coroutines.flow.Flow
 import java.math.BigDecimal
+import java.math.RoundingMode
 
 @Dao
 interface TransactionDao {
@@ -126,7 +127,7 @@ interface TransactionDao {
     ): BigDecimal?
 
     @get:Query("SELECT * FROM budget_table WHERE isActive = 1")
-    val getCurrentBudget: BudgetModelClass?
+    val getCurrentBudget: BudgetWithDayDetails?
 
     @Query("SELECT * FROM budget_day_table WHERE date == :date AND budgetId == :budgetId")
     fun getSingleBudgetDay(date: Long, budgetId: Long): BudgetDayModelClass?
@@ -136,8 +137,9 @@ interface TransactionDao {
 
     //Transactions
     @Transaction
-    suspend fun addTransactionAndPropagateChanges(transactionClass: TransactionClass) {
+    suspend fun addTransactionAndPropagateChanges(transactionClass: TransactionClass): Boolean {
         insert(transactionClass)
+        var isBudgetPercentageReached = false
         val expense = getTotalAmountForDateWithoutFlow(transactionClass.date, EXPENSE)
         val income = getTotalAmountForDateWithoutFlow(transactionClass.date, INCOME)
 
@@ -165,16 +167,28 @@ interface TransactionDao {
         val currentBudget = getCurrentBudget
 
         currentBudget?.let {
-            if (transactionClass.date >= it.budgetStartDate && transactionClass.date <= it.budgetEndDate) {
-                val singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
+            if (transactionClass.date >= it.budgetSummary.budgetStartDate && transactionClass.date <= it.budgetSummary.budgetEndDate) {
+                val singleDay = getSingleBudgetDay(transactionClass.date, it.budgetSummary.budgetId)
                 singleDay?.let {
                     it.totalExpense = expense ?: BigDecimal.ZERO
                     it.totalIncome = income ?: BigDecimal.ZERO
                 }
                 singleDay?.let { updateSingleDay(it) }
             }
+            val currentExpenseLocal =
+                it.budgetAllDays.fold(BigDecimal.ZERO) { acc, i ->
+                    acc + i.totalExpense
+                }
+            val effectivePercentageAmount = it.budgetSummary.totalBudgetAmount.divide(
+                BigDecimal(100), 2,
+                RoundingMode.HALF_UP
+            ).multiply(it.budgetSummary.notificationForBudgetUsage.toDouble().toBigDecimal())
+            if (effectivePercentageAmount < currentExpenseLocal) {
+                //you have only left 20% of your budget
+                isBudgetPercentageReached = true
+            }
         }
-
+        return isBudgetPercentageReached
     }
 
     @Transaction
@@ -207,8 +221,8 @@ interface TransactionDao {
         val currentBudget = getCurrentBudget
 
         currentBudget?.let {
-            if (transactionClass.date >= it.budgetStartDate && transactionClass.date <= it.budgetEndDate) {
-                val singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
+            if (transactionClass.date >= it.budgetSummary.budgetStartDate && transactionClass.date <= it.budgetSummary.budgetEndDate) {
+                val singleDay = getSingleBudgetDay(transactionClass.date, it.budgetSummary.budgetId)
                 singleDay?.let {
                     it.totalExpense = expense ?: BigDecimal.ZERO
                     it.totalIncome = income ?: BigDecimal.ZERO
@@ -236,8 +250,8 @@ interface TransactionDao {
         val currentBudget = getCurrentBudget
 
         currentBudget?.let {
-            if (transactionClass.date >= it.budgetStartDate && transactionClass.date <= it.budgetEndDate) {
-                val singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
+            if (transactionClass.date >= it.budgetSummary.budgetStartDate && transactionClass.date <= it.budgetSummary.budgetEndDate) {
+                val singleDay = getSingleBudgetDay(transactionClass.date, it.budgetSummary.budgetId)
                 singleDay?.let {
                     it.totalExpense = expense ?: BigDecimal.ZERO
                     it.totalIncome = income ?: BigDecimal.ZERO
@@ -277,8 +291,8 @@ interface TransactionDao {
         val currentBudget = getCurrentBudget
 
         currentBudget?.let {
-            if (transactionClass.date >= it.budgetStartDate && transactionClass.date <= it.budgetEndDate) {
-                val singleDay = getSingleBudgetDay(transactionClass.date, it.budgetId)
+            if (transactionClass.date >= it.budgetSummary.budgetStartDate && transactionClass.date <= it.budgetSummary.budgetEndDate) {
+                val singleDay = getSingleBudgetDay(transactionClass.date, it.budgetSummary.budgetId)
                 singleDay?.let {
                     it.totalExpense = expense ?: BigDecimal.ZERO
                     it.totalIncome = income ?: BigDecimal.ZERO

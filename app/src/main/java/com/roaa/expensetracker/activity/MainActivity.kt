@@ -94,9 +94,7 @@ import com.roaa.expensetracker.composable.syncTheme
 import com.roaa.expensetracker.hilt.AllViewModel
 import com.roaa.expensetracker.notification.NotificationPermissionHandler
 import com.roaa.expensetracker.notification.createNotificationChannel
-import com.roaa.expensetracker.notification.generalNotificationChannel
 import com.roaa.expensetracker.notification.notificationChannelList
-import com.roaa.expensetracker.notification.sendNotification
 import com.roaa.expensetracker.notification.workManager.scheduleDailyNotification
 import com.roaa.expensetracker.utilities.appStartingChecks
 import com.roaa.expensetracker.utilities.convertToWholeMonthName
@@ -163,12 +161,12 @@ class ComposeMainActivity : ComponentActivity() {
                 }
             )
 
-            sendNotification(
-                context = context,
-                notificationChannel = generalNotificationChannel,
-                title = "Expense Tracker",
-                message = "Have you recorded your transactions today? 💰"
-            )
+//            sendNotification(
+//                context = context,
+//                notificationChannel = generalNotificationChannel,
+//                title = "Expense Tracker",
+//                message = "Have you recorded your transactions today? 💰"
+//            )
             scheduleDailyNotification(this)
             allViewModels.preferencesViewModel.setFirstStartupCompleted()
 
