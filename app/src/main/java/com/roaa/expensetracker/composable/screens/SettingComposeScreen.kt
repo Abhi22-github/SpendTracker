@@ -1,6 +1,9 @@
 package com.roaa.expensetracker.composable.screens
 
+import android.content.ActivityNotFoundException
+import android.content.Intent
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
+import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
@@ -35,6 +38,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
@@ -58,6 +62,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.Role
@@ -161,6 +166,36 @@ fun SettingsScreenContent(
             firstSampleClass
         )
     }
+//for email
+    val context = LocalContext.current
+    val emailIntent = remember {
+        Intent(Intent.ACTION_SENDTO).apply {
+            data = Uri.parse("mailto:") // Ensures only email apps handle this
+            putExtra(Intent.EXTRA_EMAIL, arrayOf("roaatech22@gmail.com"))
+            putExtra(Intent.EXTRA_SUBJECT, "Feedback for Expense Tracker App")
+        }
+    }
+    //for share
+    val appPackageName = context.packageName // Get your app's package name
+    val shareIntent = remember {
+        Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, "Check out this amazing Expense Tracker app!")
+            putExtra(
+                Intent.EXTRA_TEXT,
+                "Hey! Try this Expense Tracker app: https://play.google.com/store/apps/details?id=$appPackageName"
+            )
+        }
+    }
+    //for Rate us
+    val rateIntent = remember {
+        Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("market://details?id=$appPackageName")
+        ).apply {
+            addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        }
+    }
 
     LaunchedEffect(expenseCategoryList, expenseCategoryId) {
         val expenseCategoryPresent =
@@ -202,41 +237,41 @@ fun SettingsScreenContent(
                 }
             }
 
-            Spacer(Modifier.height(32.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(horizontalPadding, verticalPadding)
-            ) {
-                Column(Modifier.weight(1f)) {
-                    Text(
-                        text = "Experiment Components",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
-
-                        )
-                    Text(
-                        text = "Show all experimental components",
-                        style = MaterialTheme.typography.labelLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.6f),
-                    )
-                }
-                Row(
-                    modifier = Modifier
-                        .weight(.3f), horizontalArrangement = Arrangement.End
-                ) {
-                    Switch(
-                        checked = showExperimentalComponent,
-                        onCheckedChange = {
-                            scope.launch {
-                                viewModel.preferencesViewModel.setExperimentalComponentsState(it)
-                            }
-                        },
-                        modifier = Modifier
-
-                    )
-                }
-            }
+//            Spacer(Modifier.height(32.dp))
+//            Row(
+//                verticalAlignment = Alignment.CenterVertically,
+//                modifier = Modifier
+//                    .padding(horizontalPadding, verticalPadding)
+//            ) {
+//                Column(Modifier.weight(1f)) {
+//                    Text(
+//                        text = "Experiment Components",
+//                        style = MaterialTheme.typography.titleMedium,
+//                        color = MaterialTheme.colorScheme.onSurface,
+//
+//                        )
+//                    Text(
+//                        text = "Show all experimental components",
+//                        style = MaterialTheme.typography.labelLarge,
+//                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(0.6f),
+//                    )
+//                }
+//                Row(
+//                    modifier = Modifier
+//                        .weight(.3f), horizontalArrangement = Arrangement.End
+//                ) {
+//                    Switch(
+//                        checked = showExperimentalComponent,
+//                        onCheckedChange = {
+//                            scope.launch {
+//                                viewModel.preferencesViewModel.setExperimentalComponentsState(it)
+//                            }
+//                        },
+//                        modifier = Modifier
+//
+//                    )
+//                }
+//            }
 
             Spacer(Modifier.height(24.dp))
             Row(modifier = Modifier.clickable { showCurrencyDialog = !showCurrencyDialog }) {
@@ -465,6 +500,76 @@ fun SettingsScreenContent(
 
                         }
                     }
+                }
+            }
+
+            Spacer(Modifier.height(16.dp))
+            HorizontalDivider(
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f),
+                modifier = Modifier.padding(horizontal = horizontalPadding)
+            )
+            Spacer(Modifier.height(16.dp))
+            Row(modifier = Modifier.clickable { context.startActivity(emailIntent) }) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontalPadding, 16.dp)
+
+                ) {
+                    Text(
+                        text = "Feedback", style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
+            Spacer(Modifier.height(6.dp))
+            Row(modifier = Modifier.clickable {
+                context.startActivity(
+                    Intent.createChooser(
+                        shareIntent,
+                        "Share via"
+                    )
+                )
+            }) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontalPadding, 16.dp)
+
+                ) {
+                    Text(
+                        text = "Share", style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
+
+            Spacer(Modifier.height(6.dp))
+            Row(modifier = Modifier.clickable {
+                try {
+                    context.startActivity(rateIntent)
+                } catch (e: ActivityNotFoundException) {
+                    // Fallback to Play Store website if the Play Store app is not installed
+                    val webIntent = Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("https://play.google.com/store/apps/details?id=$appPackageName")
+                    )
+                    context.startActivity(webIntent)
+                }
+            }) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontalPadding, 16.dp)
+
+                ) {
+                    Text(
+                        text = "Rate us", style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
                 }
             }
         }

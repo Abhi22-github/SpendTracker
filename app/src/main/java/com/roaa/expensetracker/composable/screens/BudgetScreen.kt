@@ -746,7 +746,6 @@ fun DayProgressIndicator(
     isInBudget: Boolean
 ) {
     val lineColor = MaterialTheme.colorScheme.surfaceContainer
-    val completedColor = MaterialTheme.colorScheme.primaryContainer
     val decorationColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
     var progress =
         (expenseAmount).divide(
@@ -754,7 +753,8 @@ fun DayProgressIndicator(
             2,
             RoundingMode.HALF_UP
         )
-
+    val completedColor =
+        if (progress > BigDecimal.ONE) MaterialTheme.colorScheme.errorContainer else MaterialTheme.colorScheme.primaryContainer
     // progress = if (progress > BigDecimal.ZERO) BigDecimal.ONE else progress
     Box(
         modifier = modifier, contentAlignment = Alignment.Center
@@ -781,7 +781,10 @@ fun DayProgressIndicator(
             drawLine(
                 color = completedColor,
                 start = Offset(0f, size.height / 2),
-                end = Offset(segmentWidthForProgress * progress.toFloat(), size.height / 2),
+                end = Offset(
+                    segmentWidthForProgress * if (progress.toFloat() > 1f) 1f else progress.toFloat(),
+                    size.height / 2
+                ),
                 strokeWidth = height,
                 cap = StrokeCap.Round
             )
