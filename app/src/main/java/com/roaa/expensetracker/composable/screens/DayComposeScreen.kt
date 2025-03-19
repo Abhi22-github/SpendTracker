@@ -33,12 +33,10 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.GraphicEq
-import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
@@ -392,8 +390,7 @@ fun DayStatCard(
             containerColor = cardColor
         ),
     ) {
-        ConstraintLayout(
-            Modifier
+        ConstraintLayout(modifier.animateContentSize()
         ) {
             val (content, decoration1, decoration2) = createRefs()
             Column(
@@ -404,7 +401,6 @@ fun DayStatCard(
                         start.linkTo(parent.start)
                         end.linkTo(parent.end)
                     }
-                    .animateContentSize()
                     .zIndex(1f)) {
                 Box(Modifier.clickable { mainContentVisibility = !mainContentVisibility }) {
                     Row(
@@ -439,18 +435,18 @@ fun DayStatCard(
                                 color = MaterialTheme.colorScheme.onSurface
                             )
                         }
-                        IconButton(
-                            onClick = { mainContentVisibility = !mainContentVisibility },
-                            modifier = Modifier
-                                .weight(0.1f)
-                                .aspectRatio(1f)
-                        ) {
-                            Icon(
-                                Icons.Rounded.KeyboardArrowDown,
-                                modifier = Modifier.size(24.dp),
-                                contentDescription = "Drop Down"
-                            )
-                        }
+//                        IconButton(
+//                            onClick = { mainContentVisibility = !mainContentVisibility },
+//                            modifier = Modifier
+//                                .weight(0.1f)
+//                                .aspectRatio(1f)
+//                        ) {
+//                            Icon(
+//                                Icons.Rounded.KeyboardArrowDown,
+//                                modifier = Modifier.size(24.dp),
+//                                contentDescription = "Drop Down"
+//                            )
+//                        }
                         Spacer(Modifier.width(24.dp))
                     }
                 }

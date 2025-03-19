@@ -130,7 +130,6 @@ class ComposeMainActivity : ComponentActivity() {
         }
         WindowCompat.setDecorFitsSystemWindows(window, false)
         installSplashScreen().setKeepOnScreenCondition { !isDone.value }
-        this.deleteDatabase("database")
 
         setContent {
             val scope = rememberCoroutineScope()
@@ -161,12 +160,6 @@ class ComposeMainActivity : ComponentActivity() {
                 }
             )
 
-//            sendNotification(
-//                context = context,
-//                notificationChannel = generalNotificationChannel,
-//                title = "Expense Tracker",
-//                message = "Have you recorded your transactions today? 💰"
-//            )
             scheduleDailyNotification(this)
             allViewModels.preferencesViewModel.setFirstStartupCompleted()
 

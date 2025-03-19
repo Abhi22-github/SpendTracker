@@ -123,6 +123,7 @@ import com.roaa.expensetracker.composable.infoColor
 import com.roaa.expensetracker.composable.orange
 import com.roaa.expensetracker.composable.screens.LivePaymentCard
 import com.roaa.expensetracker.composable.screens.PaymentCard
+import com.roaa.expensetracker.composable.screens.TitleWithCheckBox
 import com.roaa.expensetracker.composable.screens.ValueLabelList
 import com.roaa.expensetracker.composable.secondaryAlpha
 import com.roaa.expensetracker.composable.secondaryAlphaForElements
@@ -1369,6 +1370,7 @@ fun BottomSheetContentItemDetailsContent(
     val scope = rememberCoroutineScope()
     val colorPalette =
         toPalette(if (singleTransaction.transaction.type == EXPENSE) orange else greenColor)
+    var excludeTransactionFromBudget by remember { mutableStateOf(!singleTransaction.transaction.includeInRespectiveBudget) }
     Column(
         horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.fillMaxWidth()
     ) {
@@ -1472,6 +1474,28 @@ fun BottomSheetContentItemDetailsContent(
                     )
                 }
             }
+        }
+        Column(modifier = Modifier.padding(horizontal = 32.dp)) {
+            TitleWithCheckBox(
+                Modifier,
+                labelAndValueStyle,
+                "Exclude from budget",
+                excludeTransactionFromBudget,
+                {
+                    excludeTransactionFromBudget = it
+                    scope.launch {
+                        singleTransaction.transaction.let {
+                            val temp =
+                                it.copy(includeInRespectiveBudget = !excludeTransactionFromBudget)
+                            viewModel.transactionsViewModel.updateForBudgetSwitchDataInDatabase(
+                                temp
+                            )
+                        }
+
+                    }
+                }
+            )
+
         }
 
         Row(

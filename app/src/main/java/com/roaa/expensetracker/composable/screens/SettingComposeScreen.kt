@@ -273,12 +273,12 @@ fun SettingsScreenContent(
 //                }
 //            }
 
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(8.dp))
             Row(modifier = Modifier.clickable { showCurrencyDialog = !showCurrencyDialog }) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .padding(horizontalPadding, verticalPadding)
+                        .padding(horizontalPadding, 16.dp)
 
                 ) {
                     Column(Modifier.weight(1f)) {
@@ -306,7 +306,7 @@ fun SettingsScreenContent(
                 }
             }
 
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(8.dp))
 
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -523,7 +523,6 @@ fun SettingsScreenContent(
                     )
                 }
             }
-            Spacer(Modifier.height(6.dp))
             Row(modifier = Modifier.clickable {
                 context.startActivity(
                     Intent.createChooser(
@@ -545,8 +544,6 @@ fun SettingsScreenContent(
                     )
                 }
             }
-
-            Spacer(Modifier.height(6.dp))
             Row(modifier = Modifier.clickable {
                 try {
                     context.startActivity(rateIntent)

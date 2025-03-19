@@ -26,7 +26,7 @@ class DatabaseModule() {
     @Singleton
     fun provideAppDatabase(@ApplicationContext context: Context): AppDatabase {
         return databaseBuilder(
-            context.applicationContext, AppDatabase::class.java, "database2"
+            context.applicationContext, AppDatabase::class.java, "appdatabase"
         )
             .addCallback(prePopulateData)
             .fallbackToDestructiveMigration()

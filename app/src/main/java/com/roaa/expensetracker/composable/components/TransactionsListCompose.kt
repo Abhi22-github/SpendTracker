@@ -390,7 +390,7 @@ fun SingleTransaction(
             ) {
                 var amount = parseAmount(item.transaction.amount)
                 var amountColor = successColor
-                if (item.category.categoryType.equals(EXPENSE)) {
+                if (item.transaction.type.equals(EXPENSE)) {
                     amount = "-${LocalCurrency.current.currencySymbol}" + amount
                     amountColor = failureColor
                 } else {

@@ -20,29 +20,6 @@
 # hide the original source file name.
 #-renamesourcefileattribute SourceFile
 
--dontobfuscate
-
-# Keep common dependencies used in extensions
--keep class androidx.preference.** { public protected *; }
--keep class kotlin.** { public protected *; }
--keep,allowoptimization class kotlinx.coroutines.** { public protected *; }
--keep class kotlinx.serialization.** { public protected *; }
--keep class okhttp3.** { public protected *; }
--keep,allowoptimization class okio.** { public protected *; }
--keep,allowoptimization class rx.** { public protected *; }
--keep class org.jsoup.** { public protected *; }
--keep,allowoptimization class com.google.gson.** { public protected *; }
--keep,allowoptimization class app.cash.quickjs.** { public protected *; }
--keep,allowoptimization class uy.kohesive.injekt.** { public protected *; }
--keep,allowoptimization class eu.davidea.flexibleadapter.** { public protected *; }
--keep class io.requery.android.database.** { public protected *; }
-
-# Design library
--dontwarn com.google.android.material.**
--keep class com.google.android.material.** { *; }
--keep interface com.google.android.material.** { *; }
--keep public class com.google.android.material.R$* { *; }
-
 ##---------------Begin: proguard configuration for kotlinx.serialization  ----------
 -keepattributes *Annotation*, InnerClasses
 -dontnote kotlinx.serialization.AnnotationsKt # core serialization annotations
@@ -55,20 +32,8 @@
     kotlinx.serialization.KSerializer serializer(...);
 }
 
--keep,includedescriptorclasses class eu.kanade.**$$serializer { *; }
--keepclassmembers class eu.kanade.** {
-    *** Companion;
-}
--keepclasseswithmembers class eu.kanade.** {
-    kotlinx.serialization.KSerializer serializer(...);
-}
-
 -keep class kotlinx.serialization.**
 -keepclassmembers class kotlinx.serialization.** {
     <methods>;
 }
 ##---------------End: proguard configuration for kotlinx.serialization  ----------
-
-# Firebase
--keep class com.google.firebase.installations.** { *; }
--keep interface com.google.firebase.installations.** { *; }

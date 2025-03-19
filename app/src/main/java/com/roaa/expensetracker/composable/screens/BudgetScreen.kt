@@ -792,7 +792,7 @@ fun DayProgressIndicator(
             // Draw decorations for specific days
 
             if (isInBudget) {
-                val xOffset = (segmentWidthForDayDecoration * day)
+                val xOffset = (segmentWidthForDayDecoration * (day/totalDays))
                 drawRoundRect(
                     color = decorationColor,
                     topLeft = Offset(xOffset, 0f - height / 2),

@@ -354,7 +354,7 @@ fun BottomSheetBudgetContent(
     var notificationUsageValue by remember {
         mutableStateOf(
             if (isBudgetSet) budgetWithSummary.budgetSummary.notificationForBudgetUsage else BigDecimal(
-                20
+                80
             )
         )
     }
@@ -554,7 +554,7 @@ fun BottomSheetBudgetContent(
                         )
                     }
                     Text(
-                        text = "Below ${notificationUsageValue}% ",
+                        text = "Above ${notificationUsageValue}% ",
                         modifier = Modifier
                             .weight(1f),
                         textAlign = TextAlign.End,
@@ -597,7 +597,10 @@ fun BottomSheetBudgetContent(
                         totalAmountText.text,
                         startDate.toLocalDate().toLong(),
                         endDate.toLocalDate().toLong(),
-                        totalDaysRemaining,
+                        getDayDifference(
+                            startDate.toLocalDate(),
+                            endDate.toLocalDate()
+                        ),
                         restDistributionValue,
                         notificationUsageValue,
                         totalAmountPerDay
