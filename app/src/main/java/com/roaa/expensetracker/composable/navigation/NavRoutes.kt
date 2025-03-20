@@ -3,7 +3,7 @@ package com.roaa.expensetracker.composable.navigation
 import com.roaa.expensetracker.composable.utils.ActionTypes
 import kotlinx.serialization.Serializable
 
-
+@Serializable
 sealed class NavRoutes() {
     @Serializable
     data object HomeScreen : NavRoutes()
@@ -12,6 +12,7 @@ sealed class NavRoutes() {
     data object AppScreen : NavRoutes()
 }
 
+@Serializable
 sealed class Destinations(){
 
     @Serializable
