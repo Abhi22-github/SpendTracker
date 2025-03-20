@@ -21,6 +21,7 @@ import com.patrykandpatrick.vico.compose.cartesian.cartesianLayerPadding
 import com.patrykandpatrick.vico.compose.cartesian.layer.rememberColumnCartesianLayer
 import com.patrykandpatrick.vico.compose.cartesian.marker.rememberDefaultCartesianMarker
 import com.patrykandpatrick.vico.compose.cartesian.rememberCartesianChart
+import com.patrykandpatrick.vico.compose.cartesian.rememberVicoScrollState
 import com.patrykandpatrick.vico.compose.cartesian.rememberVicoZoomState
 import com.patrykandpatrick.vico.compose.common.component.rememberLineComponent
 import com.patrykandpatrick.vico.compose.common.component.rememberTextComponent
@@ -29,6 +30,7 @@ import com.patrykandpatrick.vico.compose.common.fill
 import com.patrykandpatrick.vico.compose.common.insets
 import com.patrykandpatrick.vico.compose.common.shape.dashedShape
 import com.patrykandpatrick.vico.compose.common.shape.rounded
+import com.patrykandpatrick.vico.core.cartesian.Scroll
 import com.patrykandpatrick.vico.core.cartesian.Zoom
 import com.patrykandpatrick.vico.core.cartesian.axis.BaseAxis
 import com.patrykandpatrick.vico.core.cartesian.axis.HorizontalAxis
@@ -52,8 +54,10 @@ import com.patrykandpatrick.vico.core.common.shape.CorneredShape
 import com.roaa.expensetracker.activity.LocalCurrency
 import com.roaa.expensetracker.composable.utils.HarmonizedColorPalette
 import com.roaa.expensetracker.model.uiDataModels.BarChartExpenseModel
+import com.roaa.expensetracker.utilities.parseAmount
+import com.roaa.expensetracker.utilities.toLong
 import java.math.BigDecimal
-import java.text.DecimalFormat
+import java.time.LocalDate
 
 
 private val BottomAxisLabelKey = ExtraStore.Key<List<String>>()
@@ -62,19 +66,6 @@ private val BottomAxisValueFormatter = CartesianValueFormatter { context, x, _ -
     rawLabel.split(",").get(0).replace(" ", "\n")
 }
 
-private const val Y_DIVISOR = 1000
-private val YDecimalFormat = DecimalFormat("#.##K")
-
-private val MarkerValueFormatter =
-    DefaultCartesianMarker.ValueFormatter { _, targets ->
-        val column = (targets[0] as ColumnCartesianLayerMarkerTarget).columns[0]
-        SpannableStringBuilder()
-            .append(
-                YDecimalFormat.format(column.entry.y / Y_DIVISOR),
-                ForegroundColorSpan(column.color),
-                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
-            )
-    }
 
 @Composable
 fun BarChart(
@@ -82,10 +73,20 @@ fun BarChart(
     currentMonthAllDayAndDates: List<BarChartExpenseModel>,
     palette: HarmonizedColorPalette
 ) {
+    val localCurrency = LocalCurrency.current.currencySymbol
+    val MarkerValueFormatter = DefaultCartesianMarker.ValueFormatter { context, targets ->
+        val column = (targets[0] as ColumnCartesianLayerMarkerTarget).columns[0]
+        SpannableStringBuilder()
+            .append(
+                "$localCurrency${parseAmount(column.entry.y.toBigDecimal())}",
+                ForegroundColorSpan(column.color),
+                Spannable.SPAN_EXCLUSIVE_EXCLUSIVE,
+            )
+    }
+
     val modelProducer = remember { CartesianChartModelProducer() }
     LaunchedEffect(Unit) {
         modelProducer.runTransaction {
-            // Learn more: https://patrykandpatrick.com/eji9zq.
             columnSeries { series(currentMonthAllDayAndDates.map { it.expenseAmount }) }
             extras {
                 it[BottomAxisLabelKey] =
@@ -106,10 +107,6 @@ fun BarChart(
                         )
                     )
                 ),
-                // startAxis = VerticalAxis.rememberStart(label = TextComponent(
-                //                    lineCount = 2,
-                //                    color = MaterialTheme.colorScheme.onSurface.toArgb()
-                //                )),
                 bottomAxis = HorizontalAxis.rememberBottom(
                     guideline = LineComponent(fill = Fill.Transparent),
                     itemPlacer = remember { HorizontalAxis.ItemPlacer.segmented() },
@@ -132,14 +129,20 @@ fun BarChart(
                             ),
                             shape = CorneredShape.rounded(40)
                         )
-                    )
+                    ),
+                    valueFormatter = MarkerValueFormatter,
                 ),
                 layerPadding = { cartesianLayerPadding(scalableStart = 8.dp, scalableEnd = 8.dp) },
             ),
         modelProducer = modelProducer,
         modifier = modifier.height(224.dp),
-        zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.x(7.0))
-        //scrollState = rememberVicoScrollState(scrollEnabled = false),
+        zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.x(7.0)),
+        scrollState = rememberVicoScrollState(
+            scrollEnabled = true,
+            initialScroll = Scroll.Absolute.x(
+                LocalDate.now().toLong().toString().takeLast(2).toDouble() - 1, 0.5f
+            )
+        ),
     )
 }
 
@@ -168,10 +171,12 @@ fun BarChartTest(
                         )
                     )
                 ),
-                startAxis = VerticalAxis.rememberStart(itemPlacer = VerticalAxis.ItemPlacer.count({ 3 }),label = TextComponent(
-                    lineCount = 2,
-                    color = MaterialTheme.colorScheme.onSurface.toArgb()
-                )),
+                startAxis = VerticalAxis.rememberStart(
+                    itemPlacer = VerticalAxis.ItemPlacer.count({ 3 }), label = TextComponent(
+                        lineCount = 2,
+                        color = MaterialTheme.colorScheme.onSurface.toArgb()
+                    )
+                ),
                 bottomAxis = HorizontalAxis.rememberBottom(
                     guideline = LineComponent(
                         fill = fill(MaterialTheme.colorScheme.onSurface.copy(0.1f)),
@@ -243,10 +248,10 @@ fun BarChartStatisticsScreen(
                     itemPlacer = VerticalAxis.ItemPlacer.count({ 3 }), line = LineComponent(
                         fill(Color.Transparent)
                     ),
-                            label = TextComponent(
-                            lineCount = 2,
-                    color = MaterialTheme.colorScheme.onSurface.toArgb()
-                )
+                    label = TextComponent(
+                        lineCount = 2,
+                        color = MaterialTheme.colorScheme.onSurface.toArgb()
+                    )
                 ),
                 bottomAxis = HorizontalAxis.rememberBottom(
                     guideline = LineComponent(
@@ -438,7 +443,7 @@ fun BarChartStatisticsScreenBanks(
                 startAxis = VerticalAxis.rememberStart(
                     itemPlacer = VerticalAxis.ItemPlacer.count({ 3 }), line = LineComponent(
                         fill(Color.Transparent)
-                    ),label = TextComponent(
+                    ), label = TextComponent(
                         lineCount = 2,
                         color = MaterialTheme.colorScheme.onSurface.toArgb()
                     )

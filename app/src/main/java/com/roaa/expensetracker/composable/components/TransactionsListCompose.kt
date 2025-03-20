@@ -481,7 +481,6 @@ fun HomeStatCardNew(
     )
     var mainContentVisibility by remember { mutableStateOf(false) }
     val currentMontAllDayList = currentMonthAllDayAndDatesListAndMaxValue.first
-    val maxExpense = currentMonthAllDayAndDatesListAndMaxValue.second
 
     Card(
         modifier = modifier.padding(horizontal = 12.dp),
@@ -571,13 +570,6 @@ fun HomeStatCardNew(
                             modifier = Modifier
                                 .padding(horizontal = 12.dp)
                         )
-//                        Spacer(Modifier.height(8.dp))
-//                        Text(
-//                            text = "Spending per day",
-//                            style = MaterialTheme.typography.labelLarge,
-//                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
-//                            modifier = Modifier.padding(start = 16.dp)
-//                        )
                         Spacer(Modifier.height(16.dp))
                         BoxWithConstraints {
                             BarChart(
