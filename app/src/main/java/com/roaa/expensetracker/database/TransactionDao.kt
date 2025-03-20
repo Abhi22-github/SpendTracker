@@ -36,6 +36,9 @@ interface TransactionDao {
     @Query("DELETE FROM transaction_table")
     suspend fun deleteAllTransaction()
 
+    @Query("SELECT * FROM transaction_table WHERE id = :id")
+    fun getSingleTransactionWithoutFlow(id: Long): TransactionWithDetails
+
     @Query("SELECT SUM(amount) FROM transaction_table where date == :date and type == :type")
     fun getTotalAmountForDate(date: Long, type: String): Flow<BigDecimal?>
 
@@ -193,11 +196,28 @@ interface TransactionDao {
 
     @Transaction
     suspend fun updateTransactionAndPropagateChanges(transactionClass: TransactionClass) {
+        val oldTransactionData = getSingleTransactionWithoutFlow(transactionClass.id)
         update(transactionClass)
         val expense = getTotalAmountForDateWithoutFlow(transactionClass.date, EXPENSE)
         val income = getTotalAmountForDateWithoutFlow(transactionClass.date, INCOME)
 
+        val oldBankAccount =
+            getSingleBankAccountWithoutFlow(oldTransactionData.BankAccount.bankAccountId)
         val bankAccount = getSingleBankAccountWithoutFlow(transactionClass.bankAccountId)
+
+        val oldBankExpense = getTotalAmountForBankWithDateWithoutFlow(
+            bankAccount.accountAddedDate,
+            transactionClass.date,
+            EXPENSE,
+            oldBankAccount.bankAccountId
+        ) ?: BigDecimal.ZERO
+
+        val oldBankIncome = getTotalAmountForBankWithDateWithoutFlow(
+            bankAccount.accountAddedDate,
+            transactionClass.date,
+            INCOME,
+            oldBankAccount.bankAccountId
+        ) ?: BigDecimal.ZERO
 
         val bankExpense = getTotalAmountForBankWithDateWithoutFlow(
             bankAccount.accountAddedDate,
@@ -212,10 +232,17 @@ interface TransactionDao {
             INCOME,
             transactionClass.bankAccountId
         ) ?: BigDecimal.ZERO
+
+        val oldBankRemBalance = oldBankAccount.initialAmount - (oldBankExpense - oldBankIncome)
+        val updateOldBank = oldBankAccount.copy(
+            currentAmount = oldBankRemBalance
+        )
+
         val remBalance = bankAccount.initialAmount - (bankExpense - bankIncome)
         val updatedBank = bankAccount.copy(
             currentAmount = remBalance
         )
+        update(updateOldBank)
         update(updatedBank)
 
         val currentBudget = getCurrentBudget
