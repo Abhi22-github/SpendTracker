@@ -5,9 +5,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -238,19 +235,19 @@ fun LineChartBudgetTotalUsage(
     palette: HarmonizedColorPalette,
     lineChartDataList: Map<String, BigDecimal>,
     totalBudgetAmount: BigDecimal,
-    dayDifferenceForCharts: MutableState<Long>,
-    ) {
+    dayDifferenceForCharts: Long,
+) {
     val localCurrency = LocalCurrency.current.currencySymbol
-    val MarkerValueFormatter =  DefaultCartesianMarker.ValueFormatter.default(DecimalFormat("$localCurrency#,##,##0.00"))
+    val MarkerValueFormatter =
+        DefaultCartesianMarker.ValueFormatter.default(DecimalFormat("$localCurrency#,##,##0.00"))
     val maxY = maxOf(
         totalBudgetAmount.multiply(BigDecimal(1.2)), // Add 20% buffer above budget
         lineChartDataList.values.max()
     ).toDouble()
 
     val modelProducer = remember { CartesianChartModelProducer() }
-    val scrollX by remember { mutableStateOf(dayDifferenceForCharts.value.toDouble()) }
 
-    LaunchedEffect(lineChartDataList,dayDifferenceForCharts,totalBudgetAmount) {
+    LaunchedEffect(lineChartDataList, dayDifferenceForCharts, totalBudgetAmount) {
         modelProducer.runTransaction {
             lineSeries {
                 series(lineChartDataList.values)
@@ -328,6 +325,7 @@ fun LineChartBudgetTotalUsage(
             ),
             decorations = listOf(rememberHorizontalLine(totalBudgetAmount, palette))
         ),
+
         modelProducer,
         modifier = modifier
             .height(300.dp)
@@ -335,7 +333,7 @@ fun LineChartBudgetTotalUsage(
         zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.x(6.0)),
         scrollState = rememberVicoScrollState(
             scrollEnabled = true,
-            initialScroll = Scroll.Absolute.x(scrollX, 0.5f)
+            initialScroll = Scroll.Absolute.x(dayDifferenceForCharts.toDouble(), 0.5f)
         ),
     )
 }

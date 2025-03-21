@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -325,7 +324,7 @@ fun BarChartBudgetUsage(
     palette: HarmonizedColorPalette,
     chartDataList: List<BarChartExpenseModel>,
     budgetAmount: BigDecimal,
-    dayDifferenceForCharts: MutableState<Long>
+    dayDifferenceForCharts: Long
 ) {
     val localCurrency = LocalCurrency.current.currencySymbol
     val MarkerValueFormatter =
@@ -414,7 +413,7 @@ fun BarChartBudgetUsage(
         zoomState = rememberVicoZoomState(zoomEnabled = true, initialZoom = Zoom.x(7.0)),
         scrollState = rememberVicoScrollState(
             scrollEnabled = true,
-            initialScroll = Scroll.Absolute.x(dayDifferenceForCharts.value.toDouble(), 0.5f)
+            initialScroll = Scroll.Absolute.x(dayDifferenceForCharts.toDouble(), 0.5f)
         ),
     )
 }

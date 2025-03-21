@@ -148,12 +148,10 @@ fun BudgetScreen(
             emptyBudgetClass, listOf(emptyBudgetDayClass)
         )
     }
-    val dayDifferenceForCharts = remember {
-        mutableStateOf(
-            getDayDifference(
-                getCurrentBudget.budgetSummary.budgetStartDate.toLocalDate(),
-                LocalDate.now()
-            )
+    val dayDifferenceForCharts = remember(getCurrentBudget.budgetSummary.budgetStartDate.toLocalDate()) {
+        getDayDifference(
+            getCurrentBudget.budgetSummary.budgetStartDate.toLocalDate(),
+            LocalDate.now()
         )
     }
     BackHandler {
@@ -193,7 +191,8 @@ fun BudgetScreen(
                             var currentExpenseLocal by remember { mutableStateOf(BigDecimal.ZERO) }
                             var remainingBudget by remember { mutableStateOf(currentBudgetLocal - currentExpenseLocal) }
                             var remainingDaysPercentage by remember { mutableStateOf(BigDecimal.ZERO) }
-                            val sortedBudgetAllDays = getCurrentBudget.budgetAllDays.sortedBy { it.date }
+                            val sortedBudgetAllDays =
+                                getCurrentBudget.budgetAllDays.sortedBy { it.date }
                             val barChartDataList = sortedBudgetAllDays.map {
                                 BarChartExpenseModel(
                                     date = it.date,
