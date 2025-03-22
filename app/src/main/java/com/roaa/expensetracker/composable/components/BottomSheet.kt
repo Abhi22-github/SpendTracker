@@ -150,11 +150,11 @@ import com.roaa.expensetracker.utilities.Constants.UPDATE
 import com.roaa.expensetracker.utilities.DecimalFilterTransformation
 import com.roaa.expensetracker.utilities.ErrorManager
 import com.roaa.expensetracker.utilities.convertMillisToDateString
+import com.roaa.expensetracker.utilities.decimalFormat
 import com.roaa.expensetracker.utilities.extractNumbers
 import com.roaa.expensetracker.utilities.getDayDifference
 import com.roaa.expensetracker.utilities.getMonthEndDate
 import com.roaa.expensetracker.utilities.getMonthStartDate
-import com.roaa.expensetracker.utilities.parseAmount
 import com.roaa.expensetracker.utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.utilities.toLocalDate
 import com.roaa.expensetracker.utilities.toLongMillis
@@ -1376,7 +1376,7 @@ fun BottomSheetContentItemDetailsContent(
     ) {
 
         Text(
-            text = "${LocalCurrency.current.currencySymbol}" + parseAmount(singleTransaction.transaction.amount),
+            text = "${LocalCurrency.current.currencySymbol}" + decimalFormat.format(singleTransaction.transaction.amount),
             style = typography.headlineLarge,
             fontFamily = numberFont
         )

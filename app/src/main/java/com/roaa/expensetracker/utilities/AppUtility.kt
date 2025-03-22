@@ -11,9 +11,12 @@ import com.roaa.expensetracker.hilt.AllViewModel
 import com.roaa.expensetracker.model.uiDataModels.CurrencyClass
 import com.roaa.expensetracker.model.uiDataModels.NavigationItems
 import kotlinx.coroutines.DelicateCoroutinesApi
+import java.text.DecimalFormat
 import java.time.LocalDate
 import java.util.Currency
 import java.util.Locale
+
+val decimalFormat = DecimalFormat("#,##,##0.00")
 
 val section1Items = listOf(
     NavigationItems(
