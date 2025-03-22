@@ -249,8 +249,16 @@ fun TransactionsListCompose(
                                     Row(modifier = Modifier.padding(top = 8.dp)) {
                                         HomeStatCardNew(
                                             Modifier,
-                                            parseAmount(totalIncomeForMonth.totalAmount),
-                                            parseAmount(totalExpenseForMonth.totalAmount),
+                                            "${LocalCurrency.current.currencySymbol}${
+                                                parseAmount(
+                                                    totalIncomeForMonth.totalAmount
+                                                )
+                                            }",
+                                            "${LocalCurrency.current.currencySymbol}${
+                                                parseAmount(
+                                                    totalExpenseForMonth.totalAmount
+                                                )
+                                            }",
                                             transactionListOfMonth.size,
                                             selectedMonthString,
                                             currentMonthAllDayAndDatesListAndMaxValue,

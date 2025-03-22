@@ -103,6 +103,11 @@ fun parseAmount(amount: BigDecimal): String {
     return formatter.format(amount.toFloat())
 }
 
+fun parseAmountWithPrecision(amount: BigDecimal): String {
+    val formatter = DecimalFormat("#,##,##0.00")
+    return formatter.format(amount.toFloat())
+}
+
 
 fun convertTotalExpenseIncomeClassToMap(totalExpenseIncomeClassList: List<TotalExpenseIncomeClass>): HashMap<Long, Pair<BigDecimal, BigDecimal>> {
     val map = hashMapOf<Long, Pair<BigDecimal, BigDecimal>>()

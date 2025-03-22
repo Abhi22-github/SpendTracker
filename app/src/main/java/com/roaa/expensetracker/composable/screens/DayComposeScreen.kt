@@ -65,6 +65,7 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.R
+import com.roaa.expensetracker.activity.LocalCurrency
 import com.roaa.expensetracker.composable.colorBad
 import com.roaa.expensetracker.composable.colorEditor
 import com.roaa.expensetracker.composable.colorGood
@@ -390,7 +391,8 @@ fun DayStatCard(
             containerColor = cardColor
         ),
     ) {
-        ConstraintLayout(modifier.animateContentSize()
+        ConstraintLayout(
+            modifier.animateContentSize()
         ) {
             val (content, decoration1, decoration2) = createRefs()
             Column(
@@ -463,19 +465,21 @@ fun DayStatCard(
                         HomeStatCardSingleNew(
                             Modifier
                                 .width(width)
-                                .wrapContentHeight(), parseAmount(expense), EXPENSE
+                                .wrapContentHeight(),
+                            "${LocalCurrency.current.currencySymbol}${parseAmount(expense)}",
+                            EXPENSE
                         )
                         HomeStatCardSingleNew(
                             Modifier
                                 .width(width)
-                                .wrapContentHeight(), parseAmount(income), INCOME
+                                .wrapContentHeight(), "${LocalCurrency.current.currencySymbol}${parseAmount(income)}", INCOME
                         )
                         AnimatedVisibility(isBudgetSet) {
                             HomeStatCardSingleNew(
                                 Modifier
                                     .width(width)
                                     .wrapContentHeight(),
-                                parseAmount(budgetAmountPerDay),
+                                "${LocalCurrency.current.currencySymbol}${parseAmount(budgetAmountPerDay)}",
                                 "Budget"
                             )
                         }

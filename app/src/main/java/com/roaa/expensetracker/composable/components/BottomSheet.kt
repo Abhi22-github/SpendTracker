@@ -150,11 +150,11 @@ import com.roaa.expensetracker.utilities.Constants.UPDATE
 import com.roaa.expensetracker.utilities.DecimalFilterTransformation
 import com.roaa.expensetracker.utilities.ErrorManager
 import com.roaa.expensetracker.utilities.convertMillisToDateString
-import com.roaa.expensetracker.utilities.decimalFormat
 import com.roaa.expensetracker.utilities.extractNumbers
 import com.roaa.expensetracker.utilities.getDayDifference
 import com.roaa.expensetracker.utilities.getMonthEndDate
 import com.roaa.expensetracker.utilities.getMonthStartDate
+import com.roaa.expensetracker.utilities.parseAmountWithPrecision
 import com.roaa.expensetracker.utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.utilities.toLocalDate
 import com.roaa.expensetracker.utilities.toLongMillis
@@ -1376,11 +1376,11 @@ fun BottomSheetContentItemDetailsContent(
     ) {
 
         Text(
-            text = "${LocalCurrency.current.currencySymbol}" + decimalFormat.format(singleTransaction.transaction.amount),
+            text = "${LocalCurrency.current.currencySymbol}" + parseAmountWithPrecision(singleTransaction.transaction.amount),
             style = typography.headlineLarge,
             fontFamily = numberFont
         )
-//        Spacer(Modifier.height(4.dp))
+       Spacer(Modifier.height(4.dp))
         Text(
             text = singleTransaction.transaction.note,
             style = typography.bodyMedium.copy(
@@ -1388,7 +1388,7 @@ fun BottomSheetContentItemDetailsContent(
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = secondaryAlpha)
             ),
         )
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(16.dp))
         Box(
             modifier = modifier.wrapContentWidth()
         ) {
@@ -1399,7 +1399,7 @@ fun BottomSheetContentItemDetailsContent(
                     disabledContainerColor = MaterialTheme.colorScheme.onPrimary,
                     disabledContentColor = MaterialTheme.colorScheme.onPrimary
                 ), contentPadding = PaddingValues(
-                    start = 20.dp, end = 20.dp, top = 16.dp, bottom = 16.dp
+                    start = 20.dp, end = 20.dp, top = 8.dp, bottom = 8.dp
                 )
             ) {
                 val image =
