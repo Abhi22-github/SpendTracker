@@ -244,6 +244,7 @@ fun BottomSheetContentItemAddContent(
     val specificCategory by viewModel.uiViewModel.addSpecificCategoryForTransaction.collectAsState()
 
     val categoryList by viewModel.categoryViewModel.categoryList.collectAsState()
+    val lastSelectedBank by viewModel.preferencesViewModel.getLastUsedBank.collectAsState(0L)
     val lastExpenseCategoryId by viewModel.preferencesViewModel.getLastExpenseCategory.collectAsState(
         0L
     )
@@ -266,7 +267,8 @@ fun BottomSheetContentItemAddContent(
         selectedType,
         isAddFromSpecificCategoryOrBank,
         specificBankAccount,
-        specificCategory
+        specificCategory,
+        lastSelectedBank
     ) {
         if (isAddFromSpecificCategoryOrBank) {
             if (specificBankAccount.bankAccountId != 0L) {
@@ -321,6 +323,11 @@ fun BottomSheetContentItemAddContent(
             }
         }
 
+        val bankPresent = bankAccountsList.any { it.bankAccountId == lastSelectedBank }
+        if (bankPresent) {
+            selectedPaymentMethod = bankAccountsList.first { it.bankAccountId == lastSelectedBank }
+
+        }
     }
 
     val errorStatus by viewModel.uiViewModel.errorStatusInAddBottomSheet.collectAsState(false)
@@ -441,8 +448,11 @@ fun BottomSheetContentItemAddContent(
                     ) {
                         Row {
                             Row(Modifier.weight(0.8f)) {
-                                val image =
-                                    rememberAsyncImagePainter(IconState.fromNumber(selectedCategory.categoryIconNumber))
+                                val image = rememberAsyncImagePainter(
+                                    IconState.fromNumber(
+                                        selectedCategory.categoryIconNumber
+                                    )
+                                )
                                 AnimatedContent(image) {
                                     Image(
                                         painter = it,
@@ -1153,6 +1163,7 @@ fun validateTransactionData(
                 viewModel.preferencesViewModel.setLastUsedIncomeCategoryId(selectedCategory.categoryId)
             }
         }
+        viewModel.preferencesViewModel.setLastUsedBankId(selectedPaymentMethod.bankAccountId)
 
         closeBottomSheet()
 
@@ -1376,11 +1387,11 @@ fun BottomSheetContentItemDetailsContent(
     ) {
 
         Text(
-            text = "${LocalCurrency.current.currencySymbol}" + parseAmountWithPrecision(singleTransaction.transaction.amount),
-            style = typography.headlineLarge,
-            fontFamily = numberFont
+            text = "${LocalCurrency.current.currencySymbol}" + parseAmountWithPrecision(
+                singleTransaction.transaction.amount
+            ), style = typography.headlineLarge, fontFamily = numberFont
         )
-       Spacer(Modifier.height(4.dp))
+        Spacer(Modifier.height(4.dp))
         Text(
             text = singleTransaction.transaction.note,
             style = typography.bodyMedium.copy(
@@ -1477,11 +1488,7 @@ fun BottomSheetContentItemDetailsContent(
         }
         Column(modifier = Modifier.padding(horizontal = 32.dp)) {
             TitleWithCheckBox(
-                Modifier,
-                labelAndValueStyle,
-                "Exclude from budget",
-                excludeTransactionFromBudget,
-                {
+                Modifier, labelAndValueStyle, "Exclude from budget", excludeTransactionFromBudget, {
                     excludeTransactionFromBudget = it
                     scope.launch {
                         singleTransaction.transaction.let {
@@ -1493,8 +1500,7 @@ fun BottomSheetContentItemDetailsContent(
                         }
 
                     }
-                }
-            )
+                })
 
         }
 
@@ -1561,7 +1567,9 @@ fun BottomSheetContentItemDetailsContent(
                 onDismissRequest = { showDeleteConfirmation = false },
                 onConfirmation = {
                     scope.launch {
-                        viewModel.transactionsViewModel.deleteSingleTransaction(singleTransaction.transaction)
+                        viewModel.transactionsViewModel.deleteSingleTransaction(
+                            singleTransaction.transaction
+                        )
                         showDeleteConfirmation = false
                         closeBottomSheet()
                     }
@@ -1595,8 +1603,8 @@ fun BottomSheetIconPicker(
 ) {
     ModalBottomSheet(
         onDismissRequest = {
-            closeBottomSheet()
-        },
+        closeBottomSheet()
+    },
         sheetState = sheetState,
         modifier = Modifier.fillMaxWidth(),
         contentWindowInsets = { WindowInsets.ime },
@@ -1652,7 +1660,13 @@ fun SingleIcon(item: Int, viewModel: AllViewModel) {
             .fillMaxSize()
             .aspectRatio(1f)
             .clip(shape = RoundedCornerShape(50))
-            .clickable { scope.launch { viewModel.uiViewModel.selectedIconFromBottomSheet.emit(item) } },
+            .clickable {
+                scope.launch {
+                    viewModel.uiViewModel.selectedIconFromBottomSheet.emit(
+                        item
+                    )
+                }
+            },
         color = MaterialTheme.colorScheme.surfaceVariant
     ) {
         Box(
@@ -3131,8 +3145,7 @@ fun BankDetailsBottomSheetContent(
                     text = "You have made ${bankSpecificStats.transactionCount} transactions this month, totaling ${bankSpecificStats.totalExpense - bankSpecificStats.totalIncome} in expenses. You have spend around ${LocalCurrency.current.currencySymbol}${
                         bankSpecificStats.totalExpense.divide(
                             getDayDifference(
-                                getMonthStartDate().toLocalDate(),
-                                LocalDate.now()
+                                getMonthStartDate().toLocalDate(), LocalDate.now()
                             ).toBigDecimal(), 2, RoundingMode.HALF_UP
                         )
                     }/day in current Month",

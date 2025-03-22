@@ -13,6 +13,7 @@ import com.roaa.expensetracker.utilities.preferenceManger.IS_APP_FIRST_STARTUP
 import com.roaa.expensetracker.utilities.preferenceManger.IS_BUDGET_SET
 import com.roaa.expensetracker.utilities.preferenceManger.IS_ONBOARDING_COMPLETED
 import com.roaa.expensetracker.utilities.preferenceManger.IS_ONE_DEFAULT_CATEGORY_SET
+import com.roaa.expensetracker.utilities.preferenceManger.LAST_USED_BANK_ID
 import com.roaa.expensetracker.utilities.preferenceManger.LAST_USED_EXPENSE_CATEGORY_ID
 import com.roaa.expensetracker.utilities.preferenceManger.LAST_USED_INCOME_CATEGORY_ID
 import com.roaa.expensetracker.utilities.preferenceManger.PRIMARY_BANK_ACCOUNT
@@ -138,5 +139,13 @@ class PreferencesViewModel @Inject constructor(private val preferenceManager: Pr
     }
 
     val getPreDefaultCategoryStatus = preferenceManager.getBooleanValue(IS_ONE_DEFAULT_CATEGORY_SET)
+
+    fun setLastUsedBankId(id: Long) {
+        viewModelScope.launch {
+            preferenceManager.saveLongValue(id, LAST_USED_BANK_ID)
+        }
+    }
+
+    val getLastUsedBank = preferenceManager.getLongValue(LAST_USED_BANK_ID)
 
 }
