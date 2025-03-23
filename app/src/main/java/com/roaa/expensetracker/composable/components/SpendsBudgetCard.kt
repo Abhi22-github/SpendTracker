@@ -32,6 +32,7 @@ import com.roaa.expensetracker.composable.colorGood
 import com.roaa.expensetracker.composable.colorNotGood
 import com.roaa.expensetracker.composable.numberFormat
 import com.roaa.expensetracker.composable.ui.StatCard
+import com.roaa.expensetracker.composable.ui.StatCardForHomeCard
 import com.roaa.expensetracker.composable.utils.combineColors
 import com.roaa.expensetracker.composable.utils.harmonize
 import com.roaa.expensetracker.composable.utils.toPalette
@@ -139,6 +140,107 @@ fun SpendsBudgetCard(
         }
     )
 }
+
+@Composable
+fun SpendsBudgetCardForHomeScreen(
+    modifier: Modifier = Modifier,
+    budget: BigDecimal,
+    spend: BigDecimal,
+) {
+    var flipCard by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+    val temp = spend.divide(budget, 4, RoundingMode.HALF_UP)
+    val percent = BigDecimal.ONE.minus(temp)
+
+    val showPercentSpent = temp.multiply(BigDecimal(100)).setScale(2, RoundingMode.HALF_UP)
+    val showPercentRemaining = BigDecimal.ONE.minus(temp).multiply(BigDecimal(100)).setScale(
+        2,
+        RoundingMode.HALF_UP
+    )
+
+//    val percentFormatted =  remember{
+//        val formatter = NumberFormat.getNumberInstance(Locale.getDefault())
+//        formatter.maximumFractionDigits = 2
+//        formatter.minimumFractionDigits = 0
+//
+//        formatter.format(percent.times(100))
+//    }
+
+    val shift = remember { Animatable(0f) }
+    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(Unit) {
+        fun anim() {
+            coroutineScope.launch {
+                shift.animateTo(
+                    1f,
+                    animationSpec = FloatTweenSpec(4000, 0, LinearEasing)
+                )
+                shift.animateTo(0f)
+                anim()
+            }
+        }
+        anim()
+    }
+
+    val percentWithNewSpentAnimated = animateFloatAsState(
+        label = "percentWithNewSpentAnimated",
+        targetValue = percent.toFloat(),
+        animationSpec = TweenSpec(300),
+    ).value
+
+    val harmonizedColor = toPalette(
+        harmonize(
+            combineColors(
+                listOf(
+                    colorBad,
+                    colorNotGood,
+                    colorGood,
+                ),
+                percentWithNewSpentAnimated.coerceIn(0f, 1f),
+            )
+        )
+    )
+
+    StatCardForHomeCard(
+        modifier = modifier
+            .clip(MaterialTheme.shapes.extraLarge)
+            .clickable { flipCard = !flipCard },
+        colors = CardDefaults.cardColors(
+            containerColor = harmonizedColor.container,
+            contentColor = harmonizedColor.onContainer,
+        ),
+        flip = flipCard,
+        value = numberFormat(
+            context,
+            BigDecimal(if (flipCard) (budget - spend).toDouble() else spend.toDouble()),
+        ),
+        budget = budget.toString(),
+        label = if (flipCard) "Remaining" else "Spent",
+        content = {
+            Text(
+                text = if (flipCard) "${showPercentRemaining}% remaining" else "${showPercentSpent}% spent",
+                style = MaterialTheme.typography.bodyMedium,
+            )
+        },
+        backdropContent = {
+            Box(
+                modifier = Modifier
+                    .background(
+                        harmonizedColor.main,
+                        shape = WavyShape(
+                            period = 30.dp,
+                            amplitude = 2.dp,
+                            shift = shift.value,
+                        ),
+                    )
+                    .fillMaxHeight()
+                    .fillMaxWidth(percent.toFloat()),
+            )
+        }
+    )
+}
+
 //
 //@Preview(name = "The budget is almost completely spent")
 //@Composable

@@ -933,10 +933,10 @@ fun PaymentDetailsScreen(
                             )
                         }
                         items(transactionList, key = { it.transaction.id }) {
-                            SingleTransaction(it) {
+                            SingleTransaction(it,{
                                 singleTransaction = it
                                 bottomSheet = !bottomSheet
-                            }
+                            },false)
                         }
                     }
                 }

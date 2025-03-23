@@ -138,6 +138,112 @@ fun StatCard(
     }
 }
 
+@Composable
+fun StatCardForHomeCard(
+    modifier: Modifier = Modifier,
+    value: String,
+    budget: String,
+    label: String,
+    flip: Boolean,
+    contentPadding: PaddingValues = PaddingValues(vertical = 16.dp, horizontal = 24.dp),
+    colors: CardColors = CardDefaults.cardColors(),
+    valueFontSize: TextUnit = MaterialTheme.typography.titleLarge.fontSize,
+    valueFontStyle: TextStyle = MaterialTheme.typography.displayMedium,
+    labelFontStyle: TextStyle = MaterialTheme.typography.labelMedium,
+    content: @Composable ColumnScope.() -> Unit = {},
+    backdropContent: @Composable () -> Unit = {},
+) {
+    Card(
+        modifier = modifier,
+        shape = MaterialTheme.shapes.extraLarge,
+        colors = colors,
+    ) {
+        val textColor = LocalContentColor.current
+
+        Box(
+            Modifier
+                .fillMaxWidth()
+                .fillMaxHeight()
+        ) {
+            Box(
+                Modifier
+                    .fillMaxHeight()
+                    .fillMaxWidth()
+            ) {
+                backdropContent()
+            }
+
+            Column(
+                Modifier
+                    .fillMaxWidth()
+                    .padding(contentPadding)
+            ) {
+                Row(Modifier.fillMaxWidth()) {
+                    Column(
+                        Modifier
+                            .weight(0.8f)
+                    ) {
+                        Text(
+                            text = value,
+                            style = valueFontStyle,
+                            fontSize = valueFontSize,
+                            overflow = TextOverflow.Ellipsis,
+                            softWrap = false,
+                            lineHeight = TextUnit(0.2f, TextUnitType.Em)
+                        )
+                        Text(
+                            text = label,
+                            style = labelFontStyle,
+                            color = textColor.copy(alpha = 0.6f),
+                            overflow = TextOverflow.Ellipsis,
+                            softWrap = false,
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+
+                        CompositionLocalProvider(
+                            LocalContentColor provides textColor,
+                        ) {
+                            Column(
+                                modifier = Modifier.fillMaxWidth(),
+                                content = content,
+                            )
+                        }
+                    }
+                    Row(
+                        Modifier
+                            .weight(0.1f), horizontalArrangement = Arrangement.End
+                    ) {
+                        Box(
+                            Modifier
+                                .size(6.dp)
+                                .background(
+                                    if (!flip)
+                                        MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(
+                                        alpha = 0.3f
+                                    ),
+                                    RoundedCornerShape(50)
+                                )
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Box(
+                            Modifier
+                                .size(6.dp)
+                                .background(
+                                    if (flip)
+                                        MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(
+                                        alpha = 0.3f
+                                    ),
+                                    RoundedCornerShape(50)
+                                )
+                        )
+
+                    }
+                }
+            }
+        }
+    }
+}
+
 @Preview
 @Composable
 private fun Preview() {

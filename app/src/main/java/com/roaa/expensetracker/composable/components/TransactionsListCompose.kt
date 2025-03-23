@@ -2,6 +2,10 @@ package com.roaa.expensetracker.composable.components
 
 import android.annotation.SuppressLint
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -9,6 +13,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
@@ -28,6 +33,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.rounded.AccountBalanceWallet
 import androidx.compose.material.icons.rounded.KeyboardArrowDown
 import androidx.compose.material.icons.rounded.PieChart
 import androidx.compose.material3.Card
@@ -68,11 +74,13 @@ import coil.compose.rememberAsyncImagePainter
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.activity.LocalCurrency
 import com.roaa.expensetracker.composable.CustomFonts
+import com.roaa.expensetracker.composable.color4
 import com.roaa.expensetracker.composable.failureColor
 import com.roaa.expensetracker.composable.navigation.Destinations
 import com.roaa.expensetracker.composable.navigation.NavigationManager
 import com.roaa.expensetracker.composable.orange
 import com.roaa.expensetracker.composable.statisticsComponent.BarChart
+import com.roaa.expensetracker.composable.statisticsComponent.BarChartTest
 import com.roaa.expensetracker.composable.successColor
 import com.roaa.expensetracker.composable.utils.HarmonizedColorPalette
 import com.roaa.expensetracker.composable.utils.IconState
@@ -123,6 +131,7 @@ fun TransactionsListCompose(
         convertMonthShortToFullName(currentSelectedMonth)
     var selectedMonthString by remember { mutableStateOf(monthName) }
     val getCurrentBudget by viewModel.budgetViewModel.getCurrentBudget.collectAsState()
+    var isCardExpanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(getCurrentBudget) {
         viewModel.budgetViewModel.getCurrentBudgetWithDetailsForCompose()
@@ -212,6 +221,7 @@ fun TransactionsListCompose(
 
         val selectedMonth by viewModel.uiViewModel.selectedMonth.collectAsState()
         val pagerState = rememberPagerState(initialPage = 500 / 2, pageCount = { 500 })
+        val innerPagerState = rememberPagerState(initialPage = 1, pageCount = { 3 })
 
         LaunchedEffect(selectedMonth) {
             val (firstDate, lastDate) = getFirstAndLastMonth(selectedMonth)
@@ -247,22 +257,76 @@ fun TransactionsListCompose(
                             ) {
                                 item {
                                     Row(modifier = Modifier.padding(top = 8.dp)) {
-                                        HomeStatCardNew(
-                                            Modifier,
-                                            "${LocalCurrency.current.currencySymbol}${
-                                                parseAmount(
-                                                    totalIncomeForMonth.totalAmount
+                                        HorizontalPager(
+                                            state = innerPagerState,
+                                            userScrollEnabled = true,
+                                            contentPadding = PaddingValues(
+                                                top = 0.dp,
+                                                end = 10.dp,
+                                                start = 10.dp,
+                                                bottom = 0.dp
+                                            ),
+                                            pageSpacing = -15.dp
+                                        ) {
+                                            when (it) {
+                                                0 -> HomeStatCardBudget(
+                                                    Modifier,
+                                                    "${LocalCurrency.current.currencySymbol}${
+                                                        parseAmount(
+                                                            totalIncomeForMonth.totalAmount
+                                                        )
+                                                    }",
+                                                    "${LocalCurrency.current.currencySymbol}${
+                                                        parseAmount(
+                                                            totalExpenseForMonth.totalAmount
+                                                        )
+                                                    }",
+                                                    transactionListOfMonth.size,
+                                                    selectedMonthString,
+                                                    isCardExpanded,
+                                                    { isCardExpanded = !isCardExpanded },
+                                                    currentMonthAllDayAndDatesListAndMaxValue,
                                                 )
-                                            }",
-                                            "${LocalCurrency.current.currencySymbol}${
-                                                parseAmount(
-                                                    totalExpenseForMonth.totalAmount
+
+                                                1 -> HomeStatCardNew(
+                                                    Modifier,
+                                                    "${LocalCurrency.current.currencySymbol}${
+                                                        parseAmount(
+                                                            totalIncomeForMonth.totalAmount
+                                                        )
+                                                    }",
+                                                    "${LocalCurrency.current.currencySymbol}${
+                                                        parseAmount(
+                                                            totalExpenseForMonth.totalAmount
+                                                        )
+                                                    }",
+                                                    transactionListOfMonth.size,
+                                                    selectedMonthString,
+                                                    isCardExpanded,
+                                                    { isCardExpanded = !isCardExpanded },
+                                                    currentMonthAllDayAndDatesListAndMaxValue,
                                                 )
-                                            }",
-                                            transactionListOfMonth.size,
-                                            selectedMonthString,
-                                            currentMonthAllDayAndDatesListAndMaxValue,
-                                        )
+
+                                                2 -> HomeStatCardNew(
+                                                    Modifier,
+                                                    "${LocalCurrency.current.currencySymbol}${
+                                                        parseAmount(
+                                                            totalIncomeForMonth.totalAmount
+                                                        )
+                                                    }",
+                                                    "${LocalCurrency.current.currencySymbol}${
+                                                        parseAmount(
+                                                            totalExpenseForMonth.totalAmount
+                                                        )
+                                                    }",
+                                                    transactionListOfMonth.size,
+                                                    selectedMonthString,
+                                                    isCardExpanded,
+                                                    { isCardExpanded = !isCardExpanded },
+                                                    currentMonthAllDayAndDatesListAndMaxValue,
+                                                )
+                                            }
+                                        }
                                     }
                                 }
                                 transactionConverterList.forEach { (date, transactionList) ->
@@ -290,7 +354,7 @@ fun TransactionsListCompose(
                                             else
                                                 bottomSheet = true
 
-                                        })
+                                        }, innerPagerState.settledPage == 0)
                                     }
                                 }
                             }
@@ -321,7 +385,7 @@ fun TransactionsListCompose(
                                     )
                                 else
                                     bottomSheet = true
-                            })
+                            }, false)
                         }
                     }
                     else EmptyScreen()
@@ -352,22 +416,39 @@ fun TransactionsListCompose(
 @Composable
 fun SingleTransaction(
     item: TransactionWithDetails,
-    onSingleItemClick: (TransactionWithDetails) -> Unit
+    onSingleItemClick: (TransactionWithDetails) -> Unit,
+    showBudgetIndicator: Boolean
 ) {
     ConstraintLayout() {
         val (content, excludeFromBudgetStatus) = createRefs()
+//        AnimatedVisibility(showBudgetIndicator) {
 //        Box(
 //            modifier = Modifier
 //                .constrainAs(excludeFromBudgetStatus) {
-//                    start.linkTo(parent.start, 40.dp)
-//                    bottom.linkTo(parent.bottom,20.dp)
-//
-//                .clip(RoundedCornerShape(25.dp))
-//                .background(MaterialTheme.colorScheme.surfaceVariant, RoundedCornerShape(25.dp))
+//                    start.linkTo(parent.start, 16.dp)
+//                    top
+//                        .linkTo(parent.top, 4.dp)
+//                }
+//                .clip(   RoundedCornerShape(25.dp))
+//                .background(
+//                    successColor.copy(alpha = 0.5f),
+//                    RoundedCornerShape(25.dp)
+//                )
 //                .zIndex(1f),
 //            contentAlignment = Alignment.Center
 //        ) {
-//            Icon(Icons.Rounded.Block, contentDescription = null, modifier = Modifier.size(16.dp))
+//                Icon(
+//                    Icons.Rounded.Check,
+//                    contentDescription = null,
+//                    tint = MaterialTheme.colorScheme.onSurface,
+//                    modifier = Modifier.size(16.dp)
+//                )
+////            Text(
+////                text = "budget",
+////                color = MaterialTheme.colorScheme.surfaceVariant,
+////                style = MaterialTheme.typography.labelSmall,modifier = Modifier.padding(4.dp)
+////            )
+//        }
 //        }
         Card(
             shape = RoundedCornerShape(12.dp), modifier = Modifier
@@ -405,24 +486,46 @@ fun SingleTransaction(
                     amount = "+${LocalCurrency.current.currencySymbol}" + amount
                     amountColor = successColor
                 }
-                Surface(
-                    shape = CircleShape,
+                Box(
                     modifier = Modifier
                         .size(36.dp)
-                        .fillMaxSize(),
-                    color = MaterialTheme.colorScheme.surfaceVariant
+                        .fillMaxSize()
                 ) {
-                    Box(
-                        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colorScheme.surfaceVariant
                     ) {
-                        val image =
-                            rememberAsyncImagePainter(IconState.fromNumber(item.category.categoryIconNumber))
-                        Image(
-                            painter = image,
-                            contentDescription = "Test Image",
-                            modifier = Modifier.size(24.dp),
-                        )
+                        Box(
+                            modifier = Modifier.fillMaxSize(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            val image =
+                                rememberAsyncImagePainter(IconState.fromNumber(item.category.categoryIconNumber))
+                            Image(
+                                painter = image,
+                                contentDescription = "Test Image",
+                                modifier = Modifier.size(24.dp),
+                            )
+                        }
                     }
+                    Row(modifier = Modifier.fillMaxSize()) {
+                        AnimatedVisibility(
+                            showBudgetIndicator,
+                            enter = scaleIn(initialScale = 0.5f) + fadeIn(), // Scale from 50% to full size with fade-in
+                            exit = scaleOut(targetScale = 0.5f) + fadeOut()
+                        ) {
+                            val image =
+                                rememberAsyncImagePainter(R.drawable.ic_checkmark)
+                            Image(
+                                painter = image,
+                                contentDescription = "Test Image",
+                                modifier = Modifier.fillMaxSize(),
+                                colorFilter = ColorFilter.tint(successColor),
+                                alpha = 0.8f
+                            )
+                        }
+                    }
+
                 }
 
 
@@ -440,13 +543,13 @@ fun SingleTransaction(
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
-                    if (true) {
-                        Text(
-                            text = item.category.categoryName,
-                            style = typography.labelMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.5f),
-                        )
-                    }
+                    Text(
+                        text = item.category.categoryName,
+                        style = typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(
+                            alpha = 0.5f
+                        ),
+                    )
                 }
                 Spacer(modifier = Modifier.width(16.dp))
 
@@ -469,25 +572,25 @@ fun SingleTransaction(
     }
 }
 
-
 @SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
-fun HomeStatCardNew(
+fun HomeStatCardBudget(
     modifier: Modifier = Modifier,
     income: String,
     expense: String,
     totalTransactionsCount: Int,
     selectedMonthShort: String,
+    isExpanded: Boolean,
+    setExpanded: () -> Unit,
     currentMonthAllDayAndDatesListAndMaxValue: Pair<List<BarChartExpenseModel>, BigDecimal>
 ) {
     val palette =
-        toPalette(orange)
+        toPalette(color4)
     val cardColor = combineColors(
         MaterialTheme.colorScheme.surface,
         palette.container,
         angle = 0.7f,
     )
-    var mainContentVisibility by remember { mutableStateOf(false) }
     val currentMontAllDayList = currentMonthAllDayAndDatesListAndMaxValue.first
 
     Card(
@@ -511,7 +614,169 @@ fun HomeStatCardNew(
                         end.linkTo(parent.end)
                     }
                     .zIndex(1f)) {
-                Box(Modifier.clickable { mainContentVisibility = !mainContentVisibility }) {
+                Box(Modifier.clickable { setExpanded() }) {
+                    Row(
+                        Modifier
+                            .padding(vertical = 4.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Spacer(Modifier.width(24.dp))
+                        Box(
+                            modifier = Modifier
+                                .background(
+                                    palette.container,
+                                    shape = RoundedCornerShape(50)
+                                )
+                                .weight(0.1f)
+                                .aspectRatio(1f)
+                                .size(48.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Rounded.AccountBalanceWallet,
+                                modifier = Modifier.size(24.dp),
+                                contentDescription = "wallet icon"
+                            )
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Column(Modifier.weight(0.8f)) {
+                            Text(
+                                text = "Budget (12th Feb - 30th March)",
+                                textAlign = TextAlign.Start,
+                                modifier = Modifier.fillMaxWidth(),
+                                style = typography.titleMedium,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+//                            Text(
+//                                text = "${totalTransactionsCount} transactions",
+//                                textAlign = TextAlign.Start,
+//                                modifier = Modifier.fillMaxWidth(),
+//                                style = typography.labelLarge,
+//                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f)
+//                            )
+                        }
+                        IconButton(
+                            onClick = { setExpanded() },
+                            modifier = Modifier.weight(0.1f)
+                        ) {
+                            Icon(
+                                Icons.Rounded.KeyboardArrowDown,
+                                modifier = Modifier.size(24.dp),
+                                contentDescription = "Drop Down"
+                            )
+                        }
+                        Spacer(Modifier.width(24.dp))
+                    }
+                }
+                AnimatedVisibility(isExpanded) {
+                    Column(
+                        Modifier
+                            .height(260.dp)
+                            .padding(bottom = 16.dp)
+                            .fillMaxWidth()
+                    ) {
+                        HorizontalDivider(
+                            thickness = 0.7.dp,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                            modifier = Modifier
+                                .padding(horizontal = 12.dp)
+                        )
+                        Spacer(Modifier.height(16.dp))
+                        BoxWithConstraints {
+                            BarChartTest(
+                                modifier = Modifier,
+                                palette = toPalette(color4)
+                            )
+                        }
+                    }
+                }
+                HorizontalDivider(
+                    thickness = 0.7.dp,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.1f),
+                    modifier = Modifier
+                        .padding(horizontal = 12.dp)
+                )
+                Row(
+                    Modifier.padding(horizontal = 12.dp)
+                ) {
+                    SpendsBudgetCardForHomeScreen(
+                        Modifier,
+                        BigDecimal(1),
+                        BigDecimal(0.5),
+                    )
+                }
+            }
+
+            val image = rememberAsyncImagePainter(R.drawable.shape_soft_star_1)
+            Image(
+                painter = image,
+                contentDescription = "Test Image",
+                modifier = Modifier
+                    .size(128.dp)
+                    .constrainAs(decoration1) {
+                        top.linkTo(parent.top, margin = -50.dp)
+                        end.linkTo(parent.end, margin = -50.dp)
+                    }, colorFilter = ColorFilter.tint(palette.container)
+            )
+
+            Image(
+                painter = image,
+                contentDescription = "Test Image",
+                modifier = Modifier
+                    .size(128.dp)
+                    .constrainAs(decoration2) {
+                        bottom.linkTo(parent.bottom, margin = -80.dp)
+                        end.linkTo(parent.end)
+                        start.linkTo(parent.start)
+                    }, colorFilter = ColorFilter.tint(palette.container)
+            )
+        }
+    }
+}
+
+@SuppressLint("UnusedBoxWithConstraintsScope")
+@Composable
+fun HomeStatCardNew(
+    modifier: Modifier = Modifier,
+    income: String,
+    expense: String,
+    totalTransactionsCount: Int,
+    selectedMonthShort: String,
+    isExpanded: Boolean,
+    setExpanded: () -> Unit,
+    currentMonthAllDayAndDatesListAndMaxValue: Pair<List<BarChartExpenseModel>, BigDecimal>
+) {
+    val palette =
+        toPalette(orange)
+    val cardColor = combineColors(
+        MaterialTheme.colorScheme.surface,
+        palette.container,
+        angle = 0.7f,
+    )
+    val currentMontAllDayList = currentMonthAllDayAndDatesListAndMaxValue.first
+
+    Card(
+        modifier = modifier.padding(horizontal = 12.dp),
+        shape = RoundedCornerShape(25.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = cardColor
+        ),
+    ) {
+        ConstraintLayout(
+            Modifier
+                .fillMaxSize()
+        ) {
+            val (content, decoration1, decoration2) = createRefs()
+            Column(
+                Modifier
+                    .constrainAs(content) {
+                        top.linkTo(parent.top)
+                        bottom.linkTo(parent.bottom)
+                        start.linkTo(parent.start)
+                        end.linkTo(parent.end)
+                    }
+                    .zIndex(1f)) {
+                Box(Modifier.clickable { setExpanded() }) {
                     Row(
                         Modifier
                             .padding(vertical = 16.dp),
@@ -553,7 +818,7 @@ fun HomeStatCardNew(
                             )
                         }
                         IconButton(
-                            onClick = { mainContentVisibility = !mainContentVisibility },
+                            onClick = { setExpanded() },
                             modifier = Modifier.weight(0.1f)
                         ) {
                             Icon(
@@ -565,7 +830,7 @@ fun HomeStatCardNew(
                         Spacer(Modifier.width(24.dp))
                     }
                 }
-                AnimatedVisibility(mainContentVisibility) {
+                AnimatedVisibility(isExpanded) {
                     Column(
                         Modifier
                             .height(260.dp)
@@ -744,7 +1009,10 @@ fun HomeStatCard(
 
 
 @Composable
-fun SingleTransactionNew(item: TransactionClass, onSingleItemClick: (TransactionClass) -> Unit) {
+fun SingleTransactionNew(
+    item: TransactionClass,
+    onSingleItemClick: (TransactionClass) -> Unit
+) {
 
     Card(
         shape = RoundedCornerShape(22.dp), colors = CardDefaults.cardColors(

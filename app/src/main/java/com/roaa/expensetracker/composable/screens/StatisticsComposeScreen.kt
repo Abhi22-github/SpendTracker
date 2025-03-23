@@ -835,7 +835,7 @@ fun StatisticsScreenTest(
                         SingleTransaction(item, onSingleItemClick = {
                             selectedTransaction = it
                             showTransactionDetailsBottomSheet = !showTransactionDetailsBottomSheet
-                        })
+                        },false)
                     }
                 }
 
