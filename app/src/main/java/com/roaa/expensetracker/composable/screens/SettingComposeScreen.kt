@@ -75,6 +75,7 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.aay.chart.BuildConfig
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.composable.ThemeMode
 import com.roaa.expensetracker.composable.components.DropDownMenu
@@ -89,6 +90,7 @@ import com.roaa.expensetracker.composable.utils.combineColors
 import com.roaa.expensetracker.composable.utils.toPalette
 import com.roaa.expensetracker.hilt.AllViewModel
 import com.roaa.expensetracker.model.uiDataModels.CurrencyClass
+import com.roaa.expensetracker.utilities.getAppVersion
 import com.roaa.expensetracker.utilities.getCountryCurrencyList
 import com.roaa.expensetracker.utilities.utilityModalClass.defaultCurrency
 import com.roaa.expensetracker.utilities.utilityModalClass.firstSampleClass
@@ -565,6 +567,22 @@ fun SettingsScreenContent(
                 ) {
                     Text(
                         text = "Rate us", style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+            }
+            val version = getAppVersion(context)
+            Row(modifier = Modifier.clickable {
+            }) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontalPadding, 16.dp)
+
+                ) {
+                    Text(
+                        text = "Version (${version})", style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                 }

@@ -16,6 +16,11 @@ import java.util.Currency
 import java.util.Locale
 
 
+fun getAppVersion(context: Context): String {
+    val packageInfo = context.packageManager.getPackageInfo(context.packageName, 0)
+    return packageInfo.versionName ?: "Unknown"
+}
+
 val section1Items = listOf(
     NavigationItems(
         title = "List",
