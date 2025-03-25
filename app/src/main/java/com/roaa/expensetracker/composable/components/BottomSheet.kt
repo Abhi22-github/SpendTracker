@@ -3134,7 +3134,7 @@ fun BankDetailsBottomSheetContent(
 
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    text = "You have made ${bankSpecificStats.transactionCount} transactions this month, totaling ${bankSpecificStats.totalExpense - bankSpecificStats.totalIncome} in expenses. You have spend around ${LocalCurrency.current.currencySymbol}${
+                    text = "You have made ${bankSpecificStats.transactionCount} transactions this month, totaling ${bankSpecificStats.totalExpense} in expenses. You have spend around ${LocalCurrency.current.currencySymbol}${
                         bankSpecificStats.totalExpense.divide(
                             getDayDifference(
                                 getMonthStartDate().toLocalDate(), LocalDate.now()
