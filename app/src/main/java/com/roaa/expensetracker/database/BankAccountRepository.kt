@@ -47,4 +47,10 @@ class BankAccountRepository @Inject constructor(private val bankAccountsDao: Ban
     suspend fun insertWithDailyBalance(bankAccountsClass: BankAccountsClass) {
         bankAccountsDao.insertWithDailyBalance(bankAccountsClass)
     }
+    suspend fun updateWithDailyBalance(
+        bankAccountsClass: BankAccountsClass,
+        oldBankAccount: BankAccountsClass
+    ) {
+        bankAccountsDao.updateWithDailyBalance(bankAccountsClass,oldBankAccount)
+    }
 }

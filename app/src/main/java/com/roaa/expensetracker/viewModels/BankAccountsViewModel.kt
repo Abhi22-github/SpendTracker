@@ -111,13 +111,15 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
         id: Long,
         bankAmount: String,
         bankName: String,
-        selectedColor: Int
+        selectedColor: Int,
+        bankAccountsClass: BankAccountsClass
     ) {
         val bankAccountObj = BankAccountsClass(
             bankAccountId = id,
             initialAmount = bankAmount.toBigDecimal(),
             currentAmount = bankAmount.toBigDecimal(),
-            accountAddedDate = LocalDate.now().toLong(),
+            accountAddedDate = if (id == 0L) LocalDate.now()
+                .toLong() else bankAccountsClass.accountAddedDate,
             balanceLastUpdatedDate = LocalDate.now().toLong(),
             bankName = bankName,
             cardColorNumber = selectedColor,
@@ -125,10 +127,13 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
             accountType = PRIMARY,
             isActive = true
         )
-        storeBankAccount(bankAccountObj)
+        storeBankAccount(bankAccountObj,bankAccountsClass)
     }
 
-    fun storeBankAccount(bankAccountsClass: BankAccountsClass) {
+    fun storeBankAccount(
+        bankAccountsClass: BankAccountsClass,
+        oldBankAccount: BankAccountsClass
+    ) {
         if (bankAccountsClass.bankAccountId == 0L) {
             //adding new bank Accounts
             viewModelScope.launch {
@@ -137,7 +142,7 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
         } else {
             //updating existing account
             viewModelScope.launch {
-                bankAccountRepository.update(bankAccountsClass)
+                bankAccountRepository.updateWithDailyBalance(bankAccountsClass,oldBankAccount   )
             }
         }
 

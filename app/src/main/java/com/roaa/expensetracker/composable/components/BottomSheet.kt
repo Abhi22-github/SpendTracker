@@ -160,6 +160,7 @@ import com.roaa.expensetracker.utilities.toLocalDate
 import com.roaa.expensetracker.utilities.toLongMillis
 import com.roaa.expensetracker.utilities.utilityModalClass.defaultBank
 import com.roaa.expensetracker.utilities.utilityModalClass.defaultCategoryClass
+import com.roaa.expensetracker.utilities.utilityModalClass.emptyBank
 import com.roaa.expensetracker.utilities.utilityModalClass.emptyInfoStat
 import com.roaa.expensetracker.utilities.utilityModalClass.emptyTransactionClass
 import com.roaa.expensetracker.utilities.utilityModalClass.firstSampleClass
@@ -1715,7 +1716,7 @@ fun AddPaymentMethodBottomSheet(
                     }
                     if (bankName.isNotEmpty() && amount.isNotEmpty()) {
                         viewModel.bankAccountsViewModel.createObjectAndStoreIt(
-                            0L, amount, bankName, selectedColor
+                            0L, amount, bankName, selectedColor, emptyBank
                         )
                         closeBottomSheet()
                         return@launch
@@ -1758,7 +1759,7 @@ fun EditPaymentMethodBottomSheet(
             showError,
             showExperimentalComponent,
             { scope.launch { viewModel.uiViewModel.errorStatusInBankAccountAdd.emit(false) } },
-            { bankName, amount, selectedColor ->
+            { bankAccountClass,bankName, amount, selectedColor ->
                 scope.launch {
                     if (amount.isEmpty()) {
                         viewModel.uiViewModel.setErrorMessage("Please enter bank amount")
@@ -1772,7 +1773,7 @@ fun EditPaymentMethodBottomSheet(
                     }
                     if (bankName.isNotEmpty() && amount.isNotEmpty()) {
                         viewModel.bankAccountsViewModel.createObjectAndStoreIt(
-                            bankAccountsClass.bankAccountId, amount, bankName, selectedColor
+                            bankAccountsClass.bankAccountId, amount, bankName, selectedColor,bankAccountsClass
                         )
                         closeBottomSheet()
                         return@launch
@@ -2024,7 +2025,7 @@ fun BottomSheetContentPaymentMethodEditContentNew(
     showError: Boolean,
     showExperimentalComponent: Boolean,
     removeError: () -> Unit,
-    saveButtonClicked: (bankName: String, bankAmount: String, selectedColor: Int) -> Unit,
+    saveButtonClicked: (bankAccountClass: BankAccountsClass,bankName: String, bankAmount: String, selectedColor: Int) -> Unit,
 ) {
     var bankAmount by remember { mutableStateOf(TextFieldValue(bankAccountsClass.currentAmount.toString())) }
     var bankName by remember { mutableStateOf(TextFieldValue(bankAccountsClass.bankName)) }
@@ -2237,7 +2238,7 @@ fun BottomSheetContentPaymentMethodEditContentNew(
                 .padding(horizontalPadding, verticalPadding),
             colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.primary),
             onClick = {
-                saveButtonClicked(bankName.text, bankAmount.text, selectedColor)
+                saveButtonClicked(bankAccountsClass,bankName.text, bankAmount.text, selectedColor)
             },
         ) {
             Text(text = "Save", color = MaterialTheme.colorScheme.onPrimary)
@@ -2262,7 +2263,7 @@ private fun PaymentEditContentPreview() {
     BottomSheetContentPaymentMethodEditContentNew(
         modifier = Modifier.padding(16.dp, 0.dp), defaultBank,
         showError = true, false, {},
-        saveButtonClicked = { a, b, c -> },
+        saveButtonClicked = { a, b, c,d -> },
     )
 }
 

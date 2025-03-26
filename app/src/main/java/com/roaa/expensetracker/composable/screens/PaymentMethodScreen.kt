@@ -227,7 +227,7 @@ fun PaymentMethodScreen(
                         scope.launch {
                             viewModel.bankAccountsViewModel.storeBankAccount(bankAccountsClass.apply {
                                 this.isActive = false
-                            })
+                            }, bankAccountsClass)
                         }
                     }
 
@@ -967,7 +967,7 @@ fun PaymentDetailsScreen(
                             scope.launch {
                                 viewModel.bankAccountsViewModel.storeBankAccount(bankAccountsClass.apply {
                                     this.isActive = false
-                                })
+                                }, bankAccountsClass)
                             }
                         }
 

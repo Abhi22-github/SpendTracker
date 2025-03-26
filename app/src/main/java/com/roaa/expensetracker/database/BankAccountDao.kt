@@ -71,6 +71,23 @@ interface BankAccountDao {
         insert(dailyBalance)
     }
 
+    @Transaction
+    suspend fun updateWithDailyBalance(
+        bankAccountsClass: BankAccountsClass,
+        oldBankAccount: BankAccountsClass
+    ) {
+        update(bankAccountsClass)
+        val dailyBalance = BankAmountCorrectionsClass(
+            id = 0,
+            bankAccountId = bankAccountsClass.bankAccountId,
+            date = LocalDate.now().toLong(),
+            finalAmount = bankAccountsClass.currentAmount,
+            difference = bankAccountsClass.currentAmount.minus(oldBankAccount.currentAmount),
+            startingAmount = BigDecimal.ZERO,
+        )
+        insert(dailyBalance)
+    }
+
 
 
     @Transaction
