@@ -112,7 +112,6 @@ fun SettingsScreen(
     rootNavController: NavHostController,
     navigationManager: NavigationManager,
     viewModel: AllViewModel,
-    sendUserBack: () -> Unit,
 ) {
 
     BackHandler() {
