@@ -684,7 +684,7 @@ fun LivePaymentCard(
 
                     Spacer(Modifier.height(2.dp))
                     Text(
-                        text = bankName, style = typography.titleLarge.copy(fontFamily = numberFont)
+                        text = bankName,
                     )
 
                 }

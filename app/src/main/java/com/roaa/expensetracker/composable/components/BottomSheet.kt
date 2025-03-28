@@ -41,9 +41,11 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
@@ -52,6 +54,8 @@ import androidx.compose.material.icons.outlined.Cable
 import androidx.compose.material.icons.outlined.DateRange
 import androidx.compose.material.icons.outlined.Payment
 import androidx.compose.material.icons.rounded.AddCircle
+import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material.icons.rounded.ArrowDropUp
 import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material.icons.rounded.DateRange
 import androidx.compose.material.icons.rounded.PieChart
@@ -118,6 +122,7 @@ import com.roaa.expensetracker.R
 import com.roaa.expensetracker.activity.LocalCurrency
 import com.roaa.expensetracker.composable.CustomFonts.numberFont
 import com.roaa.expensetracker.composable.blueColor
+import com.roaa.expensetracker.composable.failureColor
 import com.roaa.expensetracker.composable.greenColor
 import com.roaa.expensetracker.composable.infoColor
 import com.roaa.expensetracker.composable.orange
@@ -1759,7 +1764,7 @@ fun EditPaymentMethodBottomSheet(
             showError,
             showExperimentalComponent,
             { scope.launch { viewModel.uiViewModel.errorStatusInBankAccountAdd.emit(false) } },
-            { bankAccountClass,bankName, amount, selectedColor ->
+            { bankAccountClass, bankName, amount, selectedColor ->
                 scope.launch {
                     if (amount.isEmpty()) {
                         viewModel.uiViewModel.setErrorMessage("Please enter bank amount")
@@ -1773,7 +1778,11 @@ fun EditPaymentMethodBottomSheet(
                     }
                     if (bankName.isNotEmpty() && amount.isNotEmpty()) {
                         viewModel.bankAccountsViewModel.createObjectAndStoreIt(
-                            bankAccountsClass.bankAccountId, amount, bankName, selectedColor,bankAccountsClass
+                            bankAccountsClass.bankAccountId,
+                            amount,
+                            bankName,
+                            selectedColor,
+                            bankAccountsClass
                         )
                         closeBottomSheet()
                         return@launch
@@ -2025,7 +2034,7 @@ fun BottomSheetContentPaymentMethodEditContentNew(
     showError: Boolean,
     showExperimentalComponent: Boolean,
     removeError: () -> Unit,
-    saveButtonClicked: (bankAccountClass: BankAccountsClass,bankName: String, bankAmount: String, selectedColor: Int) -> Unit,
+    saveButtonClicked: (bankAccountClass: BankAccountsClass, bankName: String, bankAmount: String, selectedColor: Int) -> Unit,
 ) {
     var bankAmount by remember { mutableStateOf(TextFieldValue(bankAccountsClass.currentAmount.toString())) }
     var bankName by remember { mutableStateOf(TextFieldValue(bankAccountsClass.bankName)) }
@@ -2033,8 +2042,9 @@ fun BottomSheetContentPaymentMethodEditContentNew(
     var selectedColor by remember { mutableIntStateOf(bankAccountsClass.cardColorNumber) }
     val color = ColorState.fromNumber(selectedColor)!!
     val title = "Edit Bank Account"
+    val verticalScroll = rememberScrollState()
 
-    Column {
+    Column(Modifier.verticalScroll(verticalScroll)) {
         Text(
             text = title,
             modifier = modifier.fillMaxWidth(),
@@ -2120,6 +2130,26 @@ fun BottomSheetContentPaymentMethodEditContentNew(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             // visualTransformation = NumberCommaTransformation()
         )
+        if(false)
+        Row(modifier = modifier) {
+            Text(
+                text = "${LocalCurrency.current.currencySymbol}${bankAccountsClass.currentAmount} --> ${LocalCurrency.current.currencySymbol}${bankAmount.text}",
+                style = typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
+            )
+            Spacer(Modifier.width(24.dp))
+            val diff = bankAccountsClass.currentAmount.minus(if(bankAmount.text.isEmpty()) BigDecimal.ZERO else bankAmount.text.toBigDecimal())
+            val icon =
+                if (diff > BigDecimal.ZERO) Icons.Rounded.ArrowDropUp else Icons.Rounded.ArrowDropDown
+            val color = if (diff > BigDecimal.ZERO) successColor else failureColor
+            Icon(icon, contentDescription = null, tint = color)
+            Text(
+                text = "${LocalCurrency.current.currencySymbol}${diff} ",
+                style = typography.bodyLarge,
+                color = color
+            )
+
+        }
 
         Spacer(Modifier.height(16.dp))
 
@@ -2238,7 +2268,7 @@ fun BottomSheetContentPaymentMethodEditContentNew(
                 .padding(horizontalPadding, verticalPadding),
             colors = ButtonDefaults.filledTonalButtonColors(containerColor = MaterialTheme.colorScheme.primary),
             onClick = {
-                saveButtonClicked(bankAccountsClass,bankName.text, bankAmount.text, selectedColor)
+                saveButtonClicked(bankAccountsClass, bankName.text, bankAmount.text, selectedColor)
             },
         ) {
             Text(text = "Save", color = MaterialTheme.colorScheme.onPrimary)
@@ -2263,7 +2293,7 @@ private fun PaymentEditContentPreview() {
     BottomSheetContentPaymentMethodEditContentNew(
         modifier = Modifier.padding(16.dp, 0.dp), defaultBank,
         showError = true, false, {},
-        saveButtonClicked = { a, b, c,d -> },
+        saveButtonClicked = { a, b, c, d -> },
     )
 }
 

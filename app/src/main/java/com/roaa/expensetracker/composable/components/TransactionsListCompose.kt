@@ -144,7 +144,15 @@ fun TransactionsListCompose(
                 BigDecimal(100), 2,
                 RoundingMode.HALF_UP
             ).multiply(it.budgetSummary.notificationForBudgetUsage.toDouble().toBigDecimal())
-            if (effectivePercentageAmount < currentExpenseLocal) {
+            if (it.budgetSummary.totalBudgetAmount < currentExpenseLocal) {
+                sendNotification(
+                    context,
+                    budgetNotificationChannel,
+                    "‼️Budget Alert: 100% Used!",
+                    "You've already spent 100% of your budget. Keep track to stay on top of your expenses!"
+                )
+                viewModel.uiViewModel.isBudgetExceededNotificationIsSent.value = true
+            } else if (effectivePercentageAmount < currentExpenseLocal) {
                 if (!viewModel.uiViewModel.isBudgetExceededNotificationIsSent.value) {
                     sendNotification(
                         context,

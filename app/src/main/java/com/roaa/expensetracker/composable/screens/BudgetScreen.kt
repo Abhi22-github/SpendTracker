@@ -774,7 +774,7 @@ fun DayProgressIndicator(
                 .height(10.dp)
         ) {
             val canvasWidth = size.width
-            val segmentWidthForDayDecoration = canvasWidth / totalDays
+            val segmentWidthForDayDecoration = canvasWidth
             val segmentWidthForProgress = canvasWidth
 
             // Draw the total progress line
@@ -801,7 +801,7 @@ fun DayProgressIndicator(
             // Draw decorations for specific days
 
             if (isInBudget) {
-                val xOffset = (segmentWidthForDayDecoration * (day / totalDays))
+                val xOffset = (segmentWidthForDayDecoration * (day.toFloat() / totalDays.toFloat()))
                 drawRoundRect(
                     color = decorationColor,
                     topLeft = Offset(xOffset, 0f - height / 2),

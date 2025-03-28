@@ -107,7 +107,7 @@ fun sendNotification(
             .setContentTitle(title) // Title of the notification
             .setContentText(message) // Message of the notification
             .setContentIntent(pendingIntent)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setAutoCancel(true) // Automatically dismiss the notification when tapped
 
     notificationManager.notify(notificationId, notificationBuilder.build())

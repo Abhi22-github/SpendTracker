@@ -47,12 +47,12 @@ fun scheduleDailyNotification(context: Context) {
 }
 
 fun scheduleBudgetReminder(context: Context, budgetEndDate: LocalDate) {
-    val reminderDate = budgetEndDate.minusDays(1) // One day before expiry
+
     // Schedule at 5:00 PM
-    scheduleNotificationAtTime(context, reminderDate, 17, 0) // 17:00 (5 PM)
+    scheduleNotificationAtTime(context, budgetEndDate, 17, 0) // 17:00 (5 PM)
 
     // Schedule at 9:00 PM
-    scheduleNotificationAtTime(context, reminderDate, 21, 0) // 21:00 (9 PM)
+    scheduleNotificationAtTime(context, budgetEndDate, 21, 0) // 21:00 (9 PM)
 }
 
 private fun scheduleNotificationAtTime(context: Context, date: LocalDate, hour: Int, minute: Int) {
