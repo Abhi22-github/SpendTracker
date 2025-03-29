@@ -2,8 +2,7 @@
 <resources>
 
     <style name="Theme.ExpenseTracker.Splash" parent="Theme.SplashScreen">
-        <item name="windowSplashScreenBackground">@color/white</item>
-        <item name="android:windowSplashScreenAnimatedIcon">@drawable/splash_screen_animation</item>
+        <item name="windowSplashScreenAnimatedIcon">@drawable/ic_launcher_splash_screen</item>
         <item name="postSplashScreenTheme">@style/Theme.ExpenseTracker</item>
     </style>
 </resources>

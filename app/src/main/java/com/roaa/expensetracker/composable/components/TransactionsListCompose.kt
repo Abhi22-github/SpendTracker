@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -61,6 +62,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
@@ -205,6 +207,7 @@ fun TransactionsListCompose(
     Scaffold(
         floatingActionButton = {
             ExtendedFloatingActionButton(
+                modifier = Modifier.offset(y = 32.dp),
                 onClick = {
                     showAddBottomSheet = !showAddBottomSheet
                 },
@@ -229,7 +232,7 @@ fun TransactionsListCompose(
 
         val selectedMonth by viewModel.uiViewModel.selectedMonth.collectAsState()
         val pagerState = rememberPagerState(initialPage = 500 / 2, pageCount = { 500 })
-        val innerPagerState = rememberPagerState(initialPage = 1, pageCount = { 3 })
+        val innerPagerState = rememberPagerState(initialPage = 1, pageCount = { 1 })
 
         LaunchedEffect(selectedMonth) {
             val (firstDate, lastDate) = getFirstAndLastMonth(selectedMonth)
@@ -237,7 +240,7 @@ fun TransactionsListCompose(
             viewModel.transactionsViewModel.getTotalIncomeForRange(firstDate, lastDate)
         }
 
-        Column {
+        Column() {
             if (!showSingleDateTransactions) {
                 HorizontalPager(state = pagerState, userScrollEnabled = false) {
                     val (firstDate, lastDate) = getFirstAndLastMonth(selectedMonth)
@@ -268,16 +271,35 @@ fun TransactionsListCompose(
                                         HorizontalPager(
                                             state = innerPagerState,
                                             userScrollEnabled = true,
-                                            contentPadding = PaddingValues(
-                                                top = 0.dp,
-                                                end = 10.dp,
-                                                start = 10.dp,
-                                                bottom = 0.dp
-                                            ),
-                                            pageSpacing = -15.dp
+//                                            contentPadding = PaddingValues(
+//                                                top = 0.dp,
+//                                                end = 10.dp,
+//                                                start = 10.dp,
+//                                                bottom = 0.dp
+//                                            ),
+//                                            pageSpacing = -15.dp
                                         ) {
                                             when (it) {
-                                                0 -> HomeStatCardBudget(
+//                                                0 -> HomeStatCardBudget(
+//                                                    Modifier,
+//                                                    "${LocalCurrency.current.currencySymbol}${
+//                                                        parseAmount(
+//                                                            totalIncomeForMonth.totalAmount
+//                                                        )
+//                                                    }",
+//                                                    "${LocalCurrency.current.currencySymbol}${
+//                                                        parseAmount(
+//                                                            totalExpenseForMonth.totalAmount
+//                                                        )
+//                                                    }",
+//                                                    transactionListOfMonth.size,
+//                                                    selectedMonthString,
+//                                                    isCardExpanded,
+//                                                    { isCardExpanded = !isCardExpanded },
+//                                                    currentMonthAllDayAndDatesListAndMaxValue,
+//                                                )
+
+                                                0 -> HomeStatCardNew(
                                                     Modifier,
                                                     "${LocalCurrency.current.currencySymbol}${
                                                         parseAmount(
@@ -296,43 +318,24 @@ fun TransactionsListCompose(
                                                     currentMonthAllDayAndDatesListAndMaxValue,
                                                 )
 
-                                                1 -> HomeStatCardNew(
-                                                    Modifier,
-                                                    "${LocalCurrency.current.currencySymbol}${
-                                                        parseAmount(
-                                                            totalIncomeForMonth.totalAmount
-                                                        )
-                                                    }",
-                                                    "${LocalCurrency.current.currencySymbol}${
-                                                        parseAmount(
-                                                            totalExpenseForMonth.totalAmount
-                                                        )
-                                                    }",
-                                                    transactionListOfMonth.size,
-                                                    selectedMonthString,
-                                                    isCardExpanded,
-                                                    { isCardExpanded = !isCardExpanded },
-                                                    currentMonthAllDayAndDatesListAndMaxValue,
-                                                )
-
-                                                2 -> HomeStatCardNew(
-                                                    Modifier,
-                                                    "${LocalCurrency.current.currencySymbol}${
-                                                        parseAmount(
-                                                            totalIncomeForMonth.totalAmount
-                                                        )
-                                                    }",
-                                                    "${LocalCurrency.current.currencySymbol}${
-                                                        parseAmount(
-                                                            totalExpenseForMonth.totalAmount
-                                                        )
-                                                    }",
-                                                    transactionListOfMonth.size,
-                                                    selectedMonthString,
-                                                    isCardExpanded,
-                                                    { isCardExpanded = !isCardExpanded },
-                                                    currentMonthAllDayAndDatesListAndMaxValue,
-                                                )
+//                                                2 -> HomeStatCardNew(
+//                                                    Modifier,
+//                                                    "${LocalCurrency.current.currencySymbol}${
+//                                                        parseAmount(
+//                                                            totalIncomeForMonth.totalAmount
+//                                                        )
+//                                                    }",
+//                                                    "${LocalCurrency.current.currencySymbol}${
+//                                                        parseAmount(
+//                                                            totalExpenseForMonth.totalAmount
+//                                                        )
+//                                                    }",
+//                                                    transactionListOfMonth.size,
+//                                                    selectedMonthString,
+//                                                    isCardExpanded,
+//                                                    { isCardExpanded = !isCardExpanded },
+//                                                    currentMonthAllDayAndDatesListAndMaxValue,
+//                                                )
                                             }
                                         }
                                     }
@@ -362,7 +365,7 @@ fun TransactionsListCompose(
                                             else
                                                 bottomSheet = true
 
-                                        }, innerPagerState.settledPage == 0)
+                                        }, innerPagerState.settledPage == 1)
                                     }
                                 }
                             }
