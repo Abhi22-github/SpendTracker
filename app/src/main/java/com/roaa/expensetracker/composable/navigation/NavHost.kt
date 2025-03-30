@@ -114,7 +114,7 @@ fun RootNavGraph(
                 )
             }
             composable<Destinations.SettingScreen>() {
-                SettingsScreen(rooNavController, navigationManager, viewModel, {})
+                SettingsScreen(rooNavController, navigationManager, viewModel)
             }
 
             composable<Destinations.StatisticsScreen>() {
@@ -235,7 +235,7 @@ fun AppNavGraph(
                 )
             }
             composable<Destinations.SettingScreen>() {
-                SettingsScreen(rooNavController, navigationManager, viewModel, {})
+                SettingsScreen(rooNavController, navigationManager, viewModel)
             }
             composable<Destinations.StatisticsScreen>() {
                 StatisticsScreenTest(rooNavController, navigationManager, viewModel)

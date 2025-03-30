@@ -13,6 +13,11 @@ plugins {
 
 apply(plugin = "kotlin-android")
 
+// Define version components
+val versionMajor = 1
+val versionMinor = 0
+val versionPatch = 0
+val isBeta = true
 
 android {
     namespace = "com.roaa.expensetracker"
@@ -26,8 +31,8 @@ android {
         applicationId = "com.roaa.expensetracker"
         minSdk = 26
         targetSdk = 35
-        versionCode = 16
-        versionName = "1.6"
+        versionCode = versionMajor * 10000 + versionMinor * 100 + versionPatch
+        versionName = "${versionMajor}.${versionMinor}.${versionPatch}"+if (isBeta) "-beta" else ""
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         signingConfig = signingConfigs.getByName("debug")
 
