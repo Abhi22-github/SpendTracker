@@ -16,8 +16,8 @@ apply(plugin = "kotlin-android")
 // Define version components
 val versionMajor = 1
 val versionMinor = 0
-val versionPatch = 0
-val isBeta = true
+val versionPatch = 1
+val isBeta = false
 
 android {
     namespace = "com.roaa.expensetracker"
@@ -35,7 +35,7 @@ android {
         versionName = "${versionMajor}.${versionMinor}.${versionPatch}"+if (isBeta) "-beta" else ""
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         signingConfig = signingConfigs.getByName("debug")
-
+        setProperty("archivesBaseName", "et" + "-v" + versionCode + "(" + versionName + ")")
     }
 
 
@@ -85,7 +85,6 @@ dependencies {
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation(libs.activity)
-    implementation(libs.places)
     implementation(libs.core.ktx)
     implementation(libs.androidx.palette.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

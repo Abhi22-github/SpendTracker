@@ -75,7 +75,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
-import com.aay.chart.BuildConfig
 import com.roaa.expensetracker.R
 import com.roaa.expensetracker.composable.ThemeMode
 import com.roaa.expensetracker.composable.components.DropDownMenu
@@ -627,13 +626,21 @@ fun WorldCurrencyChooserContent(
     var searchValue by remember { mutableStateOf("") }
     val scrollState = rememberLazyListState()
 
+    fun safeScroll(index: Int) {
+        val lastIndex = scrollState.layoutInfo.totalItemsCount - 1
+        val target = index.coerceIn(0, lastIndex)
+        coroutineScope.launch {
+            scrollState.scrollToItem(target)
+        }
+    }
+
     LaunchedEffect(Unit) {
         if (defaultCurrency == null) return@LaunchedEffect
 
         coroutineScope.launch(start = CoroutineStart.UNDISPATCHED) {
             val index = list.indexOfFirst { it.countryName == defaultCurrency.countryName }
 
-            scrollState.scrollToItem(index)
+            safeScroll(index)
         }
     }
 
