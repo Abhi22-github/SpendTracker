@@ -29,6 +29,7 @@ class DatabaseModule() {
             context.applicationContext, AppDatabase::class.java, "appdatabase"
         )
             .addCallback(prePopulateData)
+            //.createFromAsset("database/database.db")
             .fallbackToDestructiveMigration()
             .build()
     }
