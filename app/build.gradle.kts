@@ -163,4 +163,8 @@ dependencies {
     implementation("com.himanshoe:charty:2.1.0-beta03.1")
     implementation("io.github.thechance101:chart:Beta-0.0.5")
     implementation("com.github.murgupluoglu:flagkit-android:1.0.2")
+    // For AppWidgets support
+    implementation ("androidx.glance:glance-appwidget:1.0.0")
+    // For interop APIs with Material 3
+    implementation ("androidx.glance:glance-material3:1.0.0")
 }

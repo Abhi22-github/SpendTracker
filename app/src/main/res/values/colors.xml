@@ -10,6 +10,10 @@
     <color name="textColor60">#99494949</color>
     <color name="expense_orange">#DF7D1A</color>
 
+    <color name="primary">#000</color>
+    <color name="surface">#fff</color>
+    <color name="onSurface">#000</color>
+
     <color name="md_theme_primary">#435E91</color>
     <color name="md_theme_onPrimary">#FFFFFF</color>
     <color name="md_theme_primaryContainer">#D8E2FF</color>
