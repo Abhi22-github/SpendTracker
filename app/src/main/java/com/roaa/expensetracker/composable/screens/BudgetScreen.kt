@@ -148,12 +148,13 @@ fun BudgetScreen(
             emptyBudgetClass, listOf(emptyBudgetDayClass)
         )
     }
-    val dayDifferenceForCharts = remember(getCurrentBudget.budgetSummary.budgetStartDate.toLocalDate()) {
-        getDayDifference(
-            getCurrentBudget.budgetSummary.budgetStartDate.toLocalDate(),
-            LocalDate.now()
-        )
-    }
+    val dayDifferenceForCharts =
+        remember(getCurrentBudget.budgetSummary.budgetStartDate.toLocalDate()) {
+            getDayDifference(
+                getCurrentBudget.budgetSummary.budgetStartDate.toLocalDate(),
+                LocalDate.now()
+            )
+        }
     BackHandler {
         handleBackNavigation(navigationManager)
     }
@@ -338,8 +339,8 @@ fun BudgetScreen(
                                 ) {
                                     SpendsBudgetCard(
                                         Modifier,
-                                        if (currentBudgetLocal == BigDecimal.ZERO) BigDecimal.ONE else currentBudgetLocal,
-                                        if (currentExpenseLocal == BigDecimal.ZERO) BigDecimal.ONE else currentExpenseLocal,
+                                        currentBudgetLocal,
+                                        currentExpenseLocal,
                                     )
                                 }
                                 Spacer(Modifier.height(12.dp))

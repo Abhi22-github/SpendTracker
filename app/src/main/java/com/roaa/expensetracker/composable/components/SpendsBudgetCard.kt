@@ -48,7 +48,7 @@ fun SpendsBudgetCard(
 ) {
     var flipCard by remember { mutableStateOf(false) }
     val context = LocalContext.current
-    val temp = spend.divide(budget, 4, RoundingMode.HALF_UP)
+    val temp = spend.divide(if(budget == BigDecimal.ZERO) BigDecimal.ONE else budget, 4, RoundingMode.HALF_UP)
     val percent = BigDecimal.ONE.minus(temp)
 
     val showPercentSpent = temp.multiply(BigDecimal(100)).setScale(2, RoundingMode.HALF_UP)
