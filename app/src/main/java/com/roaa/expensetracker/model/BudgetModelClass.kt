@@ -15,6 +15,6 @@ data class BudgetModelClass(
     val budgetEndDate: Long,
     val restDistributionType:Int,
     val notificationForBudgetUsage:BigDecimal,
-    val isActive: Boolean
+    var isActive: Boolean
 
 )

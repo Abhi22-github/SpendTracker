@@ -8,6 +8,7 @@ import androidx.work.NetworkType
 import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import androidx.work.workDataOf
 import java.time.LocalDate
 import java.time.ZoneId
 import java.util.Calendar
@@ -66,11 +67,11 @@ private fun scheduleNotificationAtTime(context: Context, date: LocalDate, hour: 
         OneTimeWorkRequestBuilder<BudgetRemainderNotificationWorker>().setInitialDelay(
             delay,
             TimeUnit.MILLISECONDS
-        ).build()
+        ).setInputData(workDataOf("budgetNotificationType" to 1)).build()
 
     WorkManager.getInstance(context)
         .enqueueUniqueWork(
-            "Budget $notificationTimeMillis",
+            "Budget (will expired) $notificationTimeMillis",
             ExistingWorkPolicy.REPLACE,
             workRequest
         )

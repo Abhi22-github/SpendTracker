@@ -84,6 +84,7 @@ import com.roaa.expensetracker.composable.utils.ActionTypes
 import com.roaa.expensetracker.composable.utils.DistributionMethod
 import com.roaa.expensetracker.database.relations.BudgetWithDayDetails
 import com.roaa.expensetracker.hilt.AllViewModel
+import com.roaa.expensetracker.notification.workManager.scheduleBudgetExpiryStatus
 import com.roaa.expensetracker.notification.workManager.scheduleBudgetReminder
 import com.roaa.expensetracker.utilities.DecimalFilterTransformation
 import com.roaa.expensetracker.utilities.LongMillisToNormalLong
@@ -299,6 +300,11 @@ fun SaveBudgetDetailsInDatabase(
         getValidDatesListFromLong(budgetStartDate.toLocalDate(), budgetEndDate.toLocalDate())
     )
     scheduleBudgetReminder(context, budgetEndDate.toLocalDate())
+    scheduleBudgetExpiryStatus(
+        context,
+        budgetEndDate.toLocalDate(),
+        budgetWithSummary.budgetSummary.budgetId
+    )
     focusManager.clearFocus()
     keyboardController?.hide()
 }
