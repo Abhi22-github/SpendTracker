@@ -745,8 +745,8 @@ fun WorldCurrencyChooserContent(
                 }
             }
 
-            Divider(
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
+            HorizontalDivider(
+                 color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
             )
 
             Row(

@@ -1,6 +1,7 @@
 package com.roaa.expensetracker.composable.components
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
@@ -155,13 +156,18 @@ import com.roaa.expensetracker.utilities.Constants.UPDATE
 import com.roaa.expensetracker.utilities.DecimalFilterTransformation
 import com.roaa.expensetracker.utilities.ErrorManager
 import com.roaa.expensetracker.utilities.convertMillisToDateString
+import com.roaa.expensetracker.utilities.convertTo12HourFormat
+import com.roaa.expensetracker.utilities.convertToEpochMillis
 import com.roaa.expensetracker.utilities.extractNumbers
+import com.roaa.expensetracker.utilities.extractTimeFromMillis
+import com.roaa.expensetracker.utilities.formatTimeForDisplay
 import com.roaa.expensetracker.utilities.getDayDifference
 import com.roaa.expensetracker.utilities.getMonthEndDate
 import com.roaa.expensetracker.utilities.getMonthStartDate
 import com.roaa.expensetracker.utilities.parseAmountWithPrecision
 import com.roaa.expensetracker.utilities.toDisplayStringForMonthWithYear
 import com.roaa.expensetracker.utilities.toLocalDate
+import com.roaa.expensetracker.utilities.toLong
 import com.roaa.expensetracker.utilities.toLongMillis
 import com.roaa.expensetracker.utilities.utilityModalClass.defaultBank
 import com.roaa.expensetracker.utilities.utilityModalClass.defaultCategoryClass
@@ -175,6 +181,7 @@ import kotlinx.coroutines.launch
 import java.math.BigDecimal
 import java.math.RoundingMode
 import java.time.LocalDate
+import java.time.LocalTime
 
 @Composable
 @OptIn(ExperimentalMaterial3Api::class)
@@ -238,6 +245,9 @@ fun BottomSheetContentItemAddContent(
     var expenseValue by remember { mutableStateOf(TextFieldValue("")) }
     var comment by remember { mutableStateOf(TextFieldValue("")) }
     var selectedDate by remember { mutableStateOf<Long?>(date) }
+    var selectedTimeInMillis by remember { mutableStateOf(System.currentTimeMillis()) }
+    var hour by remember { mutableStateOf(LocalTime.now().hour) }
+    var minute by remember { mutableStateOf(LocalTime.now().minute) }
     val focusRequester = remember { FocusRequester() }
     val expenseType = TransactionTypeClass(1, EXPENSE)
     val incomeType = TransactionTypeClass(2, INCOME)
@@ -665,7 +675,22 @@ fun BottomSheetContentItemAddContent(
                 modifier,
                 viewModel,
                 selectedDate,
-                { selectedDate = it },
+                { date, tempHour, tempMinute ->
+                    selectedDate = date
+                    selectedTimeInMillis = convertToEpochMillis(
+                        date = date?.toLocalDate() ?: LocalDate.now(),
+                        hour = tempHour,
+                        minute = tempMinute,
+                    )
+                    hour = tempHour
+                    minute = tempMinute
+                },
+                hour,
+                minute,
+                { tempHour, tempMinute ->
+                    hour = tempHour
+                    minute = tempMinute
+                },
                 bankAccountsList,
                 selectedPaymentMethod,
                 { selectedPaymentMethod = it },
@@ -690,6 +715,7 @@ fun BottomSheetContentItemAddContent(
                         expenseValue.text.replace(",", ""),
                         comment.text,
                         selectedDate,
+                        selectedTimeInMillis,
                         selectedPaymentMethod,
                         scope,
                         isDefaultCategorySet,
@@ -725,6 +751,10 @@ fun BottomSheetContentItemEditContent(
     var expenseValue by remember { mutableStateOf(TextFieldValue(singleTransaction.transaction.amount.toString())) }
     var comment by remember { mutableStateOf(TextFieldValue(singleTransaction.transaction.note)) }
     var selectedDate by remember { mutableStateOf<Long?>(singleTransaction.transaction.date) }
+    var selectedTimeInMillis by remember { mutableStateOf(System.currentTimeMillis()) }
+    val (normalHour,normalMinute) = extractTimeFromMillis(singleTransaction.transaction.dateWithTime)
+    var hour by remember { mutableStateOf(normalHour) }
+    var minute by remember { mutableStateOf(normalMinute) }
     var selectedPaymentMethod by remember { mutableStateOf<BankAccountsClass>(singleTransaction.BankAccount) }
     val focusRequester = remember { FocusRequester() }
     val categoryList by viewModel.categoryViewModel.categoryList.collectAsState()
@@ -1063,7 +1093,23 @@ fun BottomSheetContentItemEditContent(
                 modifier,
                 viewModel,
                 selectedDate,
-                { selectedDate = it },
+                { date, tempHour, tempMinute ->
+                    selectedDate = date
+                    selectedTimeInMillis = convertToEpochMillis(
+                        date = date?.toLocalDate() ?: LocalDate.now(),
+                        hour = tempHour,
+                        minute = tempMinute,
+                    )
+                    hour = tempHour
+                    minute = tempMinute
+
+                },
+                hour,
+                minute,
+                { tempHour, tempMinute ->
+                    hour = tempHour
+                    minute = tempMinute
+                },
                 bankAccountsList,
                 selectedPaymentMethod,
                 { selectedPaymentMethod = it },
@@ -1086,6 +1132,7 @@ fun BottomSheetContentItemEditContent(
                         expenseValue.text.replace(",", ""),
                         comment.text,
                         selectedDate,
+                        selectedTimeInMillis,
                         selectedPaymentMethod,
                         scope,
                         false,
@@ -1117,6 +1164,7 @@ fun validateTransactionData(
     amount: String,
     comment: String,
     selectedDate: Long?,
+    selectedTimeInMillis:Long,
     selectedPaymentMethod: BankAccountsClass,
     scope: CoroutineScope,
     isDefaultCategorySet: Boolean,
@@ -1145,10 +1193,12 @@ fun validateTransactionData(
             amount,
             comment,
             selectedDate,
+            selectedTimeInMillis,
             selectedPaymentMethod.bankAccountId
         ) else viewModel.transactionsViewModel.updateFormDataInDatabase(singleTransaction.transaction.also {
             it.type = type
             selectedDate?.let { date -> it.date = date }
+            it.dateWithTime = selectedTimeInMillis
             it.amount = amount.toBigDecimal()
             it.note = comment
             it.categoryId = selectedCategory.categoryId
@@ -1175,7 +1225,10 @@ fun BottomRow(
     modifier: Modifier,
     viewModel: AllViewModel,
     selectedDate: Long?,
-    selectedDateSetter: (Long?) -> Unit,
+    selectedDateSetter: (Long?, Int, Int) -> Unit,
+    hour: Int,
+    minute: Int,
+    setTime: (Int, Int) -> Unit,
     bankAccountsList: List<BankAccountsClass>,
     selectedBankAccount: BankAccountsClass,
     selectedPaymentMethodSetter: (BankAccountsClass) -> Unit,
@@ -1186,6 +1239,9 @@ fun BottomRow(
     )
     val colorPalletBlue = toPalette(blueColor)
     val scope = rememberCoroutineScope()
+
+    val (hour12, amPm) = convertTo12HourFormat(hour, minute)
+    val displayTime = formatTimeForDisplay(hour12, minute, amPm)
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -1198,7 +1254,7 @@ fun BottomRow(
             FilledTonalButton(
                 onClick = {
                     showDatePicker = !showDatePicker
-                    selectedDateSetter(selectedDate)
+                    // selectedDateSetter(selectedDate)
                 }, colors = ButtonDefaults.outlinedButtonColors(
                     contentColor = MaterialTheme.colorScheme.onSurface.copy(
                         alpha = secondaryAlphaForElements
@@ -1219,7 +1275,7 @@ fun BottomRow(
                     selectedDate?.let {
                         convertMillisToDateString(it.toLocalDate().toLongMillis())
                     } ?: "Date Error"
-                })
+                } + "($displayTime)")
 
             }
         }
@@ -1266,9 +1322,24 @@ fun BottomRow(
     }
 
     if (showDatePicker) {
-        DatePickerModal(datePickerState, onDateSelected = { date ->
-            selectedDateSetter(date)
-        }, onDismiss = { showDatePicker = !showDatePicker })
+        //temp comment
+//        DatePickerModal(datePickerState, onDateSelected = { date ->
+//            selectedDateSetter(date)
+//        }, onDismiss = { showDatePicker = !showDatePicker })
+        UpdatedDateTimePicker(
+            Modifier,
+            selectedDate?.toLocalDate() ?: LocalDate.now(),
+            hour,
+            minute,
+            saveButtonClicked = { date, tempHour, tempMinute ->
+                selectedDateSetter(
+                    date.toLong(),
+                    tempHour,
+                    tempMinute
+                )
+                setTime(tempHour, tempMinute)
+            },
+            dismissDialog = { showDatePicker = !showDatePicker })
     }
 }
 
@@ -1375,6 +1446,11 @@ fun BottomSheetContentItemDetailsContent(
 ) {
     var showDeleteConfirmation by remember { mutableStateOf(false) }
     var showEdit by remember { mutableStateOf(false) }
+    val (normalHour,normalMinute) = extractTimeFromMillis(singleTransaction.transaction.dateWithTime)
+    var hour by remember { mutableStateOf(normalHour) }
+    var minute by remember { mutableStateOf(normalMinute) }
+    val (hour12, amPm) = convertTo12HourFormat(hour, minute)
+    val displayTime = formatTimeForDisplay(hour12, minute, amPm)
     val labelAndValueStyle = typography.bodyMedium
     val scope = rememberCoroutineScope()
     val colorPalette =
@@ -1462,9 +1538,9 @@ fun BottomSheetContentItemDetailsContent(
                     ValueLabelList(
                         modifier = Modifier,
                         labelAndValueStyle = labelAndValueStyle,
-                        labelName = "Date",
+                        labelName = "Date & Time",
                         labelValue = singleTransaction.transaction.date.toLocalDate()
-                            .toDisplayStringForMonthWithYear(),
+                            .toDisplayStringForMonthWithYear()+"($displayTime)",
                         iconNumber = 12,
                         image = Icons.Outlined.DateRange,
                     )
@@ -2130,26 +2206,27 @@ fun BottomSheetContentPaymentMethodEditContentNew(
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             // visualTransformation = NumberCommaTransformation()
         )
-        if(false)
-        Row(modifier = modifier) {
-            Text(
-                text = "${LocalCurrency.current.currencySymbol}${bankAccountsClass.currentAmount} --> ${LocalCurrency.current.currencySymbol}${bankAmount.text}",
-                style = typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
-            )
-            Spacer(Modifier.width(24.dp))
-            val diff = bankAccountsClass.currentAmount.minus(if(bankAmount.text.isEmpty()) BigDecimal.ZERO else bankAmount.text.toBigDecimal())
-            val icon =
-                if (diff > BigDecimal.ZERO) Icons.Rounded.ArrowDropUp else Icons.Rounded.ArrowDropDown
-            val color = if (diff > BigDecimal.ZERO) successColor else failureColor
-            Icon(icon, contentDescription = null, tint = color)
-            Text(
-                text = "${LocalCurrency.current.currencySymbol}${diff} ",
-                style = typography.bodyLarge,
-                color = color
-            )
+        if (false)
+            Row(modifier = modifier) {
+                Text(
+                    text = "${LocalCurrency.current.currencySymbol}${bankAccountsClass.currentAmount} --> ${LocalCurrency.current.currencySymbol}${bankAmount.text}",
+                    style = typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(secondaryAlpha)
+                )
+                Spacer(Modifier.width(24.dp))
+                val diff =
+                    bankAccountsClass.currentAmount.minus(if (bankAmount.text.isEmpty()) BigDecimal.ZERO else bankAmount.text.toBigDecimal())
+                val icon =
+                    if (diff > BigDecimal.ZERO) Icons.Rounded.ArrowDropUp else Icons.Rounded.ArrowDropDown
+                val color = if (diff > BigDecimal.ZERO) successColor else failureColor
+                Icon(icon, contentDescription = null, tint = color)
+                Text(
+                    text = "${LocalCurrency.current.currencySymbol}${diff} ",
+                    style = typography.bodyLarge,
+                    color = color
+                )
 
-        }
+            }
 
         Spacer(Modifier.height(16.dp))
 
@@ -3050,8 +3127,10 @@ fun DistributionRadioButtons(
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(Modifier.weight(0.1f)) {
-                androidx.compose.animation.AnimatedVisibility(type == selectedDistributionMethod) {
-                    Icon(Icons.Rounded.Check, contentDescription = null)
+                Row() {
+                    AnimatedVisibility(type == selectedDistributionMethod) {
+                        Icon(Icons.Rounded.Check, contentDescription = null)
+                    }
                 }
             }
 
@@ -3159,7 +3238,7 @@ fun BankDetailsBottomSheetContent(
             Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
                 Text(
                     text = "Statistics",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = typography.titleMedium,
                     color = infoCardColors.onSurface
                 )
 
@@ -3172,7 +3251,7 @@ fun BankDetailsBottomSheetContent(
                             ).toBigDecimal(), 2, RoundingMode.HALF_UP
                         )
                     }/day in current Month",
-                    style = MaterialTheme.typography.labelLarge,
+                    style = typography.labelLarge,
                     color = infoCardColors.onSurface.copy(alpha = 0.6f)
                 )
                 Spacer(Modifier.height(16.dp))
@@ -3322,7 +3401,7 @@ fun CategoryDetailsBottomSheetContent(
             Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 16.dp)) {
                 Text(
                     text = "Statistics",
-                    style = MaterialTheme.typography.titleMedium,
+                    style = typography.titleMedium,
                     color = infoCardColors.onSurface
                 )
                 Spacer(Modifier.height(4.dp))
@@ -3357,7 +3436,7 @@ fun CategoryDetailsBottomSheetContent(
                             )).toBigDecimal(), 2, RoundingMode.HALF_UP
                         )
                     }/day in current Month",
-                    style = MaterialTheme.typography.labelLarge,
+                    style = typography.labelLarge,
                     color = infoCardColors.onSurface.copy(alpha = 0.6f)
                 )
                 Spacer(Modifier.height(16.dp))

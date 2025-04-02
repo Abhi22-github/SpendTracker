@@ -7,7 +7,10 @@ import java.text.DecimalFormat
 import java.text.SimpleDateFormat
 import java.time.Instant
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
 import java.time.YearMonth
+import java.time.ZoneId
 import java.time.ZoneOffset
 import java.time.format.DateTimeFormatter
 import java.time.format.TextStyle
@@ -514,4 +517,33 @@ fun getMonthsBetween(startDate: LocalDate, endDate: LocalDate): List<YearMonth> 
 fun getAllDatesInMonth(monthYear: YearMonth): List<LocalDate> {
     val daysInMonth = monthYear.lengthOfMonth() // Get total days in the month
     return (1..daysInMonth).map { day -> LocalDate.of(monthYear.year, monthYear.monthValue, day) }
+}
+
+fun convertTo12HourFormat(hour24: Int, minute: Int): Pair<Int, String> {
+    return when {
+        hour24 == 0 -> Pair(12, "AM")  // 00:00 becomes 12 AM
+        hour24 < 12 -> Pair(hour24, "AM")
+        hour24 == 12 -> Pair(12, "PM")
+        else -> Pair(hour24 - 12, "PM")
+    }
+}
+
+fun formatTimeForDisplay(hour: Int, minute: Int, amPm: String): String {
+    return String.format("%d:%02d %s", hour, minute, amPm)
+}
+
+fun convertToEpochMillis(
+    date: LocalDate,
+    hour: Int,
+    minute: Int,
+    zoneId: ZoneId = ZoneId.systemDefault()
+): Long {
+    val localDateTime = LocalDateTime.of(date, LocalTime.of(hour, minute))
+    return localDateTime.atZone(zoneId).toInstant().toEpochMilli()
+}
+
+fun extractTimeFromMillis(millis: Long): Pair<Int, Int> {
+    val instant = Instant.ofEpochMilli(millis)
+    val zonedDateTime = instant.atZone(ZoneId.systemDefault())
+    return zonedDateTime.hour to zonedDateTime.minute
 }

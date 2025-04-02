@@ -105,6 +105,7 @@ class TransactionsViewModel @Inject constructor(
         expenseValue: String,
         comment: String,
         selectedDate: Long?,
+        selectedTimeInMillis:Long,
         selectedBankAccountId: Long,
     ) {
         storeFormDataInDatabase(
@@ -112,8 +113,9 @@ class TransactionsViewModel @Inject constructor(
             amount = expenseValue,
             note = comment,
             date = selectedDate ?: LocalDate.now().toLong(),
-            selectedCategoryId,
-            selectedBankAccountId,
+            selectedTimeInMillis = selectedTimeInMillis,
+            selectedCategoryId = selectedCategoryId,
+            selectedBankAccountId =selectedBankAccountId,
         )
     }
 
@@ -123,6 +125,7 @@ class TransactionsViewModel @Inject constructor(
         amount: String,
         note: String,
         date: Long,
+        selectedTimeInMillis : Long,
         selectedCategoryId: Long,
         selectedBankAccountId: Long
     ) {
@@ -133,7 +136,7 @@ class TransactionsViewModel @Inject constructor(
             type = expense.trim { it <= ' ' },
             amount = amount.trim { it <= ' ' }.replace(",", "").toBigDecimal(),
             note = note.trim { it <= ' ' },
-            dateWithTime = System.currentTimeMillis(),
+            dateWithTime = selectedTimeInMillis,
             date = date,
             includeInRespectiveBudget = true,
             categoryId = selectedCategoryId,
