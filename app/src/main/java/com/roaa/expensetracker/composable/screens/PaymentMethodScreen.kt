@@ -196,6 +196,7 @@ fun PaymentMethodScreen(
             {
                 bankAccountsClass = it
                 showEditBottomSheet = !showEditBottomSheet
+                showBankDetailsBottomSheet = !showBankDetailsBottomSheet
             },
             {
                 bankAccountsClass = it
