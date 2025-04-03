@@ -26,6 +26,8 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.AccessTime
+import androidx.compose.material.icons.rounded.ChevronLeft
+import androidx.compose.material.icons.rounded.ChevronRight
 import androidx.compose.material.icons.rounded.Keyboard
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -51,11 +53,13 @@ import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,9 +74,11 @@ import com.roaa.expensetracker.composable.screens.horizontalPadding
 import com.roaa.expensetracker.utilities.LongMillisToNormalLong
 import com.roaa.expensetracker.utilities.convertTo12HourFormat
 import com.roaa.expensetracker.utilities.formatTimeForDisplay
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -334,15 +340,26 @@ fun UpdatedDateTimePickerContent(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
                         .padding(horizontalPadding, 16.dp)
-
+                        .fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     val (hour12, amPm) = convertTo12HourFormat(hour, minute)
                     val displayTime = formatTimeForDisplay(hour12, minute, amPm)
-                    Icon(Icons.Rounded.AccessTime, contentDescription = null)
-                    Spacer(Modifier.width(12.dp))
+                    Row() {
+                        Icon(
+                            Icons.Rounded.AccessTime,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f)
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            text = "Time", style = typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                        )
+                    }
                     Text(
                         text = displayTime, style = typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurface,
+                        color = MaterialTheme.colorScheme.primary,
                     )
 
                 }
@@ -396,15 +413,39 @@ fun CustomDatePickerDialog(
     onDateSelected: (LocalDate) -> Unit,
     onDismiss: () -> Unit
 ) {
+    val CENTER_PAGE = MAX_MONTHS / 2
+    val scope = rememberCoroutineScope()
+
+    val initialPage = remember(selectedDate) {
+        CENTER_PAGE + ChronoUnit.MONTHS.between(
+            LocalDate.now().withDayOfMonth(1),
+            selectedDate.withDayOfMonth(1)
+        ).toInt().coerceIn(0, MAX_MONTHS - 1)
+    }
+
     val pagerState = rememberPagerState(
-        initialPage = 12,
-        pageCount = { 24 }
+        initialPage = initialPage,
+        pageCount = { MAX_MONTHS }
     )
-    val visibleMonth by remember {
+    val visibleMonth by remember(pagerState.currentPage) {
         derivedStateOf {
-            selectedDate.plusMonths(pagerState.currentPage.toLong() - MAX_MONTHS / 2L)
+            LocalDate.now()
+                .withDayOfMonth(1)
+                .plusMonths((pagerState.currentPage - CENTER_PAGE).toLong())
         }
     }
+    LaunchedEffect(selectedDate) {
+        val targetPage = CENTER_PAGE + ChronoUnit.MONTHS.between(
+            LocalDate.now().withDayOfMonth(1),
+            selectedDate.withDayOfMonth(1)
+        ).toInt().coerceIn(0, MAX_MONTHS - 1)
+
+        if (pagerState.currentPage != targetPage) {
+            pagerState.animateScrollToPage(targetPage)
+        }
+    }
+    // Month header
+    // val monthDate = selectedDate.plusMonths(pagerState.currentPage.toLong() - ((MAX_MONTHS / 2L)))
     Column(
         modifier = Modifier
             .padding(16.dp)
@@ -412,21 +453,51 @@ fun CustomDatePickerDialog(
             .fillMaxWidth()
 
     ) {
-        // Month header
-
         // Month pager
         HorizontalPager(
             state = pagerState,
         ) { page ->
+            val monthDate = LocalDate.now()
+                .withDayOfMonth(1)
+                .plusMonths((page - CENTER_PAGE).toLong())
             Column {
-                Text(
-                    text = visibleMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
-                    style = typography.titleMedium,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
-                    textAlign = TextAlign.Center
-                )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    IconButton(onClick = {
+                        scope.launch {
+                            pagerState.animateScrollToPage(
+                                page = (pagerState.currentPage - 1).coerceAtLeast(0)
+                            )
+                        }
+                    }) {
+                        Icon(
+                            Icons.Rounded.ChevronLeft,
+                            contentDescription = null
+                        )
+                    }
+                    Text(
+                        text = visibleMonth.format(DateTimeFormatter.ofPattern("MMMM yyyy")),
+                        style = typography.titleMedium,
+                        modifier = Modifier
+                            .padding(vertical = 8.dp),
+                        textAlign = TextAlign.Center
+                    )
+                    IconButton(onClick = {
+                        scope.launch {
+                            pagerState.animateScrollToPage(
+                                page = (pagerState.currentPage + 1).coerceAtMost(MAX_MONTHS - 1)
+                            )
+                        }
+                    }) {
+                        Icon(
+                            Icons.Rounded.ChevronRight,
+                            contentDescription = null
+                        )
+                    }
+                }
                 Spacer(Modifier.height(18.dp))
 
                 // Days of week header
@@ -445,7 +516,6 @@ fun CustomDatePickerDialog(
                     }
                 }
 
-                val monthDate = selectedDate.plusMonths(page.toLong() - MAX_MONTHS / 2L)
                 MonthCalendar(
                     month = monthDate,
                     selectedDate = selectedDate,
