@@ -67,6 +67,7 @@ interface BankAccountDao {
             finalAmount = bankAccountsClass.currentAmount,
             difference = bankAccountsClass.currentAmount.minus(bankAccountsClass.initialAmount),
             startingAmount = BigDecimal.ZERO,
+            addedTimeStamp = System.currentTimeMillis(),
         )
         insert(dailyBalance)
     }
@@ -84,6 +85,7 @@ interface BankAccountDao {
             finalAmount = bankAccountsClass.currentAmount,
             difference = bankAccountsClass.currentAmount.minus(oldBankAccount.currentAmount),
             startingAmount = BigDecimal.ZERO,
+            addedTimeStamp = System.currentTimeMillis(),
         )
         insert(dailyBalance)
     }

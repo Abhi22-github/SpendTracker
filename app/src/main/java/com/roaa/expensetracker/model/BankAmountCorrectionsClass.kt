@@ -13,6 +13,7 @@ data class BankAmountCorrectionsClass(
     var id: Long,
     var bankAccountId: Long,
     var date: Long,
+    var addedTimeStamp: Long = 0,
     var finalAmount: BigDecimal,
     var difference: BigDecimal,
     var startingAmount: BigDecimal,

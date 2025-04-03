@@ -10,6 +10,7 @@ import com.roaa.expensetracker.database.BudgetDao
 import com.roaa.expensetracker.database.BudgetDayDao
 import com.roaa.expensetracker.database.CategoryDao
 import com.roaa.expensetracker.database.TransactionDao
+import com.roaa.expensetracker.database.databaseUtils.MIGRATION_1_2
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -30,6 +31,7 @@ class DatabaseModule() {
         )
             .addCallback(prePopulateData)
             //.createFromAsset("database/database.db")
+            .addMigrations(MIGRATION_1_2)
             .fallbackToDestructiveMigration()
             .build()
     }

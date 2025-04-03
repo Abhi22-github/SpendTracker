@@ -31,7 +31,11 @@ data class BankAccountsClass(
     @Serializable(with = BigDecimalSerializer::class)
     val currentAmount: BigDecimal,
     val accountAddedDate: Long,
+   // @ColumnInfo(defaultValue = "1735689600000")
+    val accountAddedTimestamp:Long ,
     val balanceLastUpdatedDate: Long,
+    //@ColumnInfo(defaultValue = "1735689600000")
+    val balanceLastUpdatedTimeStamp:Long ,
     val bankName: String,
     val cardColorNumber: Int,
     val cardIconNumber: Int,
@@ -49,7 +53,9 @@ object BankAccountsSerializer : Serializer<BankAccountsClass> {
             BigDecimal.ZERO,
             BigDecimal.ZERO,
             20250101,
+            1735689600000,
             20250101,
+            1735689600000,
             "Cash",
             1,
             25,

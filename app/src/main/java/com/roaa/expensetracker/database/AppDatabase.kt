@@ -17,10 +17,8 @@ import com.roaa.expensetracker.model.TransactionClass
 @TypeConverters(RoomConverters::class)
 @Database(
     entities = [TransactionClass::class, CategoryClass::class, BankAccountsClass::class, BudgetModelClass::class, BudgetDayModelClass::class, BankAmountCorrectionsClass::class],
-    version = 1,
+    version = 2,
     exportSchema = true,
-    autoMigrations = [
-    ]
 )
 abstract class AppDatabase : RoomDatabase() {
 
@@ -62,7 +60,7 @@ abstract class AppDatabase : RoomDatabase() {
                 db.execSQL("INSERT INTO category_table(categoryName, categoryColorNumber, categoryIconNumber, categoryType,isActive) VALUES('Other',1,99,'Income',1) ")
 
                 //payment method cash
-                db.execSQL("INSERT INTO bank_accounts(initialAmount, currentAmount, bankName, accountAddedDate, balanceLastUpdatedDate,cardColorNumber,cardIconNumber,accountType,isActive) VALUES('0','0','Cash',20250101,20250101,1,25,'CASH',1) ")
+                db.execSQL("INSERT INTO bank_accounts(initialAmount, currentAmount, bankName, accountAddedDate,accountAddedTimestamp, balanceLastUpdatedDate,balanceLastUpdatedTimeStamp,cardColorNumber,cardIconNumber,accountType,isActive) VALUES('0','0','Cash',20250101,1735689600000,20250101,1735689600000,1,25,'CASH',1) ")
             }
         }
     }

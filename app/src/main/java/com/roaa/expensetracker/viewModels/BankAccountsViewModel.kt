@@ -120,12 +120,17 @@ class BankAccountsViewModel @Inject constructor(private val bankAccountRepositor
             currentAmount = bankAmount.toBigDecimal(),
             accountAddedDate = if (id == 0L) LocalDate.now()
                 .toLong() else bankAccountsClass.accountAddedDate,
+            accountAddedTimestamp = if (id == 0L) System.currentTimeMillis()
+                .toLong() else bankAccountsClass.accountAddedTimestamp,
             balanceLastUpdatedDate = LocalDate.now().toLong(),
+            balanceLastUpdatedTimeStamp = System.currentTimeMillis(),
             bankName = bankName,
             cardColorNumber = selectedColor,
             cardIconNumber = 24,
             accountType = PRIMARY,
-            isActive = true
+            isActive = true,
+
+
         )
         storeBankAccount(bankAccountObj,bankAccountsClass)
     }
