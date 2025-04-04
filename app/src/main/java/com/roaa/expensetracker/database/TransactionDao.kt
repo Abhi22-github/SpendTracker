@@ -165,7 +165,9 @@ interface TransactionDao {
         val updatedBank = bankAccount.copy(
             currentAmount = remBalance
         )
-        update(updatedBank)
+        if (transactionClass.dateWithTime >= bankAccount.balanceLastUpdatedTimeStamp) {
+            update(updatedBank)
+        }
 
         val currentBudget = getCurrentBudget
 
@@ -213,21 +215,21 @@ interface TransactionDao {
         ) ?: BigDecimal.ZERO
 
         val oldBankIncome = getTotalAmountForBankWithDateWithoutFlow(
-           bankAccount.balanceLastUpdatedTimeStamp,
+            bankAccount.balanceLastUpdatedTimeStamp,
             transactionClass.dateWithTime,
             INCOME,
             oldBankAccount.bankAccountId
         ) ?: BigDecimal.ZERO
 
         val bankExpense = getTotalAmountForBankWithDateWithoutFlow(
-           bankAccount.balanceLastUpdatedTimeStamp,
+            bankAccount.balanceLastUpdatedTimeStamp,
             transactionClass.dateWithTime,
             EXPENSE,
             transactionClass.bankAccountId
         ) ?: BigDecimal.ZERO
 
         val bankIncome = getTotalAmountForBankWithDateWithoutFlow(
-           bankAccount.balanceLastUpdatedTimeStamp,
+            bankAccount.balanceLastUpdatedTimeStamp,
             transactionClass.dateWithTime,
             INCOME,
             transactionClass.bankAccountId
@@ -242,8 +244,12 @@ interface TransactionDao {
         val updatedBank = bankAccount.copy(
             currentAmount = remBalance
         )
-        update(updateOldBank)
-        update(updatedBank)
+        if (transactionClass.dateWithTime >= oldBankAccount.balanceLastUpdatedTimeStamp) {
+            update(updateOldBank)
+        }
+        if (transactionClass.dateWithTime >= bankAccount.balanceLastUpdatedTimeStamp) {
+            update(updatedBank)
+        }
 
         val currentBudget = getCurrentBudget
 
@@ -297,14 +303,14 @@ interface TransactionDao {
         val bankAccount = getSingleBankAccountWithoutFlow(transactionClass.bankAccountId)
 
         val bankExpense = getTotalAmountForBankWithDateWithoutFlow(
-           bankAccount.balanceLastUpdatedTimeStamp,
+            bankAccount.balanceLastUpdatedTimeStamp,
             transactionClass.dateWithTime,
             EXPENSE,
             transactionClass.bankAccountId
         ) ?: BigDecimal.ZERO
 
         val bankIncome = getTotalAmountForBankWithDateWithoutFlow(
-           bankAccount.balanceLastUpdatedTimeStamp,
+            bankAccount.balanceLastUpdatedTimeStamp,
             transactionClass.dateWithTime,
             INCOME,
             transactionClass.bankAccountId
@@ -313,7 +319,9 @@ interface TransactionDao {
         val updatedBank = bankAccount.copy(
             currentAmount = remBalance
         )
-        update(updatedBank)
+        if (transactionClass.dateWithTime >= bankAccount.balanceLastUpdatedTimeStamp) {
+            update(updatedBank)
+        }
 
         val currentBudget = getCurrentBudget
 
