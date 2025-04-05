@@ -106,7 +106,8 @@ class BudgetViewModel @Inject constructor(private val budgetRepository: BudgetRe
             budgetEndDate = budgetMonthEndDate,
             restDistributionType = when (restDistributionValue) {
                 DistributionMethod.DEFAULT -> 1
-                DistributionMethod.SPILLOVER -> 2
+                DistributionMethod.DISTRIBUTION -> 2
+                DistributionMethod.SPILLOVER -> 3
             },
             notificationForBudgetUsage = notificationUsageValue,
             isActive = true
