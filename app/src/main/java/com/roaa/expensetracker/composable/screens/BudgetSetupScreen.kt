@@ -382,7 +382,8 @@ fun BottomSheetBudgetContent(
         )
         if (totalAmountText.text.isNotEmpty() && totalAmountText.text.toBigDecimal() != BigDecimal.ZERO) {
             totalAmountPerDay =
-                totalAmountText.text.toBigDecimal().div(totalDaysRemaining.toBigDecimal())
+                totalAmountText.text.toBigDecimal()
+                    .div(if (totalDaysRemaining.toBigDecimal() == BigDecimal.ZERO) BigDecimal.ONE else totalDaysRemaining.toBigDecimal())
         } else {
             totalAmountPerDay = BigDecimal.ZERO
         }
