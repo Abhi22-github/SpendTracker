@@ -68,7 +68,7 @@ android {
         buildConfig = true
     }
     composeOptions {
-        kotlinCompilerExtensionVersion = "1.5.1"
+        kotlinCompilerExtensionVersion = "1.7.0"
     }
 
 
@@ -81,13 +81,14 @@ android {
 dependencies {
     implementation(libs.appcompat)
     implementation(libs.androidx.material3)
-    implementation(libs.material)
+    implementation(libs.androidx.material3.expressive)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation(libs.activity)
     implementation(libs.core.ktx)
     implementation(libs.androidx.palette.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.material3)
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
