@@ -1,7 +1,6 @@
 package com.roaa.expensetracker
 
 import android.app.Application
-import com.google.android.material.color.DynamicColors
 import com.google.firebase.Firebase
 import com.google.firebase.analytics.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
@@ -20,6 +19,5 @@ class App : Application() {
 
         // Optional: Disable Firebase Analytics for Debug
         Firebase.analytics.setAnalyticsCollectionEnabled(!isDebuggable)
-        DynamicColors.applyToActivitiesIfAvailable(this)
     }
 }

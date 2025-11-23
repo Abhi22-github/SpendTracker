@@ -4,7 +4,6 @@ package com.roaa.expensetracker.composable
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Build
-import androidx.appcompat.app.AppCompatDelegate
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
@@ -494,7 +493,7 @@ fun syncTheme(context: Context) {
                 preferences[THEME_MODE] ?: ThemeMode.SYSTEM.toString()
             }.first()
     }
-    changeThemeSystemWide(mode)
+   // changeThemeSystemWide(mode)
 }
 
 @Composable
@@ -509,19 +508,19 @@ fun isNightMode(preferencesViewModel: PreferencesViewModel = hiltViewModel()): B
 }
 
 fun changeThemeSystemWide(mode: String) {
-    when (mode) {
-        ThemeMode.LIGHT.toString() -> {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
-        }
-
-        ThemeMode.SYSTEM.toString() -> {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
-        }
-
-        ThemeMode.NIGHT.toString() -> {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
-        }
-    }
+//    when (mode) {
+//        ThemeMode.LIGHT.toString() -> {
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO)
+//        }
+//
+//        ThemeMode.SYSTEM.toString() -> {
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM)
+//        }
+//
+//        ThemeMode.NIGHT.toString() -> {
+//            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES)
+//        }
+//    }
 }
 
 

@@ -81,7 +81,7 @@ android {
 dependencies {
     implementation(libs.appcompat)
     implementation(libs.androidx.material3)
-    implementation(libs.androidx.material3.expressive)
+    //implementation(libs.androidx.material3.expressive)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation(libs.activity)
