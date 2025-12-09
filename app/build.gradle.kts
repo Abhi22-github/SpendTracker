@@ -15,7 +15,7 @@ apply(plugin = "kotlin-android")
 
 // Define version components
 val versionMajor = 1
-val versionMinor = 1
+val versionMinor = 2
 val versionPatch = 1
 val isBeta = true
 
@@ -81,7 +81,6 @@ android {
 dependencies {
     implementation(libs.appcompat)
     implementation(libs.androidx.material3)
-    //implementation(libs.androidx.material3.expressive)
     implementation(libs.navigation.fragment)
     implementation(libs.navigation.ui)
     implementation(libs.activity)

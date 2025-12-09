@@ -71,7 +71,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.style.TextAlign
@@ -153,12 +152,7 @@ class ComposeMainActivity : ComponentActivity() {
             val startDestination =
                 if (onboardingCompletedStatus) Destinations.ListScreen else Destinations.WelcomeScreen
 
-            NotificationPermissionHandler(
-                onPermissionGranted = {
-                },
-                onPermissionDenied = {
-                }
-            )
+            NotificationPermissionHandler(onPermissionGranted = {}, onPermissionDenied = {})
 
             scheduleDailyNotification(this)
             allViewModels.preferencesViewModel.setFirstStartupCompleted()
@@ -175,15 +169,12 @@ class ComposeMainActivity : ComponentActivity() {
                 isReady.value = true
             }
             val widthSizeClass = calculateWindowSizeClass(this).widthSizeClass
-            val deviceDensity = LocalDensity.current
 
             if (widthSizeClass == WindowWidthSizeClass.Compact) {
                 lockScreenOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT)
             }
 
-            val windowInsets = WindowInsets
-                .systemBars
-                .asPaddingValues()
+            val windowInsets = WindowInsets.systemBars.asPaddingValues()
 
             val errorMessage = remember { mutableStateOf<String>("") }
             val localCurrencyClass by allViewModels.preferencesViewModel.getCurrency.collectAsState(
@@ -199,10 +190,7 @@ class ComposeMainActivity : ComponentActivity() {
                         LocalCurrency provides localCurrencyClass
                     ) {
                         NavigationDrawer(
-                            rootNavController,
-                            navigationManager,
-                            allViewModels,
-                            startDestination
+                            rootNavController, navigationManager, allViewModels, startDestination
                         )
                         LaunchedEffect(Unit) {
                             // App rendered and splash screen can be hidden
@@ -244,7 +232,6 @@ fun NavigationDrawer(
 
     val section1 = section1Items
     val section2 = section2Items
-    val deviceDensity = LocalDensity.current
 
     val currentBackStackEntry by rootNavController.currentBackStackEntryAsState()
     val currentRoute = currentBackStackEntry?.destination?.route?.substringBefore("/")
@@ -278,8 +265,7 @@ fun NavigationDrawer(
     val showMonthFilterChips by allViewModels.uiViewModel.showMonthFilterChips.collectAsState()
 
     ModalNavigationDrawer(
-        drawerState = drawerState,
-        drawerContent = {
+        drawerState = drawerState, drawerContent = {
             CompositionLocalProvider(
             ) {
                 Box(
@@ -291,8 +277,7 @@ fun NavigationDrawer(
                             .width(320.dp)
                             .clickable(enabled = drawerState.isOpen) { // Close on outside tap
                                 scope.launch { drawerState.close() }
-                            })
-                    {
+                            }) {
                         Spacer(modifier = Modifier.height(16.dp)) //space (margin) from top
                         Row(
                             modifier = Modifier.padding(20.dp, 8.dp),
@@ -316,12 +301,12 @@ fun NavigationDrawer(
                         section1.forEachIndexed { index, item ->
                             NavigationDrawerItem(
                                 label = {
-                                    Text(
-                                        text = item.title,
-                                        modifier = Modifier.padding(12.dp, 0.dp),
-                                        style = MaterialTheme.typography.labelLarge
-                                    )
-                                },
+                                Text(
+                                    text = item.title,
+                                    modifier = Modifier.padding(12.dp, 0.dp),
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            },
                                 selected = index == selectedItemIndex,
                                 onClick = {
                                     selectedItemIndex = index
@@ -347,8 +332,7 @@ fun NavigationDrawer(
                                         )
                                     }
                                 },
-                                modifier = Modifier
-                                    .padding(NavigationDrawerItemDefaults.ItemPadding) //padding between items
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding) //padding between items
                             )
                         }
 
@@ -360,12 +344,12 @@ fun NavigationDrawer(
                         section2.forEachIndexed { index, item ->
                             NavigationDrawerItem(
                                 label = {
-                                    Text(
-                                        text = item.title,
-                                        modifier = Modifier.padding(12.dp, 0.dp),
-                                        style = MaterialTheme.typography.labelLarge
-                                    )
-                                },
+                                Text(
+                                    text = item.title,
+                                    modifier = Modifier.padding(12.dp, 0.dp),
+                                    style = MaterialTheme.typography.labelLarge
+                                )
+                            },
                                 selected = false,
                                 onClick = {
                                     scope.launch {
@@ -389,8 +373,7 @@ fun NavigationDrawer(
                                         )
                                     }
                                 },
-                                modifier = Modifier
-                                    .padding(NavigationDrawerItemDefaults.ItemPadding) //padding between items
+                                modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding) //padding between items
                             )
                         }
 
@@ -493,10 +476,7 @@ fun NavigationDrawer(
                                 ) {
                                     items(monthList) {
                                         MonthChip(
-                                            it,
-                                            currentYear,
-                                            selectedMonth,
-                                            {
+                                            it, currentYear, selectedMonth, {
                                                 scope.launch {
                                                     allViewModels.uiViewModel.selectedMonth.emit(it)
                                                 }
@@ -509,10 +489,7 @@ fun NavigationDrawer(
                 ) { innerPadding ->
                     Column(Modifier.padding(innerPadding)) {
                         RootNavGraph(
-                            rootNavController,
-                            navigationManager,
-                            allViewModels,
-                            startDestination
+                            rootNavController, navigationManager, allViewModels, startDestination
                         )
                     }
 
