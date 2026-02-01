@@ -526,7 +526,7 @@ fun StatisticsScreenTest(
                 )
             }
     categoryListData.onEachIndexed { index, entry ->
-        entry.value.color = colorList[index]
+        entry.value.color = colorList[index % colorList.size]
         entry.value.percentage =
             ((entry.value.totalAmount.divide(
                 if (totalAmount == BigDecimal.ZERO) BigDecimal.ONE else totalAmount, 2,

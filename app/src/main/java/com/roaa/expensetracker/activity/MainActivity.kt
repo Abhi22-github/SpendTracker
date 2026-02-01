@@ -212,7 +212,7 @@ class ComposeMainActivity : ComponentActivity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         // Handle any additional logic here if needed
-        if (intent?.getBooleanExtra("SHOW_ADD_TRANSACTION", false) == true) {
+        if (intent.getBooleanExtra("SHOW_ADD_TRANSACTION", false) == true) {
             notificationUiViewModel.isNotificationClicked = true // Update state
         }
     }
