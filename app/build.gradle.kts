@@ -16,8 +16,8 @@ apply(plugin = "kotlin-android")
 // Define version components
 val versionMajor = 1
 val versionMinor = 2
-val versionPatch = 1
-val isBeta = true
+val versionPatch = 2
+val isBeta = false
 
 android {
     namespace = "com.roaa.expensetracker"
