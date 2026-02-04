@@ -16,7 +16,7 @@ apply(plugin = "kotlin-android")
 // Define version components
 val versionMajor = 1
 val versionMinor = 2
-val versionPatch = 2
+val versionPatch = 3
 val isBeta = false
 
 android {

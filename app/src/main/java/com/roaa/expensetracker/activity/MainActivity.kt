@@ -6,6 +6,7 @@ import android.content.pm.ActivityInfo
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Image
@@ -123,10 +124,12 @@ class ComposeMainActivity : ComponentActivity() {
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
+        enableEdgeToEdge()
         super.onCreate(savedInstanceState)
         if (intent?.getBooleanExtra("SHOW_ADD_TRANSACTION", false) == true) {
             notificationUiViewModel.isNotificationClicked = true // Update state
         }
+
         WindowCompat.setDecorFitsSystemWindows(window, false)
         installSplashScreen().setKeepOnScreenCondition { !isDone.value }
 
