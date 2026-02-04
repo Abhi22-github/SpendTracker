@@ -1106,7 +1106,7 @@ fun FilterBottomSheetContent(
         rememberDatePickerState(initialSelectedDateMillis = endDate.toLocalDate().toLongMillis())
     var showStartDateDayPicker by remember { mutableStateOf(false) }
     var showEndDateDayPicker by remember { mutableStateOf(false) }
-    Column(Modifier) {
+    Column(Modifier.verticalScroll(rememberScrollState())) {
         Column(
             verticalArrangement = Arrangement.Top, modifier = Modifier
         ) {
