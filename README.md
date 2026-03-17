@@ -64,8 +64,8 @@ A clean, modern personal finance app for Android to track expenses, manage budge
 ## Getting Started
 
 ```bash
-git clone https://github.com/abhisatpute/ExpenseTracker.git
-cd ExpenseTracker
+git clone https://github.com/Abhi22-github/SpendTracker.git
+cd SpendTracker
 ```
 
 Then open the project in Android Studio, or build from the command line:
@@ -81,6 +81,8 @@ Then open the project in Android Studio, or build from the command line:
 ---
 
 ## License
+
+This project is licensed under the [Apache License 2.0](LICENSE).
 
 ```
 Copyright 2026 Abhi
