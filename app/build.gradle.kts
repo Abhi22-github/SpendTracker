@@ -15,13 +15,13 @@ apply(plugin = "kotlin-android")
 
 // Define version components
 val versionMajor = 1
-val versionMinor = 2
-val versionPatch = 5
+val versionMinor = 3
+val versionPatch = 0
 val isBeta = false
 
 android {
     namespace = "com.roaa.expensetracker"
-    compileSdk = 35
+    compileSdk = 37
 
     room {
         schemaDirectory("$projectDir/schemas")
@@ -30,7 +30,7 @@ android {
     defaultConfig {
         applicationId = "com.roaa.expensetracker"
         minSdk = 26
-        targetSdk = 35
+        targetSdk = 37
         versionCode = versionMajor * 10000 + versionMinor * 100 + versionPatch
         versionName = "${versionMajor}.${versionMinor}.${versionPatch}"+if (isBeta) "-beta" else ""
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
