@@ -11,7 +11,7 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        // Check if the build is Debug or Release
+        // Check if the build is Debug or Release.
         val isDebuggable = (applicationInfo.flags and android.content.pm.ApplicationInfo.FLAG_DEBUGGABLE) != 0
 
         // Enable Crashlytics only in Release mode
