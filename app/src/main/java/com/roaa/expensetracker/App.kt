@@ -6,6 +6,9 @@ import com.google.firebase.analytics.analytics
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 import dagger.hilt.android.HiltAndroidApp
 
+/**
+ * Sample application class.
+ */
 @HiltAndroidApp
 class App : Application() {
     override fun onCreate() {

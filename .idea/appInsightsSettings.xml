@@ -8,8 +8,8 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="com.roaa.expensetracker.debug" />
-                  <option name="mobileSdkAppId" value="1:137409796729:android:0b44eb256ac3308e7812a8" />
+                  <option name="appId" value="com.roaa.expensetracker" />
+                  <option name="mobileSdkAppId" value="1:137409796729:android:2bd58fc95af445a97812a8" />
                   <option name="projectId" value="expense-tracker---compose" />
                   <option name="projectNumber" value="137409796729" />
                 </ConnectionSetting>
