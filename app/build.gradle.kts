@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.jetbrains.kotlin.android)
     alias(libs.plugins.compose.compiler)
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
@@ -11,13 +10,17 @@ plugins {
     // Apply Hilt plugin
 }
 
-apply(plugin = "kotlin-android")
-
 // Define version components
-val versionMajor = 1
-val versionMinor = 3
+val versionMajor = 2
+val versionMinor = 0
 val versionPatch = 0
 val isBeta = false
+val appVersionCode = versionMajor * 10000 + versionMinor * 100 + versionPatch
+val appVersionName = "${versionMajor}.${versionMinor}.${versionPatch}"+if (isBeta) "-beta" else ""
+
+base {
+    archivesName = "et" + "-v" + appVersionCode + "(" + appVersionName + ")"
+}
 
 android {
     namespace = "com.roaa.expensetracker"
@@ -31,11 +34,10 @@ android {
         applicationId = "com.roaa.expensetracker"
         minSdk = 26
         targetSdk = 37
-        versionCode = versionMajor * 10000 + versionMinor * 100 + versionPatch
-        versionName = "${versionMajor}.${versionMinor}.${versionPatch}"+if (isBeta) "-beta" else ""
+        versionCode = appVersionCode
+        versionName = appVersionName
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         signingConfig = signingConfigs.getByName("debug")
-        setProperty("archivesBaseName", "et" + "-v" + versionCode + "(" + versionName + ")")
     }
 
 
@@ -66,17 +68,13 @@ android {
         viewBinding = true
         compose = true
         buildConfig = true
+        resValues = true
     }
-    composeOptions {
-        kotlinCompilerExtensionVersion = "1.7.0"
+}
+kotlin {
+    compilerOptions {
+        jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
     }
-
-
-    kotlinOptions {
-        jvmTarget = "17"
-    }
-
-
 }
 dependencies {
     implementation(libs.appcompat)
